@@ -40,7 +40,6 @@ namespace PeptideHitResultsProcRunner
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
 
         /// <summary>
         /// Error codes specialized for this class
@@ -50,14 +49,6 @@ namespace PeptideHitResultsProcRunner
             NoError = 0,
             UnspecifiedError = -1
         }
-
-        #endregion
-
-        #region "Structures"
-
-        #endregion
-
-        #region "Class wide Variables"
 
         protected ResultsFileFormat mPeptideHitResultsFileFormat;
 
@@ -72,10 +63,6 @@ namespace PeptideHitResultsProcRunner
         private bool mOptionsDisplayed = false;
 
         private bool mFilePathsShown = false;
-
-        #endregion
-
-        #region "Properties"
 
         public bool CreateFirstHitsFile { get; set; }
 
@@ -122,8 +109,6 @@ namespace PeptideHitResultsProcRunner
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         public bool WarnMissingParameterFileSection { get; set; }
-
-        #endregion
 
         /// <summary>
         /// If filePath is an empty string, return textIfEmptyPath

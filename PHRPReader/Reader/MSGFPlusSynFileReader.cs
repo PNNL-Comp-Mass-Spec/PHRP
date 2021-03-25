@@ -22,7 +22,6 @@ namespace PHRPReader.Reader
     public class MSGFPlusSynFileReader : SynFileReaderBaseClass
     {
         // Ignore Spelling: Frag, novo, msgfdb, Da, tda, Za, Validator, prot, nnet, ntt
-        #region "Constants"
 
 #pragma warning disable 1591
 
@@ -109,10 +108,6 @@ namespace PHRPReader.Reader
 
 #pragma warning restore 1591
 
-        #endregion
-
-        #region "Properties"
-
         /// <summary>
         /// First hits file
         /// </summary>
@@ -157,8 +152,6 @@ namespace PHRPReader.Reader
         /// Search engine name
         /// </summary>
         public override string SearchEngineName => GetSearchEngineName();
-
-        #endregion
 
         /// <summary>
         /// Constructor; assumes loadModsAndSeqInfo=True

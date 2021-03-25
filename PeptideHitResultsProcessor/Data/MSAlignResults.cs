@@ -22,8 +22,6 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class MSAlignResults : SearchResultsBaseClass
     {
-        #region "Properties"
-
         public string Prsm_ID { get; set; }
         public string Spectrum_ID { get; set; }
 
@@ -49,8 +47,6 @@ namespace PeptideHitResultsProcessor.Data
         public string Precursor_mz { get; set; }
         public string MSAlignComputedDelM { get; set; }
         public string MSAlignComputedDelMPPM { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

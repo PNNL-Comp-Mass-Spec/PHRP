@@ -31,8 +31,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "MODa";
 
         public const string FILENAME_SUFFIX_MODA_FILE = "_moda.id";
@@ -72,10 +70,6 @@ namespace PeptideHitResultsProcessor.Processor
             Protein = 9,
             PeptidePosition = 10
         }
-
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
@@ -130,15 +124,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private int mDeltaMassWarningCount;
 
         private Dictionary<int, int> mSpectrumIndexToScanMap;
-
-        #endregion
 
         /// <summary>
         /// Step through .PeptideSequenceWithMods
@@ -1722,8 +1710,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "IComparer Classes"
-
         private class MODaSearchResultsComparerScanChargeProbabilityPeptide : IComparer<MODaSearchResult>
         {
             public int Compare(MODaSearchResult x, MODaSearchResult y)
@@ -1770,7 +1756,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

@@ -29,8 +29,6 @@ namespace PHRPReader
     /// </summary>
     public class PeptideMassCalculator
     {
-        #region "Constants and Enums"
-
         /// <summary>
         /// Symbol used when the modification is not an isotopic modification
         /// </summary>
@@ -68,9 +66,6 @@ namespace PHRPReader
         public const double DEFAULT_C_TERMINUS_MASS_CHANGE = MASS_OXYGEN + MASS_HYDROGEN;
 
         private const byte ASCII_VAL_LETTER_A = 65;
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// Peptide sequence mod info
@@ -105,9 +100,6 @@ namespace PHRPReader
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
         // The Amino Acid arrays contain 26 entries, corresponding to A through Z
         // Invalid/Undefined letters (J and U) have values of 0 for the mass and atom counts
         // The values can be customized using SetAminoAcidMass and SetAminoAcidAtomCounts
@@ -129,10 +121,6 @@ namespace PHRPReader
         /// This dictionary tracks element symbols and monoisotopic masses
         /// </summary>
         private static readonly Dictionary<string, double> mElementMonoMasses;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Charge carrier mass
@@ -158,8 +146,6 @@ namespace PHRPReader
         /// If true, look for and remove prefix and suffix residues
         /// </summary>
         public bool RemovePrefixAndSuffixIfPresent { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor for shared (static) variables
@@ -290,7 +276,7 @@ namespace PHRPReader
             mErrorMessage = string.Empty;
             foreach (var chChar in primarySequence)
             {
-                // Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
+                // Use Convert.ToInt32 to convert to the ASCII value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chChar);
 
                 try
@@ -345,7 +331,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence sequence; uses the information in udtResidueModificationInfo() to determine modification masses
+        /// Compute the mass of the peptide sequence; uses the information in modifiedResidues() to determine modification masses
         /// </summary>
         /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers)</param>
         /// <param name="modifiedResidues">List of modified residues</param>

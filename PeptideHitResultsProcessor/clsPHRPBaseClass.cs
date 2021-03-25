@@ -101,8 +101,6 @@ namespace PeptideHitResultsProcessor
             UnspecifiedError = -1
         }
 
-        #region "Properties"
-
         public bool AbortProcessing { get; set; }
 
         public bool CreateModificationSummaryFile { get; set; }
@@ -193,8 +191,6 @@ namespace PeptideHitResultsProcessor
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         public bool WarnMissingParameterFileSection { get; set; }
-
-        #endregion
 
         public void AbortProcessingNow()
         {

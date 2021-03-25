@@ -42,8 +42,6 @@ namespace PeptideHitResultsProcessor.Processor
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "MSPathFinder";
 
         public const string FILENAME_SUFFIX_MSPathFinder_FILE = "_IcTda";
@@ -83,10 +81,6 @@ namespace PeptideHitResultsProcessor.Processor
             QValue = 19,
             PepQValue = 20
         }
-
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
@@ -157,13 +151,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private readonly Regex mGetModName;
-
-        #endregion
 
         /// <summary>
         /// Step through the Modifications and associate each modification with the residues
@@ -1470,16 +1458,10 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "Event Handlers"
-
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
             SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
-
-        #endregion
-
-        #region "IComparer Classes"
 
         private class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<MSPathFinderSearchResult>
         {
@@ -1528,7 +1510,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

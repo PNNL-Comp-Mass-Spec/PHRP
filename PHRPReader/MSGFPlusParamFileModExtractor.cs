@@ -47,8 +47,6 @@ namespace PHRPReader
     {
         // Ignore Spelling: Carbamidomethyl, Dehydro, Acetyl, Acetylation, Prot, UniMod, defs, Hydroxyproline, nterm, cterm
 
-        #region "Constants and Enums"
-
         /// <summary>
         /// Unknown MS-GF+ mod symbols
         /// </summary>
@@ -133,10 +131,6 @@ namespace PHRPReader
             TopPIC = 1
         }
 
-        #endregion
-
-        #region "Structures"
-
         /// <summary>
         /// Tracks dynamic and static modification details
         /// Also tracks Custom amino acids
@@ -190,21 +184,14 @@ namespace PHRPReader
                 return string.Format("{0} {1}, {2}; {3}", ModType, ModName, ModMass, Residues);
             }
         }
-        #endregion
 
-        #region "Class wide Variables"
         private string mErrorMessage;
         private readonly string mToolName;
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Error message
         /// </summary>
         public string ErrorMessage => mErrorMessage;
-
-        #endregion
 
         /// <summary>
         /// Constructor

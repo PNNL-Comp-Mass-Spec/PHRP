@@ -41,8 +41,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "SEQUEST";
 
         public const string FILENAME_SUFFIX_FIRST_HITS_FILE = "_fht";
@@ -50,8 +48,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         private const int SEQUEST_SYN_FILE_MIN_COL_COUNT = 5;
         private const int MAX_ERROR_LOG_LENGTH = 4096;
-
-        #endregion
 
         private bool AddDynamicAndStaticResidueMods(
             SearchResultsBaseClass searchResult,

@@ -31,8 +31,6 @@ namespace PeptideHitResultsProcessor.Processor
             FileDate = "July 10, 2019";
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "ModPlus";
 
         public const string FILENAME_SUFFIX_MODPlus_FILE = "_modp.id";
@@ -75,10 +73,6 @@ namespace PeptideHitResultsProcessor.Processor
             ProteinAndPeptidePositionList = 11,
             ModificationAnnotation = 12
         }
-
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
@@ -142,15 +136,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private int mDeltaMassWarningCount;
 
         private Regex mProteinNamePositionSplit;
-
-        #endregion
 
         /// <summary>
         /// Step through .PeptideSequenceWithMods
@@ -1720,8 +1708,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "IComparer Classes"
-
         private class MODPlusSearchResultsComparerScanChargeScorePeptide : IComparer<MODPlusSearchResult>
         {
             public int Compare(MODPlusSearchResult x, MODPlusSearchResult y)
@@ -1815,7 +1801,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

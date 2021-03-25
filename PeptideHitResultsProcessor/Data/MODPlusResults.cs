@@ -22,8 +22,6 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class MODPlusResults : SearchResultsBaseClass
     {
-        #region "Properties"
-
         public string Spectrum_Index { get; set; }
 
         /// <summary>
@@ -40,8 +38,6 @@ namespace PeptideHitResultsProcessor.Data
         public string Probability { get; set; }
 
         public string PeptidePosition { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

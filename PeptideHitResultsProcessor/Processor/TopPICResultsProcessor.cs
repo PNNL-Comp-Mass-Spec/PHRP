@@ -38,8 +38,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "TopPIC";
 
         public const string FILENAME_SUFFIX_TopPIC_PROTEOFORMS_FILE = "_TopPIC_Proteoforms";
@@ -97,10 +95,6 @@ namespace PeptideHitResultsProcessor.Processor
             Qvalue = 25,                     //  Spectral FDR, or PepFDR
             Proteoform_QValue = 26
         }
-
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file created directly by TopPIC
@@ -183,15 +177,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private int mDeltaMassWarningCount;
 
         private readonly SortedSet<string> mUnknownNamedMods = new();
-
-        #endregion
 
         /// <summary>
         /// Step through .PeptideSequenceWithMods
@@ -1786,16 +1774,10 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "Event Handlers"
-
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
             SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
-
-        #endregion
-
-        #region "IComparer Classes"
 
         private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<TopPICSearchResult>
         {
@@ -1837,7 +1819,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

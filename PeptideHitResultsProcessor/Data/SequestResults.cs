@@ -25,8 +25,6 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class SequestResults : SearchResultsBaseClass
     {
-        #region "Properties"
-
         public string NumScans { get; set; }
         public string PeptideDeltaCn { get; set; }
         public string PeptideDeltaCn2 { get; set; }
@@ -46,8 +44,6 @@ namespace PeptideHitResultsProcessor.Data
         /// Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
         /// </summary>
         public string PeptideXCorrNext { get; private set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

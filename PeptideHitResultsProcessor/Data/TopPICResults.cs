@@ -22,8 +22,6 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     internal class TopPICResults : SearchResultsBaseClass
     {
-        #region "Properties"
-
         public string Prsm_ID { get; set; }
         public string Spectrum_ID { get; set; }
 
@@ -50,8 +48,6 @@ namespace PeptideHitResultsProcessor.Data
         public string Precursor_mz { get; set; }
         public string TopPICComputedDelM { get; set; }
         public string TopPICComputedDelMPPM { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

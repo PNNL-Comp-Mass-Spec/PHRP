@@ -25,8 +25,6 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: MODa, iTraq, Defs
 
-        #region "Structures"
-
         /// <summary>
         /// Tracks ambiguous modifications
         /// </summary>
@@ -47,9 +45,6 @@ namespace PHRPReader.Reader
             /// </summary>
             public string ModMassString;
         }
-        #endregion
-
-        #region "Module variables"
 
         /// <summary>
         /// Dataset name
@@ -95,10 +90,6 @@ namespace PHRPReader.Reader
         /// Protein Names for each ResultID
         /// </summary>
         protected readonly SortedList<int, List<string>> mResultIDToProteins;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Cached error messages
@@ -157,10 +148,6 @@ namespace PHRPReader.Reader
         /// </summary>
         public List<string> WarningMessages { get; }
 
-        #endregion
-
-        #region "Properties overridden by derived classes"
-
         /// <summary>
         /// First hits file
         /// </summary>
@@ -205,8 +192,6 @@ namespace PHRPReader.Reader
         /// Search engine name
         /// </summary>
         public abstract string SearchEngineName { get; }
-
-        #endregion
 
         /// <summary>
         /// Initialize the parser for the given dataset, input file, and result type
@@ -468,8 +453,6 @@ namespace PHRPReader.Reader
             };
         }
 
-        #region "Functions overridden by derived classes"
-
         /// <summary>
         /// Define header names for the PHRP synopsis or first hits file for the given tool
         /// </summary>
@@ -522,8 +505,6 @@ namespace PHRPReader.Reader
         /// <param name="searchEngineParams">Output: Search engine parameters class</param>
         /// <returns>True if successful, false if an error</returns>
         public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams);
-
-        #endregion
 
         /// <summary>
         /// Add a PHRP synopsis or first hits header column to mColumnHeaders

@@ -42,8 +42,6 @@ namespace PeptideHitResultsProcessor.Processor
             mNumericModErrors = 0;
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "MSGFPlus";
 
         public const string FILENAME_SUFFIX_MSGFDB_FILE = "_msgfdb";
@@ -116,10 +114,6 @@ namespace PeptideHitResultsProcessor.Processor
             SynFile = 0,
             FHTFile = 1
         }
-
-        #endregion
-
-        #region "Structures"
 
         private struct MSGFPlusSearchResult
         {
@@ -238,10 +232,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
         private ParentMassTolerance mParentMassToleranceInfo;
@@ -255,8 +245,6 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly Regex mModMassRegEx;
 
         private int mNumericModErrors;
-
-        #endregion
 
         /// <summary>
         /// Step through .PeptideSequenceWithMods
@@ -3186,8 +3174,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "IComparer Classes"
-
         private class MSGFPlusSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<MSGFPlusSearchResult>
         {
             public int Compare(MSGFPlusSearchResult x, MSGFPlusSearchResult y)
@@ -3234,7 +3220,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

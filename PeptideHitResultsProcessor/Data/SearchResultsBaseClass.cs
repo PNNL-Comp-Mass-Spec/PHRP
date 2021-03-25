@@ -32,14 +32,11 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: Da, MaxQuant, MODa, acetyl, delM, Oxy
 
-        #region "Constants and Enums"
         /// <summary>
         /// Mass difference, in Da, between ^12C and ^13C
         /// </summary>
         public const double MASS_C13 = 1.00335483;
-        #endregion
 
-        #region "Class wide Variables"
         // Note: Many of these variables typically hold numbers but we're storing the numbers as strings
         //       to prevent the numeric representation from changing when converting to a number then back to a string
 
@@ -79,9 +76,6 @@ namespace PeptideHitResultsProcessor.Data
         private readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
         private string mErrorMessage = string.Empty;
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Most recent error message
@@ -253,8 +247,6 @@ namespace PeptideHitResultsProcessor.Data
         /// Number of peptide residue modifications (dynamic or static)
         /// </summary>
         public int SearchResultModificationCount => mSearchResultModifications.Count;
-
-        #endregion
 
         /// <summary>
         /// Constructor

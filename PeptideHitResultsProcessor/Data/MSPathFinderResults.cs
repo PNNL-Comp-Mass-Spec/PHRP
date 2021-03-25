@@ -22,8 +22,6 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class MSPathFinderResults : SearchResultsBaseClass
     {
-        #region "Properties"
-
         public string MostAbundantIsotopeMz { get; set; }
         public string Modifications { get; set; }
         public string Composition { get; set; }
@@ -36,8 +34,6 @@ namespace PeptideHitResultsProcessor.Data
         public string EValue { get; set; }
         public string QValue { get; set; }
         public string PepQValue { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

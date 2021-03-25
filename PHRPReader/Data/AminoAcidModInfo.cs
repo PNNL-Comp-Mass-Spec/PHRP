@@ -5,8 +5,6 @@
     /// </summary>
     public class AminoAcidModInfo
     {
-        #region "Constants and Enums"
-
         /// <summary>
         /// Symbol used by DMS for tracking the N-terminus of a peptide
         /// </summary>
@@ -63,7 +61,6 @@
             ProteinNandCCTerminus = 5
 
         }
-        #endregion
 
         /// <summary>
         /// True if the location of the modification is ambiguous

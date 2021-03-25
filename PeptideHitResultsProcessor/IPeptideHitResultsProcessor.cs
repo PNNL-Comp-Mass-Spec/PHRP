@@ -10,8 +10,6 @@ namespace PeptideHitResultsProcessor
     [Obsolete("This class is unused")]
     public abstract class IPeptideHitResultsProcessor : PRISM.EventNotifier
     {
-        #region "Enums"
-
         /// <summary>
         /// /Return values for Start and Abort functions
         /// </summary>
@@ -63,9 +61,7 @@ namespace PeptideHitResultsProcessor
             /// </summary>
             PH_ABORTING
         }
-        #endregion
 
-        #region "Structures"
         public struct InitializationParams
         {
             /// <summary>
@@ -163,9 +159,6 @@ namespace PeptideHitResultsProcessor
             /// </summary>
             public bool CreateFirstHitsFile;
         }
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Input: path to directory containing the peptide hit results file
@@ -265,10 +258,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks>0=minimum, 5=maximum verbosity</remarks>
         public virtual int DebugLevel { get; set; }
 
-        #endregion
-
-        #region "Methods"
-
         /// <summary>
         /// Initializes parameters. Must be called before executing Start()
         /// </summary>
@@ -284,7 +273,5 @@ namespace PeptideHitResultsProcessor
         /// Aborts spectra file creation
         /// </summary>
         public abstract ProcessStatus Abort();
-
-        #endregion
     }
 }

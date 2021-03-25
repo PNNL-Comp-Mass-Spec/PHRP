@@ -33,8 +33,6 @@ namespace PHRPReader.Data
     {
         // Ignore Spelling: UniMod, deamidated, acetyl
 
-        #region "Constants and Enums"
-
         /// <summary>
         /// Default modification symbols
         /// </summary>
@@ -67,13 +65,6 @@ namespace PHRPReader.Data
         // ReSharper disable once UnusedMember.Global
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = ']';
 
-        #endregion
-
-        #region "Structures"
-        #endregion
-
-        #region "Class wide Variables"
-
         /// <summary>
         /// List of available modification symbols
         /// </summary>
@@ -92,10 +83,6 @@ namespace PHRPReader.Data
         private List<ModificationDefinition> mStandardRefinementModifications;
 
         private Dictionary<int, string> mIntegerMassCorrectionTagLookup;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Error message
@@ -116,8 +103,6 @@ namespace PHRPReader.Data
         /// When true, take the mod symbol into account when finding identical mods
         /// </summary>
         public bool ConsiderModSymbolWhenFindingIdenticalMods { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

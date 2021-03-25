@@ -50,8 +50,6 @@ namespace PHRPReader.Data
         /// </summary>
         private readonly Dictionary<string, string> mAdditionalScores;
 
-        #region "Properties"
-
         /// <summary>
         /// Returns a dictionary with additional search engine scores stored as key/value pairs
         /// </summary>
@@ -276,8 +274,6 @@ namespace PHRPReader.Data
         /// Required for looking up information from the SeqInfo files
         /// </summary>
         public int SeqID { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor; auto-calls Clear()

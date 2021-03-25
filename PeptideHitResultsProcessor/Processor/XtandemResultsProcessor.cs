@@ -100,9 +100,6 @@ namespace PeptideHitResultsProcessor.Processor
             Refine_ModificationMass = 12,
             Scoring_Include_Reverse = 13
         }
-        #endregion
-
-        #region "Class wide Variables"
 
         private int mNextResultID;
         private bool mLookForReverseSequenceTag;
@@ -114,8 +111,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly Dictionary<string, int> mSeqsWithMods;
         private readonly SortedSet<string> mSeqsWithoutMods;
-
-        #endregion
 
         /// <summary>
         /// Constructor

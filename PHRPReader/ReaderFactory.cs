@@ -34,8 +34,6 @@ namespace PHRPReader
     {
         // Ignore Spelling: xt, msx, fht, Ss, Za, msgfdb, MODa, moda, modp, kv, toppic, mspath, msa, modplus, msp, prot, tpc
 
-        #region "Constants"
-
         /// <summary>
         /// Symbol used by PHRP to indicate a protein terminus
         /// </summary>
@@ -68,10 +66,6 @@ namespace PHRPReader
         // ${ParentMZ} will hold the first parent ion m/z found (the first parent ion m/z corresponds to the highest peak)
         // For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
         private const string PARENT_ION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
-
-        #endregion
-
-        #region "Module variables"
 
         private string mInputFilePath;
 
@@ -158,10 +152,6 @@ namespace PHRPReader
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
         private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Returns True if the input file was successfully opened and data remains to be read
@@ -327,8 +317,6 @@ namespace PHRPReader
         /// Cached warning messages
         /// </summary>
         public List<string> WarningMessages { get; }
-
-        #endregion
 
         /// <summary>
         /// Constructor that auto-determines the PeptideHit result type based on the filename

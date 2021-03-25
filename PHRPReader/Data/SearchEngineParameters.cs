@@ -29,7 +29,6 @@ namespace PHRPReader.Data
 
         private string mEnzyme;
 
-        #region "Properties"
         /// <summary>
         /// Enzyme name
         /// </summary>
@@ -129,8 +128,6 @@ namespace PHRPReader.Data
         /// Search date
         /// </summary>
         public DateTime SearchDate => mSearchDate;
-
-        #endregion
 
         /// <summary>
         /// Constructor

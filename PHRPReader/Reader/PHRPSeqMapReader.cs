@@ -14,8 +14,6 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: PepToProtMap
 
-        #region "Constants"
-
 #pragma warning disable 1591
 
         public const string SEQ_PROT_MAP_COLUMN_Unique_Seq_ID = "Unique_Seq_ID";
@@ -33,15 +31,7 @@ namespace PHRPReader.Reader
 
 #pragma warning restore 1591
 
-        #endregion
-
-        #region "Module-wide variables"
-
         private readonly string mSeqInfoFilename;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// Dataset name
@@ -88,8 +78,6 @@ namespace PHRPReader.Reader
         /// SeqToProteinMap filename
         /// </summary>
         public string SeqToProteinMapFilename { get; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

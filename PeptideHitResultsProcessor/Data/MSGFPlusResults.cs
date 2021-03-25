@@ -24,8 +24,6 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: tda
 
-        #region "Properties"
-
         public string FragMethod { get; set; }
         public string NTT { get; set; }
 
@@ -72,8 +70,6 @@ namespace PeptideHitResultsProcessor.Data
         /// False if from MSGFDB
         /// </summary>
         public bool UsedMSGFPlus { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

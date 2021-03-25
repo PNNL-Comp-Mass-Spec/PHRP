@@ -29,8 +29,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "MSAlign";
 
         public const string FILENAME_SUFFIX_MSALIGN_FILE = "_MSAlign_ResultTable";
@@ -76,10 +74,6 @@ namespace PeptideHitResultsProcessor.Processor
             Species_ID = 21,             // Present between Protein_ID and Protein_name in MSAlign_Histone result files
             FragMethod = 22              // Present as the last column in MSAlign_Histone result files
         }
-
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file created directly by MSAlign
@@ -151,13 +145,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private int mDeltaMassWarningCount;
-
-        #endregion
 
         /// <summary>
         /// Step through .PeptideSequenceWithMods
@@ -1727,8 +1715,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "IComparer Classes"
-
         private class MSAlignSearchResultsComparerScanChargePValuePeptide : IComparer<MSAlignSearchResult>
         {
             public int Compare(MSAlignSearchResult x, MSAlignSearchResult y)
@@ -1769,7 +1755,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return result;
             }
         }
-
-        #endregion
     }
 }

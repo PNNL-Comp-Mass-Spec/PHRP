@@ -17,8 +17,6 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSGFResultsReader
     {
-        #region "Constants"
-
 #pragma warning disable 1591
 
         public const string DATA_COLUMN_ResultID = "Result_ID";
@@ -31,18 +29,12 @@ namespace PHRPReader.Reader
 
 #pragma warning restore 1591
 
-        #endregion
-
-        #region "Class-wide variables"
-
         /// <summary>
         /// Column headers
         /// </summary>
         private readonly SortedDictionary<string, int> mColumnHeaders;
 
         private string mErrorMessage = string.Empty;
-
-        #endregion
 
         /// <summary>
         /// Error message

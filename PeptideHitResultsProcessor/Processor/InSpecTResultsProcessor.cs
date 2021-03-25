@@ -41,8 +41,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         public const string TOOL_NAME = "InSpecT";
 
         public const string FILENAME_SUFFIX_INSPECT_FILE = "_inspect";
@@ -117,10 +115,6 @@ namespace PeptideHitResultsProcessor.Processor
             FHTbyFScore = 1,
             FHTbyTotalPRM = 2
         }
-
-        #endregion
-
-        #region "Structures"
 
         private struct InspectSearchResult
         {
@@ -207,13 +201,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string ModSymbol;
         }
 
-        #endregion
-
-        #region "Properties"
-
         public bool SortFHTAndSynFiles { get; set; }
-
-        #endregion
 
         private void AddCurrentRecordToSearchResults(ref int currentScanResultsCount,
             InspectSearchResult[] searchResultsCurrentScan,
@@ -2000,8 +1988,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        #region "IComparer Classes"
-
         private class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<InspectSearchResult>
         {
             public int Compare(InspectSearchResult x, InspectSearchResult y)
@@ -2150,7 +2136,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return 0;
             }
         }
-
-        #endregion
     }
 }

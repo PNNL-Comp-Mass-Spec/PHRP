@@ -25,8 +25,6 @@ namespace PHRPReader.Data
     {
         // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy
 
-        #region "Constants and Enums"
-
         /// <summary>
         /// Modification symbol used after all of the DEFAULT_MODIFICATION_SYMBOLS have been used
         /// </summary>
@@ -121,9 +119,6 @@ namespace PHRPReader.Data
             ProteinTerminusStaticMod = 5
         }
 
-        #endregion
-
-        #region "Class wide Variables"
         /// <summary>
         /// One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
         /// </summary>
@@ -154,10 +149,6 @@ namespace PHRPReader.Data
         /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
         private char mAffectedAtom;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// One letter symbol for this modification
@@ -283,8 +274,6 @@ namespace PHRPReader.Data
         /// True if this was an unknown mass that was auto defined
         /// </summary>
         public bool UnknownModAutoDefined { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

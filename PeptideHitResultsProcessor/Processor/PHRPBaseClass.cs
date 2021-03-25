@@ -62,8 +62,6 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        #region "Constants and Enums"
-
         private const string UNIQUE_SEQ_TO_PROTEIN_MAP_SEP = "_";
 
         private const string COLUMN_NAME_UNIQUE_SEQ_ID = "Unique_Seq_ID";
@@ -108,10 +106,6 @@ namespace PeptideHitResultsProcessor.Processor
         private const float PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE = 95;
 
         private const string PROTEIN_NAME_NO_MATCH = "__NoMatch__";
-
-        #endregion
-
-        #region "Structures"
 
         protected struct SearchOptionModificationInfo
         {
@@ -169,10 +163,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         protected PHRPErrorCode mErrorCode = PHRPErrorCode.NoError;
         protected string mErrorMessage = string.Empty;
 
@@ -197,10 +187,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly Regex mReplaceSymbols;
 
-        #endregion
-
-        #region "Progress Events and Variables"
-
         public event ProgressResetEventHandler ProgressReset;
         public delegate void ProgressResetEventHandler();
 
@@ -213,10 +199,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// Ranges from 0 to 100, but can contain decimal percentage values
         /// </summary>
         protected float mProgressPercentComplete;
-
-        #endregion
-
-        #region "Properties"
 
         public bool AbortProcessing { get; set; }
 
@@ -308,8 +290,6 @@ namespace PeptideHitResultsProcessor.Processor
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         public bool WarnMissingParameterFileSection { get; set; }
-
-        #endregion
 
         public void AbortProcessingNow()
         {
@@ -2595,8 +2575,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public abstract override string ToString();
 
-        #region "PeptideToProteinMapper Event Handlers"
-
         private void PeptideToProteinMapper_ProgressChanged(string taskDescription, float percentComplete)
         {
             if (percentComplete >= mNextPeptideToProteinMapperLevel)
@@ -2614,10 +2592,6 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
         }
-
-        #endregion
-
-        #region "IComparer classes"
 
         protected class ISearchOptionModificationInfoComparer : IComparer<SearchOptionModificationInfo>
         {
@@ -2691,7 +2665,5 @@ namespace PeptideHitResultsProcessor.Processor
                 return string.CompareOrdinal(x.Peptide, y.Peptide);
             }
         }
-
-        #endregion
     }
 }

@@ -48,8 +48,6 @@ namespace PHRPReader
     {
         // Ignore Spelling: A-Za-z, udt
 
-        #region "Constants and Enums"
-
         /// <summary>
         /// Generic residue symbol
         /// </summary>
@@ -144,9 +142,6 @@ namespace PHRPReader
             V8 = 10
 #pragma warning restore 1591
         }
-        #endregion
-
-        #region "Structures"
 
         /// <summary>
         /// Example RegEx match strings for EnzymeMatchSpecInfo:
@@ -179,18 +174,10 @@ namespace PHRPReader
             }
         }
 
-        #endregion
-
-        #region "Class wide Variables"
-
         private EnzymeMatchSpecInfo mEnzymeMatchSpec;
         private Regex mLeftRegEx;
         private Regex mRightRegEx;
         private bool mUsingStandardTrypsinRules;
-
-        #endregion
-
-        #region "Properties"
 
         /// <summary>
         /// RegEx patterns for matching cleavage site residues
@@ -209,8 +196,6 @@ namespace PHRPReader
         /// and is useful for quickly checking for the presence of a terminus symbol using a binary search
         /// </remarks>
         public SortedSet<char> TerminusSymbols { get; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

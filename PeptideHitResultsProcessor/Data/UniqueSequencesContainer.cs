@@ -23,25 +23,15 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class UniqueSequencesContainer
     {
-        #region "Constants and Enums"
         private const int DEFAULT_INITIAL_SEQ_ID = 1;
         private const char SEQUENCE_MOD_DESC_SEP = '_';
-        #endregion
-
-        #region "Class wide Variables"
 
         private readonly Dictionary<string, int> mMasterSequences;
 
         private int mNextUniqueSeqID;
 
-        #endregion
-
-        #region "Properties"
-
         // ReSharper disable once UnusedMember.Global
         public int UniqueSequenceCount => mMasterSequences.Count;
-
-        #endregion
 
         /// <summary>
         /// Constructor

@@ -21,8 +21,6 @@ namespace PHRPReader.Reader
     /// </summary>
     public class SequestSynFileReader : SynFileReaderBaseClass
     {
-        #region "Constants"
-
 #pragma warning disable 1591
 
         public const string DATA_COLUMN_HitNum = "HitNum";
@@ -89,10 +87,6 @@ namespace PHRPReader.Reader
 
 #pragma warning restore 1591
 
-        #endregion
-
-        #region "Properties"
-
         /// <summary>
         /// First hits file
         /// </summary>
@@ -137,8 +131,6 @@ namespace PHRPReader.Reader
         /// Search engine name
         /// </summary>
         public override string SearchEngineName => GetSearchEngineName();
-
-        #endregion
 
         /// <summary>
         /// Constructor; assumes loadModsAndSeqInfo=True

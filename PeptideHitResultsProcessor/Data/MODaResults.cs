@@ -24,8 +24,6 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: MODa
 
-        #region "Properties"
-
         public string Spectrum_Index { get; set; }
 
         /// <summary>
@@ -39,8 +37,6 @@ namespace PeptideHitResultsProcessor.Data
         public string MODaScore { get; set; }
 
         public string Probability { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor

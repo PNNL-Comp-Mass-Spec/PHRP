@@ -18,12 +18,8 @@ namespace PeptideHitResultsProcessor
     {
         // Ignore Spelling: msgfdb
 
-        #region "Constants and enums"
         private const string DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt";
         private const string MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt";
-        #endregion
-
-        #region "Class wide Variables"
 
         private ResultsFileFormat m_PeptideHitResultsFileFormat = ResultsFileFormat.AutoDetermine;
 
@@ -43,10 +39,6 @@ namespace PeptideHitResultsProcessor
 
         private Thread m_thThread;
 
-        #endregion
-
-        #region "Properties"
-
         public override string ErrMsg => m_ErrMsg;
 
         public override float PercentComplete
@@ -64,8 +56,6 @@ namespace PeptideHitResultsProcessor
         public override ProcessStatus Status => m_Status;
 
         public override ProcessResults Results => m_Results;
-
-        #endregion
 
         public override ProcessStatus Abort()
         {

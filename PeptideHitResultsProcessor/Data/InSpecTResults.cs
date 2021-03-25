@@ -23,15 +23,9 @@ namespace PeptideHitResultsProcessor.Data
     /// </summary>
     public class InSpecTResults : SearchResultsBaseClass
     {
-        #region "Class wide Variables"
-
         // Scan: tracked by the base class
         // Annotation: aka Peptide, which is tracked by the base class
         // Protein: tracked by the base class
-
-        #endregion
-
-        #region "Properties"
 
         public string SpectrumFile { get; set; }
         public string MQScore { get; set; }
@@ -55,8 +49,6 @@ namespace PeptideHitResultsProcessor.Data
         public string SpecFilePos { get; set; }
         public string PrecursorMz { get; set; }
         public string PrecursorError { get; set; }
-
-        #endregion
 
         /// <summary>
         /// Constructor
