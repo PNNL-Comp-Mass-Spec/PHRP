@@ -548,60 +548,26 @@ namespace PHRPReader.Reader
                                         }
                                         else
                                         {
-                                            switch (value)
+                                            searchEngineParams.Enzyme = value switch
                                             {
-                                                case 1:
-                                                    searchEngineParams.Enzyme = "trypsin";
-                                                    break;
-                                                case 2:
-                                                    searchEngineParams.Enzyme = "trypsin_modified";
-                                                    break;
-                                                case 3:
-                                                    searchEngineParams.Enzyme = "Chymotrypsin";
-                                                    break;
-                                                case 4:
-                                                    searchEngineParams.Enzyme = "Chymotrypsin_modified";
-                                                    break;
-                                                case 5:
-                                                    searchEngineParams.Enzyme = "Clostripain";
-                                                    break;
-                                                case 6:
-                                                    searchEngineParams.Enzyme = "Cyanogen_Bromide";
-                                                    break;
-                                                case 7:
-                                                    searchEngineParams.Enzyme = "IodosoBenzoate";
-                                                    break;
-                                                case 8:
-                                                    searchEngineParams.Enzyme = "Proline_Endopept";
-                                                    break;
-                                                case 9:
-                                                    searchEngineParams.Enzyme = "Staph_Protease";
-                                                    break;
-                                                case 10:
-                                                    searchEngineParams.Enzyme = "Trypsin_K";
-                                                    break;
-                                                case 11:
-                                                    searchEngineParams.Enzyme = "Trypsin_R";
-                                                    break;
-                                                case 12:
-                                                    searchEngineParams.Enzyme = "GluC";
-                                                    break;
-                                                case 13:
-                                                    searchEngineParams.Enzyme = "LysC";
-                                                    break;
-                                                case 14:
-                                                    searchEngineParams.Enzyme = "AspN";
-                                                    break;
-                                                case 15:
-                                                    searchEngineParams.Enzyme = "Elastase";
-                                                    break;
-                                                case 16:
-                                                    searchEngineParams.Enzyme = "Elastase/Tryp/Chymo";
-                                                    break;
-                                                default:
-                                                    searchEngineParams.Enzyme = "Unknown";
-                                                    break;
-                                            }
+                                                1 => "trypsin",
+                                                2 => "trypsin_modified",
+                                                3 => "Chymotrypsin",
+                                                4 => "Chymotrypsin_modified",
+                                                5 => "Clostripain",
+                                                6 => "Cyanogen_Bromide",
+                                                7 => "IodosoBenzoate",
+                                                8 => "Proline_Endopept",
+                                                9 => "Staph_Protease",
+                                                10 => "Trypsin_K",
+                                                11 => "Trypsin_R",
+                                                12 => "GluC",
+                                                13 => "LysC",
+                                                14 => "AspN",
+                                                15 => "Elastase",
+                                                16 => "Elastase/Tryp/Chymo",
+                                                _ => "Unknown"
+                                            };
                                             searchEngineParams.MinNumberTermini = 2;
                                         }
                                     }

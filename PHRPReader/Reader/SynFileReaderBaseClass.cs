@@ -455,32 +455,17 @@ namespace PHRPReader.Reader
         public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
-            switch (peptideHitResultType)
+            return peptideHitResultType switch
             {
-                case PeptideHitResultTypes.Inspect:
-                    return new InspectSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.MSAlign:
-                    return new MSAlignSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.MSGFPlus:
-                    return new MSGFPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.Sequest:
-                    return new SequestSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.XTandem:
-                    return new XTandemSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.MODa:
-                    return new MODaSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                case PeptideHitResultTypes.MODPlus:
-                    return new MODPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
-
-                default:
-                    throw new Exception("Unrecognized value for PeptideHitResultType: " + peptideHitResultType.ToString());
-            }
+                PeptideHitResultTypes.Inspect => new InspectSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.MSAlign => new MSAlignSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.MSGFPlus => new MSGFPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.Sequest => new SequestSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                PeptideHitResultTypes.MODPlus => new MODPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
+                _ => throw new Exception("Unrecognized value for PeptideHitResultType: " + peptideHitResultType.ToString())
+            };
         }
 
         #region "Functions overridden by derived classes"

@@ -164,19 +164,12 @@ namespace PeptideHitResultsProcRunner
             if (ErrorCode == ProcessFilesErrorCodes.LocalizedError ||
                 ErrorCode == ProcessFilesErrorCodes.NoError)
             {
-                switch (mLocalErrorCode)
+                errorMessage = mLocalErrorCode switch
                 {
-                    case ResultsProcessorErrorCodes.NoError:
-                        errorMessage = string.Empty;
-                        break;
-                    case ResultsProcessorErrorCodes.UnspecifiedError:
-                        errorMessage = "Unspecified localized error";
-                        break;
-                    default:
-                        // This shouldn't happen
-                        errorMessage = "Unknown error state";
-                        break;
-                }
+                    ResultsProcessorErrorCodes.NoError => string.Empty,
+                    ResultsProcessorErrorCodes.UnspecifiedError => "Unspecified localized error",
+                    _ => "Unknown error state"             // This shouldn't happen
+                };
             }
             else
             {

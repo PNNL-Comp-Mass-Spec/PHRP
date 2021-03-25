@@ -598,21 +598,15 @@ namespace PHRPReader.Data
                 return ModificationDefinition.ResidueModificationType.UnknownType;
             }
 
-            switch (modificationTypeSymbol)
+            return modificationTypeSymbol switch
             {
-                case 'D':
-                    return ModificationDefinition.ResidueModificationType.DynamicMod;
-                case 'S':
-                    return ModificationDefinition.ResidueModificationType.StaticMod;
-                case 'T':
-                    return ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
-                case 'I':
-                    return ModificationDefinition.ResidueModificationType.IsotopicMod;
-                case 'P':
-                    return ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
-                default:
-                    return ModificationDefinition.ResidueModificationType.UnknownType;
-            }
+                'D' => ModificationDefinition.ResidueModificationType.DynamicMod,
+                'S' => ModificationDefinition.ResidueModificationType.StaticMod,
+                'T' => ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod,
+                'I' => ModificationDefinition.ResidueModificationType.IsotopicMod,
+                'P' => ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod,
+                _ => ModificationDefinition.ResidueModificationType.UnknownType
+            };
         }
 
         /// <summary>
@@ -622,21 +616,15 @@ namespace PHRPReader.Data
         /// <returns>D, S, T, I, or P</returns>
         public static char ModificationTypeToModificationSymbol(ModificationDefinition.ResidueModificationType modificationType)
         {
-            switch (modificationType)
+            return modificationType switch
             {
-                case ModificationDefinition.ResidueModificationType.DynamicMod:
-                    return 'D';
-                case ModificationDefinition.ResidueModificationType.StaticMod:
-                    return 'S';
-                case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
-                    return 'T';
-                case ModificationDefinition.ResidueModificationType.IsotopicMod:
-                    return 'I';
-                case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
-                    return 'P';
-                default:
-                    return '?';
-            }
+                ResidueModificationType.DynamicMod => 'D',
+                ResidueModificationType.StaticMod => 'S',
+                ResidueModificationType.TerminalPeptideStaticMod => 'T',
+                ResidueModificationType.IsotopicMod => 'I',
+                ResidueModificationType.ProteinTerminusStaticMod => 'P',
+                _ => '?'
+            };
         }
 
         /// <summary>

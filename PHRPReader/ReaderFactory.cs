@@ -1746,38 +1746,19 @@ namespace PHRPReader
         /// <param name="resultTypeName"></param>
         public static PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
         {
-            switch (resultTypeName.ToLower())
+            return resultTypeName.ToLower() switch
             {
-                case "peptide_hit":
-                    return PeptideHitResultTypes.Sequest;
-
-                case "xt_peptide_hit":
-                    return PeptideHitResultTypes.XTandem;
-
-                case "in_peptide_hit":
-                    return PeptideHitResultTypes.Inspect;
-
-                case "msg_peptide_hit":
-                    return PeptideHitResultTypes.MSGFPlus;
-
-                case "msa_peptide_hit":
-                    return PeptideHitResultTypes.MSAlign;
-
-                case "moda_peptide_hit":
-                    return PeptideHitResultTypes.MODa;
-
-                case "modplus_peptide_hit":
-                    return PeptideHitResultTypes.MODPlus;
-
-                case "msp_peptide_hit":
-                    return PeptideHitResultTypes.MSPathFinder;
-
-                case "tpc_peptide_hit":
-                    return PeptideHitResultTypes.TopPIC;
-
-                default:
-                    return PeptideHitResultTypes.Unknown;
-            }
+                "peptide_hit" => PeptideHitResultTypes.Sequest,
+                "xt_peptide_hit" => PeptideHitResultTypes.XTandem,
+                "in_peptide_hit" => PeptideHitResultTypes.Inspect,
+                "msg_peptide_hit" => PeptideHitResultTypes.MSGFPlus,
+                "msa_peptide_hit" => PeptideHitResultTypes.MSAlign,
+                "moda_peptide_hit" => PeptideHitResultTypes.MODa,
+                "modplus_peptide_hit" => PeptideHitResultTypes.MODPlus,
+                "msp_peptide_hit" => PeptideHitResultTypes.MSPathFinder,
+                "tpc_peptide_hit" => PeptideHitResultTypes.TopPIC,
+                _ => PeptideHitResultTypes.Unknown
+            };
         }
 
         /// <summary>
@@ -1811,47 +1792,19 @@ namespace PHRPReader
                 return mCachedParser;
             }
 
-            switch (resultType)
+            mCachedParser = resultType switch
             {
-                case PeptideHitResultTypes.Sequest:
-                    mCachedParser = new SequestSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.XTandem:
-                    mCachedParser = new XTandemSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.Inspect:
-                    mCachedParser = new InspectSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.MSGFPlus:
-                    mCachedParser = new MSGFPlusSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.MSAlign:
-                    mCachedParser = new MSAlignSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.MODa:
-                    mCachedParser = new MODaSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.MODPlus:
-                    mCachedParser = new MODPlusSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.MSPathFinder:
-                    mCachedParser = new MSPathFinderSynFileReader(datasetName, string.Empty);
-                    break;
-
-                case PeptideHitResultTypes.TopPIC:
-                    mCachedParser = new TopPICSynFileReader(datasetName, string.Empty);
-                    break;
-
-                default:
-                    throw new Exception("Unsupported PeptideHitResultTypes value: " + resultType);
-            }
+                PeptideHitResultTypes.Sequest => new SequestSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.Inspect => new InspectSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MSGFPlus => new MSGFPlusSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MSAlign => new MSAlignSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MODPlus => new MODPlusSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MSPathFinder => new MSPathFinderSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.TopPIC => new TopPICSynFileReader(datasetName, string.Empty),
+                _ => throw new Exception("Unsupported PeptideHitResultTypes value: " + resultType)
+            };
 
             mCachedParserType = resultType;
             mCachedDataset = string.Copy(datasetName);
@@ -1998,39 +1951,19 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
         {
-            switch (resultType)
+            return resultType switch
             {
-                case PeptideHitResultTypes.Sequest:
-                    return "Tool_Version_Info_Sequest.txt";
-
-                case PeptideHitResultTypes.XTandem:
-                    return "Tool_Version_Info_XTandem.txt";
-
-                case PeptideHitResultTypes.Inspect:
-                    return "Tool_Version_Info_Inspect.txt";
-
-                case PeptideHitResultTypes.MSGFPlus:
-                    // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
-                    return "Tool_Version_Info_MSGFPlus.txt";
-
-                case PeptideHitResultTypes.MSAlign:
-                    return "Tool_Version_Info_MSAlign.txt";
-
-                case PeptideHitResultTypes.MODa:
-                    return "Tool_Version_Info_MODa.txt";
-
-                case PeptideHitResultTypes.MODPlus:
-                    return "Tool_Version_Info_MODPlus.txt";
-
-                case PeptideHitResultTypes.MSPathFinder:
-                    return "Tool_Version_Info_MSPathFinder.txt";
-
-                case PeptideHitResultTypes.TopPIC:
-                    return "Tool_Version_Info_TopPIC.txt";
-
-                default:
-                    return string.Empty;
-            }
+                PeptideHitResultTypes.Sequest => "Tool_Version_Info_Sequest.txt",
+                PeptideHitResultTypes.XTandem => "Tool_Version_Info_XTandem.txt",
+                PeptideHitResultTypes.Inspect => "Tool_Version_Info_Inspect.txt",
+                PeptideHitResultTypes.MSGFPlus => "Tool_Version_Info_MSGFPlus.txt",  // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
+                PeptideHitResultTypes.MSAlign => "Tool_Version_Info_MSAlign.txt",
+                PeptideHitResultTypes.MODa => "Tool_Version_Info_MODa.txt",
+                PeptideHitResultTypes.MODPlus => "Tool_Version_Info_MODPlus.txt",
+                PeptideHitResultTypes.MSPathFinder => "Tool_Version_Info_MSPathFinder.txt",
+                PeptideHitResultTypes.TopPIC => "Tool_Version_Info_TopPIC.txt",
+                _ => string.Empty
+            };
         }
 
         private void HandleException(string baseMessage, Exception ex)
