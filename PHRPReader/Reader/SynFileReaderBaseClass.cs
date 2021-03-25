@@ -194,7 +194,7 @@ namespace PHRPReader.Reader
         public abstract string SearchEngineName { get; }
 
         /// <summary>
-        /// Initialize the parser for the given dataset, input file, and result type
+        /// Initialize the SynFileReader for the given dataset, input file, and result type
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="inputFilePath">Input file path</param>
@@ -226,11 +226,11 @@ namespace PHRPReader.Reader
 
             var startupOptions = new StartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
 
-            InitializeParser(datasetName, inputFilePath, peptideHitResultType, startupOptions);
+            InitializeReader(datasetName, inputFilePath, peptideHitResultType, startupOptions);
         }
 
         /// <summary>
-        /// Initialize the parser for the given dataset, input file, and result type
+        /// Initialize the SynFileReader for the given dataset, input file, and result type
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
@@ -259,11 +259,11 @@ namespace PHRPReader.Reader
             SeqToProteinMap = new SortedList<int, List<ProteinInfo>>();
             PepToProteinMap = new Dictionary<string, PepToProteinMapInfo>();
 
-            InitializeParser(datasetName, inputFilePath, peptideHitResultType, startupOptions);
+            InitializeReader(datasetName, inputFilePath, peptideHitResultType, startupOptions);
         }
 
         /// <summary>
-        /// Initialize the parser for the given dataset and input file
+        /// Initialize the SynFileReader for the given dataset and input file
         /// </summary>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="inputFilePath">Input file path</param>
@@ -274,7 +274,7 @@ namespace PHRPReader.Reader
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
-        private void InitializeParser(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
+        private void InitializeReader(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             if (string.IsNullOrWhiteSpace(datasetName))
                 datasetName = "Undefined";
@@ -382,9 +382,9 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
-        public static SynFileReaderBaseClass GetParser(string inputFilePath)
+        public static SynFileReaderBaseClass GetReader(string inputFilePath)
         {
-            return GetParser(inputFilePath, true);
+            return GetReader(inputFilePath, true);
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
-        public static SynFileReaderBaseClass GetParser(string inputFilePath, bool loadModsAndSeqInfo)
+        public static SynFileReaderBaseClass GetReader(string inputFilePath, bool loadModsAndSeqInfo)
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
@@ -408,7 +408,7 @@ namespace PHRPReader.Reader
                 throw new Exception("Unable to auto-determine the Dataset Name for " + inputFilePath);
             }
 
-            return GetParser(inputFilePath, datasetName, peptideHitResultType, loadModsAndSeqInfo);
+            return GetReader(inputFilePath, datasetName, peptideHitResultType, loadModsAndSeqInfo);
         }
 
         /// <summary>
@@ -418,7 +418,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
-        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
+        public static SynFileReaderBaseClass GetReader(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
@@ -427,7 +427,7 @@ namespace PHRPReader.Reader
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
 
-            return GetParser(inputFilePath, datasetName, peptideHitResultType, loadModsAndSeqInfo);
+            return GetReader(inputFilePath, datasetName, peptideHitResultType, loadModsAndSeqInfo);
         }
 
         /// <summary>
@@ -437,7 +437,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, PeptideHitResultTypes peptideHitResultType,
+        public static SynFileReaderBaseClass GetReader(string inputFilePath, string datasetName, PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             return peptideHitResultType switch

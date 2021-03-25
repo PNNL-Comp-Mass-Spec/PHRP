@@ -640,7 +640,7 @@ namespace PHRPReader
 
                 // Open the input file for reading
                 // Note that this will also load the MSGFSpecEValue info and ScanStats info
-                success = InitializeParser(resultType);
+                success = InitializeReader(resultType);
 
                 if (success && mStartupOptions.LoadModsAndSeqInfo)
                 {
@@ -679,7 +679,7 @@ namespace PHRPReader
             }
         }
 
-        private bool InitializeParser(PeptideHitResultTypes resultType)
+        private bool InitializeReader(PeptideHitResultTypes resultType)
         {
             var success = true;
             var datasetName = string.Copy(DatasetName);
@@ -720,7 +720,7 @@ namespace PHRPReader
                 mCachedLine = string.Empty;
 
                 // Open the peptide-hit result file (from PHRP) for reading
-                // Instantiate the appropriate PHRP Parser
+                // Instantiate the appropriate PHRP SynFileReader
                 switch (resultType)
                 {
                     case PeptideHitResultTypes.Sequest:
@@ -802,7 +802,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                HandleException("Error in ReaderFactory.InitializeParser", ex);
+                HandleException("Error in ReaderFactory.InitializeReader", ex);
                 if (!mInitialized)
                     throw new Exception(ErrorMessage, ex);
 
@@ -1769,18 +1769,18 @@ namespace PHRPReader
             return auxSuffixes;
         }
 
-        private static SynFileReaderBaseClass mCachedParser;
-        private static PeptideHitResultTypes mCachedParserType = PeptideHitResultTypes.Unknown;
+        private static SynFileReaderBaseClass mCachedReader;
+        private static PeptideHitResultTypes mCachedReaderType = PeptideHitResultTypes.Unknown;
         private static string mCachedDataset = string.Empty;
 
-        private static SynFileReaderBaseClass GetPHRPFileFreeParser(PeptideHitResultTypes resultType, string datasetName)
+        private static SynFileReaderBaseClass GetPHRPFileFreeReader(PeptideHitResultTypes resultType, string datasetName)
         {
-            if (mCachedParserType != PeptideHitResultTypes.Unknown && mCachedParserType == resultType && mCachedDataset == datasetName)
+            if (mCachedReaderType != PeptideHitResultTypes.Unknown && mCachedReaderType == resultType && mCachedDataset == datasetName)
             {
-                return mCachedParser;
+                return mCachedReader;
             }
 
-            mCachedParser = resultType switch
+            mCachedReader = resultType switch
             {
                 PeptideHitResultTypes.Sequest => new SequestSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, string.Empty),
@@ -1794,10 +1794,10 @@ namespace PHRPReader
                 _ => throw new Exception("Unsupported PeptideHitResultTypes value: " + resultType)
             };
 
-            mCachedParserType = resultType;
+            mCachedReaderType = resultType;
             mCachedDataset = string.Copy(datasetName);
 
-            return mCachedParser;
+            return mCachedReader;
         }
 
         /// <summary>
@@ -1808,8 +1808,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var phrpResultsFileName = parser.PHRPFirstHitsFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var phrpResultsFileName = reader.PHRPFirstHitsFileName;
 
             return phrpResultsFileName;
         }
@@ -1822,8 +1822,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var phrpModSummaryFileName = parser.PHRPModSummaryFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var phrpModSummaryFileName = reader.PHRPModSummaryFileName;
 
             return phrpModSummaryFileName;
         }
@@ -1836,8 +1836,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var pepToProteinMapFileName = parser.PHRPPepToProteinMapFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var pepToProteinMapFileName = reader.PHRPPepToProteinMapFileName;
 
             return pepToProteinMapFileName;
         }
@@ -1850,8 +1850,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var proteinModsFileName = parser.PHRPProteinModsFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var proteinModsFileName = reader.PHRPProteinModsFileName;
 
             return proteinModsFileName;
         }
@@ -1864,8 +1864,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var phrpResultsFileName = parser.PHRPSynopsisFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var phrpResultsFileName = reader.PHRPSynopsisFileName;
 
             return phrpResultsFileName;
         }
@@ -1878,8 +1878,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var resultToSeqMapFilename = parser.PHRPResultToSeqMapFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var resultToSeqMapFilename = reader.PHRPResultToSeqMapFileName;
 
             return resultToSeqMapFilename;
         }
@@ -1892,8 +1892,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var seqInfoFilename = parser.PHRPSeqInfoFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var seqInfoFilename = reader.PHRPSeqInfoFileName;
 
             return seqInfoFilename;
         }
@@ -1906,8 +1906,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            var parser = GetPHRPFileFreeParser(resultType, datasetName);
-            var seqToProteinMapFileName = parser.PHRPSeqToProteinMapFileName;
+            var reader = GetPHRPFileFreeReader(resultType, datasetName);
+            var seqToProteinMapFileName = reader.PHRPSeqToProteinMapFileName;
 
             return seqToProteinMapFileName;
         }
