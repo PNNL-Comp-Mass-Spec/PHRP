@@ -45,7 +45,7 @@ namespace PHRPReader
         /// Returns True if the input file was successfully opened and data remains to be read
         /// </summary>
         /// <returns>True if the file is readable</returns>
-        public bool CanRead { get; private set; }
+        public bool CanRead { get; }
 
         // public clsPSM CurrentPSM => mPSMCurrent;
 
@@ -54,7 +54,7 @@ namespace PHRPReader
         /// <summary>
         /// Dataset name (auto-determined based on the input filename)
         /// </summary>
-        public string DatasetName { get; private set; }
+        public string DatasetName { get; }
 
         /// <summary>
         /// If True, will display messages at the console
@@ -69,7 +69,7 @@ namespace PHRPReader
         /// <summary>
         /// Current error message
         /// </summary>
-        public string ErrorMessage { get; private set; } = string.Empty;
+        public string ErrorMessage { get; } = string.Empty;
 
         /// <summary>
         /// Used to enable fast read mode when calling MoveNext
@@ -102,7 +102,7 @@ namespace PHRPReader
         /// <summary>
         /// Returns True if the ModSummary file was successfully loaded
         /// </summary>
-        public bool ModSummaryFileLoaded { get; private set; }
+        public bool ModSummaryFileLoaded { get; }
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
@@ -693,7 +693,6 @@ namespace PHRPReader
         {
             throw new Exception("Method FinalizeCurrentPSM is obsolete");
         }
-
 
         #region "IDisposable Support"
 
