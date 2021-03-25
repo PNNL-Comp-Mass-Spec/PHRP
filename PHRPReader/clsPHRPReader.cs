@@ -4,6 +4,9 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// Legacy PHRP Reader
+    /// </summary>
     [Obsolete("Legacy PHRP Reader; superseded by the PHRPReader class")]
     public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {
@@ -721,6 +724,9 @@ namespace PHRPReader
         #endregion
     }
 
+    /// <summary>
+    /// Legacy PHRP startup options
+    /// </summary>
     [Obsolete("Legacy Startup Options; superseded by StartupOptions")]
     public class clsPHRPStartupOptions
     {
