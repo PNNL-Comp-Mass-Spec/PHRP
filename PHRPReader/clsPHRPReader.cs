@@ -700,7 +700,9 @@ namespace PHRPReader
         /// <summary>
         /// Used to detect redundant calls
         /// </summary>
-        private bool disposedValue;
+#pragma warning disable 414
+        private bool mDisposedValue;
+#pragma warning restore 414
 
         /// <summary>
         /// Dispose of this class
@@ -708,7 +710,7 @@ namespace PHRPReader
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            disposedValue = true;
+            mDisposedValue = true;
         }
 
         /// <summary>
