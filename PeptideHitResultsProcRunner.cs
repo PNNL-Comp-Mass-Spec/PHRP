@@ -155,28 +155,23 @@ namespace PeptideHitResultsProcRunner
             return extensionsToParse;
         }
 
+        /// <summary>
+        /// Get the error message, or an empty string if no error
+        /// </summary>
         public override string GetErrorMessage()
         {
-            // Returns "" if no error
-
-            string errorMessage;
-
             if (ErrorCode == ProcessFilesErrorCodes.LocalizedError ||
                 ErrorCode == ProcessFilesErrorCodes.NoError)
             {
-                errorMessage = mLocalErrorCode switch
+                return mLocalErrorCode switch
                 {
                     ResultsProcessorErrorCodes.NoError => string.Empty,
                     ResultsProcessorErrorCodes.UnspecifiedError => "Unspecified localized error",
                     _ => "Unknown error state"             // This shouldn't happen
                 };
             }
-            else
-            {
-                errorMessage = GetBaseClassErrorMessage();
-            }
 
-            return errorMessage;
+            return GetBaseClassErrorMessage();
         }
 
         private void InitializeLocalVariables()

@@ -13,6 +13,7 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
+using System.Globalization;
 using PHRPReader;
 using PHRPReader.Data;
 
@@ -91,7 +92,7 @@ namespace PeptideHitResultsProcessor.Data
                 if (float.TryParse(PeptideXCorr, out var xCorr) &&
                     float.TryParse(PeptideDeltaCn2, out var delCN2))
                 {
-                    PeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString();
+                    PeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {

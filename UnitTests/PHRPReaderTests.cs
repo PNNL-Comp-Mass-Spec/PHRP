@@ -11,7 +11,6 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PHRPReaderTests
     {
-
         private struct MSGFPlusInfo
         {
             public string Peptide;
@@ -474,10 +473,7 @@ namespace PHRP_UnitTests
 
         private double GetValueOrDefault(double? nullableValue, double valueIfNull = 0)
         {
-            if (nullableValue.HasValue)
-                return nullableValue.Value;
-
-            return valueIfNull;
+            return nullableValue ?? valueIfNull;
         }
 
         private static List<double?> SplitDelimitedDoubles(string delimitedValues, char delimiter = '|')

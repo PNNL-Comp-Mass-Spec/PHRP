@@ -852,12 +852,6 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo,
             int rowNumber)
         {
-            // Parses an entry from the MSPathFinder results file
-
-            // Theoretical peptide monoisotopic mass, including mods, as computed by MSPathFinder
-            // ReSharper disable once NotAccessedVariable
-            double sequenceMonoMassMSPathFinder = 0;
-
             try
             {
                 udtSearchResult.Clear();
@@ -883,7 +877,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
-                double.TryParse(udtSearchResult.CalculatedMonoMass, out sequenceMonoMassMSPathFinder);
+
+                // double.TryParse(udtSearchResult.CalculatedMonoMass, out var sequenceMonoMassMSPathFinder);
 
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
 

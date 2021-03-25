@@ -229,6 +229,7 @@ namespace PHRPReader.Data
             if (residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
             {
                 // Assume this is a terminus mod
+                // Override the target residues
                 switch (residueTerminusState)
                 {
                     case AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus:
@@ -951,12 +952,10 @@ namespace PHRPReader.Data
             const char modSymbol = ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
             const bool useNextAvailableModificationSymbol = true;
 
-            modificationDefinition = AddUnknownModification(
+            return AddUnknownModification(
                 modificationMass, modType, chTargetResidue, residueTerminusState,
                 addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol,
                 massDigitsOfPrecision, massDigitsOfPrecisionLoose);
-
-            return modificationDefinition;
         }
 
         /// <summary>
@@ -1184,12 +1183,10 @@ namespace PHRPReader.Data
             }
 
             // Still no match; define a new custom modification
-            modificationDefinition = AddUnknownModification(
+            return AddUnknownModification(
                 modificationMass, modType, chTargetResidue, residueTerminusState,
                 addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol,
                 massDigitsOfPrecision, massDigitsOfPrecisionLoose);
-
-            return modificationDefinition;
         }
 
         private void InitializeLocalVariables()
