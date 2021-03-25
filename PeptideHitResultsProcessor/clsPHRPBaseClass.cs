@@ -37,19 +37,6 @@ namespace PeptideHitResultsProcessor
             //InitializeLocalVariables();
         }
 
-
-        private const string UNIQUE_SEQ_TO_PROTEIN_MAP_SEP = "_";
-
-        private const string COLUMN_NAME_UNIQUE_SEQ_ID = "Unique_Seq_ID";
-        private const string COLUMN_NAME_PROTEIN_NAME = "Protein_Name";
-        protected const string COLUMN_NAME_RESULTID = "ResultID";
-        protected const string COLUMN_NAME_PEPTIDE = "Peptide";
-        private const string COLUMN_NAME_RESIDUE = "Residue";
-        private const string COLUMN_NAME_PROTEIN_RESIDUE_NUMBER = "Protein_Residue_Num";
-        private const string COLUMN_NAME_RESIDUE_MOD_NAME = "Mod_Name";
-        private const string COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER = "Peptide_Residue_Num";
-        private const string COLUMN_NAME_MSGF_SPECPROB = "MSGF_SpecProb";
-
         public const string XTANDEM_RESULTS_FILE_SUFFIX = "_xt.xml";
         public const string SEQUEST_SYNOPSIS_FILE_SUFFIX = "_syn.txt";
         public const string SEQUEST_FIRST_HITS_FILE_SUFFIX = "_fht.txt";
@@ -77,11 +64,6 @@ namespace PeptideHitResultsProcessor
         public const string FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING = "_PepToProtMap";
         public const string FILENAME_SUFFIX_PROTEIN_MODS = "_ProteinMods.txt";
         public const string FILENAME_SUFFIX_MSGF = "_MSGF.txt";
-
-        protected const float PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE = 90;
-        private const float PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE = 95;
-
-        private const string PROTEIN_NAME_NO_MATCH = "__NoMatch__";
 
         [Obsolete("Superseded by ResultsFileFormat")]
         public enum PeptideHitResultsFileFormatConstants
@@ -118,7 +100,6 @@ namespace PeptideHitResultsProcessor
             FilePathError = 11,
             UnspecifiedError = -1
         }
-
 
         #region "Properties"
 
