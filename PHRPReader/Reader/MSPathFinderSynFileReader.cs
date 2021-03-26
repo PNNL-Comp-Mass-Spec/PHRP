@@ -47,30 +47,6 @@ namespace PHRPReader.Reader
 
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
-        [Obsolete("Superseded by enum Data.MSPathFinderSynFileColumns")]
-        // ReSharper disable UnusedMember.Global
-        public enum MSPathFinderSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Charge = 2,
-            MostAbundantIsotopeMz = 3,
-            Mass = 4,
-            Sequence = 5,                // PrefixLetter.Sequence.SuffixLetter
-            Modifications = 6,
-            Composition = 7,
-            Protein = 8,
-            ProteinDesc = 9,
-            ProteinLength = 10,
-            ResidueStart = 11,
-            ResidueEnd = 12,
-            MatchedFragments = 13,
-            SpecEValue = 14,             // Column added 2015-08-25
-            EValue = 15,                 // Column added 2015-08-25
-            QValue = 16,
-            PepQValue = 17
-        }
-        // ReSharper restore UnusedMember.Global
 #pragma warning restore 1591
 
         /// <summary>

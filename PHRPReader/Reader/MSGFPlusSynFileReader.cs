@@ -77,36 +77,6 @@ namespace PHRPReader.Reader
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
-        [Obsolete("Superseded by enum Data.MSGFPlusSynFileColumns")]
-        // ReSharper disable UnusedMember.Global
-        public enum MSGFPlusSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            FragMethod = 2,
-            SpecIndex = 3,
-            Charge = 4,
-            PrecursorMZ = 5,
-            DelM = 6,                            // Precursor error, in Daltons; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
-            DelMPPM = 7,                         // Precursor error, in ppm; corrected for isotope selection errors
-            MH = 8,                              // Theoretical monoisotopic peptide mass (computed by PHRP)
-            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification symbols
-            Protein = 10,                        // Protein Name (remove description)
-            NTT = 11,                            // Number of tryptic termini
-            DeNovoScore = 12,
-            MSGFScore = 13,
-            SpecProb_EValue = 14,
-            RankSpecProb = 15,                   // Rank 1 means lowest SpecEValue, 2 means next higher score, etc. (ties get the same rank)
-            PValue_EValue = 16,
-            FDR_QValue = 17,                     // Only present if searched using -tda 1
-            PepFDR_PepQValue = 18,               // Only present if searched using -tda 1
-            EFDR = 19,                           // Only present if did not search using -tda 1
-            IMSScan = 20,                        // Only present for MSGFDB_IMS results
-            IMSDriftTime = 21,                   // Only present for MSGFDB_IMS results
-            IsotopeError = 22
-        }
-        // ReSharper restore UnusedMember.Global
-
 #pragma warning restore 1591
 
         /// <summary>
