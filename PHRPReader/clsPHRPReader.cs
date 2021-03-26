@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace PHRPReader
 {
@@ -11,7 +10,7 @@ namespace PHRPReader
     /// <summary>
     /// Legacy PHRP Reader
     /// </summary>
-    [Obsolete("Legacy PHRP Reader; superseded by the PHRPReader class")]
+    [Obsolete("Legacy PHRP Reader; superseded by the ReaderFactory class")]
     public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {
         // Ignore Spelling: xt, msx, fht, Ss, Za, msgfdb, MODa, moda, modp, kv, toppic, mspath, msa, modplus, msp, prot, tpc
@@ -80,7 +79,7 @@ namespace PHRPReader
         /// When FastReadMode is True, you should call FinalizeCurrentPSM after calling MoveNext to populate the remaining fields if the peptide is a peptide of interest
         /// </summary>
         /// <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
-        public bool FastReadMode { get; set;  }
+        public bool FastReadMode { get; set; }
 
         /// <summary>
         /// If True, looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
@@ -723,6 +722,7 @@ namespace PHRPReader
         /// </summary>
         /// <returns>True if a line was read, false if not more data is available</returns>
         /// <remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+        [Obsolete("Superseded by ReaderFactory.MoveNext")]
         public bool MoveNext()
         {
             return false;
@@ -732,6 +732,7 @@ namespace PHRPReader
         /// When FastReadMode is True, first call MoveNext to read the peptide scores.
         /// Then, if the peptide is a peptide of interest, call this function to finalize any processing steps that were skipped.
         /// </summary>
+        [Obsolete("Superseded by ReaderFactory.FinalizeCurrentPSM")]
         public void FinalizeCurrentPSM()
         {
             throw new Exception("Method FinalizeCurrentPSM is obsolete");
