@@ -138,7 +138,7 @@
     /// <summary>
     /// These columns correspond to the Synopsis file created by MSPathFinderResultsProcessor
     /// </summary>
-    public enum MSPathFinderSynFile
+    public enum MSPathFinderSynFileColumns
     {
         /// <summary>
         /// Result ID
