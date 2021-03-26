@@ -220,6 +220,8 @@ namespace PHRPReader
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
+
+            throw new Exception("Class clsPHRPReader is obsolete; replace with the ReaderFactory class");
         }
 
         /// <summary>
@@ -232,6 +234,8 @@ namespace PHRPReader
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
+
+            throw new Exception("Class clsPHRPReader is obsolete; replace with the ReaderFactory class");
         }
 
         /// <summary>
