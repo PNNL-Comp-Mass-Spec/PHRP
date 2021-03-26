@@ -41,7 +41,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected PHRPBaseClass()
         {
-            FileDate = "March 25, 2021";
+            FileDate = "March 26, 2021";
 
             mPeptideSeqMassCalculator = new PeptideMassCalculator { ChargeCarrierMass = PeptideMassCalculator.MASS_PROTON };
 
@@ -1605,7 +1605,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!File.Exists(parameterFilePath))
                 {
                     // See if parameterFilePath points to a file in the same directory as the application
-                    var appDirPath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
+                    var appDirPath = ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
                     if (string.IsNullOrWhiteSpace(appDirPath))
                     {
                         SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
@@ -1780,11 +1780,24 @@ namespace PeptideHitResultsProcessor.Processor
             ProgressComplete?.Invoke();
         }
 
+        /// <summary>
+        /// Main processing function
+        /// </summary>
+        /// <param name="inputFilePath">PSM tool results file</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
+        /// <returns>True if successful, False if failure</returns>
         public bool ProcessFile(string inputFilePath, string outputDirectoryPath)
         {
             return ProcessFile(inputFilePath, outputDirectoryPath, string.Empty);
         }
 
+        /// <summary>
+        /// Main processing function
+        /// </summary>
+        /// <param name="inputFilePath">PSM tool results file</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
+        /// <param name="parameterFilePath">Parameter file</param>
+        /// <returns>True if successful, False if failure</returns>
         public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
 
         /// <summary>
