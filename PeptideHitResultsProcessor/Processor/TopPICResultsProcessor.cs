@@ -1419,7 +1419,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">TopPIC results file</param>
+        /// <param name="inputFilePath">TopPIC results file (Dataset_TopPIC_PrSMs.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>

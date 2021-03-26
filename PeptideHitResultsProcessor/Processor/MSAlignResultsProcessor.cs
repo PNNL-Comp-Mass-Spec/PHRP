@@ -1326,7 +1326,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">MSAlign results file</param>
+        /// <param name="inputFilePath">MSAlign results file (Dataset_MSAlign_ResultTable.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>

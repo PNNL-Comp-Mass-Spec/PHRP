@@ -47,7 +47,7 @@ namespace PHRPReader.Reader
 
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
-        [Obsolete("Superseded by Data.MSPathFinderSynFile")]
+        [Obsolete("Superseded by enum Data.MSPathFinderSynFileColumns")]
         // ReSharper disable UnusedMember.Global
         public enum MSPathFinderSynFileColumns
         {

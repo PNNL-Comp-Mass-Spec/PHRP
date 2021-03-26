@@ -77,7 +77,7 @@ namespace PHRPReader.Reader
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
-        [Obsolete("Superseded by Data.MSGFPlusSynFile")]
+        [Obsolete("Superseded by enum Data.MSGFPlusSynFileColumns")]
         // ReSharper disable UnusedMember.Global
         public enum MSGFPlusSynFileColumns
         {

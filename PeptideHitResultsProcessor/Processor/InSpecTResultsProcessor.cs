@@ -1420,7 +1420,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">Inspect results file</param>
+        /// <param name="inputFilePath">Inspect results file (Dataset_inspect.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>

@@ -2237,7 +2237,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">MS-GF+ results file</param>
+        /// <param name="inputFilePath">MS-GF+ results file (Dataset.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file for data processing</param>
         /// <returns>True if successful, False if failure</returns>

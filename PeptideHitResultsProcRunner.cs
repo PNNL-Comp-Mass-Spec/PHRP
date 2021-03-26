@@ -329,7 +329,7 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath"></param>
+        /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="parameterFilePath"></param>
         /// <param name="resetErrorCode"></param>

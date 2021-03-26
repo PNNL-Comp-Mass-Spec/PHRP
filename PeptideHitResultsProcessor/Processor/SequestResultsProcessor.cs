@@ -483,7 +483,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">Sequest Synopsis or First-hits file</param>
+        /// <param name="inputFilePath">SEQUEST Synopsis or First-hits file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>
