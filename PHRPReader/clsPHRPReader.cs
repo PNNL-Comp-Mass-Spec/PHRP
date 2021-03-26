@@ -239,9 +239,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="basePHRPFileName"></param>
+        [Obsolete("Superseded by ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired")]
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
         {
-           return string.Empty;
+            return ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(filePath, basePHRPFileName);
         }
 
         /// <summary>
@@ -266,6 +267,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineBestInputFile")]
         public static string AutoDetermineBestInputFile(string inputDirectoryPath)
         {
             return AutoDetermineBestInputFile(inputDirectoryPath, out _);
@@ -278,10 +280,10 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineBestInputFile")]
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, out PeptideHitResultTypes matchedResultType)
         {
-            matchedResultType = PeptideHitResultTypes.Unknown;
-            return string.Empty;
+            return ReaderFactory.AutoDetermineBestInputFile(inputDirectoryPath, out matchedResultType);
         }
 
         /// <summary>
@@ -291,6 +293,7 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineBestInputFile")]
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName)
         {
             return AutoDetermineBestInputFile(inputDirectoryPath, datasetName, out _);
@@ -304,6 +307,7 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineBestInputFile")]
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName,
                                                         out PeptideHitResultTypes matchedResultType)
         {
@@ -323,11 +327,11 @@ namespace PHRPReader
         /// <param name="datasetNames">List of dataset names to search for</param>
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineBestInputFile")]
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, List<string> datasetNames,
                                                         out PeptideHitResultTypes matchedResultType)
         {
-            matchedResultType = PeptideHitResultTypes.Unknown;
-            return string.Empty;
+            return ReaderFactory.AutoDetermineBestInputFile(inputDirectoryPath, datasetNames, out matchedResultType);
         }
 
         /// <summary>
@@ -336,6 +340,7 @@ namespace PHRPReader
         /// <param name="filePath"></param>
         /// <returns>Dataset name</returns>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineDatasetName")]
         public static string AutoDetermineDatasetName(string filePath)
         {
             var resultType = AutoDetermineResultType(filePath);
@@ -349,18 +354,20 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <returns>Dataset name</returns>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineDatasetName")]
         public static string AutoDetermineDatasetName(string filePath, PeptideHitResultTypes resultType)
         {
-            return string.Empty;
+            return ReaderFactory.AutoDetermineDatasetName(filePath, resultType);
         }
 
         /// <summary>
         /// Determine the PeptideHit result type given the input file path
         /// </summary>
         /// <param name="filePath"></param>
+        [Obsolete("Superseded by ReaderFactory.AutoDetermineResultType")]
         public static PeptideHitResultTypes AutoDetermineResultType(string filePath)
         {
-            return PeptideHitResultTypes.Unknown;
+            return ReaderFactory.AutoDetermineResultType(filePath);
         }
 
         /// <summary>
@@ -371,6 +378,7 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
         /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
         /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
+        [Obsolete("Superseded by ReaderFactory.FindModSummaryFile")]
         public static string FindModSummaryFile(
             PeptideHitResultTypes peptideHitResultType,
             string datasetName,
@@ -390,6 +398,7 @@ namespace PHRPReader
         /// <param name="modSummaryFileName">Expected mod summary filename</param>
         /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
         /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        [Obsolete("Superseded by ReaderFactory.FindModSummaryFile")]
         public static string FindModSummaryFile(
             string inputDirectoryPath,
             string inputFileName,
@@ -407,6 +416,7 @@ namespace PHRPReader
         /// <param name="resultToSeqMapFileName">Expected ResultToSeqMap filename</param>
         /// <param name="resultToSeqMapFileNamePreferred">Output: preferred ResultToSeqMap filename (based on whether a _syn.txt or _fht.txt file is present)</param>
         /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        [Obsolete("Superseded by ReaderFactory.FindResultToSeqMapFile")]
         public static string FindResultToSeqMapFile(
             string inputDirectoryPath,
             string inputFileName,
@@ -424,40 +434,43 @@ namespace PHRPReader
         /// <param name="fileNameToFind">Expected PHRP result filename</param>
         /// <param name="preferredName">Output: preferred PHRP result filename (based on whether a _syn.txt or _fht.txt file is present)</param>
         /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        [Obsolete("Superseded by ReaderFactory.FindPHRPFile")]
         public static string FindPHRPFile(
             string inputDirectoryPath,
             string inputFileName,
             string fileNameToFind,
             out string preferredName)
         {
-            preferredName = string.Empty;
-            return string.Empty;
+            return ReaderFactory.FindPHRPFile(inputDirectoryPath, inputFileName, fileNameToFind, out preferredName);
         }
 
         /// <summary>
         /// Returns the filename of the MSGF file that corresponds to synopsisOrFirstHitsFileName
         /// </summary>
         /// <param name="synopsisOrFirstHitsFileName">Filename (or full path) to the synopsis or first-hits file</param>
+        [Obsolete("Superseded by ReaderFactory.GetMSGFFileName")]
         public static string GetMSGFFileName(string synopsisOrFirstHitsFileName)
         {
-            return Path.GetFileNameWithoutExtension(synopsisOrFirstHitsFileName) + MSGF_RESULT_FILENAME_SUFFIX;
+            return ReaderFactory.GetMSGFFileName(synopsisOrFirstHitsFileName);
         }
 
         /// <summary>
         /// Get the peptide hit result type for the given result type name
         /// </summary>
         /// <param name="resultTypeName"></param>
+        [Obsolete("Superseded by ReaderFactory.GetPeptideHitResultType")]
         public static PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
         {
-            return PeptideHitResultTypes.Unknown;
+            return ReaderFactory.GetPeptideHitResultType(resultTypeName);
         }
 
         /// <summary>
         /// Get the list of auxiliary file suffixes
         /// </summary>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPAuxiliaryFileSuffixes")]
         public static List<string> GetPHRPAuxiliaryFileSuffixes()
         {
-            return new();
+            return ReaderFactory.GetPHRPAuxiliaryFileSuffixes();
         }
 
         /// <summary>
@@ -466,9 +479,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPFirstHitsFileName")]
         public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPFirstHitsFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -477,9 +491,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPModSummaryFileName")]
         public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPModSummaryFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -488,9 +503,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPPepToProteinMapFileName")]
         public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPPepToProteinMapFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -499,9 +515,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPProteinModsFileName")]
         public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPProteinModsFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -510,9 +527,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPSynopsisFileName")]
         public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPSynopsisFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -521,9 +539,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPResultToSeqMapFileName")]
         public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPResultToSeqMapFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -532,9 +551,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPSeqInfoFileName")]
         public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPSeqInfoFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -543,9 +563,10 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetPHRPSeqToProteinMapFileName")]
         public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetPHRPSeqToProteinMapFileName(resultType, datasetName);
         }
 
         /// <summary>
@@ -553,9 +574,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetScanStatsFilename")]
         public static string GetScanStatsFilename(string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetScanStatsFilename(datasetName);
         }
 
         /// <summary>
@@ -563,9 +585,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetExtendedScanStatsFilename")]
         public static string GetExtendedScanStatsFilename(string datasetName)
         {
-            return string.Empty;
+            return ReaderFactory.GetExtendedScanStatsFilename(datasetName);
         }
 
         /// <summary>
@@ -573,9 +596,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="resultType"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Superseded by ReaderFactory.GetToolVersionInfoFilename")]
         public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
         {
-            return string.Empty;
+            return ReaderFactory.GetToolVersionInfoFilename(resultType);
         }
 
         /// <summary>
@@ -583,9 +607,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="chChar">Character to examine</param>
         /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+        [Obsolete("Superseded by ReaderFactory.IsLetterAtoZ")]
         public static bool IsLetterAtoZ(char chChar)
         {
-            return false;
+            return ReaderFactory.IsLetterAtoZ(chChar);
         }
 
         /// <summary>
@@ -593,9 +618,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="data"></param>
         /// <returns>True if a number, otherwise false</returns>
+        [Obsolete("Superseded by ReaderFactory.IsNumber")]
         public static bool IsNumber(string data)
         {
-            return false;
+            return ReaderFactory.IsNumber(data);
         }
 
         /// <summary>
@@ -604,9 +630,10 @@ namespace PHRPReader
         /// <param name="columnName"></param>
         /// <param name="columnHeaders"></param>
         /// <returns>Column index, or -1 if not found</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnIndex")]
         public static int LookupColumnIndex(string columnName, SortedDictionary<string, int> columnHeaders)
         {
-            return -1;
+            return ReaderFactory.LookupColumnIndex(columnName, columnHeaders);
         }
 
         /// <summary>
@@ -615,57 +642,63 @@ namespace PHRPReader
         /// <param name="columnEnum"></param>
         /// <param name="columnHeaders"></param>
         /// <returns>Column index, or -1 if not found</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnIndex")]
         public static int LookupColumnIndex(Enum columnEnum, SortedDictionary<Enum, int> columnHeaders)
         {
-            return -1;
+            return ReaderFactory.LookupColumnIndex(columnEnum, columnHeaders);
         }
 
         /// <summary>
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnValue")]
         public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders)
         {
-            return string.Empty;
+            return ReaderFactory.LookupColumnValue(dataColumns, columnName, columnHeaders);
         }
 
         /// <summary>
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnValue")]
         public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders,
                                                string valueIfMissing)
         {
-            return valueIfMissing;
+            return ReaderFactory.LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing);
         }
 
         /// <summary>
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnValue")]
         public static string LookupColumnValue(string[] dataColumns, Enum columnEnum, SortedDictionary<Enum, int> columnHeaders,
                                                string valueIfMissing)
         {
-            return valueIfMissing;
+            return ReaderFactory.LookupColumnValue(dataColumns, columnEnum, columnHeaders, valueIfMissing);
         }
 
         /// <summary>
         /// Returns the value stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnValue")]
         public static int LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, int valueIfMissing)
         {
-            return valueIfMissing;
+            return ReaderFactory.LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing);
         }
 
         /// <summary>
         /// Returns the value stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
+        [Obsolete("Superseded by ReaderFactory.LookupColumnValue")]
         public static double LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders,
                                                double valueIfMissing)
         {
-            return valueIfMissing;
+            return ReaderFactory.LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing);
         }
 
         /// <summary>
@@ -674,8 +707,10 @@ namespace PHRPReader
         /// <param name="dataColumns">Column names read from the input file</param>
         /// <param name="columnHeaders">Column mapping dictionary object to update</param>
         /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
+        [Obsolete("Superseded by ReaderFactory.ParseColumnHeaders")]
         public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
         {
+            ReaderFactory.ParseColumnHeaders(dataColumns, columnHeaders);
             return;
         }
 
