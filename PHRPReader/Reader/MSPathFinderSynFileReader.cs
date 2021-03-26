@@ -141,28 +141,28 @@ namespace PHRPReader.Reader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
-        public static SortedDictionary<string, Data.MSPathFinderSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, MSPathFinderSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, Data.MSPathFinderSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, MSPathFinderSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, Data.MSPathFinderSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, Data.MSPathFinderSynFileColumns.Scan},
-                {DATA_COLUMN_Charge, Data.MSPathFinderSynFileColumns.Charge},
-                {DATA_COLUMN_MostAbundantIsotopeMz, Data.MSPathFinderSynFileColumns.MostAbundantIsotopeMz},
-                {DATA_COLUMN_Mass, Data.MSPathFinderSynFileColumns.Mass},
-                {DATA_COLUMN_Sequence, Data.MSPathFinderSynFileColumns.Sequence},
-                {DATA_COLUMN_Modifications, Data.MSPathFinderSynFileColumns.Modifications},
-                {DATA_COLUMN_Composition, Data.MSPathFinderSynFileColumns.Composition},
-                {DATA_COLUMN_Protein, Data.MSPathFinderSynFileColumns.Protein},
-                {DATA_COLUMN_ProteinDesc, Data.MSPathFinderSynFileColumns.ProteinDesc},
-                {DATA_COLUMN_ProteinLength, Data.MSPathFinderSynFileColumns.ProteinLength},
-                {DATA_COLUMN_ResidueStart, Data.MSPathFinderSynFileColumns.ResidueStart},
-                {DATA_COLUMN_ResidueEnd, Data.MSPathFinderSynFileColumns.ResidueEnd},
-                {DATA_COLUMN_MatchedFragments, Data.MSPathFinderSynFileColumns.MatchedFragments},
-                {DATA_COLUMN_SpecEValue, Data.MSPathFinderSynFileColumns.SpecEValue},
-                {DATA_COLUMN_EValue, Data.MSPathFinderSynFileColumns.EValue},
-                {DATA_COLUMN_QValue, Data.MSPathFinderSynFileColumns.QValue},
-                {DATA_COLUMN_PepQValue, Data.MSPathFinderSynFileColumns.PepQValue}
+                {DATA_COLUMN_ResultID, MSPathFinderSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MSPathFinderSynFileColumns.Scan},
+                {DATA_COLUMN_Charge, MSPathFinderSynFileColumns.Charge},
+                {DATA_COLUMN_MostAbundantIsotopeMz, MSPathFinderSynFileColumns.MostAbundantIsotopeMz},
+                {DATA_COLUMN_Mass, MSPathFinderSynFileColumns.Mass},
+                {DATA_COLUMN_Sequence, MSPathFinderSynFileColumns.Sequence},
+                {DATA_COLUMN_Modifications, MSPathFinderSynFileColumns.Modifications},
+                {DATA_COLUMN_Composition, MSPathFinderSynFileColumns.Composition},
+                {DATA_COLUMN_Protein, MSPathFinderSynFileColumns.Protein},
+                {DATA_COLUMN_ProteinDesc, MSPathFinderSynFileColumns.ProteinDesc},
+                {DATA_COLUMN_ProteinLength, MSPathFinderSynFileColumns.ProteinLength},
+                {DATA_COLUMN_ResidueStart, MSPathFinderSynFileColumns.ResidueStart},
+                {DATA_COLUMN_ResidueEnd, MSPathFinderSynFileColumns.ResidueEnd},
+                {DATA_COLUMN_MatchedFragments, MSPathFinderSynFileColumns.MatchedFragments},
+                {DATA_COLUMN_SpecEValue, MSPathFinderSynFileColumns.SpecEValue},
+                {DATA_COLUMN_EValue, MSPathFinderSynFileColumns.EValue},
+                {DATA_COLUMN_QValue, MSPathFinderSynFileColumns.QValue},
+                {DATA_COLUMN_PepQValue, MSPathFinderSynFileColumns.PepQValue}
             };
 
             return headerColumns;
@@ -175,7 +175,7 @@ namespace PHRPReader.Reader
         /// <param name="headerNames"></param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
-        public static Dictionary<Data.MSPathFinderSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        public static Dictionary<MSPathFinderSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
