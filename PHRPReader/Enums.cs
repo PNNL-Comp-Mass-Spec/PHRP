@@ -105,6 +105,11 @@ namespace PHRPReader
         /// <summary>
         /// TopPIC
         /// </summary>
-        TopPIC = 9
+        TopPIC = 9,
+
+        /// <summary>
+        /// MaxQuant
+        /// </summary>
+        MaxQuant = 10
     }
 }

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisManagerPeptideHitResultsProcessor.cs" />
+    <Compile Include="Data\MaxQuantResults.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPeptideHitResultsProcessor.cs" />

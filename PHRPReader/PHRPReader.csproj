@@ -51,6 +51,7 @@
     <Compile Include="PeptideCleavageStateCalculator.cs" />
     <Compile Include="PeptideMassCalculator.cs" />
     <Compile Include="ReaderFactory.cs" />
+    <Compile Include="Reader\MaxQuantSynFileReader.cs" />
     <Compile Include="StartupOptions.cs" />
     <Compile Include="Data\AminoAcidModInfo.cs" />
     <Compile Include="Data\EmpiricalFormula.cs" />
@@ -86,8 +87,6 @@
       <Version>2.6.26</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DataColumn\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

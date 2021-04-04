@@ -1,20 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PHRPReader;
+﻿using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
-    class clsSearchResultsMaxQuant : clsSearchResultsBaseClass
+    /// <summary>
+    /// This class is used to track the peptide details for a MaxQuant search result
+    /// See SearchResultsBaseClass for additional information
+    /// </summary>
+    public class MaxQuantResults : SearchResultsBaseClass
     {
-        #region "Properties"
+        // Ignore Spelling: Acetyl, MaxQuant
 
         public string DatasetName { get; set; }
         public int DatasetID { get; set; }
         public string MissedCleavageCount { get; set; }
+
+        /// <summary>
+        /// Comma-separated list of modification names that are in the ModifiedSequence field
+        /// </summary>
+        /// <remarks>
+        /// Examples:
+        ///   Acetyl (Protein N-term)
+        ///   Oxidation (M)
+        ///   Acetyl (Protein N-term),Oxidation (M)
+        ///   2 Oxidation (M)
+        ///   4 Oxidation (M)
+        /// </remarks>
+        public string Modifications { get; set; }
+
+        public string ModifiedSequence { get; set; }
         public string CollisionMode { get; set; }
         public string MassAnalyzer { get; set; }
         public string IdType { get; set; }
@@ -49,8 +63,6 @@ namespace PeptideHitResultsProcessor
         public string EvidenceID { get; set; }
         public string OxidationSiteIDs { get; set; }
 
-        #endregion
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -60,7 +72,7 @@ namespace PeptideHitResultsProcessor
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsMaxQuant(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        public MaxQuantResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }
