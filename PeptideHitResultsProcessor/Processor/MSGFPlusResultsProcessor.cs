@@ -24,9 +24,45 @@ using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor.Processor
 {
+    /// <summary>
+    /// This class reads a MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// 1) ProcessFile reads MS-GF+ results file Dataset.tsv
+    /// </para>
+    /// <para>
+    /// 2) It calls CreateFHTorSYNResultsFile to create the _fht.txt and _syn.txt files
+    /// </para>
+    /// <para>
+    /// 3) ParseMSGFPlusResultsFileHeaderLine reads the header line to determine the column mapping
+    ///      columnMapping = new Dictionary of MSGFPlusResultsFileColumns, int
+    /// </para>
+    /// <para>
+    /// 4) ParseMSGFPlusResultsFileEntry reads each data line and stores in an instance of MSGFPlusSearchResult, which is a private struct
+    ///    The data is stored in a list
+    ///      searchResultsCurrentScan = new List of MSGFPlusSearchResult
+    /// </para>
+    /// <para>
+    /// 5) Filter-passing results for a given scan are stored in another list
+    ///      searchResultsPrefiltered = new List of MSGFPlusSearchResult
+    /// </para>
+    /// <para>
+    /// 6) Once the entire .tsv has been read, searchResultsPrefiltered is sorted by score
+    /// </para>
+    /// <para>
+    /// 7) Data to be written to the _syn.txt or _fht.txt file is stored in another list
+    ///      filteredSearchResults = new List of MSGFPlusSearchResult
+    ///    For syn files, all filter-passing PSMs are stored
+    ///    For fht files, only the highest scoring PSM is stored for each scan/charge combo
+    /// </para>
+    /// <para>
+    /// 8) SortAndWriteFilteredSearchResults performs one more sort, then writes out to disk
+    /// </para>
+    /// </remarks>
     public class MSGFPlusResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, structs, methylation, udt, frag, novo, Prefiltered
+        // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, struct, structs, methylation, udt, frag, novo, Prefiltered
 
         /// <summary>
         /// Constructor
@@ -1859,6 +1895,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (scanCount > 1)
                 {
+                    // This result came from a merged spectrum and thus has a scan number formatted like: 3010/3011/3012
                     // Append one entry to searchResults for each item in udtMergedScanInfo()
 
                     for (var index = 0; index <= scanCount - 1; index++)

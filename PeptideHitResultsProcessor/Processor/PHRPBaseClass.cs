@@ -1319,7 +1319,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         /// <summary>
         /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to String.Empty
+        /// Otherwise, updates value to string.Empty
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out string value)

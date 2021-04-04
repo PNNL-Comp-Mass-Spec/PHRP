@@ -28,9 +28,40 @@ namespace PeptideHitResultsProcessor.Processor
     /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
     /// a tab-delimited text file with the data.
     /// </summary>
+    /// <summary>
+    /// This class reads a MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// 1) ProcessFile reads MSPathFinder results file Dataset_IcTda.tsv
+    /// </para>
+    /// <para>
+    /// 2) It calls CreateSynResultsFile to create the _syn.txt file
+    /// </para>
+    /// <para>
+    /// 3) ParseMSPathFinderResultsFileHeaderLine reads the header line to determine the column mapping
+    ///      columnMapping = new Dictionary of MSPathFinderResultsFileColumns, int
+    /// </para>
+    /// <para>
+    /// 4) ParseMSPathFinderResultsFileEntry reads each data line and stores in an instance of MSPathFinderSearchResult, which is a private struct
+    ///    The data is stored in a list
+    ///      searchResultsUnfiltered = new List of MSPathFinderSearchResult
+    /// </para>
+    /// <para>
+    /// 5) Once the entire .tsv has been read, searchResultsUnfiltered is sorted by scan, charge, and ascending SpecEValue
+    /// </para>
+    /// <para>
+    /// 6) StoreSynMatches stores filter-passing values in a new list
+    ///      filteredSearchResults = new List of MSPathFinderSearchResult
+    /// </para>
+    /// <para>
+    /// 7) SortAndWriteFilteredSearchResults performs one more sort, then writes out to disk
+    ///    Sorts ascending by SpecEValue, QValue, Scan, Peptide, and Protein
+    /// </para>
+    /// </remarks>
     public class MSPathFinderResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: IcTda, Dehydro, Desc, mspath
+        // Ignore Spelling: IcTda, Dehydro, Desc, mspath, struct
 
         /// <summary>
         /// Constructor
@@ -145,9 +176,9 @@ namespace PeptideHitResultsProcessor.Processor
                 QValue = string.Empty;
                 PepQValue = string.Empty;
 
-                // Unused at present: MH = String.Empty
-                // Unused at present: DelM = String.Empty
-                // Unused at present: DelM_PPM = String.Empty
+                // Unused at present: MH = string.Empty
+                // Unused at present: DelM = string.Empty
+                // Unused at present: DelM_PPM = string.Empty
             }
         }
 
@@ -170,6 +201,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 return;
             }
+
+            // Modifications are listed as a comma separated list for Mod name and residue number; examples:
+            // Oxidation 21
+            // Oxidation 11,Dehydro 12
+            // Dehydro 1,Dehydro 4,Dehydro 7
 
             var mods = searchResult.Modifications.Split(',');
             var finalResidueLoc = searchResult.PeptideCleanSequence.Length;
@@ -620,7 +656,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-            // Note that ParseMSPathfinderSynopsisFile synopsis files are normally sorted on Probability value, ascending
+            // Note that MSPathfinder synopsis files are normally sorted on Probability value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
@@ -930,7 +966,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<MSPathFinderResultsFileColumns, int> columnMapping)
         {
-            // The expected column order from MassMSPathFinder:
+            // The expected column order from MSPathFinder:
             //   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
 
             var columnNames = new SortedDictionary<string, MSPathFinderResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
