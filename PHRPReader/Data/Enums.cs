@@ -2,6 +2,120 @@
 {
     // Ignore Spelling: Da, novo, tda
 
+#pragma warning disable 1591
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by InSpecTResultsProcessor
+    /// </summary>
+    public enum InspectSynFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Peptide = 2,
+        Protein = 3,
+        Charge = 4,
+        MQScore = 5,
+        Length = 6,
+        TotalPRMScore = 7,
+        MedianPRMScore = 8,
+        FractionY = 9,
+        FractionB = 10,
+        Intensity = 11,
+        NTT = 12,
+        PValue = 13,
+        FScore = 14,
+        DeltaScore = 15,
+        DeltaScoreOther = 16,
+        DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, stores 0.  This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+        DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, stores 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
+        RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+        RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+        MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
+        RecordNumber = 22,
+        DBFilePos = 23,
+        SpecFilePos = 24,
+        PrecursorMZ = 25,
+        PrecursorError = 26,
+        DelM_PPM = 27
+    }
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by MaxQuantResultsProcessor
+    /// </summary>
+    public enum MaxQuantSynFileColumns
+    {
+        /// <summary>
+        /// Result ID
+        /// </summary>
+        ResultID = 0,
+
+        /// <summary>
+        /// Scan
+        /// </summary>
+        DatasetID = 1,
+
+        /// <summary>
+        /// Scan
+        /// </summary>
+        Scan = 2
+
+    }
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by MODPlusResultsProcessor
+    /// </summary>
+    public enum MODPlusSynFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Spectrum_Index = 2,
+        Charge = 3,
+        PrecursorMZ = 4,
+        DelM = 5,                            // Precursor error, in Daltons
+        DelM_PPM = 6,                        // Precursor error, in ppm
+        MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+        NTT = 9,
+        ModificationAnnotation = 10,
+        Protein = 11,
+        Peptide_Position = 12,
+        Score = 13,
+        Probability = 14,
+        Rank_Score = 15,
+        QValue = 16
+    }
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by MSAlignResultsProcessor
+    /// </summary>
+    public enum MSAlignSynFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Prsm_ID = 2,
+        Spectrum_ID = 3,
+        Charge = 4,
+        PrecursorMZ = 5,
+        DelM = 6,                            // Precursor error, in Da
+        DelMPPM = 7,                         // Precursor error, in ppm
+        MH = 8,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+        Protein = 10,                        // Protein Name
+        Protein_Mass = 11,
+        Unexpected_Mod_Count = 12,
+        Peak_Count = 13,
+        Matched_Peak_Count = 14,
+        Matched_Fragment_Ion_Count = 15,
+        PValue = 16,
+        Rank_PValue = 17,
+        EValue = 18,
+        FDR = 19,
+        Species_ID = 20,
+        FragMethod = 21
+    }
+
+#pragma warning restore 1591
+
     /// <summary>
     /// These columns correspond to the Synopsis file created by MSGFPlusResultsProcessor
     /// </summary>
@@ -233,4 +347,89 @@
         /// </summary>
         PepQValue = 17
     }
+
+#pragma warning disable 1591
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by MODaResultsProcessor
+    /// </summary>
+    public enum MODaSynFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Spectrum_Index = 2,
+        Charge = 3,
+        PrecursorMZ = 4,
+        DelM = 5,                            // Precursor error, in Da
+        DelM_PPM = 6,                        // Precursor error, in ppm
+        MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+        Protein = 9,                         // Protein Name
+        Score = 10,
+        Probability = 11,
+        Rank_Probability = 12,
+        Peptide_Position = 13,
+        QValue = 14
+    }
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by TopPICResultsProcessor
+    /// </summary>
+    public enum TopPICSynFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Prsm_ID = 2,
+        Spectrum_ID = 3,
+        FragMethod = 4,
+        Charge = 5,
+        PrecursorMZ = 6,
+        DelM = 7,                            // Precursor error, in Da
+        DelMPPM = 8,                         // Precursor error, in ppm
+        MH = 9,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        Peptide = 10,                        // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+        Proteoform_ID = 11,
+        Feature_Intensity = 12,
+        Feature_Score = 13,
+        Protein = 14,                        // Protein Name
+        ResidueStart = 15,
+        ResidueEnd = 16,
+        Unexpected_Mod_Count = 17,
+        Peak_Count = 18,
+        Matched_Peak_Count = 19,
+        Matched_Fragment_Ion_Count = 20,
+        PValue = 21,
+        Rank_PValue = 22,
+        EValue = 23,
+        QValue = 24,
+        Proteoform_QValue = 25,
+        VariablePTMs = 26
+    }
+
+    /// <summary>
+    /// These columns correspond to the Synopsis file created by XTandemResultsProcessor
+    /// </summary>
+    public enum XTandemSynFileColumns
+    {
+        ResultID = 0,
+        GroupID = 1,
+        Scan = 2,
+        Charge = 3,
+        MH = 4,
+        Hyperscore = 5,
+        EValue = 6,                 // Peptide_Expectation_Value_LogE
+        ProteinCount = 7,           // Multiple_Protein_Count
+        Peptide = 8,
+        DeltaCn2 = 9,
+        YScore = 10,
+        YIons = 11,
+        BScore = 12,
+        BIons = 13,
+        DelM = 14,
+        Intensity = 15,             // Peptide_Intensity_LogI
+        DelMPPM = 16
+    }
+
+#pragma warning restore 1591
+
 }

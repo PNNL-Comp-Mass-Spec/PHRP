@@ -664,7 +664,7 @@ namespace PeptideHitResultsProcessor.Processor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
-            var columnMapping = new Dictionary<MODPlusSynFileReader.MODPlusSynFileColumns, int>();
+            var columnMapping = new Dictionary<MODPlusSynFileColumns, int>();
 
             try
             {
@@ -1084,7 +1084,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMODPlusSynFileHeaderLine(string lineIn, IDictionary<MODPlusSynFileReader.MODPlusSynFileColumns, int> columnMapping)
+        private bool ParseMODPlusSynFileHeaderLine(string lineIn, IDictionary<MODPlusSynFileColumns, int> columnMapping)
         {
             var columnNames = MODPlusSynFileReader.GetColumnHeaderNamesAndIDs();
 
@@ -1093,7 +1093,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (MODPlusSynFileReader.MODPlusSynFileColumns resultColumn in Enum.GetValues(typeof(MODPlusSynFileReader.MODPlusSynFileColumns)))
+                foreach (MODPlusSynFileColumns resultColumn in Enum.GetValues(typeof(MODPlusSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1122,7 +1122,7 @@ namespace PeptideHitResultsProcessor.Processor
             MODPlusResults searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<MODPlusSynFileReader.MODPlusSynFileColumns, int> columnMapping,
+            IDictionary<MODPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             // Parses an entry from the MODPlus Synopsis file
@@ -1142,7 +1142,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1154,13 +1154,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1170,11 +1170,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.DelM], out string modPlusComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.DelM_PPM], out string modPlusComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.DelM], out string modPlusComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.DelM_PPM], out string modPlusComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MODPlusComputedDelM = modPlusComputedDelM;
@@ -1207,14 +1207,14 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Spectrum_Index], out string spectrumIndex);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Spectrum_Index], out string spectrumIndex);
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.MH], out string parentIonMh);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.MH], out string parentIonMh);
 
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Score], out string modPlusScore);
-                GetColumnValue(splitLine, columnMapping[MODPlusSynFileReader.MODPlusSynFileColumns.Probability], out string probability);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Score], out string modPlusScore);
+                GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Probability], out string probability);
 
                 searchResult.Spectrum_Index = spectrumIndex;
                 searchResult.Precursor_mz = precursorMz;

@@ -678,7 +678,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Although this was a possibility with Inspect, it likely never occurs for MSAlign
             //  But, we'll keep the check in place just in case
 
-            var columnMapping = new Dictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int>();
+            var columnMapping = new Dictionary<MSAlignSynFileColumns, int>();
 
             try
             {
@@ -1143,7 +1143,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int> columnMapping)
+        private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<MSAlignSynFileColumns, int> columnMapping)
         {
             var columnNames = MSAlignSynFileReader.GetColumnHeaderNamesAndIDs();
 
@@ -1152,7 +1152,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (MSAlignSynFileReader.MSAlignSynFileColumns resultColumn in Enum.GetValues(typeof(MSAlignSynFileReader.MSAlignSynFileColumns)))
+                foreach (MSAlignSynFileColumns resultColumn in Enum.GetValues(typeof(MSAlignSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1181,7 +1181,7 @@ namespace PeptideHitResultsProcessor.Processor
             MSAlignResults searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int> columnMapping,
+            IDictionary<MSAlignSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             // Parses an entry from the MSAlign Synopsis file
@@ -1201,7 +1201,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1214,13 +1214,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1231,11 +1231,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MSAlignComputedDelM = msAlignComputedDelM;
@@ -1268,24 +1268,24 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Prsm_ID], out string prsmId);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Prsm_ID], out string prsmId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.MH], out string parentIonMH);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.MH], out string parentIonMH);
 
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.EValue], out string eValue);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.FDR], out string fdr);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Species_ID], out string speciesId);
-                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Peak_Count], out string peakCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.PValue], out string pValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.FDR], out string fdr);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Species_ID], out string speciesId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.FragMethod], out string fragMethod);
 
                 searchResult.Prsm_ID = prsmId;
                 searchResult.Spectrum_ID = spectrumId;

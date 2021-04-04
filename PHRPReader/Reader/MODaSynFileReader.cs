@@ -44,29 +44,7 @@ namespace PHRPReader.Reader
         public const string FILENAME_SUFFIX_FHT = "_moda_fht.txt";
 
         private const string MODa_SEARCH_ENGINE_NAME = "MODa";
-
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by MODaResultsProcessor
-        /// </summary>
-        public enum MODaSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Spectrum_Index = 2,
-            Charge = 3,
-            PrecursorMZ = 4,
-            DelM = 5,                            // Precursor error, in Da
-            DelM_PPM = 6,                        // Precursor error, in ppm
-            MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
-            Protein = 9,                         // Protein Name
-            Score = 10,
-            Probability = 11,
-            Rank_Probability = 12,
-            Peptide_Position = 13,
-            QValue = 14
-        }
-
+        
 #pragma warning restore 1591
 
         /// <summary>

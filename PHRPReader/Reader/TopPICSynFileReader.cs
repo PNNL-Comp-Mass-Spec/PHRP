@@ -57,40 +57,6 @@ namespace PHRPReader.Reader
 
         private const string TopPIC_SEARCH_ENGINE_NAME = "TopPIC";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by TopPICResultsProcessor
-        /// </summary>
-        public enum TopPICSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Prsm_ID = 2,
-            Spectrum_ID = 3,
-            FragMethod = 4,
-            Charge = 5,
-            PrecursorMZ = 6,
-            DelM = 7,                            // Precursor error, in Da
-            DelMPPM = 8,                         // Precursor error, in ppm
-            MH = 9,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 10,                        // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
-            Proteoform_ID = 11,
-            Feature_Intensity = 12,
-            Feature_Score = 13,
-            Protein = 14,                        // Protein Name
-            ResidueStart = 15,
-            ResidueEnd = 16,
-            Unexpected_Mod_Count = 17,
-            Peak_Count = 18,
-            Matched_Peak_Count = 19,
-            Matched_Fragment_Ion_Count = 20,
-            PValue = 21,
-            Rank_PValue = 22,
-            EValue = 23,
-            QValue = 24,
-            Proteoform_QValue = 25,
-            VariablePTMs = 26
-        }
-
 #pragma warning restore 1591
 
         /// <summary>

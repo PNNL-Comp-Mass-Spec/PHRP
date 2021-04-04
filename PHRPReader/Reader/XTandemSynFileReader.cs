@@ -53,30 +53,6 @@ namespace PHRPReader.Reader
 
         private const string TAXONOMY_INFO_KEY_NAME = "list path, taxonomy information";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by XTandemResultsProcessor
-        /// </summary>
-        public enum XTandemSynFileColumns
-        {
-            ResultID = 0,
-            GroupID = 1,
-            Scan = 2,
-            Charge = 3,
-            MH = 4,
-            Hyperscore = 5,
-            EValue = 6,                 // Peptide_Expectation_Value_LogE
-            ProteinCount = 7,           // Multiple_Protein_Count
-            Peptide = 8,
-            DeltaCn2 = 9,
-            YScore = 10,
-            YIons = 11,
-            BScore = 12,
-            BIons = 13,
-            DelM = 14,
-            Intensity = 15,             // Peptide_Intensity_LogI
-            DelMPPM = 16
-        }
-
 #pragma warning restore 1591
 
         /// <summary>

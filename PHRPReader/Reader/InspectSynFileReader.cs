@@ -57,41 +57,6 @@ namespace PHRPReader.Reader
 
         private const string INS_SEARCH_ENGINE_NAME = "Inspect";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by InSpecTResultsProcessor
-        /// </summary>
-        public enum InspectSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Peptide = 2,
-            Protein = 3,
-            Charge = 4,
-            MQScore = 5,
-            Length = 6,
-            TotalPRMScore = 7,
-            MedianPRMScore = 8,
-            FractionY = 9,
-            FractionB = 10,
-            Intensity = 11,
-            NTT = 12,
-            PValue = 13,
-            FScore = 14,
-            DeltaScore = 15,
-            DeltaScoreOther = 16,
-            DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, stores 0.  This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-            DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, stores 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
-            RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-            RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-            MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
-            RecordNumber = 22,
-            DBFilePos = 23,
-            SpecFilePos = 24,
-            PrecursorMZ = 25,
-            PrecursorError = 26,
-            DelM_PPM = 27
-        }
-
 #pragma warning restore 1591
 
         /// <summary>

@@ -51,35 +51,6 @@ namespace PHRPReader.Reader
 
         private const string MSAlign_SEARCH_ENGINE_NAME = "MSAlign";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by MSAlignResultsProcessor
-        /// </summary>
-        public enum MSAlignSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Prsm_ID = 2,
-            Spectrum_ID = 3,
-            Charge = 4,
-            PrecursorMZ = 5,
-            DelM = 6,                            // Precursor error, in Da
-            DelMPPM = 7,                         // Precursor error, in ppm
-            MH = 8,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
-            Protein = 10,                        // Protein Name
-            Protein_Mass = 11,
-            Unexpected_Mod_Count = 12,
-            Peak_Count = 13,
-            Matched_Peak_Count = 14,
-            Matched_Fragment_Ion_Count = 15,
-            PValue = 16,
-            Rank_PValue = 17,
-            EValue = 18,
-            FDR = 19,
-            Species_ID = 20,
-            FragMethod = 21
-        }
-
 #pragma warning restore 1591
 
         /// <summary>

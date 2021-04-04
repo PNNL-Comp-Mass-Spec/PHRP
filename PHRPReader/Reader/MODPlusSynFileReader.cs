@@ -49,30 +49,6 @@ namespace PHRPReader.Reader
 
         private const string MODPlus_SEARCH_ENGINE_NAME = "MODPlus";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by MODPlusResultsProcessor
-        /// </summary>
-        public enum MODPlusSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Spectrum_Index = 2,
-            Charge = 3,
-            PrecursorMZ = 4,
-            DelM = 5,                            // Precursor error, in Daltons
-            DelM_PPM = 6,                        // Precursor error, in ppm
-            MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
-            NTT = 9,
-            ModificationAnnotation = 10,
-            Protein = 11,
-            Peptide_Position = 12,
-            Score = 13,
-            Probability = 14,
-            Rank_Score = 15,
-            QValue = 16
-        }
-
 #pragma warning restore 1591
 
         /// <summary>

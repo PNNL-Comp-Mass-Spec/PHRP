@@ -773,7 +773,7 @@ namespace PeptideHitResultsProcessor.Processor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
-            var columnMapping = new Dictionary<MODaSynFileReader.MODaSynFileColumns, int>();
+            var columnMapping = new Dictionary<MODaSynFileColumns, int>();
 
             try
             {
@@ -1204,7 +1204,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMODaSynFileHeaderLine(string lineIn, IDictionary<MODaSynFileReader.MODaSynFileColumns, int> columnMapping)
+        private bool ParseMODaSynFileHeaderLine(string lineIn, IDictionary<MODaSynFileColumns, int> columnMapping)
         {
             var columnNames = MODaSynFileReader.GetColumnHeaderNamesAndIDs();
 
@@ -1213,7 +1213,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (MODaSynFileReader.MODaSynFileColumns resultColumn in Enum.GetValues(typeof(MODaSynFileReader.MODaSynFileColumns)))
+                foreach (MODaSynFileColumns resultColumn in Enum.GetValues(typeof(MODaSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1252,7 +1252,7 @@ namespace PeptideHitResultsProcessor.Processor
             MODaResults searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<MODaSynFileReader.MODaSynFileColumns, int> columnMapping,
+            IDictionary<MODaSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             string[] splitLine = null;
@@ -1270,7 +1270,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1282,13 +1282,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1298,11 +1298,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.DelM], out string moDaComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.DelM_PPM], out string moDaComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM], out string moDaComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM_PPM], out string moDaComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MODaComputedDelM = moDaComputedDelM;
@@ -1335,14 +1335,14 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Spectrum_Index], out string spectrumIndex);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Spectrum_Index], out string spectrumIndex);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.MH], out string parentIonMh);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.MH], out string parentIonMh);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Score], out string moDaScore);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileReader.MODaSynFileColumns.Probability], out string probability);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Score], out string moDaScore);
+                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Probability], out string probability);
 
                 searchResult.Spectrum_Index = spectrumIndex;
                 searchResult.Precursor_mz = precursorMz;
