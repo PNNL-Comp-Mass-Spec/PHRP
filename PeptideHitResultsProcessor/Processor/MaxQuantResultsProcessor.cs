@@ -108,6 +108,21 @@ namespace PeptideHitResultsProcessor.Processor
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
         /// <summary>
+        /// These columns correspond to MaxQuant file peptides.txt
+        /// </summary>
+        private enum MaxQuantPeptidesFileColumns
+        {
+            Sequence = 0,
+            Prefix = 1,
+            Suffix = 2,
+            Proteins = 3,
+            LeadingRazorProtein = 4,
+            Intensity = 5,
+            IntensityByExperimentStart = 6,
+            IntensityByExperimentEnd = 7
+        }
+
+        /// <summary>
         /// These columns correspond to MaxQuant file msms.txt
         /// </summary>
         private enum MaxQuantResultsFileColumns
@@ -624,42 +639,72 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private int GetNumMatchesPerSpectrumToReport(string searchToolParameterFilePath)
+        /// <summary>
+        /// Read data from the peptides.txt file
+        /// </summary>
+        /// <param name="inputDirectory"></param>
+        /// <param name="maxQuantPeptides">Keys are peptide sequence, values are the metadata for the peptide</param>
+        private void LoadPeptideInfo(FileSystemInfo inputDirectory, out Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides)
         {
+            maxQuantPeptides = new Dictionary<string, MaxQuantPeptideInfo>();
+
             try
             {
-                if (string.IsNullOrEmpty(searchToolParameterFilePath))
+                var inputFile = new FileInfo(Path.Combine(inputDirectory.FullName, "peptides.txt"));
+                if (!inputFile.Exists)
                 {
-                    ReportError("MaxQuant parameter file name not defined; cannot determine NumMatchesPerSpec");
-                    return 0;
+                    ReportWarning("MaxQuant peptides.txt file not found: " + inputFile.FullName);
+                    return;
                 }
 
-                var paramFile = new FileInfo(searchToolParameterFilePath);
-                if (!paramFile.Exists)
+                using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var headerParsed = false;
+
+                var columnMapping = new Dictionary<MaxQuantPeptidesFileColumns, int>();
+
+                // Keys are column indices, values are column names
+                var intensityByExperimentColumns = new Dictionary<int, string>();
+
+                while (!reader.EndOfStream && !AbortProcessing)
                 {
-                    ReportError("MaxQuant parameter file not found: " + searchToolParameterFilePath);
-                    return 0;
+                    var lineIn = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                    {
+                        continue;
+                    }
+
+                    if (!headerParsed)
+                    {
+                        var validHeader = ParseMaxQuantPeptidesFileHeaderLine(lineIn, columnMapping, intensityByExperimentColumns);
+                        if (!validHeader)
+                            return;
+
+                        headerParsed = true;
+                        continue;
+                    }
                 }
-
-                var paramFileReader = new KeyValueParamFileReader("MaxQuant", searchToolParameterFilePath);
-                RegisterEvents(paramFileReader);
-
-                var success = paramFileReader.ParseKeyValueParameterFile(out var paramFileEntries);
-                if (!success)
-                {
-                    ReportError("Error reading MaxQuant parameter file in GetNumMatchesPerSpectrumToReport: " + paramFileReader.ErrorMessage);
-                    return 0;
-                }
-
-                return KeyValueParamFileReader.GetParameterValue(paramFileEntries, "NumMatchesPerSpec", 1);
             }
             catch (Exception ex)
             {
-                ReportError(string.Format(
-                                "Error reading the MaxQuant parameter file ({0}): {1}",
-                                Path.GetFileName(searchToolParameterFilePath), ex.Message));
-                return 0;
+                SetErrorMessage("Error in LoadPeptideInfo: " + ex.Message);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
             }
+        }
+
+        private bool LookupMaxQuantPeptideInfo(
+            IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
+            string sequence,
+            out MaxQuantPeptideInfo peptideInfo)
+        {
+            if (!maxQuantPeptides.TryGetValue(sequence, out peptideInfo))
+            {
+                ReportWarning("Peptide from msms.txt file was not present in the peptides.txt file: " + sequence);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -886,6 +931,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MaxQuant results line while creating the MaxQuant synopsis file
         /// </summary>
+        /// <param name="maxQuantPeptides"></param>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
@@ -894,6 +940,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="rowNumber">Row number (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantResultsFileEntry(
+            Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
             ref MaxQuantSearchResult udtSearchResult,
             ref string errorLog,
@@ -979,6 +1026,78 @@ namespace PeptideHitResultsProcessor.Processor
                     errorLog += "Error parsing MassMaxQuant Results in ParseMaxQuantResultsFileEntry for Row " + rowNumber + "\n";
                 }
 
+                return false;
+            }
+        }
+
+        private bool ParseMaxQuantPeptidesFileHeaderLine(
+            string lineIn,
+            IDictionary<MaxQuantPeptidesFileColumns, int> columnMapping,
+            IDictionary<int, string> intensityByExperimentColumns)
+        {
+            var columnNames = new SortedDictionary<string, MaxQuantPeptidesFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Sequence", MaxQuantPeptidesFileColumns.Sequence},
+                {"Amino acid before", MaxQuantPeptidesFileColumns.Prefix},
+                {"Amino acid after", MaxQuantPeptidesFileColumns.Suffix},
+                {"Proteins", MaxQuantPeptidesFileColumns.Proteins},
+                {"Leading razor protein", MaxQuantPeptidesFileColumns.LeadingRazorProtein},
+                {"Intensity", MaxQuantPeptidesFileColumns.Intensity},
+            };
+
+            columnMapping.Clear();
+            intensityByExperimentColumns.Clear();
+
+            try
+            {
+                // Initialize each entry in columnMapping to -1
+                foreach (MaxQuantPeptidesFileColumns resultColumn in Enum.GetValues(typeof(MaxQuantPeptidesFileColumns)))
+                {
+                    columnMapping.Add(resultColumn, -1);
+                }
+
+                var splitLine = lineIn.Split('\t');
+
+                for (var index = 0; index < splitLine.Length; index++)
+                {
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
+                    {
+                        // Recognized column name; update columnMapping
+                        columnMapping[resultFileColumn] = index;
+                    }
+                }
+
+                var intensityColumnIndex = columnMapping[MaxQuantPeptidesFileColumns.Intensity];
+                if (intensityColumnIndex < 0)
+                {
+                    ReportWarning("Intensity column not found in the MaxQuant peptides.txt file");
+                    return true;
+                }
+
+                for (var index = intensityColumnIndex + 1; index < splitLine.Length; index++)
+                {
+                    if (!splitLine[index].StartsWith("Experiment "))
+                    {
+                        if (columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentStart] > 0)
+                        {
+                            columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentEnd] = index - 1;
+                        }
+                        break;
+                    }
+
+                    if (index == intensityColumnIndex + 1)
+                    {
+                        columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentStart] = index;
+                    }
+
+                    intensityByExperimentColumns.Add(index, splitLine[index]);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error parsing header in MaxQuant peptides file: " + ex.Message);
                 return false;
             }
         }
