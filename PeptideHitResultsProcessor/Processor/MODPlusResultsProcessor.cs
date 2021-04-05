@@ -1039,7 +1039,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        for (var index = 0; index <= splitLine.Length - 1; index++)
+                        for (var index = 0; index < splitLine.Length; index++)
                         {
                             if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                             {
@@ -1099,7 +1099,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
-                for (var index = 0; index <= splitLine.Length - 1; index++)
+                for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
