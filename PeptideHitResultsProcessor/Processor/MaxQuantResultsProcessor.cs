@@ -127,95 +127,175 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private enum MaxQuantResultsFileColumns
         {
-            Scan = 0,
-            PrefixResidue = 1,
-            Sequence = 2,
-            SuffixResidue = 3,
-            Modifications = 4,
-            Composition = 5,
-            Protein = 6,
-            ProteinDesc = 7,
-            ProteinLength = 8,
-            ResidueStart = 9,
-            ResidueEnd = 10,
-            Charge = 11,
-            MostAbundantIsotopeMz = 12,
-            CalculatedMonoMass = 13,
-            MS1Features = 14,
-            NumMatchedFragments = 15,
-            Probability = 16,
-            SpecEValue = 17,
-            EValue = 18,
-            QValue = 19,
-            PepQValue = 20
+            RawFile = 0,
+            Scan = 1,
+            ScanIndex = 2,
+            Sequence = 3,
+            Length = 4,
+            MissedCleavages = 5,
+            Modifications = 6,
+            ModifiedSequence = 7,
+            Proteins = 8,
+            Charge = 9,
+            Fragmentation = 10,
+            MassAnalyzer = 11,
+            Type = 12,
+            ScanEventNumber = 13,
+            IsotopeIndex = 14,
+            MZ = 15,
+            CalculatedMonoMass = 16,
+            MassErrorPPM = 17,
+            MassErrorDa = 18,
+            SimpleMassErrorPPM = 19,
+            RetentionTime = 20,
+            PEP = 21,
+            Score = 22,
+            DeltaScore = 23,
+            ScoreDiff = 24,
+            LocalizationProb = 25,
+            Combinatorics = 26,
+            PIF = 27,
+            FractionOfTotalSpectrum = 28,
+            BasePeakFraction = 29,
+            PrecursorFullScanNumber = 30,
+            PrecursorIntensity = 31,
+            PrecursorApexFraction = 32,
+            PrecursorApexOffset = 33,
+            PrecursorApexOffsetTime = 34,
+            NumberOfMatches = 35,
+            IntensityCoverage = 36,
+            PeakCoverage = 37,
+            Reverse = 38,
+            ID = 39,
+            ProteinGroupIDs = 40,
+            PeptideID = 41,
+            ModPeptideID = 42,
+            EvidenceID = 43
         }
 
         /// <summary>
         /// This data structure holds rows read from MaxQuant file msms.txt
         /// </summary>
         /// <remarks>
-        /// These columns correspond to the Synopsis file created by this class
+        /// These columns hold data that this class will use when creating the synopsis file
         /// </remarks>
         private struct MaxQuantSearchResult
         {
-            // ToDo: Customize these for MaxQuant
+            public string RawFile;
             public string Scan;
             public int ScanNum;
-            public string PrefixResidue;
+            public string ScanIndex;
             public string Sequence;
-            public string SuffixResidue;
+            public string PrefixResidue;            // This is read from the peptides.txt file, column "Amino acid before"
+            public string SuffixResidue;            // This is read from the peptides.txt file, column "Amino acid after"
+            public int NumberOfTrypticTerminii;     // Computed by this class
+            public string Length;
+            public string MissedCleavages;
             public string Modifications;
-            public string Composition;
+            public string ModifiedSequence;
             public string Protein;
-            public string ProteinDesc;
-            public string ProteinLength;
-            public string ResidueStart;
-            public string ResidueEnd;
+            public string LeadingRazorProtein;
             public string Charge;
             public short ChargeNum;
-            public string MostAbundantIsotopeMz;        // As reported by MaxQuant
-            public string CalculatedMonoMass;           // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
-            public double CalculatedMonoMassPHRP;       // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
-            public string NumMatchedFragments;
-            public string SpecEValue;                   // EValue, at the scan level
-            public double SpecEValueNum;
-            public string EValue;                       // EValue, at the peptide level
-            public string QValue;                       // FDR, at the scan level
-            public double QValueNum;
-            public string PepQValue;                    // FDR, at the peptide level
-
-            public string DelM;                         // Computed using Precursor_mass - CalculatedMonoMass
-            public string DelM_PPM;                     // Computed using DelM and CalculatedMonoMass
+            public string Fragmentation;
+            public string MassAnalyzer;
+            public string Type;                     // Identification type, e.g. MULTI-MSMS, MULTI-SECPEP, or MSMS
+            public string ScanEventNumber;
+            public string IsotopeIndex;
+            public string PrecursorMZ;
+            public string MH;                       // Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+            public string CalculatedMonoMass;       // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
+            public double CalculatedMonoMassValue;  // Parsed from CalculatedMonoMass
+            public double CalculatedMonoMassPHRP;   // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
+            public string MassErrorPPM;
+            public string MassErrorDa;
+            public string SimpleMassErrorPPM;
+            public string RetentionTime;
+            public string PEP;                      // Posterior error probability; lower is better
+            public double PEPValue;
+            public string Score;                    // Confidence score; higher is better
+            public double ScoreValue;
+            public string DeltaScore;
+            public string ScoreDiff;
+            public string LocalizationProb;
+            public string Combinatorics;
+            public string PIF;
+            public string FractionOfTotalSpectrum;
+            public string BasePeakFraction;
+            public string PrecursorFullScanNumber;
+            public string PrecursorIntensity;
+            public string PeptideIntensity;
+            public string PrecursorApexFraction;
+            public string PrecursorApexOffset;
+            public string PrecursorApexOffsetTime;
+            public string NumberOfMatches;
+            public string IntensityCoverage;
+            public string PeakCoverage;
+            public string Reverse;
+            public string ID;
+            public string ProteinGroupIDs;
+            public string PeptideID;
+            public string ModPeptideID;
+            public string EvidenceID;
 
             public void Clear()
             {
+                RawFile = string.Empty;
                 Scan = string.Empty;
                 ScanNum = 0;
-                PrefixResidue = string.Empty;
+                ScanIndex = string.Empty;
                 Sequence = string.Empty;
+                PrefixResidue = string.Empty;
                 SuffixResidue = string.Empty;
+                NumberOfTrypticTerminii = 0;
+                Length = string.Empty;
+                MissedCleavages = string.Empty;
                 Modifications = string.Empty;
-                Composition = string.Empty;
+                ModifiedSequence = string.Empty;
                 Protein = string.Empty;
-                ProteinDesc = string.Empty;
-                ProteinLength = string.Empty;
-                ResidueStart = string.Empty;
-                ResidueEnd = string.Empty;
+                LeadingRazorProtein = string.Empty;
                 Charge = string.Empty;
                 ChargeNum = 0;
-                MostAbundantIsotopeMz = string.Empty;
+                Fragmentation = string.Empty;
+                MassAnalyzer = string.Empty;
+                Type = string.Empty;
+                ScanEventNumber = string.Empty;
+                IsotopeIndex = string.Empty;
+                PrecursorMZ = string.Empty;
+                MH = string.Empty;
                 CalculatedMonoMass = string.Empty;
+                CalculatedMonoMassValue = 0;
                 CalculatedMonoMassPHRP = 0;
-                NumMatchedFragments = string.Empty;
-                SpecEValue = string.Empty;
-                SpecEValueNum = 0;
-                EValue = string.Empty;
-                QValue = string.Empty;
-                PepQValue = string.Empty;
-
-                // Unused at present: MH = string.Empty;
-                DelM = string.Empty;
-                DelM_PPM = string.Empty;
+                MassErrorPPM = string.Empty;
+                MassErrorDa = string.Empty;
+                SimpleMassErrorPPM = string.Empty;
+                RetentionTime = string.Empty;
+                PEP = string.Empty;
+                PEPValue = 0;
+                Score = string.Empty;
+                ScoreValue = 0;
+                DeltaScore = string.Empty;
+                ScoreDiff = string.Empty;
+                LocalizationProb = string.Empty;
+                Combinatorics = string.Empty;
+                PIF = string.Empty;
+                FractionOfTotalSpectrum = string.Empty;
+                BasePeakFraction = string.Empty;
+                PrecursorFullScanNumber = string.Empty;
+                PrecursorIntensity = string.Empty;
+                PeptideIntensity = string.Empty;
+                PrecursorApexFraction = string.Empty;
+                PrecursorApexOffset = string.Empty;
+                PrecursorApexOffsetTime = string.Empty;
+                NumberOfMatches = string.Empty;
+                IntensityCoverage = string.Empty;
+                PeakCoverage = string.Empty;
+                Reverse = string.Empty;
+                ID = string.Empty;
+                ProteinGroupIDs = string.Empty;
+                PeptideID = string.Empty;
+                ModPeptideID = string.Empty;
+                EvidenceID = string.Empty;
             }
         }
 
@@ -344,6 +424,12 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
+        }
+
+        private MaxQuantSearchResult CloneSearchResult(MaxQuantSearchResult result, string newProteinName)
+        {
+            result.Protein = newProteinName;
+            return result;
         }
 
         private double ComputePeptideMass(string cleanSequence, double totalModMass)
@@ -477,11 +563,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// This routine creates a synopsis file from the output from MaxQuant
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
+        /// <param name="maxQuantPeptides"></param>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
+            Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
             string outputFilePath,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
@@ -540,11 +628,24 @@ namespace PeptideHitResultsProcessor.Processor
                         var udtSearchResult = new MaxQuantSearchResult();
 
                         var validSearchResult =
-                            ParseMaxQuantResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modInfo, rowNumber);
+                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modInfo, rowNumber);
 
                         if (validSearchResult)
                         {
-                            searchResultsUnfiltered.Add(udtSearchResult);
+                            if (proteinNames.Count == 0)
+                            {
+                                udtSearchResult.Protein = string.Empty;
+                                searchResultsUnfiltered.Add(udtSearchResult);
+                            }
+                            else
+                            {
+                                foreach (var protein in proteinNames)
+                                {
+                                    var resultToAdd = CloneSearchResult(udtSearchResult, protein);
+
+                                    searchResultsUnfiltered.Add(resultToAdd);
+                                }
+                            }
                         }
 
                         // Update the progress
@@ -588,7 +689,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -911,7 +1012,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage(ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMaxQuantSynopsisFile: " + ex.Message);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -922,7 +1023,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMaxQuantSynopsisFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -934,6 +1035,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="maxQuantPeptides"></param>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
+        /// <param name="proteinNames"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modInfo"></param>
@@ -943,20 +1045,25 @@ namespace PeptideHitResultsProcessor.Processor
             Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
             ref MaxQuantSearchResult udtSearchResult,
+            out List<string> proteinNames,
             ref string errorLog,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo,
             int rowNumber)
         {
+            proteinNames = new List<string>();
+
             try
             {
                 udtSearchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length < 11)
+                if (splitLine.Length < 20)
                 {
                     return false;
                 }
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RawFile], out udtSearchResult.RawFile);
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
@@ -968,30 +1075,79 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Scan column is not numeric in row " + rowNumber, true);
                 }
 
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out udtSearchResult.ScanIndex);
+
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MaxQuant
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
+                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass))
+                {
+                    double.TryParse(udtSearchResult.CalculatedMonoMass, out udtSearchResult.CalculatedMonoMassValue);
+                }
 
                 // double.TryParse(udtSearchResult.CalculatedMonoMass, out var sequenceMonoMassMaxQuant);
-
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Sequence], out udtSearchResult.Sequence))
                 {
                     ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
-
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out udtSearchResult.Length);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavages], out udtSearchResult.MissedCleavages);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out udtSearchResult.Modifications);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Composition], out udtSearchResult.Composition);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Protein], out udtSearchResult.Protein);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinDesc], out udtSearchResult.ProteinDesc);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinLength], out udtSearchResult.ProteinLength);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ResidueEnd], out udtSearchResult.ResidueEnd);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModifiedSequence], out udtSearchResult.ModifiedSequence);
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out string proteins);
+                proteinNames = proteins.Split(';').ToList();
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out udtSearchResult.Fragmentation);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassAnalyzer], out udtSearchResult.MassAnalyzer);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Type], out udtSearchResult.Type);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out udtSearchResult.ScanEventNumber);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out udtSearchResult.IsotopeIndex);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MZ], out udtSearchResult.PrecursorMZ);
+
+                // Store the monoisotopic MH value in .MH
+                // This is (M+H)+ when the charge carrier is a proton
+                udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(udtSearchResult.CalculatedMonoMassValue, 0), 6);
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out udtSearchResult.MassErrorPPM);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out udtSearchResult.MassErrorDa);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SimpleMassErrorPPM], out udtSearchResult.SimpleMassErrorPPM);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out udtSearchResult.RetentionTime);
+
+                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PEP], out udtSearchResult.PEP))
+                {
+                    double.TryParse(udtSearchResult.PEP, out udtSearchResult.PEPValue);
+                }
+
+                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Score], out udtSearchResult.Score))
+                {
+                    double.TryParse(udtSearchResult.Score, out udtSearchResult.ScoreValue);
+                }
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out udtSearchResult.DeltaScore);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScoreDiff], out udtSearchResult.ScoreDiff);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.LocalizationProb], out udtSearchResult.LocalizationProb);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Combinatorics], out udtSearchResult.Combinatorics);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PIF], out udtSearchResult.PIF);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.FractionOfTotalSpectrum], out udtSearchResult.FractionOfTotalSpectrum);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.BasePeakFraction], out udtSearchResult.BasePeakFraction);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorFullScanNumber], out udtSearchResult.PrecursorFullScanNumber);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out udtSearchResult.PrecursorIntensity);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexFraction], out udtSearchResult.PrecursorApexFraction);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffset], out udtSearchResult.PrecursorApexOffset);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffsetTime], out udtSearchResult.PrecursorApexOffsetTime);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.NumberOfMatches], out udtSearchResult.NumberOfMatches);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out udtSearchResult.IntensityCoverage);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out udtSearchResult.PeakCoverage);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out udtSearchResult.Reverse);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out udtSearchResult.ID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinGroupIDs], out udtSearchResult.ProteinGroupIDs);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeptideID], out udtSearchResult.PeptideID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModPeptideID], out udtSearchResult.ModPeptideID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EvidenceID], out udtSearchResult.EvidenceID);
 
                 // Parse the modification list to determine the total mod mass
                 var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
@@ -999,22 +1155,21 @@ namespace PeptideHitResultsProcessor.Processor
                 // Compute monoisotopic mass of the peptide
                 udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
-
-                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
+                // Lookup the Prefix and Suffix residues
+                var peptideInfoFound = LookupMaxQuantPeptideInfo(maxQuantPeptides, udtSearchResult.Sequence, out var peptideInfo);
+                if (peptideInfoFound)
                 {
-                    double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum);
+                    udtSearchResult.PrefixResidue = peptideInfo.Prefix;
+                    udtSearchResult.SuffixResidue = peptideInfo.Suffix;
+                    udtSearchResult.LeadingRazorProtein = peptideInfo.LeadingRazorProtein;
+                    udtSearchResult.PeptideIntensity = peptideInfo.Intensity;
+
                 }
-
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EValue], out udtSearchResult.EValue);
-
-                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.QValue], out udtSearchResult.QValue))
+                else
                 {
-                    double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum);
+                    udtSearchResult.PrefixResidue = "_";
+                    udtSearchResult.SuffixResidue = "_";
                 }
-
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PepQValue], out udtSearchResult.PepQValue);
 
                 return true;
             }
@@ -1110,34 +1265,56 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMaxQuantResultsFileHeaderLine(string lineIn, IDictionary<MaxQuantResultsFileColumns, int> columnMapping)
         {
-            // ToDo: Customize this
-
             // The expected column order from MaxQuant:
-            //   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
+            //   Raw file	Dataset_ID	Scan number	Scan index	Sequence	Length	Missed cleavages	Modifications	Modified sequence	Oxidation (M) Probabilities	Oxidation (M) Score diffs	Acetyl (Protein N-term)	Oxidation (M)	Proteins	Charge	Fragmentation	Mass analyzer	Type	Scan event number	Isotope index	m/z	Mass	etc.
 
             var columnNames = new SortedDictionary<string, MaxQuantResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"Scan", MaxQuantResultsFileColumns.Scan},
-                {"Pre", MaxQuantResultsFileColumns.PrefixResidue},
+                {"Raw file", MaxQuantResultsFileColumns.RawFile},
+                {"Scan number", MaxQuantResultsFileColumns.Scan},
+                {"Scan index", MaxQuantResultsFileColumns.ScanIndex},
                 {"Sequence", MaxQuantResultsFileColumns.Sequence},
-                {"Post", MaxQuantResultsFileColumns.SuffixResidue},
+                {"Length", MaxQuantResultsFileColumns.Length},
+                {"Missed cleavages", MaxQuantResultsFileColumns.MissedCleavages},
                 {"Modifications", MaxQuantResultsFileColumns.Modifications},
-                {"Composition", MaxQuantResultsFileColumns.Composition},
-                {"ProteinName", MaxQuantResultsFileColumns.Protein},
-                {"ProteinDesc", MaxQuantResultsFileColumns.ProteinDesc},
-                {"ProteinLength", MaxQuantResultsFileColumns.ProteinLength},
-                {"Start", MaxQuantResultsFileColumns.ResidueStart},
-                {"End", MaxQuantResultsFileColumns.ResidueEnd},
+                {"Modified sequence", MaxQuantResultsFileColumns.ModifiedSequence},
+                {"Proteins", MaxQuantResultsFileColumns.Proteins},
                 {"Charge", MaxQuantResultsFileColumns.Charge},
-                {"MostAbundantIsotopeMz", MaxQuantResultsFileColumns.MostAbundantIsotopeMz},
+                {"Fragmentation", MaxQuantResultsFileColumns.Fragmentation},
+                {"Mass analyzer", MaxQuantResultsFileColumns.MassAnalyzer},
+                {"Type", MaxQuantResultsFileColumns.Type},
+                {"Scan event number", MaxQuantResultsFileColumns.ScanEventNumber},
+                {"Isotope index", MaxQuantResultsFileColumns.IsotopeIndex},
+                {"m/z", MaxQuantResultsFileColumns.MZ},
                 {"Mass", MaxQuantResultsFileColumns.CalculatedMonoMass},
-                {"MS1Features", MaxQuantResultsFileColumns.MS1Features},
-                {"#MatchedFragments", MaxQuantResultsFileColumns.NumMatchedFragments},
-                {"Probability", MaxQuantResultsFileColumns.Probability},
-                {"SpecEValue", MaxQuantResultsFileColumns.SpecEValue},
-                {"EValue", MaxQuantResultsFileColumns.EValue},
-                {"QValue", MaxQuantResultsFileColumns.QValue},
-                {"PepQValue", MaxQuantResultsFileColumns.PepQValue}
+                {"Mass error [ppm]", MaxQuantResultsFileColumns.MassErrorPPM},
+                {"Mass error [Da]", MaxQuantResultsFileColumns.MassErrorDa},
+                {"Simple mass error [ppm]", MaxQuantResultsFileColumns.SimpleMassErrorPPM},
+                {"Retention time", MaxQuantResultsFileColumns.RetentionTime},
+                {"PEP", MaxQuantResultsFileColumns.PEP},
+                {"Score", MaxQuantResultsFileColumns.Score},
+                {"Delta score", MaxQuantResultsFileColumns.DeltaScore},
+                {"Score diff", MaxQuantResultsFileColumns.ScoreDiff},
+                {"Localization prob", MaxQuantResultsFileColumns.LocalizationProb},
+                {"Combinatorics", MaxQuantResultsFileColumns.Combinatorics},
+                {"PIF", MaxQuantResultsFileColumns.PIF},
+                {"Fraction of total spectrum", MaxQuantResultsFileColumns.FractionOfTotalSpectrum},
+                {"Base peak fraction", MaxQuantResultsFileColumns.BasePeakFraction},
+                {"Precursor full scan number", MaxQuantResultsFileColumns.PrecursorFullScanNumber},
+                {"Precursor Intensity", MaxQuantResultsFileColumns.PrecursorIntensity},
+                {"Precursor apex fraction", MaxQuantResultsFileColumns.PrecursorApexFraction},
+                {"Precursor apex offset", MaxQuantResultsFileColumns.PrecursorApexOffset},
+                {"Precursor apex offset time", MaxQuantResultsFileColumns.PrecursorApexOffsetTime},
+                {"Number of matches", MaxQuantResultsFileColumns.NumberOfMatches},
+                {"Intensity coverage", MaxQuantResultsFileColumns.IntensityCoverage},
+                {"Peak coverage", MaxQuantResultsFileColumns.PeakCoverage},
+                {"Reverse", MaxQuantResultsFileColumns.Reverse},
+                {"id", MaxQuantResultsFileColumns.ID},
+                {"Protein group IDs", MaxQuantResultsFileColumns.ProteinGroupIDs},
+                {"Peptide ID", MaxQuantResultsFileColumns.PeptideID},
+                {"Mod. peptide ID", MaxQuantResultsFileColumns.ModPeptideID},
+                {"Evidence ID", MaxQuantResultsFileColumns.EvidenceID}
+
             };
 
             columnMapping.Clear();
@@ -1151,54 +1328,23 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
-                var useDefaultHeaders = false;
 
-                if (splitLine.Length >= 2)
+                for (var index = 0; index < splitLine.Length; index++)
                 {
-                    if (int.TryParse(splitLine[1], out _))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
-                        // Second column has a number; this is not a header line
-                        useDefaultHeaders = true;
-                    }
-                    else
-                    {
-                        for (var index = 0; index <= splitLine.Length - 1; index++)
-                        {
-                            if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
-                            {
-                                // Recognized column name; update columnMapping
-                                columnMapping[resultFileColumn] = index;
-                                useDefaultHeaders = false;
-                            }
-                            else
-                            {
-                                // Unrecognized column name
-                                OnWarningEvent("Warning: Unrecognized column header name '" + splitLine[index] + "' in ParseMaxQuantResultsFileHeaderLine");
-                            }
-                        }
+                        // Recognized column name; update columnMapping
+                        columnMapping[resultFileColumn] = index;
                     }
                 }
 
-                if (useDefaultHeaders)
-                {
-                    // Use default column mappings
-                    foreach (MaxQuantResultsFileColumns resultColumn in Enum.GetValues(typeof(MaxQuantResultsFileColumns)))
-                    {
-                        columnMapping[resultColumn] = (int)resultColumn;
-                    }
-
-                    // This is not a header line; return false
-                    return false;
-                }
+                return true;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error parsing header in MaxQuant results file: " + ex.Message);
                 return false;
             }
-
-            // Header line found and parsed; return true
-            return true;
         }
 
         /// <summary>
@@ -1222,7 +1368,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
-                for (var index = 0; index <= splitLine.Length - 1; index++)
+                for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
@@ -1428,27 +1574,21 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+                    if (inputFile.Directory == null)
+                    {
+                        SetErrorMessage("Unable to determine the parent directory of the input file: " + inputFilePath);
+                        SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
+                        return false;
+                    }
 
-                    // Load the MaxQuant Parameter File so that we can determine the modification names and masses
+                    // Load the MaxQuant Parameter File so that we can determine the modification names
                     var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var modInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
                     }
 
-                    // Re-parse the MaxQuant parameter file to look for NumMatchesPerSpec
-                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(SearchToolParameterFilePath);
-                    if (numMatchesPerSpec > 1)
-                    {
-                        // Auto-change IgnorePeptideToProteinMapperErrors to True
-                        // since the MaxQuant parameter file has NumMatchesPerSpec of 2 or higher
-                        // (which results in PSMs associated with decoy proteins)
-                        IgnorePeptideToProteinMapperErrors = true;
-
-                        OnDebugEvent(string.Format(
-                            "Set IgnorePeptideToProteinMapperErrors to true since NumMatchesPerSpec is {0} in the MaxQuant parameter file",
-                            numMatchesPerSpec));
-                    }
+                    LoadPeptideInfo(inputFile.Directory, out var maxQuantPeptides);
 
                     var baseName = "Dataset_maxq";
 
@@ -1460,7 +1600,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // The synopsis file name will be of the form Dataset_maxq_syn.txt
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
-                    success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modInfo);
+                    success = CreateSynResultsFile(maxQuantPeptides, inputFilePath, synOutputFilePath, modInfo);
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
@@ -1507,7 +1647,7 @@ namespace PeptideHitResultsProcessor.Processor
             ref string errorLog)
         {
             // Sort filteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
-            var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.QValueNum, item.ScanNum, item.Sequence, item.Protein select item;
+            var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.Protein select item;
 
             var index = 1;
             foreach (var result in query)
@@ -1538,11 +1678,11 @@ namespace PeptideHitResultsProcessor.Processor
             ExpandListIfRequired(filteredSearchResults, endIndex - startIndex + 1);
 
             // Now store the matches that pass the filters
-            //  Either SpecEValue < 5E-07 (0.0000005)
-            //  or     QValue < 10
+            //  Either Score > 50
+            //  or     pep < 0.01
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)
+                if (searchResults[index].ScoreValue >= 50 || searchResults[index].PEPValue < 0.01)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
@@ -1596,22 +1736,26 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     resultID.ToString(),
                     udtSearchResult.Scan,
+                    udtSearchResult.Fragmentation,
+                    udtSearchResult.ScanIndex,
                     udtSearchResult.Charge,
-                    udtSearchResult.MostAbundantIsotopeMz,
-                    udtSearchResult.CalculatedMonoMass,
-                    udtSearchResult.PrefixResidue + "." + udtSearchResult.Sequence + "." + udtSearchResult.SuffixResidue,
-                    udtSearchResult.Modifications,
-                    udtSearchResult.Composition,
+                    udtSearchResult.PrecursorMZ,
+                    udtSearchResult.MassErrorDa,
+                    udtSearchResult.MassErrorPPM,
+                    udtSearchResult.MH,
+                    udtSearchResult.PrefixResidue + "." + udtSearchResult.Sequence + udtSearchResult.SuffixResidue,
                     udtSearchResult.Protein,
-                    udtSearchResult.ProteinDesc,
-                    udtSearchResult.ProteinLength,
-                    udtSearchResult.ResidueStart,
-                    udtSearchResult.ResidueEnd,
-                    udtSearchResult.NumMatchedFragments,
-                    udtSearchResult.SpecEValue,
-                    udtSearchResult.EValue,
-                    udtSearchResult.QValue,
-                    udtSearchResult.PepQValue
+                    udtSearchResult.NumberOfTrypticTerminii.ToString(),
+                    udtSearchResult.PEP,
+                    udtSearchResult.Score,
+                    udtSearchResult.DeltaScore,
+                    udtSearchResult.PrecursorIntensity,
+                    udtSearchResult.PeptideIntensity,
+                    udtSearchResult.LeadingRazorProtein,
+                    udtSearchResult.ProteinGroupIDs,
+                    udtSearchResult.PeptideID,
+                    udtSearchResult.ModPeptideID,
+                    udtSearchResult.EvidenceID
                 };
 
                 writer.WriteLine(CollapseList(data));
@@ -1653,29 +1797,18 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // Scan is the same; check SpecEValue
-                if (x.SpecEValueNum > y.SpecEValueNum)
+                // Scan is the same; check Score
+                if (x.ScoreValue > y.ScoreValue)
                 {
                     return 1;
                 }
 
-                if (x.SpecEValueNum < y.SpecEValueNum)
+                if (x.ScoreValue < y.ScoreValue)
                 {
                     return -1;
                 }
 
-                // SpecEValue is the same; check QValue
-                if (x.QValueNum > y.QValueNum)
-                {
-                    return 1;
-                }
-
-                if (x.QValueNum < y.QValueNum)
-                {
-                    return -1;
-                }
-
-                // SpecEValue is the same; check sequence
+                // Score is the same; check sequence
                 var result = string.CompareOrdinal(x.Sequence, y.Sequence);
                 if (result == 0)
                 {
