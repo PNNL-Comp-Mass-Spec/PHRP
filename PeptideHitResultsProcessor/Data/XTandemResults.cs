@@ -20,7 +20,7 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
-    /// This class is used to track the peptide details for an XTandem search result
+    /// This class is used to track the peptide details for an XTandem search result loaded from a synopsis file
     /// See SearchResultsBaseClass for additional information
     /// </summary>
     public class XTandemResults : SearchResultsBaseClass

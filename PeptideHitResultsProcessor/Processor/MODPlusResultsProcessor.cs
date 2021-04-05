@@ -77,6 +77,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
         /// </summary>
+        /// <remarks>
+        /// These columns hold data that this class will use when creating the synopsis file
+        /// </remarks>
         private struct MODPlusSearchResult
         {
             public string SpectrumFileName;

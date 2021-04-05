@@ -72,8 +72,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
+        /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by Java file anal_moda.jar
         /// </summary>
+        /// <remarks>
+        /// These columns hold data that this class will use when creating the synopsis file
+        /// </remarks>
         private struct MODaSearchResult
         {
             public string SpectrumFileName;

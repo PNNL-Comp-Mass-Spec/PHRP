@@ -24,11 +24,8 @@ using PRISM.AppSettings;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads inMaxQuant results file msms.txt and creates
+    /// This class reads in MaxQuant results file msms.txt and creates
     /// a tab-delimited text file with the data.
-    /// </summary>
-    /// <summary>
-    /// This class reads a MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
     /// </summary>
     /// <remarks>
     /// <para>
@@ -77,7 +74,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // ReSharper disable CommentTypo
 
-            // This matches mod names like these:
+            // The following RegEx matches mod names like these:
             // DimethNter0
             // DimethNter4
             // DimethNter8

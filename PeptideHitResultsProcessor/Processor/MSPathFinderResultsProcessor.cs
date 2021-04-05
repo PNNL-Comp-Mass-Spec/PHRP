@@ -28,9 +28,6 @@ namespace PeptideHitResultsProcessor.Processor
     /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
     /// a tab-delimited text file with the data.
     /// </summary>
-    /// <summary>
-    /// This class reads a MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
-    /// </summary>
     /// <remarks>
     /// <para>
     /// 1) ProcessFile reads MSPathFinder results file Dataset_IcTda.tsv
@@ -117,7 +114,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// This data structure holds rows read from the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
         /// </summary>
         /// <remarks>
-        /// These columns correspond to the Synopsis file created by this class
+        /// These columns hold data that this class will use when creating the synopsis file
         /// </remarks>
         private struct MSPathFinderSearchResult
         {

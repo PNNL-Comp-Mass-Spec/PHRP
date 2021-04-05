@@ -30,7 +30,21 @@ namespace PeptideHitResultsProcessor.Data
 
         public string ModifiedSequence { get; set; }
         public string CollisionMode { get; set; }
+
+        /// <summary>
+        /// Mass analyzer
+        /// </summary>
+        /// <remarks>
+        /// FTMS, ITMS
+        /// </remarks>
         public string MassAnalyzer { get; set; }
+
+        /// <summary>
+        /// Identification type
+        /// </summary>
+        /// <remarks>
+        /// MULTI-MSMS, MULTI-SECPEP, or MSMS
+        /// </remarks>
         public string IdType { get; set; }
         public string ScanEvent { get; set; }
         public string IsotopeIndex { get; set; }
@@ -39,7 +53,18 @@ namespace PeptideHitResultsProcessor.Data
         public string MaxQuantComputedDelM { get; set; }
         public string SingleMassErrorPPM { get; set; }
         public string ScanTimeMinutes { get; set; }
+
+        /// <summary>
+        /// Posterior error probability
+        /// </summary>
+        /// <remarks>
+        /// Lower is better
+        /// </remarks>
         public string PEP { get; set; }
+
+        /// <summary>
+        /// Confidence score; higher is better
+        /// </summary>
         public string Score { get; set; }
         public string DeltaScore { get; set; }
         public string ScoreDiff { get; set; }

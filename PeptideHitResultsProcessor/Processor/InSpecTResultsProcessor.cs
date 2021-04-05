@@ -116,6 +116,12 @@ namespace PeptideHitResultsProcessor.Processor
             FHTbyTotalPRM = 2
         }
 
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file (Dataset.tsv) created InSpecT
+        /// </summary>
+        /// <remarks>
+        /// These columns hold data that this class will use when creating the synopsis file
+        /// </remarks>
         private struct InspectSearchResult
         {
             public string SpectrumFileName;

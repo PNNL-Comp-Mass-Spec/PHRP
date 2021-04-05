@@ -76,8 +76,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This data structure holds rows read from the tab-delimited file created directly by MSAlign
+        /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created directly by MSAlign
         /// </summary>
+        /// <remarks>
+        /// These columns hold data that this class will use when creating the synopsis file
+        /// </remarks>
         private struct MSAlignSearchResult
         {
             public string SpectrumFileName;

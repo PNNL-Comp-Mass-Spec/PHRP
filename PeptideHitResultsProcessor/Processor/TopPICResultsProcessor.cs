@@ -97,8 +97,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This data structure holds rows read from the tab-delimited file created directly by TopPIC
+        /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created directly by TopPIC
         /// </summary>
+        /// <remarks>
+        /// These columns hold data that this class will use when creating the synopsis file
+        /// </remarks>
         private struct TopPICSearchResult
         {
             public string SpectrumFileName;

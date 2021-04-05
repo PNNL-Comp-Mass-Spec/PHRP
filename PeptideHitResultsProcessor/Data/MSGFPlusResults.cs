@@ -17,7 +17,7 @@ using PHRPReader.Data;
 namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
-    /// This class is used to track the peptide details for an MS-GF+ search result
+    /// This class is used to track the peptide details for an MS-GF+ search result loaded from a synopsis file
     /// See SearchResultsBaseClass for additional information
     /// </summary>
     public class MSGFPlusResults : SearchResultsBaseClass
