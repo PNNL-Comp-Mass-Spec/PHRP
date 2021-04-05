@@ -355,7 +355,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage(ex.Message);
+                    SetErrorMessage("Error reading input file in ParseSynopsisOrFirstHitsFile: " + ex.Message);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -366,7 +366,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error creating the output file in ParseSynopsisOrFirstHitsFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }

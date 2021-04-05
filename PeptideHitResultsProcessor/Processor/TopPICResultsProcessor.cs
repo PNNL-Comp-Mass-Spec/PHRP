@@ -636,7 +636,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -907,7 +907,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage(ex.Message);
+                    SetErrorMessage("Error reading input file in ParseTopPICSynopsisFile: " + ex.Message);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -918,7 +918,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error creating the output file in ParseTopPICSynopsisFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }

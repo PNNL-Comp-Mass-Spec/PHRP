@@ -543,14 +543,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage(ex.Message);
+                    SetErrorMessage("Error reading input file in CreateFHTorSYNResultsFile: " + ex.Message);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error creating the output file in CreateFHTorSYNResultsFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
@@ -1111,7 +1111,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage(ex.Message);
+                    SetErrorMessage("Error reading input file in ParseInspectSynopsisFile: " + ex.Message);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -1122,7 +1122,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(ex.Message);
+                SetErrorMessage("Error creating the output file in ParseInspectSynopsisFile: " + ex.Message);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
