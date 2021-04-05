@@ -1195,9 +1195,6 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorMessage("Error parsing header in MODa results file: " + ex.Message);
                 return false;
             }
-
-            // Header line found and parsed; return true
-            return true;
         }
 
         /// <summary>

@@ -1067,15 +1067,14 @@ namespace PeptideHitResultsProcessor.Processor
                     // This is not a header line; return false
                     return false;
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error parsing header in MODPlus results file: " + ex.Message);
                 return false;
             }
-
-            // Header line found and parsed; return true
-            return true;
         }
 
         /// <summary>
