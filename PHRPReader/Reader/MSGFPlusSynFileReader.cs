@@ -54,11 +54,11 @@ namespace PHRPReader.Reader
         private static readonly Dictionary<MSGFDBSynFileColumns, string> mMSGFDBColumns = new();
 
         /// <summary>
-        /// Mapping from enum to column name for MS-GF+
+        /// Mapping from enum to synopsis file column name for MS-GF+
         /// </summary>
-        private static readonly Dictionary<MSGFPlusSynFileColumns, string> mMSGFPlusColumns = new();
 
 #pragma warning restore 1591
+        private static readonly Dictionary<MSGFPlusSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -272,32 +272,32 @@ namespace PHRPReader.Reader
         {
             var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"ResultID", MSGFPlusSynFileColumns.ResultID},
-                {"Scan", MSGFPlusSynFileColumns.Scan},
-                {"FragMethod", MSGFPlusSynFileColumns.FragMethod},
-                {"SpecIndex", MSGFPlusSynFileColumns.SpecIndex},
-                {"Charge", MSGFPlusSynFileColumns.Charge},
-                {"PrecursorMZ", MSGFPlusSynFileColumns.PrecursorMZ},
-                {"DelM", MSGFPlusSynFileColumns.DelM},
-                {"DelM_PPM", MSGFPlusSynFileColumns.DelMPPM},
-                {"MH", MSGFPlusSynFileColumns.MH},
-                {"Peptide", MSGFPlusSynFileColumns.Peptide},
-                {"Protein", MSGFPlusSynFileColumns.Protein},
-                {"NTT", MSGFPlusSynFileColumns.NTT},
-                {"DeNovoScore", MSGFPlusSynFileColumns.DeNovoScore},
-                {"MSGFScore", MSGFPlusSynFileColumns.MSGFScore},
-                {MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecEValue},
-                {"MSGFDB_SpecEValue", MSGFPlusSynFileColumns.SpecEValue},
-                {MSGFDB_RankSpecProb, MSGFPlusSynFileColumns.RankSpecEValue},
-                {"Rank_MSGFDB_SpecEValue", MSGFPlusSynFileColumns.RankSpecEValue},
-                {MSGFDB_PValue, MSGFPlusSynFileColumns.EValue},
-                {"EValue", MSGFPlusSynFileColumns.EValue},
-                {MSGFDB_FDR, MSGFPlusSynFileColumns.QValue},
-                {"QValue", MSGFPlusSynFileColumns.QValue},
-                {MSGFDB_PepFDR, MSGFPlusSynFileColumns.PepQValue},
-                {"PepQValue", MSGFPlusSynFileColumns.PepQValue},
-                {"EFDR", MSGFPlusSynFileColumns.EFDR},
-                { "IsotopeError", MSGFPlusSynFileColumns.IsotopeError}
+                { "ResultID", MSGFPlusSynFileColumns.ResultID },
+                { "Scan", MSGFPlusSynFileColumns.Scan },
+                { "FragMethod", MSGFPlusSynFileColumns.FragMethod },
+                { "SpecIndex", MSGFPlusSynFileColumns.SpecIndex },
+                { "Charge", MSGFPlusSynFileColumns.Charge },
+                { "PrecursorMZ", MSGFPlusSynFileColumns.PrecursorMZ },
+                { "DelM", MSGFPlusSynFileColumns.DelM },
+                { "DelM_PPM", MSGFPlusSynFileColumns.DelMPPM },
+                { "MH", MSGFPlusSynFileColumns.MH },
+                { "Peptide", MSGFPlusSynFileColumns.Peptide },
+                { "Protein", MSGFPlusSynFileColumns.Protein },
+                { "NTT", MSGFPlusSynFileColumns.NTT },
+                { "DeNovoScore", MSGFPlusSynFileColumns.DeNovoScore },
+                { "MSGFScore", MSGFPlusSynFileColumns.MSGFScore },
+                { MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecEValue },
+                { "MSGFDB_SpecEValue", MSGFPlusSynFileColumns.SpecEValue },
+                { MSGFDB_RankSpecProb, MSGFPlusSynFileColumns.RankSpecEValue },
+                { "Rank_MSGFDB_SpecEValue", MSGFPlusSynFileColumns.RankSpecEValue },
+                { MSGFDB_PValue, MSGFPlusSynFileColumns.EValue },
+                { "EValue", MSGFPlusSynFileColumns.EValue },
+                { MSGFDB_FDR, MSGFPlusSynFileColumns.QValue },
+                { "QValue", MSGFPlusSynFileColumns.QValue },
+                { MSGFDB_PepFDR, MSGFPlusSynFileColumns.PepQValue },
+                { "PepQValue", MSGFPlusSynFileColumns.PepQValue },
+                { "EFDR", MSGFPlusSynFileColumns.EFDR },
+                { "IsotopeError", MSGFPlusSynFileColumns.IsotopeError }
             };
 
             if (!includeExtras)
@@ -325,23 +325,23 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Get the MS-GF+ column name associated with the given enum
+        /// Get the synopsis file column name associated with the given enum
         /// </summary>
         /// <param name="column"></param>
         /// <returns>Column name</returns>
         public static string GetColumnNameByID(MSGFPlusSynFileColumns column)
         {
-            if (mMSGFPlusColumns.Count > 0)
+            if (mSynopsisFileColumn.Count > 0)
             {
-                return mMSGFPlusColumns[column];
+                return mSynopsisFileColumn[column];
             }
 
             foreach (var item in GetColumnHeaderNamesAndIDs(true))
             {
-                mMSGFPlusColumns.Add(item.Value, item.Key);
+                mSynopsisFileColumn.Add(item.Value, item.Key);
             }
 
-            return mMSGFPlusColumns[column];
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
