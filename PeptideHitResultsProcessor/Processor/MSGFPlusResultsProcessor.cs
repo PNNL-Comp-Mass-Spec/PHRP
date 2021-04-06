@@ -1999,8 +1999,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {"PepFDR", MSGFPlusResultsFileColumns.PepFDR_PepQValue},
                 {"PepQValue", MSGFPlusResultsFileColumns.PepFDR_PepQValue},
                 {"EFDR", MSGFPlusResultsFileColumns.EFDR},
-                {MSGFPlusSynFileReader.DATA_COLUMN_IMS_Scan, MSGFPlusResultsFileColumns.IMSScan},
-                {MSGFPlusSynFileReader.DATA_COLUMN_IMS_Drift_Time, MSGFPlusResultsFileColumns.IMSDriftTime}
+                {"IMS_Scan", MSGFPlusResultsFileColumns.IMSScan},
+                {"IMS_Drift_Time", MSGFPlusResultsFileColumns.IMSDriftTime}
             };
 
             columnMapping.Clear();
@@ -2183,11 +2183,11 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.NTT], out string ntt);
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecProb_EValue], out string specEValue);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.RankSpecProb], out string rankSpecEValue);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PValue_EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecEValue], out string specEValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.RankSpecEValue], out string rankSpecEValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EValue], out string eValue);
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FDR_QValue], out string qValue);
+                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.QValue], out string qValue);
 
                 searchResult.FragMethod = fragMethod;
                 searchResult.PrecursorMZ = precursorMz;
@@ -2202,7 +2202,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PepFDR_PepQValue], out string pepQValue);
+                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PepQValue], out string pepQValue);
                     searchResult.PepQValue = pepQValue;
                 }
                 else
@@ -3045,64 +3045,66 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var data = new List<string>
                 {
-                    MSGFPlusSynFileReader.DATA_COLUMN_ResultID,
-                    MSGFPlusSynFileReader.DATA_COLUMN_Scan,
-                    MSGFPlusSynFileReader.DATA_COLUMN_FragMethod,
-                    MSGFPlusSynFileReader.DATA_COLUMN_SpecIndex,
-                    MSGFPlusSynFileReader.DATA_COLUMN_Charge,
-                    MSGFPlusSynFileReader.DATA_COLUMN_PrecursorMZ,
-                    MSGFPlusSynFileReader.DATA_COLUMN_DelM,
-                    MSGFPlusSynFileReader.DATA_COLUMN_DelM_PPM,
-                    MSGFPlusSynFileReader.DATA_COLUMN_MH,
-                    MSGFPlusSynFileReader.DATA_COLUMN_Peptide,
-                    MSGFPlusSynFileReader.DATA_COLUMN_Protein,
-                    MSGFPlusSynFileReader.DATA_COLUMN_NTT,
-                    MSGFPlusSynFileReader.DATA_COLUMN_DeNovoScore,
-                    MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.ResultID),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.Scan),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.FragMethod),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecIndex),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.Charge),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.PrecursorMZ),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DelM),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DelMPPM),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MH),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.Peptide),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.Protein),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.NTT),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DeNovoScore),
+                    MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore)
                 };
 
                 if (isMsgfPlus)
                 {
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_MSGFPlus_SpecEValue);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_Rank_MSGFPlus_SpecEValue);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_EValue);
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue));
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.RankSpecEValue));
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.EValue));
+
                 }
                 else
                 {
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_MSGFDB_SpecProb);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_Rank_MSGFDB_SpecProb);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_PValue);
+                    data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb));
+                    data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.RankSpecProb));
+                    data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PValue));
                 }
 
                 if (includeFDRandPepFDR)
                 {
                     if (isMsgfPlus)
                     {
-                        data.Add(MSGFPlusSynFileReader.DATA_COLUMN_QValue);
-                        data.Add(MSGFPlusSynFileReader.DATA_COLUMN_PepQValue);
+                        data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.QValue));
+                        data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.PepQValue));
                     }
                     else
                     {
-                        data.Add(MSGFPlusSynFileReader.DATA_COLUMN_FDR);
-                        data.Add(MSGFPlusSynFileReader.DATA_COLUMN_PepFDR);
+                        data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.FDR));
+                        data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PepFDR));
+
                     }
                 }
                 else if (includeEFDR)
                 {
                     // Note that we'll write out a "1" for "PepFDR" for every result
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_EFDR);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_PepFDR);
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.EFDR));
+                    data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PepFDR));
                 }
 
                 if (isMsgfPlus)
                 {
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_Isotope_Error);
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.IsotopeError));
                 }
 
                 if (includeIMSFields)
                 {
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_IMS_Scan);
-                    data.Add(MSGFPlusSynFileReader.DATA_COLUMN_IMS_Drift_Time);
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.IMSScan));
+                    data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.IMSDriftTime));
                 }
 
                 foreach (var headerName in data)
