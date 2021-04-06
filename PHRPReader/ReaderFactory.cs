@@ -628,7 +628,8 @@ namespace PHRPReader
                     return;
                 }
 
-                // Note that the following populates mDatasetName
+                // Validate the input files, including updating resultType if it is PeptideHitResultTypes.Unknown
+                // Note that the following populates DatasetName
                 var success = ValidateInputFiles(inputFilePath, ref resultType, ref modSummaryFilePath);
                 if (!success)
                 {
@@ -2290,63 +2291,63 @@ namespace PHRPReader
                 }
             }
 
-            if (SkipDuplicatePSMs)
+            if (!SkipDuplicatePSMs)
+                return true;
+
+            // Read the next line and check whether it's the same hit, but a different protein
+            var readNext = true;
+            while (readNext && !mSourceFile.EndOfStream)
             {
-                // Read the next line and check whether it's the same hit, but a different protein
-                var readNext = true;
-                while (readNext && !mSourceFile.EndOfStream)
+                lineIn = mSourceFile.ReadLine();
+                mSourceFileLinesRead++;
+
+                if (string.IsNullOrEmpty(lineIn))
+                    continue;
+
+                SynFileReader.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
+
+                // Check for duplicate lines
+                // If this line is a duplicate of the previous line, skip it
+                // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
+                // It can also happen in MS-GF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
+
+                var isDuplicate = false;
+
+                if (mPSMCurrent.ScanNumber == newPSM.ScanNumber && mPSMCurrent.Charge == newPSM.Charge)
                 {
-                    lineIn = mSourceFile.ReadLine();
-                    mSourceFileLinesRead++;
-
-                    if (string.IsNullOrEmpty(lineIn))
-                        continue;
-
-                    SynFileReader.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
-
-                    // Check for duplicate lines
-                    // If this line is a duplicate of the previous line, skip it
-                    // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-                    // It can also happen in MS-GF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
-
-                    var isDuplicate = false;
-
-                    if (mPSMCurrent.ScanNumber == newPSM.ScanNumber && mPSMCurrent.Charge == newPSM.Charge)
+                    if (string.Equals(mPSMCurrent.Peptide, newPSM.Peptide))
                     {
-                        if (string.Equals(mPSMCurrent.Peptide, newPSM.Peptide))
-                        {
-                            isDuplicate = true;
-                        }
-                        else
-                        {
-                            if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(mPSMCurrent.Peptide, out var peptide1, out _, out _) &&
-                                PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(newPSM.Peptide, out var peptide2, out _, out _))
-                            {
-                                if (string.Equals(peptide1, peptide2))
-                                {
-                                    isDuplicate = true;
-                                }
-                            }
-                        }
-                    }
-
-                    if (isDuplicate)
-                    {
-                        // Update the protein list
-                        var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.OrdinalIgnoreCase).ToList();
-                        if (additionalProteins.Count > 0)
-                        {
-                            foreach (var item in additionalProteins)
-                                mPSMCurrent.AddProtein(item);
-                        }
+                        isDuplicate = true;
                     }
                     else
                     {
-                        readNext = false;
-                        mCachedLine = string.Copy(lineIn);
-                        mCachedLineAvailable = true;
-                        mCachedPSM = newPSM;
+                        if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(mPSMCurrent.Peptide, out var peptide1, out _, out _) &&
+                            PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(newPSM.Peptide, out var peptide2, out _, out _))
+                        {
+                            if (string.Equals(peptide1, peptide2))
+                            {
+                                isDuplicate = true;
+                            }
+                        }
                     }
+                }
+
+                if (isDuplicate)
+                {
+                    // Update the protein list
+                    var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.OrdinalIgnoreCase).ToList();
+                    if (additionalProteins.Count > 0)
+                    {
+                        foreach (var item in additionalProteins)
+                            mPSMCurrent.AddProtein(item);
+                    }
+                }
+                else
+                {
+                    readNext = false;
+                    mCachedLine = string.Copy(lineIn);
+                    mCachedLineAvailable = true;
+                    mCachedPSM = newPSM;
                 }
             }
 
@@ -2782,13 +2783,11 @@ namespace PHRPReader
         private bool TryGetScanStats(int scanNumber,
             out ScanStatsInfo scanStatsInfo)
         {
-            if (mScanStats?.Count > 0)
+            if (mScanStats?.Count > 0 && mScanStats.TryGetValue(scanNumber, out scanStatsInfo))
             {
-                if (mScanStats.TryGetValue(scanNumber, out scanStatsInfo))
-                {
-                    return true;
-                }
+                return true;
             }
+
             scanStatsInfo = null;
             return false;
         }
@@ -2796,13 +2795,11 @@ namespace PHRPReader
         private bool TryGetExtendedScanStats(int scanNumber,
             out ScanStatsExInfo extendedScanStatsInfo)
         {
-            if (mScanStatsEx != null && mScanStats.Count > 0)
+            if (mScanStatsEx != null && mScanStats.Count > 0 && mScanStatsEx.TryGetValue(scanNumber, out extendedScanStatsInfo))
             {
-                if (mScanStatsEx.TryGetValue(scanNumber, out extendedScanStatsInfo))
-                {
-                    return true;
-                }
+                return true;
             }
+
             extendedScanStatsInfo = null;
             return false;
         }
