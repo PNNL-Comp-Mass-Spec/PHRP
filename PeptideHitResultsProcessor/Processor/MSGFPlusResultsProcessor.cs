@@ -183,7 +183,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string QValue;                   // Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MS-GF+
             public double QValueNum;                // Numeric equivalent of QValue
             public string PepQValue;                // Only used when target/decoy search was used; holds PepQValue for MS-GF+
-            public int RankSpecProb;
+            public int RankSpecEValue;
             public int IMSScan;
             public string IMSDriftTime;
             public int IsotopeError;                // Only used by MS-GF+
@@ -212,7 +212,7 @@ namespace PeptideHitResultsProcessor.Processor
                 QValue = string.Empty;
                 QValueNum = 0;
                 PepQValue = string.Empty;
-                RankSpecProb = 0;
+                RankSpecEValue = 0;
                 IMSScan = 0;
                 IMSDriftTime = string.Empty;
                 IsotopeError = 0;
@@ -471,7 +471,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Only one result
                 var currentResult = searchResults[startIndex];
-                currentResult.RankSpecProb = 1;
+                currentResult.RankSpecEValue = 1;
                 searchResults[startIndex] = currentResult;
                 return;
             }
@@ -507,7 +507,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                currentResult.RankSpecProb = currentRank;
+                currentResult.RankSpecEValue = currentRank;
 
                 // Because this is a list of structs, we have to copy currentResult back into the current position in searchResults
                 searchResults[entry.Key] = currentResult;
@@ -3172,7 +3172,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.DeNovoScore,
                     udtSearchResult.MSGFScore,
                     udtSearchResult.SpecEValue,
-                    udtSearchResult.RankSpecProb.ToString(),
+                    udtSearchResult.RankSpecEValue.ToString(),
                     udtSearchResult.EValue
                 };
 

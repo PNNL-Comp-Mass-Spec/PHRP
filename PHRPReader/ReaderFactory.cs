@@ -1300,17 +1300,19 @@ namespace PHRPReader
                 {
                     var headerLine = reader.ReadLine();
 
+                    var msgfColumn = MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore);
+
                     if (LineContainsValues(headerLine, InspectSynFileReader.DATA_COLUMN_MQScore,
                                            InspectSynFileReader.DATA_COLUMN_TotalPRMScore))
                     {
                         resultType = PeptideHitResultTypes.Inspect;
                     }
-                    else if (LineContainsValues(headerLine, MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore,
-                                                MSGFPlusSynFileReader.DATA_COLUMN_MSGFDB_SpecProb) ||
-                             LineContainsValues(headerLine, MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore,
-                                                MSGFPlusSynFileReader.DATA_COLUMN_MSGFPlus_SpecEValue) ||
-                             LineContainsValues(headerLine, MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore,
-                                                MSGFPlusSynFileReader.DATA_COLUMN_DeNovoScore))
+                    else if (LineContainsValues(headerLine,
+                                 msgfColumn, MSGFPlusSynFileReader.MSGFDB_SpecProb) ||
+                             LineContainsValues(headerLine,
+                                 msgfColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue)) ||
+                             LineContainsValues(headerLine,
+                                 msgfColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DeNovoScore)))
                     {
                         resultType = PeptideHitResultTypes.MSGFPlus;
                     }
