@@ -2031,12 +2031,9 @@ namespace PHRPReader
         /// <returns>Column index, or -1 if not found</returns>
         public static int LookupColumnIndex(string columnName, SortedDictionary<string, int> columnHeaders)
         {
-            if (columnHeaders.TryGetValue(columnName, out var colIndex))
+            if (columnHeaders.TryGetValue(columnName, out var colIndex) && colIndex >= 0)
             {
-                if (colIndex >= 0)
-                {
-                    return colIndex;
-                }
+                return colIndex;
             }
 
             return -1;
@@ -2050,12 +2047,9 @@ namespace PHRPReader
         /// <returns>Column index, or -1 if not found</returns>
         public static int LookupColumnIndex(Enum columnEnum, SortedDictionary<Enum, int> columnHeaders)
         {
-            if (columnHeaders.TryGetValue(columnEnum, out var colIndex))
+            if (columnHeaders.TryGetValue(columnEnum, out var colIndex) && colIndex >= 0)
             {
-                if (colIndex >= 0)
-                {
-                    return colIndex;
-                }
+                return colIndex;
             }
 
             return -1;
@@ -2283,18 +2277,15 @@ namespace PHRPReader
                 }
             }
 
-            if (mMSGFCachedResults?.Count > 0)
+            if (mMSGFCachedResults?.Count > 0 && mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText))
             {
-                if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText))
+                mPSMCurrent.MSGFSpecEValue = specEValueText;
+                if (specEValueText.Length > 12)
                 {
-                    mPSMCurrent.MSGFSpecEValue = specEValueText;
-                    if (specEValueText.Length > 12)
+                    // Attempt to shorten the SpecEValue
+                    if (double.TryParse(specEValueText, out var specEValue))
                     {
-                        // Attempt to shorten the SpecEValue
-                        if (double.TryParse(specEValueText, out var specEValue))
-                        {
-                            mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00");
-                        }
+                        mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00");
                     }
                 }
             }
