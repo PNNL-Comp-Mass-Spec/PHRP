@@ -296,20 +296,22 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        /// <returns>List of header names</returns>
+        /// <returns>List of header names, including legacy columns</returns>
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
-            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs(true, false).Keys);
             return headerNames;
         }
 
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
+        /// <param name="includeLegacyNames"></param>
+        /// <param name="includeExtraColumns"></param>
         /// <returns>Dictionary of header names and enum values</returns>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
-        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeExtras = false)
+        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeLegacyNames, bool includeExtraColumns)
         {
             var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -327,27 +329,29 @@ namespace PHRPReader.Reader
                 { "NTT", MSGFPlusSynFileColumns.NTT },
                 { "DeNovoScore", MSGFPlusSynFileColumns.DeNovoScore },
                 { "MSGFScore", MSGFPlusSynFileColumns.MSGFScore },
-                { MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecEValue },
                 { "MSGFDB_SpecEValue", MSGFPlusSynFileColumns.SpecEValue },
-                { MSGFDB_RankSpecProb, MSGFPlusSynFileColumns.RankSpecEValue },
                 { "Rank_MSGFDB_SpecEValue", MSGFPlusSynFileColumns.RankSpecEValue },
-                { MSGFDB_PValue, MSGFPlusSynFileColumns.EValue },
                 { "EValue", MSGFPlusSynFileColumns.EValue },
-                { MSGFDB_FDR, MSGFPlusSynFileColumns.QValue },
                 { "QValue", MSGFPlusSynFileColumns.QValue },
-                { MSGFDB_PepFDR, MSGFPlusSynFileColumns.PepQValue },
                 { "PepQValue", MSGFPlusSynFileColumns.PepQValue },
                 { "EFDR", MSGFPlusSynFileColumns.EFDR },
                 { "IsotopeError", MSGFPlusSynFileColumns.IsotopeError }
             };
 
-            if (!includeExtras)
+            if (includeExtraColumns)
             {
-                return headerColumns;
+                headerColumns.Add("IMS_Scan", MSGFPlusSynFileColumns.IMSScan);
+                headerColumns.Add("IMS_Drift_Time", MSGFPlusSynFileColumns.IMSDriftTime);
             }
 
-            headerColumns.Add("IMS_Scan", MSGFPlusSynFileColumns.IMSScan);
-            headerColumns.Add("IMS_Drift_Time", MSGFPlusSynFileColumns.IMSDriftTime);
+            if (!includeLegacyNames)
+                return headerColumns;
+
+            headerColumns.Add(MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecEValue);
+            headerColumns.Add(MSGFDB_RankSpecProb, MSGFPlusSynFileColumns.RankSpecEValue);
+            headerColumns.Add(MSGFDB_PValue, MSGFPlusSynFileColumns.EValue);
+            headerColumns.Add(MSGFDB_FDR, MSGFPlusSynFileColumns.QValue);
+            headerColumns.Add(MSGFDB_PepFDR, MSGFPlusSynFileColumns.PepQValue);
 
             return headerColumns;
         }
@@ -361,7 +365,7 @@ namespace PHRPReader.Reader
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
-            var headerColumns = GetColumnHeaderNamesAndIDs(true);
+            var headerColumns = GetColumnHeaderNamesAndIDs(true, true);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
@@ -377,7 +381,7 @@ namespace PHRPReader.Reader
                 return mSynopsisFileColumn[column];
             }
 
-            foreach (var item in GetColumnHeaderNamesAndIDs(true))
+            foreach (var item in GetColumnHeaderNamesAndIDs(false, true))
             {
                 mSynopsisFileColumn.Add(item.Value, item.Key);
             }

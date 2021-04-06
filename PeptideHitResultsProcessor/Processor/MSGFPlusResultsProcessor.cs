@@ -2045,7 +2045,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<MSGFPlusSynFileColumns, int> columnMapping)
         {
-            var columnNames = MSGFPlusSynFileReader.GetColumnHeaderNamesAndIDs();
+            var columnNames = MSGFPlusSynFileReader.GetColumnHeaderNamesAndIDs(true, true);
 
             columnMapping.Clear();
 
@@ -3041,7 +3041,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var knownHeaderColumns = MSGFPlusSynFileReader.GetColumnHeaderNamesAndIDs();
+                var knownHeaderColumns = MSGFPlusSynFileReader.GetColumnHeaderNamesAndIDs(true, true);
 
                 var data = new List<string>
                 {
