@@ -3066,7 +3066,6 @@ namespace PeptideHitResultsProcessor.Processor
                     data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue));
                     data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.RankSpecEValue));
                     data.Add(MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.EValue));
-
                 }
                 else
                 {
@@ -3086,7 +3085,6 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.FDR));
                         data.Add(MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PepFDR));
-
                     }
                 }
                 else if (includeEFDR)

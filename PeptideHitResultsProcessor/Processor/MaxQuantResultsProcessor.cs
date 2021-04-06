@@ -1163,7 +1163,6 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.SuffixResidue = peptideInfo.Suffix;
                     udtSearchResult.LeadingRazorProtein = peptideInfo.LeadingRazorProtein;
                     udtSearchResult.PeptideIntensity = peptideInfo.Intensity;
-
                 }
                 else
                 {
@@ -1314,7 +1313,6 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Peptide ID", MaxQuantResultsFileColumns.PeptideID},
                 {"Mod. peptide ID", MaxQuantResultsFileColumns.ModPeptideID},
                 {"Evidence ID", MaxQuantResultsFileColumns.EvidenceID}
-
             };
 
             columnMapping.Clear();
