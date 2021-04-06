@@ -1302,13 +1302,14 @@ namespace PHRPReader
 
                     var msgfColumn = MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore);
 
-                    if (LineContainsValues(headerLine, InspectSynFileReader.DATA_COLUMN_MQScore,
-                                           InspectSynFileReader.DATA_COLUMN_TotalPRMScore))
+                    if (LineContainsValues(headerLine,
+                        InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.MQScore),
+                        InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.TotalPRMScore)))
                     {
                         resultType = PeptideHitResultTypes.Inspect;
                     }
                     else if (LineContainsValues(headerLine,
-                                 msgfColumn, MSGFPlusSynFileReader.MSGFDB_SpecProb) ||
+                                 msgfColumn, MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb)) ||
                              LineContainsValues(headerLine,
                                  msgfColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue)) ||
                              LineContainsValues(headerLine,
@@ -1316,7 +1317,9 @@ namespace PHRPReader
                     {
                         resultType = PeptideHitResultTypes.MSGFPlus;
                     }
-                    else if (LineContainsValues(headerLine, SequestSynFileReader.DATA_COLUMN_XCorr, SequestSynFileReader.DATA_COLUMN_DelCn))
+                    else if (LineContainsValues(headerLine,
+                        SequestSynFileReader.GetColumnNameByID(SequestSynopsisFileColumns.XCorr),
+                        SequestSynFileReader.GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn)))
                     {
                         resultType = PeptideHitResultTypes.Sequest;
                     }

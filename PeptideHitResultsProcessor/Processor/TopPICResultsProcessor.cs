@@ -1683,8 +1683,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!dataHasPValues)
                 {
-                    headerColumns.Remove(TopPICSynFileReader.DATA_COLUMN_PValue);
-                    headerColumns.Remove(TopPICSynFileReader.DATA_COLUMN_Rank_PValue);
+                    headerColumns.Remove(TopPICSynFileReader.GetColumnNameByID(TopPICSynFileColumns.PValue));
+                    headerColumns.Remove(TopPICSynFileReader.GetColumnNameByID(TopPICSynFileColumns.Rank_PValue));
                 }
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
