@@ -1,4 +1,6 @@
-﻿namespace PHRPReader.Data
+﻿using System;
+
+namespace PHRPReader.Data
 {
     // Ignore Spelling: Da, novo, tda
 
@@ -58,7 +60,6 @@
         /// Scan
         /// </summary>
         Scan = 2
-
     }
 
     /// <summary>
@@ -115,6 +116,38 @@
     }
 
 #pragma warning restore 1591
+
+
+    /// <summary>
+    /// These columns correspond Synopsis files created for legacy tool MSGFDB
+    /// </summary>
+    public enum MSGFDBSynFileColumns
+    {
+        /// <summary>
+        /// SpecProb
+        /// </summary>
+        SpecProb = 0,
+
+        /// <summary>
+        /// RankSpecProb
+        /// </summary>
+        RankSpecProb = 1,
+
+        /// <summary>
+        /// PValue
+        /// </summary>
+        PValue = 2,
+
+        /// <summary>
+        /// FDR
+        /// </summary>
+        FDR = 3,
+
+        /// <summary>
+        /// PepFDR
+        /// </summary>
+        PepFDR = 4
+    }
 
     /// <summary>
     /// These columns correspond to the Synopsis file created by MSGFPlusResultsProcessor
@@ -196,31 +229,64 @@
         MSGFScore = 13,
 
         /// <summary>
-        /// SpecProb E-Value
+        /// Spec E-Value
         /// </summary>
+        SpecEValue = 14,
+
+        /// <summary>
+        /// Obsolete name for Spec E-Value (MS-GF+) or SpecProb (MSGFDB)
+        /// </summary>
+        [Obsolete("Use .SpecEValue")]
         SpecProb_EValue = 14,
 
         /// <summary>
-        /// Rank SpecProb
+        /// Rank SpecEValue
         /// </summary>
-        /// <remarks>Rank 1 means lowest SpecEValue, 2 means next higher score, etc. (ties get the same rank)</remarks>
+        RankSpecEValue = 15,
+
+        /// <summary>
+        /// Obsolete name for Rank Spec E-Value (MS-GF+) or Rank SpecProb (MSGFDB)
+        /// </summary>
+        [Obsolete("Use .RankSpecEValue")]
         RankSpecProb = 15,
 
         /// <summary>
-        /// P-Value or E-Value
+        /// E-Value
         /// </summary>
+        EValue = 16,
+
+        /// <summary>
+        /// Obsolete name for E-Value (MS-GF+) or P-Value (MSGFDB)
+        /// </summary>
+        [Obsolete("Use .EValue")]
         PValue_EValue = 16,
 
         /// <summary>
-        /// FDR or Q-Value
+        /// Q-Value
         /// </summary>
-        /// <remarks>Only present if searched using -tda 1</remarks>
+        /// <remarks>
+        /// Only present if searched using -tda 1
+        /// </remarks>
+        QValue = 17,
+
+        /// <summary>
+        /// Obsolete name for Q-Value (MS-GF+) or FDR (MSGFDB)
+        /// </summary>
+        [Obsolete("Use .QValue")]
         FDR_QValue = 17,
 
         /// <summary>
-        /// Peptide FDR or Peptide QValue
+        /// Peptide QValue
         /// </summary>
-        /// <remarks>Only present if searched using -tda 1</remarks>
+        /// <remarks>
+        /// Only present if searched using -tda 1
+        /// </remarks>
+        PepQValue = 18,
+
+        /// <summary>
+        /// Obsolete name for PepQValue (MS-GF+) or PepFDR (MSGFDB)
+        /// </summary>
+        [Obsolete("Use .PepQValue")]
         PepFDR_PepQValue = 18,
 
         /// <summary>
