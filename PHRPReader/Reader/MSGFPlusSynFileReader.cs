@@ -24,40 +24,81 @@ namespace PHRPReader.Reader
         // Ignore Spelling: enzymeid, Da, Frag, novo, msgfdb, peptidomics, prot, nnet, ntt, tda, Za, Validator
         // Ignore Spelling: Arg, Chymotrypsin, Glu, Lys
 
-#pragma warning disable 1591
-
-        // Constants for legacy column names for tool MSGFDB
+        /// <summary>
+        /// Legacy SpecProb column name for tool MSGFDB
+        /// </summary>
         public const string MSGFDB_SpecProb = "MSGFDB_SpecProb";
+
+        /// <summary>
+        /// Legacy Rank SpecProb column name for tool MSGFDB
+        /// </summary>
         private const string MSGFDB_RankSpecProb = "Rank_MSGFDB_SpecProb";
+
+        /// <summary>
+        /// Legacy PValue column name for tool MSGFDB
+        /// </summary>
         private const string MSGFDB_PValue = "PValue";
 
-        private const string MSGFDB_FDR = "FDR";        // MSGFDB; Only present if a Target/Decoy (TDA) search was used
-        private const string MSGFDB_PepFDR = "PepFDR";  // MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
+        /// <summary>
+        /// Legacy FDR column name for tool MSGFDB
+        /// </summary>
+        /// <remarks>
+        /// Only present if a Target/Decoy (TDA) search was used
+        /// </remarks>
+        private const string MSGFDB_FDR = "FDR";
 
-        // These suffixes were changed from_msgfdb to _msgfplus in November 2016
+        /// <summary>
+        /// Legacy PepFDR column name for tool MSGFDB
+        /// </summary>
+        /// <remarks>
+        /// Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
+        /// </remarks>
+        private const string MSGFDB_PepFDR = "PepFDR";
+
+        /// <summary>
+        /// MS-GF+ synopsis file suffix
+        /// </summary>
+        /// <remarks>
+        /// Changed from _msgfdb_syn.txt to _msgfplus_syn.txt in November 2016
+        /// </remarks>
         public const string FILENAME_SUFFIX_SYN = "_msgfplus_syn.txt";
+
+        /// <summary>
+        /// MS-GF+ first hits file suffix
+        /// </summary>
+        /// <remarks>
+        /// Changed from _msgfdb_fht.txt to _msgfplus_fht.txt in November 2016
+        /// </remarks>
         public const string FILENAME_SUFFIX_FHT = "_msgfplus_fht.txt";
 
-        // ReSharper disable once CommentTypo
-        // Renamed from "MS-GFDB" to "MS-GF+" in November 2016
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MSGFPLUS_SEARCH_ENGINE_NAME = "MS-GF+";
 
+        /// <summary>
+        /// Precursor mass tolerance parameter name
+        /// </summary>
         public const string PRECURSOR_TOLERANCE_PARAM_NAME = "PrecursorMassTolerance";
 
+        /// <summary>
+        /// Precursor mass tolerance parameter name synonym
+        /// </summary>
         public const string PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM = "PMTolerance";
 
+        /// <summary>
+        /// Charge carrier mass parameter name
+        /// </summary>
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
         /// <summary>
-        /// Mapping from enum to column name for legacy tool MSGFDB
+        /// Mapping from enum to synopsis file column name for legacy tool MSGFDB
         /// </summary>
         private static readonly Dictionary<MSGFDBSynFileColumns, string> mMSGFDBColumns = new();
 
         /// <summary>
         /// Mapping from enum to synopsis file column name for MS-GF+
         /// </summary>
-
-#pragma warning restore 1591
         private static readonly Dictionary<MSGFPlusSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>

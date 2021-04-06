@@ -1,8 +1,10 @@
 ﻿using System;
 
+// ReSharper disable UnusedMember.Global
+
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, novo, tda
+    // Ignore Spelling: Da, MaxQuant, novo, tda
 
 #pragma warning disable 1591
 
@@ -116,7 +118,6 @@ namespace PHRPReader.Data
     }
 
 #pragma warning restore 1591
-
 
     /// <summary>
     /// These columns correspond Synopsis files created for legacy tool MSGFDB
