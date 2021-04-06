@@ -22,30 +22,25 @@ namespace PHRPReader.Reader
         // ReSharper disable once CommentTypo
         // Ignore Spelling: moda, MODa, PeptTolerance, PepToProtMap
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Spectrum_Index = "Spectrum_Index";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Score = "Score";
-        public const string DATA_COLUMN_Probability = "Probability";
-        public const string DATA_COLUMN_Rank_Probability = "Rank_Probability";
-        public const string DATA_COLUMN_Peptide_Position = "Peptide_Position";
-        public const string DATA_COLUMN_QValue = "QValue";
-
+        /// <summary>
+        /// MODa synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_moda_syn.txt";
+
+        /// <summary>
+        /// MODa first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_moda_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MODa_SEARCH_ENGINE_NAME = "MODa";
-        
-#pragma warning restore 1591
+
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for MODa
+        /// </summary>
+        private static readonly Dictionary<MODaSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -174,26 +169,24 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MODaSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MODaSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MODaSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MODaSynFileColumns.Scan},
-                {DATA_COLUMN_Spectrum_Index, MODaSynFileColumns.Spectrum_Index},
-                {DATA_COLUMN_Charge, MODaSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, MODaSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, MODaSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, MODaSynFileColumns.DelM_PPM},
-                {DATA_COLUMN_MH, MODaSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, MODaSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, MODaSynFileColumns.Protein},
-                {DATA_COLUMN_Score, MODaSynFileColumns.Score},
-                {DATA_COLUMN_Probability, MODaSynFileColumns.Probability},
-                {DATA_COLUMN_Rank_Probability, MODaSynFileColumns.Rank_Probability},
-                {DATA_COLUMN_Peptide_Position, MODaSynFileColumns.Peptide_Position},
-                {DATA_COLUMN_QValue, MODaSynFileColumns.QValue}
+                { "ResultID", MODaSynFileColumns.ResultID },
+                { "Scan", MODaSynFileColumns.Scan },
+                { "Spectrum_Index", MODaSynFileColumns.Spectrum_Index },
+                { "Charge", MODaSynFileColumns.Charge },
+                { "PrecursorMZ", MODaSynFileColumns.PrecursorMZ },
+                { "DelM", MODaSynFileColumns.DelM },
+                { "DelM_PPM", MODaSynFileColumns.DelM_PPM },
+                { "MH", MODaSynFileColumns.MH },
+                { "Peptide", MODaSynFileColumns.Peptide },
+                { "Protein", MODaSynFileColumns.Protein },
+                { "Score", MODaSynFileColumns.Score },
+                { "Probability", MODaSynFileColumns.Probability },
+                { "Rank_Probability", MODaSynFileColumns.Rank_Probability },
+                { "Peptide_Position", MODaSynFileColumns.Peptide_Position },
+                { "QValue", MODaSynFileColumns.QValue }
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -207,6 +200,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MODaSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -330,7 +343,7 @@ namespace PHRPReader.Reader
                 // But MODa does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide termini; check for these now
 
-                var residuesToFind = new List<string> {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"};
+                var residuesToFind = new List<string> { "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y" };
 
                 // This dictionary tracks the static mod names we will look for
                 // It is populated using the amino acid letters in residuesToFind, plus also the N and T terminus tags
@@ -408,17 +421,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.ResultID), mColumnHeaders, 0);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Rank_Probability), mColumnHeaders, 1);
 
-                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Peptide), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -429,16 +442,16 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Charge), mColumnHeaders, 0));
 
-                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM), mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM_PPM), mColumnHeaders);
 
                     success = true;
                 }
@@ -451,14 +464,14 @@ namespace PHRPReader.Reader
                     }
 
                     // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_Spectrum_Index);
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Spectrum_Index));
 
-                    AddScore(psm, columns, DATA_COLUMN_MH);
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.MH));
 
-                    AddScore(psm, columns, DATA_COLUMN_Score);
-                    AddScore(psm, columns, DATA_COLUMN_Probability);
-                    AddScore(psm, columns, DATA_COLUMN_Peptide_Position);
-                    AddScore(psm, columns, DATA_COLUMN_QValue);
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Score));
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Probability));
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Peptide_Position));
+                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.QValue));
                 }
             }
             catch (Exception ex)

@@ -21,43 +21,25 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: toppic, prsm, Frag, Da, Prot
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Prsm_ID = "Prsm_ID";
-        public const string DATA_COLUMN_Spectrum_ID = "Spectrum_ID";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Proteoform_ID = "Proteoform_ID";
-        public const string DATA_COLUMN_Feature_Intensity = "Feature_Intensity";
-        public const string DATA_COLUMN_Feature_Score = "Feature_Score";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_ResidueStart = "ResidueStart";
-        public const string DATA_COLUMN_ResidueEnd = "ResidueEnd";
-        public const string DATA_COLUMN_Unexpected_Mod_Count = "Unexpected_Mod_Count";
-        public const string DATA_COLUMN_Peak_Count = "Peak_Count";
-        public const string DATA_COLUMN_Matched_Peak_Count = "Matched_Peak_Count";
-        public const string DATA_COLUMN_Matched_Fragment_Ion_Count = "Matched_Fragment_Ion_Count";
-        public const string DATA_COLUMN_PValue = "PValue";
-        public const string DATA_COLUMN_Rank_PValue = "Rank_PValue";
-        public const string DATA_COLUMN_EValue = "EValue";
-        public const string DATA_COLUMN_QValue = "QValue";
-        public const string DATA_COLUMN_Proteoform_FDR = "Proteoform_FDR";
-        public const string DATA_COLUMN_Proteoform_QValue = "Proteoform_QValue";
-        public const string DATA_COLUMN_FragMethod = "FragMethod";
-        public const string DATA_COLUMN_Variable_PTMs = "Variable_PTMs";
-
+        /// <summary>
+        /// TopPIC synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_toppic_syn.txt";
+
+        /// <summary>
+        /// TopPIC first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_toppic_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string TopPIC_SEARCH_ENGINE_NAME = "TopPIC";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for TopPIC
+        /// </summary>
+        private static readonly Dictionary<TopPICSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -155,44 +137,43 @@ namespace PHRPReader.Reader
         {
             var headerColumns = new SortedDictionary<string, TopPICSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, TopPICSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, TopPICSynFileColumns.Scan},
-                {DATA_COLUMN_Prsm_ID, TopPICSynFileColumns.Prsm_ID},
-                {DATA_COLUMN_Spectrum_ID, TopPICSynFileColumns.Spectrum_ID},
-                {DATA_COLUMN_FragMethod, TopPICSynFileColumns.FragMethod},
-                {DATA_COLUMN_Charge, TopPICSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, TopPICSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, TopPICSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, TopPICSynFileColumns.DelMPPM},
-                {DATA_COLUMN_MH, TopPICSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, TopPICSynFileColumns.Peptide},
-                {DATA_COLUMN_Proteoform_ID, TopPICSynFileColumns.Proteoform_ID},
-                {DATA_COLUMN_Feature_Intensity, TopPICSynFileColumns.Feature_Intensity},
-                {DATA_COLUMN_Feature_Score, TopPICSynFileColumns.Feature_Score},
-                {DATA_COLUMN_Protein, TopPICSynFileColumns.Protein},
-                {DATA_COLUMN_ResidueStart, TopPICSynFileColumns.ResidueStart},
-                {DATA_COLUMN_ResidueEnd, TopPICSynFileColumns.ResidueEnd},
-                {DATA_COLUMN_Unexpected_Mod_Count, TopPICSynFileColumns.Unexpected_Mod_Count},
-                {DATA_COLUMN_Peak_Count, TopPICSynFileColumns.Peak_Count},
-                {DATA_COLUMN_Matched_Peak_Count, TopPICSynFileColumns.Matched_Peak_Count},
-                {DATA_COLUMN_Matched_Fragment_Ion_Count, TopPICSynFileColumns.Matched_Fragment_Ion_Count},
-                {DATA_COLUMN_PValue, TopPICSynFileColumns.PValue},
-                {DATA_COLUMN_Rank_PValue, TopPICSynFileColumns.Rank_PValue},
-                {DATA_COLUMN_EValue, TopPICSynFileColumns.EValue},
-                {DATA_COLUMN_QValue, TopPICSynFileColumns.QValue}
+                { "ResultID", TopPICSynFileColumns.ResultID },
+                { "Scan", TopPICSynFileColumns.Scan },
+                { "Prsm_ID", TopPICSynFileColumns.Prsm_ID },
+                { "Spectrum_ID", TopPICSynFileColumns.Spectrum_ID },
+                { "FragMethod", TopPICSynFileColumns.FragMethod },
+                { "Charge", TopPICSynFileColumns.Charge },
+                { "PrecursorMZ", TopPICSynFileColumns.PrecursorMZ },
+                { "DelM", TopPICSynFileColumns.DelM },
+                { "DelM_PPM", TopPICSynFileColumns.DelMPPM },
+                { "MH", TopPICSynFileColumns.MH },
+                { "Peptide", TopPICSynFileColumns.Peptide },
+                { "Proteoform_ID", TopPICSynFileColumns.Proteoform_ID },
+                { "Feature_Intensity", TopPICSynFileColumns.Feature_Intensity },
+                { "Feature_Score", TopPICSynFileColumns.Feature_Score },
+                { "Protein", TopPICSynFileColumns.Protein },
+                { "ResidueStart", TopPICSynFileColumns.ResidueStart },
+                { "ResidueEnd", TopPICSynFileColumns.ResidueEnd },
+                { "Unexpected_Mod_Count", TopPICSynFileColumns.Unexpected_Mod_Count },
+                { "Peak_Count", TopPICSynFileColumns.Peak_Count },
+                { "Matched_Peak_Count", TopPICSynFileColumns.Matched_Peak_Count },
+                { "Matched_Fragment_Ion_Count", TopPICSynFileColumns.Matched_Fragment_Ion_Count },
+                { "PValue", TopPICSynFileColumns.PValue },
+                { "Rank_PValue", TopPICSynFileColumns.Rank_PValue },
+                { "EValue", TopPICSynFileColumns.EValue },
+                { "QValue", TopPICSynFileColumns.QValue },
             };
 
             if (!includeLegacyNames)
             {
-                headerColumns.Add(DATA_COLUMN_Proteoform_QValue, TopPICSynFileColumns.Proteoform_QValue);
-                headerColumns.Add(DATA_COLUMN_Variable_PTMs, TopPICSynFileColumns.VariablePTMs);
-
+                headerColumns.Add("Proteoform_QValue", TopPICSynFileColumns.Proteoform_QValue);
+                headerColumns.Add("Variable_PTMs", TopPICSynFileColumns.VariablePTMs);
                 return headerColumns;
             }
 
-            headerColumns.Add(DATA_COLUMN_Proteoform_FDR, TopPICSynFileColumns.Proteoform_QValue);
-            headerColumns.Add(DATA_COLUMN_Proteoform_QValue, TopPICSynFileColumns.Proteoform_QValue);
-            headerColumns.Add(DATA_COLUMN_Variable_PTMs, TopPICSynFileColumns.VariablePTMs);
+            headerColumns.Add("Proteoform_FDR", TopPICSynFileColumns.Proteoform_QValue);
+            headerColumns.Add("Proteoform_QValue", TopPICSynFileColumns.Proteoform_QValue);
+            headerColumns.Add("Variable_PTMs", TopPICSynFileColumns.VariablePTMs);
 
             return headerColumns;
         }
@@ -208,6 +189,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs(true);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(TopPICSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs(false))
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -366,17 +367,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                     return false;
                 }
 
-                psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.Rank_PValue), mColumnHeaders, 1);
 
-                var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.Peptide), mColumnHeaders);
 
                 if (fastReadMode)
                 {
@@ -387,57 +388,59 @@ namespace PHRPReader.Reader
                     psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.Charge), mColumnHeaders, 0));
 
-                var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.Protein), mColumnHeaders);
                 psm.AddProtein(protein);
 
-                var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                 psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.DelMPPM), mColumnHeaders);
 
                 if (!fastReadMode)
                 {
                     UpdatePSMUsingSeqInfo(psm);
                 }
 
-                psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_EValue, mColumnHeaders);
+                psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(TopPICSynFileColumns.EValue), mColumnHeaders);
 
                 // Store the remaining scores
-                AddScore(psm, columns, DATA_COLUMN_Prsm_ID);
-                AddScore(psm, columns, DATA_COLUMN_Spectrum_ID);
-                AddScore(psm, columns, DATA_COLUMN_FragMethod);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Prsm_ID));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Spectrum_ID));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.FragMethod));
 
-                AddScore(psm, columns, DATA_COLUMN_MH);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.MH));
 
-                AddScore(psm, columns, DATA_COLUMN_Proteoform_ID);
-                AddScore(psm, columns, DATA_COLUMN_Feature_Intensity);
-                AddScore(psm, columns, DATA_COLUMN_Feature_Score);
-                AddScore(psm, columns, DATA_COLUMN_ResidueStart);
-                AddScore(psm, columns, DATA_COLUMN_ResidueEnd);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Proteoform_ID));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Feature_Intensity));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Feature_Score));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.ResidueStart));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.ResidueEnd));
 
-                AddScore(psm, columns, DATA_COLUMN_Unexpected_Mod_Count);
-                AddScore(psm, columns, DATA_COLUMN_Peak_Count);
-                AddScore(psm, columns, DATA_COLUMN_Matched_Peak_Count);
-                AddScore(psm, columns, DATA_COLUMN_Matched_Fragment_Ion_Count);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Unexpected_Mod_Count));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Peak_Count));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Matched_Peak_Count));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.Matched_Fragment_Ion_Count));
 
-                AddScore(psm, columns, DATA_COLUMN_PValue);
-                AddScore(psm, columns, DATA_COLUMN_EValue);
-                AddScore(psm, columns, DATA_COLUMN_QValue);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.PValue));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.EValue));
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.QValue));
 
-                var proteoformQValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Proteoform_QValue, mColumnHeaders, NOT_FOUND);
+                var qValueColumn = GetColumnNameByID(TopPICSynFileColumns.Proteoform_QValue);
+
+                var proteoformQValue = ReaderFactory.LookupColumnValue(columns, qValueColumn, mColumnHeaders, NOT_FOUND);
                 if (proteoformQValue != NOT_FOUND)
                 {
-                    psm.SetScore(DATA_COLUMN_Proteoform_QValue, proteoformQValue);
+                    psm.SetScore(qValueColumn, proteoformQValue);
                 }
                 else
                 {
-                    AddScore(psm, columns, DATA_COLUMN_Proteoform_FDR);
+                    AddScore(psm, columns, "Proteoform_FDR");
                 }
 
-                AddScore(psm, columns, DATA_COLUMN_Variable_PTMs);
+                AddScore(psm, columns, GetColumnNameByID(TopPICSynFileColumns.VariablePTMs));
 
                 return true;
             }

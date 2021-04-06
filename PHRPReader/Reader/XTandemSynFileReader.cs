@@ -26,34 +26,29 @@ namespace PHRPReader.Reader
     /// </summary>
     public class XTandemSynFileReader : SynFileReaderBaseClass
     {
-#pragma warning disable 1591
+        // Ignore Spelling: Da, Hyperscore, ProtMap, xt
 
-        public const string DATA_COLUMN_Result_ID = "Result_ID";
-        public const string DATA_COLUMN_Group_ID = "Group_ID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_Peptide_MH = "Peptide_MH";
-        public const string DATA_COLUMN_Peptide_Hyperscore = "Peptide_Hyperscore";
-        public const string DATA_COLUMN_Peptide_Expectation_Value_LogE = "Peptide_Expectation_Value_Log(e)";
-        public const string DATA_COLUMN_Multiple_Protein_Count = "Multiple_Protein_Count";
-        public const string DATA_COLUMN_Peptide_Sequence = "Peptide_Sequence";
-        public const string DATA_COLUMN_DeltaCn2 = "DeltaCn2";
-        public const string DATA_COLUMN_y_score = "y_score";
-        public const string DATA_COLUMN_y_ions = "y_ions";
-        public const string DATA_COLUMN_b_score = "b_score";
-        public const string DATA_COLUMN_b_ions = "b_ions";
-        public const string DATA_COLUMN_Delta_Mass = "Delta_Mass";
-        public const string DATA_COLUMN_Peptide_Intensity_LogI = "Peptide_Intensity_Log(I)";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-
+        /// <summary>
+        /// X!Tandem synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_xt.txt";
+
+        /// <summary>
+        /// X!Tandem first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_xt.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string XT_SEARCH_ENGINE_NAME = "X! Tandem";
 
         private const string TAXONOMY_INFO_KEY_NAME = "list path, taxonomy information";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for X!Tandem
+        /// </summary>
+        private static readonly Dictionary<XTandemSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -175,12 +170,12 @@ namespace PHRPReader.Reader
             {
                 tolerancePPM = tolerance;
 
-                // Convert from PPM to dalton (assuming a mass of 2000 m/z)
+                // Convert from PPM to Dalton (assuming a mass of 2000 m/z)
                 tolerance = PeptideMassCalculator.PPMToMass(tolerance, 2000);
             }
             else
             {
-                // Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                // Convert from Dalton to PPM (assuming a mass of 2000 m/z)
                 tolerancePPM = PeptideMassCalculator.MassToPPM(tolerance, 2000);
             }
 
@@ -204,28 +199,26 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, XTandemSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, XTandemSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_Result_ID, XTandemSynFileColumns.ResultID},
-                {DATA_COLUMN_Group_ID, XTandemSynFileColumns.GroupID},
-                {DATA_COLUMN_Scan, XTandemSynFileColumns.Scan},
-                {DATA_COLUMN_Charge, XTandemSynFileColumns.Charge},
-                {DATA_COLUMN_Peptide_MH, XTandemSynFileColumns.MH},
-                {DATA_COLUMN_Peptide_Hyperscore, XTandemSynFileColumns.Hyperscore},
-                {DATA_COLUMN_Peptide_Expectation_Value_LogE, XTandemSynFileColumns.EValue},
-                {DATA_COLUMN_Multiple_Protein_Count, XTandemSynFileColumns.ProteinCount},
-                {DATA_COLUMN_Peptide_Sequence, XTandemSynFileColumns.Peptide},
-                {DATA_COLUMN_DeltaCn2, XTandemSynFileColumns.DeltaCn2},
-                {DATA_COLUMN_y_score, XTandemSynFileColumns.YScore},
-                {DATA_COLUMN_y_ions, XTandemSynFileColumns.YIons},
-                {DATA_COLUMN_b_score, XTandemSynFileColumns.BScore},
-                {DATA_COLUMN_b_ions, XTandemSynFileColumns.BIons},
-                {DATA_COLUMN_Delta_Mass, XTandemSynFileColumns.DelM},
-                {DATA_COLUMN_Peptide_Intensity_LogI, XTandemSynFileColumns.Intensity},
-                {DATA_COLUMN_DelM_PPM, XTandemSynFileColumns.DelMPPM}
+                { "Result_ID", XTandemSynFileColumns.ResultID },
+                { "Group_ID", XTandemSynFileColumns.GroupID },
+                { "Scan", XTandemSynFileColumns.Scan },
+                { "Charge", XTandemSynFileColumns.Charge },
+                { "Peptide_MH", XTandemSynFileColumns.MH },
+                { "Peptide_Hyperscore", XTandemSynFileColumns.Hyperscore },
+                { "Peptide_Expectation_Value_Log(e)", XTandemSynFileColumns.EValue },
+                { "Multiple_Protein_Count", XTandemSynFileColumns.ProteinCount },
+                { "Peptide_Sequence", XTandemSynFileColumns.Peptide },
+                { "DeltaCn2", XTandemSynFileColumns.DeltaCn2 },
+                { "y_score", XTandemSynFileColumns.YScore },
+                { "y_ions", XTandemSynFileColumns.YIons },
+                { "b_score", XTandemSynFileColumns.BScore },
+                { "b_ions", XTandemSynFileColumns.BIons },
+                { "Delta_Mass", XTandemSynFileColumns.DelM },
+                { "Peptide_Intensity_Log(I)", XTandemSynFileColumns.Intensity },
+                { "DelM_PPM", XTandemSynFileColumns.DelMPPM },
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -239,6 +232,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(XTandemSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -450,15 +463,14 @@ namespace PHRPReader.Reader
             var defaultParamsFilename = string.Empty;
 
             // Open the XML file and look for the "list path, default parameters" entry
-            using (var xmlReader = new XmlTextReader(paramFilePath))
+            using var xmlReader = new XmlTextReader(paramFilePath);
+
+            while (MoveToNextInputParam(xmlReader, out var kvSetting))
             {
-                while (MoveToNextInputParam(xmlReader, out var kvSetting))
+                if (kvSetting.Key == "list path, default parameters")
                 {
-                    if (kvSetting.Key == "list path, default parameters")
-                    {
-                        defaultParamsFilename = string.Copy(kvSetting.Value);
-                        break;
-                    }
+                    defaultParamsFilename = string.Copy(kvSetting.Value);
+                    break;
                 }
             }
 
@@ -579,42 +591,41 @@ namespace PHRPReader.Reader
             }
 
             // Now read the parameters in paramFilePath
-            using (var xmlReader = new XmlTextReader(paramFilePath))
+            using var xmlReader = new XmlTextReader(paramFilePath);
+
+            while (MoveToNextInputParam(xmlReader, out var kvSetting))
             {
-                while (MoveToNextInputParam(xmlReader, out var kvSetting))
+                if (!string.IsNullOrEmpty(kvSetting.Key))
                 {
-                    if (!string.IsNullOrEmpty(kvSetting.Key))
+                    searchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value);
+
+                    switch (kvSetting.Key)
                     {
-                        searchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value);
+                        case TAXONOMY_INFO_KEY_NAME:
 
-                        switch (kvSetting.Key)
-                        {
-                            case TAXONOMY_INFO_KEY_NAME:
+                            if (determineFastaFileNameUsingTaxonomyFile)
+                            {
+                                // Open the taxonomy file to determine the fasta file used
+                                var setting = GetFastaFileFromTaxonomyFile(inputDirectoryPath, Path.GetFileName(kvSetting.Value), out errorMessage);
 
-                                if (determineFastaFileNameUsingTaxonomyFile)
+                                if (!string.IsNullOrEmpty(setting))
                                 {
-                                    // Open the taxonomy file to determine the fasta file used
-                                    var setting = GetFastaFileFromTaxonomyFile(inputDirectoryPath, Path.GetFileName(kvSetting.Value), out errorMessage);
-
-                                    if (!string.IsNullOrEmpty(setting))
-                                    {
-                                        searchEngineParams.FastaFilePath = setting;
-                                    }
+                                    searchEngineParams.FastaFilePath = setting;
                                 }
+                            }
 
-                                break;
-                            case "spectrum, fragment mass type":
-                                searchEngineParams.FragmentMassType = kvSetting.Value;
+                            break;
+                        case "spectrum, fragment mass type":
+                            searchEngineParams.FragmentMassType = kvSetting.Value;
 
-                                break;
-                            case "scoring, maximum missed cleavage sites":
-                                if (int.TryParse(kvSetting.Value, out var value))
-                                {
-                                    searchEngineParams.MaxNumberInternalCleavages = value;
-                                }
+                            break;
+                        case "scoring, maximum missed cleavage sites":
+                            if (int.TryParse(kvSetting.Value, out var value))
+                            {
+                                searchEngineParams.MaxNumberInternalCleavages = value;
+                            }
 
-                                break;
-                        }
+                            break;
                     }
                 }
             }
@@ -638,7 +649,8 @@ namespace PHRPReader.Reader
 
                 var noteType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
 
-                if (noteType != "input") continue;
+                if (noteType != "input")
+                    continue;
 
                 var paramName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
 
@@ -678,19 +690,19 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.ResultID), mColumnHeaders, 0);
 
                     // X!Tandem only tracks the top-ranked peptide for each spectrum
                     psm.ScoreRank = 1;
 
-                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Peptide), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -701,7 +713,7 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Charge), mColumnHeaders, 0));
 
                     // Lookup the protein name(s) using mResultIDToProteins
                     if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
@@ -715,17 +727,17 @@ namespace PHRPReader.Reader
                     // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
                     // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
-                    var peptideMH = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
+                    var peptideMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.MH), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
 
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelM), mColumnHeaders);
                     if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
                     {
                         // Adjust the precursor mass
                         psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
                     }
 
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelMPPM), mColumnHeaders);
 
                     success = true;
                 }
@@ -738,17 +750,17 @@ namespace PHRPReader.Reader
                     }
 
                     // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_Peptide_Hyperscore);
-                    AddScore(psm, columns, DATA_COLUMN_Peptide_Expectation_Value_LogE);
-                    AddScore(psm, columns, DATA_COLUMN_DeltaCn2);
-                    AddScore(psm, columns, DATA_COLUMN_y_score);
-                    AddScore(psm, columns, DATA_COLUMN_y_ions);
-                    AddScore(psm, columns, DATA_COLUMN_b_score);
-                    AddScore(psm, columns, DATA_COLUMN_b_ions);
-                    AddScore(psm, columns, DATA_COLUMN_Peptide_Intensity_LogI);
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Hyperscore));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.EValue));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.DeltaCn2));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YScore));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YIons));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BScore));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BIons));
+                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Intensity));
 
                     // This is the base-10 log of the expectation value
-                    if (double.TryParse(psm.GetScore(DATA_COLUMN_Peptide_Expectation_Value_LogE), out var logEValue))
+                    if (double.TryParse(psm.GetScore(GetColumnNameByID(XTandemSynFileColumns.EValue)), out var logEValue))
                     {
                         // Record the original E-value
                         psm.SetScore("Peptide_Expectation_Value", Math.Pow(10, logEValue).ToString("0.00e+000"));

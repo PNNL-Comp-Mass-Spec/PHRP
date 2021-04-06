@@ -21,43 +21,25 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: chymotrypsin, Da, FilePos, PepToProt
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_MQScore = "MQScore";
-        public const string DATA_COLUMN_Length = "Length";
-        public const string DATA_COLUMN_TotalPRMScore = "TotalPRMScore";
-        public const string DATA_COLUMN_MedianPRMScore = "MedianPRMScore";
-        public const string DATA_COLUMN_FractionY = "FractionY";
-        public const string DATA_COLUMN_FractionB = "FractionB";
-        public const string DATA_COLUMN_Intensity = "Intensity";
-        public const string DATA_COLUMN_NTT = "NTT";
-        public const string DATA_COLUMN_PValue = "PValue";
-        public const string DATA_COLUMN_FScore = "FScore";
-        public const string DATA_COLUMN_DeltaScore = "DeltaScore";
-        public const string DATA_COLUMN_DeltaScoreOther = "DeltaScoreOther";
-        public const string DATA_COLUMN_DeltaNormMQScore = "DeltaNormMQScore";
-        public const string DATA_COLUMN_DeltaNormTotalPRMScore = "DeltaNormTotalPRMScore";
-        public const string DATA_COLUMN_RankTotalPRMScore = "RankTotalPRMScore";
-        public const string DATA_COLUMN_RankFScore = "RankFScore";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_RecordNumber = "RecordNumber";
-        public const string DATA_COLUMN_DBFilePos = "DBFilePos";
-        public const string DATA_COLUMN_SpecFilePos = "SpecFilePos";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_PrecursorError = "PrecursorError";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-
+        /// <summary>
+        /// Inspect synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_inspect_syn.txt";
+
+        /// <summary>
+        /// Inspect first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_inspect_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string INS_SEARCH_ENGINE_NAME = "Inspect";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for Inspect
+        /// </summary>
+        private static readonly Dictionary<InspectSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -186,39 +168,37 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, InspectSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, InspectSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, InspectSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, InspectSynFileColumns.Scan},
-                {DATA_COLUMN_Peptide, InspectSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, InspectSynFileColumns.Protein},
-                {DATA_COLUMN_Charge, InspectSynFileColumns.Charge},
-                {DATA_COLUMN_MQScore, InspectSynFileColumns.MQScore},
-                {DATA_COLUMN_Length, InspectSynFileColumns.Length},
-                {DATA_COLUMN_TotalPRMScore, InspectSynFileColumns.TotalPRMScore},
-                {DATA_COLUMN_MedianPRMScore, InspectSynFileColumns.MedianPRMScore},
-                {DATA_COLUMN_FractionY, InspectSynFileColumns.FractionY},
-                {DATA_COLUMN_FractionB, InspectSynFileColumns.FractionB},
-                {DATA_COLUMN_Intensity, InspectSynFileColumns.Intensity},
-                {DATA_COLUMN_NTT, InspectSynFileColumns.NTT},
-                {DATA_COLUMN_PValue, InspectSynFileColumns.PValue},
-                {DATA_COLUMN_FScore, InspectSynFileColumns.FScore},
-                {DATA_COLUMN_DeltaScore, InspectSynFileColumns.DeltaScore},
-                {DATA_COLUMN_DeltaScoreOther, InspectSynFileColumns.DeltaScoreOther},
-                {DATA_COLUMN_DeltaNormMQScore, InspectSynFileColumns.DeltaNormMQScore},
-                {DATA_COLUMN_DeltaNormTotalPRMScore, InspectSynFileColumns.DeltaNormTotalPRMScore},
-                {DATA_COLUMN_RankTotalPRMScore, InspectSynFileColumns.RankTotalPRMScore},
-                {DATA_COLUMN_RankFScore, InspectSynFileColumns.RankFScore},
-                {DATA_COLUMN_MH, InspectSynFileColumns.MH},
-                {DATA_COLUMN_RecordNumber, InspectSynFileColumns.RecordNumber},
-                {DATA_COLUMN_DBFilePos, InspectSynFileColumns.DBFilePos},
-                {DATA_COLUMN_SpecFilePos, InspectSynFileColumns.SpecFilePos},
-                {DATA_COLUMN_PrecursorMZ, InspectSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_PrecursorError, InspectSynFileColumns.PrecursorError},
-                {DATA_COLUMN_DelM_PPM, InspectSynFileColumns.DelM_PPM}
+                { "ResultID", InspectSynFileColumns.ResultID },
+                { "Scan", InspectSynFileColumns.Scan },
+                { "Peptide", InspectSynFileColumns.Peptide },
+                { "Protein", InspectSynFileColumns.Protein },
+                { "Charge", InspectSynFileColumns.Charge },
+                { "MQScore", InspectSynFileColumns.MQScore },
+                { "Length", InspectSynFileColumns.Length },
+                { "TotalPRMScore", InspectSynFileColumns.TotalPRMScore },
+                { "MedianPRMScore", InspectSynFileColumns.MedianPRMScore },
+                { "FractionY", InspectSynFileColumns.FractionY },
+                { "FractionB", InspectSynFileColumns.FractionB },
+                { "Intensity", InspectSynFileColumns.Intensity },
+                { "NTT", InspectSynFileColumns.NTT },
+                { "PValue", InspectSynFileColumns.PValue },
+                { "FScore", InspectSynFileColumns.FScore },
+                { "DeltaScore", InspectSynFileColumns.DeltaScore },
+                { "DeltaScoreOther", InspectSynFileColumns.DeltaScoreOther },
+                { "DeltaNormMQScore", InspectSynFileColumns.DeltaNormMQScore },
+                { "DeltaNormTotalPRMScore", InspectSynFileColumns.DeltaNormTotalPRMScore },
+                { "RankTotalPRMScore", InspectSynFileColumns.RankTotalPRMScore },
+                { "RankFScore", InspectSynFileColumns.RankFScore },
+                { "MH", InspectSynFileColumns.MH },
+                { "RecordNumber", InspectSynFileColumns.RecordNumber },
+                { "DBFilePos", InspectSynFileColumns.DBFilePos },
+                { "SpecFilePos", InspectSynFileColumns.SpecFilePos },
+                { "PrecursorMZ", InspectSynFileColumns.PrecursorMZ },
+                { "PrecursorError", InspectSynFileColumns.PrecursorError },
+                { "DelM_PPM", InspectSynFileColumns.DelM_PPM }
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -232,6 +212,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(InspectSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -407,17 +407,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_RankTotalPRMScore, mColumnHeaders, 0);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.ResultID), mColumnHeaders, 0);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.RankTotalPRMScore), mColumnHeaders, 0);
 
-                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.Peptide), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -428,16 +428,16 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.Charge), mColumnHeaders, 0));
 
-                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorError, mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.PrecursorError), mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(InspectSynFileColumns.DelM_PPM), mColumnHeaders);
 
                     success = true;
                 }
@@ -450,17 +450,17 @@ namespace PHRPReader.Reader
                     }
 
                     // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_MQScore);
-                    AddScore(psm, columns, DATA_COLUMN_TotalPRMScore);
-                    AddScore(psm, columns, DATA_COLUMN_MedianPRMScore);
-                    AddScore(psm, columns, DATA_COLUMN_PValue);
-                    AddScore(psm, columns, DATA_COLUMN_FScore);
-                    AddScore(psm, columns, DATA_COLUMN_DeltaScore);
-                    AddScore(psm, columns, DATA_COLUMN_DeltaScoreOther);
-                    AddScore(psm, columns, DATA_COLUMN_DeltaNormMQScore);
-                    AddScore(psm, columns, DATA_COLUMN_DeltaNormTotalPRMScore);
-                    AddScore(psm, columns, DATA_COLUMN_RankTotalPRMScore);
-                    AddScore(psm, columns, DATA_COLUMN_RankFScore);
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.MQScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.TotalPRMScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.MedianPRMScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.PValue));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.FScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.DeltaScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.DeltaScoreOther));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.DeltaNormMQScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.DeltaNormTotalPRMScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.RankTotalPRMScore));
+                    AddScore(psm, columns, GetColumnNameByID(InspectSynFileColumns.RankFScore));
                 }
             }
             catch (Exception ex)

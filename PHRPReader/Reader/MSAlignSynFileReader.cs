@@ -21,37 +21,25 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: Da, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Prsm_ID = "Prsm_ID";
-        public const string DATA_COLUMN_Spectrum_ID = "Spectrum_ID";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Protein_Mass = "Protein_Mass";
-        public const string DATA_COLUMN_Unexpected_Mod_Count = "Unexpected_Mod_Count";
-        public const string DATA_COLUMN_Peak_Count = "Peak_Count";
-        public const string DATA_COLUMN_Matched_Peak_Count = "Matched_Peak_Count";
-        public const string DATA_COLUMN_Matched_Fragment_Ion_Count = "Matched_Fragment_Ion_Count";
-        public const string DATA_COLUMN_PValue = "PValue";
-        public const string DATA_COLUMN_Rank_PValue = "Rank_PValue";
-        public const string DATA_COLUMN_EValue = "EValue";
-        public const string DATA_COLUMN_FDR = "FDR";
-        public const string DATA_COLUMN_Species_ID = "Species_ID";      // Only in MSAlign_Histone results
-        public const string DATA_COLUMN_FragMethod = "FragMethod";      // Only in MSAlign_Histone results
-
+        /// <summary>
+        /// MSAlign synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_msalign_syn.txt";
+
+        /// <summary>
+        /// MSAlign first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_msalign_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MSAlign_SEARCH_ENGINE_NAME = "MSAlign";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for MSAlign
+        /// </summary>
+        private static readonly Dictionary<MSAlignSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -145,7 +133,7 @@ namespace PHRPReader.Reader
             if (searchEngineParams.Parameters.TryGetValue("errorTolerance", out var tolerance))
             {
                 // Parent mass tolerance, in ppm
-                if (Double.TryParse(tolerance, out tolerancePPM))
+                if (double.TryParse(tolerance, out tolerancePPM))
                 {
                     toleranceDa = PeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
                 }
@@ -171,33 +159,31 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MSAlignSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MSAlignSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MSAlignSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MSAlignSynFileColumns.Scan},
-                {DATA_COLUMN_Prsm_ID, MSAlignSynFileColumns.Prsm_ID},
-                {DATA_COLUMN_Spectrum_ID, MSAlignSynFileColumns.Spectrum_ID},
-                {DATA_COLUMN_Charge, MSAlignSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, MSAlignSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, MSAlignSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, MSAlignSynFileColumns.DelMPPM},
-                {DATA_COLUMN_MH, MSAlignSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, MSAlignSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, MSAlignSynFileColumns.Protein},
-                {DATA_COLUMN_Protein_Mass, MSAlignSynFileColumns.Protein_Mass},
-                {DATA_COLUMN_Unexpected_Mod_Count, MSAlignSynFileColumns.Unexpected_Mod_Count},
-                {DATA_COLUMN_Peak_Count, MSAlignSynFileColumns.Peak_Count},
-                {DATA_COLUMN_Matched_Peak_Count, MSAlignSynFileColumns.Matched_Peak_Count},
-                {DATA_COLUMN_Matched_Fragment_Ion_Count, MSAlignSynFileColumns.Matched_Fragment_Ion_Count},
-                {DATA_COLUMN_PValue, MSAlignSynFileColumns.PValue},
-                {DATA_COLUMN_Rank_PValue, MSAlignSynFileColumns.Rank_PValue},
-                {DATA_COLUMN_EValue, MSAlignSynFileColumns.EValue},
-                {DATA_COLUMN_FDR, MSAlignSynFileColumns.FDR},
-                {DATA_COLUMN_Species_ID, MSAlignSynFileColumns.Species_ID},         // Only in MSAlign_Histone results
-                {DATA_COLUMN_FragMethod, MSAlignSynFileColumns.FragMethod}          // Only in MSAlign_Histone results
+                { "ResultID", MSAlignSynFileColumns.ResultID },
+                { "Scan", MSAlignSynFileColumns.Scan },
+                { "Prsm_ID", MSAlignSynFileColumns.Prsm_ID },
+                { "Spectrum_ID", MSAlignSynFileColumns.Spectrum_ID },
+                { "Charge", MSAlignSynFileColumns.Charge },
+                { "PrecursorMZ", MSAlignSynFileColumns.PrecursorMZ },
+                { "DelM", MSAlignSynFileColumns.DelM },
+                { "DelM_PPM", MSAlignSynFileColumns.DelMPPM },
+                { "MH", MSAlignSynFileColumns.MH },
+                { "Peptide", MSAlignSynFileColumns.Peptide },
+                { "Protein", MSAlignSynFileColumns.Protein },
+                { "Protein_Mass", MSAlignSynFileColumns.Protein_Mass },
+                { "Unexpected_Mod_Count", MSAlignSynFileColumns.Unexpected_Mod_Count },
+                { "Peak_Count", MSAlignSynFileColumns.Peak_Count },
+                { "Matched_Peak_Count", MSAlignSynFileColumns.Matched_Peak_Count },
+                { "Matched_Fragment_Ion_Count", MSAlignSynFileColumns.Matched_Fragment_Ion_Count },
+                { "PValue", MSAlignSynFileColumns.PValue },
+                { "Rank_PValue", MSAlignSynFileColumns.Rank_PValue },
+                { "EValue", MSAlignSynFileColumns.EValue },
+                { "FDR", MSAlignSynFileColumns.FDR },
+                { "Species_ID", MSAlignSynFileColumns.Species_ID },       // Only in MSAlign_Histone results
+                { "FragMethod", MSAlignSynFileColumns.FragMethod }        // Only in MSAlign_Histone results
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -211,6 +197,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MSAlignSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -394,17 +400,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.ResultID), mColumnHeaders, 0);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Rank_PValue), mColumnHeaders, 1);
 
-                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Peptide), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -415,16 +421,16 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Charge), mColumnHeaders, 0));
 
-                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelM), mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelMPPM), mColumnHeaders);
 
                     success = true;
                 }
@@ -437,23 +443,23 @@ namespace PHRPReader.Reader
                     }
 
                     // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_Prsm_ID);
-                    AddScore(psm, columns, DATA_COLUMN_Spectrum_ID);
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Prsm_ID));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Spectrum_ID));
 
-                    AddScore(psm, columns, DATA_COLUMN_MH);
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.MH));
 
-                    AddScore(psm, columns, DATA_COLUMN_Protein_Mass);
-                    AddScore(psm, columns, DATA_COLUMN_Unexpected_Mod_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Peak_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Matched_Peak_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Matched_Fragment_Ion_Count);
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Protein_Mass));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Unexpected_Mod_Count));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Peak_Count));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Peak_Count));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Fragment_Ion_Count));
 
-                    AddScore(psm, columns, DATA_COLUMN_PValue);
-                    AddScore(psm, columns, DATA_COLUMN_EValue);
-                    AddScore(psm, columns, DATA_COLUMN_FDR);
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.PValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.EValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FDR));
 
-                    AddScore(psm, columns, DATA_COLUMN_Species_ID);
-                    AddScore(psm, columns, DATA_COLUMN_FragMethod);
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Species_ID));
+                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FragMethod));
                 }
             }
             catch (Exception ex)

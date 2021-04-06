@@ -14,30 +14,25 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: maxq, MaxQuant
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Spectrum_Index = "Spectrum_Index";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Score = "Score";
-        public const string DATA_COLUMN_Probability = "Probability";
-        public const string DATA_COLUMN_Rank_Probability = "Rank_Probability";
-        public const string DATA_COLUMN_Peptide_Position = "Peptide_Position";
-        public const string DATA_COLUMN_QValue = "QValue";
-
+        /// <summary>
+        /// MaxQuant synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_maxq_syn.txt";
+
+        /// <summary>
+        /// MaxQuant first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_maxq_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MAXQUANT_SEARCH_ENGINE_NAME = "MaxQuant";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for MaxQuant
+        /// </summary>
+        private static readonly Dictionary<MaxQuantSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -116,7 +111,6 @@ namespace PHRPReader.Reader
         {
         }
 
-
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
@@ -134,26 +128,24 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MaxQuantSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MaxQuantSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MaxQuantSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MaxQuantSynFileColumns.Scan},
-                //{DATA_COLUMN_Spectrum_Index, MaxQuantSynFileColumns.Spectrum_Index},
-                //{DATA_COLUMN_Charge, MaxQuantSynFileColumns.Charge},
-                //{DATA_COLUMN_PrecursorMZ, MaxQuantSynFileColumns.PrecursorMZ},
-                //{DATA_COLUMN_DelM, MaxQuantSynFileColumns.DelM},
-                //{DATA_COLUMN_DelM_PPM, MaxQuantSynFileColumns.DelM_PPM},
-                //{DATA_COLUMN_MH, MaxQuantSynFileColumns.MH},
-                //{DATA_COLUMN_Peptide, MaxQuantSynFileColumns.Peptide},
-                //{DATA_COLUMN_Protein, MaxQuantSynFileColumns.Protein},
-                //{DATA_COLUMN_Score, MaxQuantSynFileColumns.Score},
-                //{DATA_COLUMN_Probability, MaxQuantSynFileColumns.Probability},
-                //{DATA_COLUMN_Rank_Probability, MaxQuantSynFileColumns.Rank_Probability},
-                //{DATA_COLUMN_Peptide_Position, MaxQuantSynFileColumns.Peptide_Position},
-                //{DATA_COLUMN_QValue, MaxQuantSynFileColumns.QValue}
+                { "ResultID", MaxQuantSynFileColumns.ResultID },
+                { "Scan", MaxQuantSynFileColumns.Scan },
+                //{ DATA_COLUMN_Spectrum_Index, MaxQuantSynFileColumns.Spectrum_Index },
+                //{ DATA_COLUMN_Charge, MaxQuantSynFileColumns.Charge },
+                //{ DATA_COLUMN_PrecursorMZ, MaxQuantSynFileColumns.PrecursorMZ },
+                //{ DATA_COLUMN_DelM, MaxQuantSynFileColumns.DelM },
+                //{ DATA_COLUMN_DelM_PPM, MaxQuantSynFileColumns.DelM_PPM },
+                //{ DATA_COLUMN_MH, MaxQuantSynFileColumns.MH },
+                //{ DATA_COLUMN_Peptide, MaxQuantSynFileColumns.Peptide },
+                //{ DATA_COLUMN_Protein, MaxQuantSynFileColumns.Protein },
+                //{ DATA_COLUMN_Score, MaxQuantSynFileColumns.Score },
+                //{ DATA_COLUMN_Probability, MaxQuantSynFileColumns.Probability },
+                //{ DATA_COLUMN_Rank_Probability, MaxQuantSynFileColumns.Rank_Probability },
+                //{ DATA_COLUMN_Peptide_Position, MaxQuantSynFileColumns.Peptide_Position },
+                //{ DATA_COLUMN_QValue, MaxQuantSynFileColumns.QValue }
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -167,6 +159,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MaxQuantSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>

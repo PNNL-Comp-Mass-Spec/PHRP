@@ -21,33 +21,25 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: mspath, ProteinDesc, PepToProt
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_MostAbundantIsotopeMz = "MostAbundantIsotopeMz";
-        public const string DATA_COLUMN_Mass = "Mass";
-        public const string DATA_COLUMN_Sequence = "Sequence";
-        public const string DATA_COLUMN_Modifications = "Modifications";
-        public const string DATA_COLUMN_Composition = "Composition";
-        public const string DATA_COLUMN_Protein = "ProteinName";
-        public const string DATA_COLUMN_ProteinDesc = "ProteinDesc";
-        public const string DATA_COLUMN_ProteinLength = "ProteinLength";
-        public const string DATA_COLUMN_ResidueStart = "ResidueStart";
-        public const string DATA_COLUMN_ResidueEnd = "ResidueEnd";
-        public const string DATA_COLUMN_MatchedFragments = "MatchedFragments";
-        public const string DATA_COLUMN_SpecEValue = "SpecEValue";
-        public const string DATA_COLUMN_EValue = "EValue";
-        public const string DATA_COLUMN_QValue = "QValue";
-        public const string DATA_COLUMN_PepQValue = "PepQValue";
-
+        /// <summary>
+        /// MSPathFinder synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_mspath_syn.txt";
+
+        /// <summary>
+        /// MSPathFinder first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_mspath_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for MSPathFinder
+        /// </summary>
+        private static readonly Dictionary<MSPathFinderSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -143,29 +135,27 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MSPathFinderSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MSPathFinderSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MSPathFinderSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MSPathFinderSynFileColumns.Scan},
-                {DATA_COLUMN_Charge, MSPathFinderSynFileColumns.Charge},
-                {DATA_COLUMN_MostAbundantIsotopeMz, MSPathFinderSynFileColumns.MostAbundantIsotopeMz},
-                {DATA_COLUMN_Mass, MSPathFinderSynFileColumns.Mass},
-                {DATA_COLUMN_Sequence, MSPathFinderSynFileColumns.Sequence},
-                {DATA_COLUMN_Modifications, MSPathFinderSynFileColumns.Modifications},
-                {DATA_COLUMN_Composition, MSPathFinderSynFileColumns.Composition},
-                {DATA_COLUMN_Protein, MSPathFinderSynFileColumns.Protein},
-                {DATA_COLUMN_ProteinDesc, MSPathFinderSynFileColumns.ProteinDesc},
-                {DATA_COLUMN_ProteinLength, MSPathFinderSynFileColumns.ProteinLength},
-                {DATA_COLUMN_ResidueStart, MSPathFinderSynFileColumns.ResidueStart},
-                {DATA_COLUMN_ResidueEnd, MSPathFinderSynFileColumns.ResidueEnd},
-                {DATA_COLUMN_MatchedFragments, MSPathFinderSynFileColumns.MatchedFragments},
-                {DATA_COLUMN_SpecEValue, MSPathFinderSynFileColumns.SpecEValue},
-                {DATA_COLUMN_EValue, MSPathFinderSynFileColumns.EValue},
-                {DATA_COLUMN_QValue, MSPathFinderSynFileColumns.QValue},
-                {DATA_COLUMN_PepQValue, MSPathFinderSynFileColumns.PepQValue}
+                { "ResultID", MSPathFinderSynFileColumns.ResultID },
+                { "Scan", MSPathFinderSynFileColumns.Scan },
+                { "Charge", MSPathFinderSynFileColumns.Charge },
+                { "MostAbundantIsotopeMz", MSPathFinderSynFileColumns.MostAbundantIsotopeMz },
+                { "Mass", MSPathFinderSynFileColumns.Mass },
+                { "Sequence", MSPathFinderSynFileColumns.Sequence },
+                { "Modifications", MSPathFinderSynFileColumns.Modifications },
+                { "Composition", MSPathFinderSynFileColumns.Composition },
+                { "ProteinName", MSPathFinderSynFileColumns.Protein },
+                { "ProteinDesc", MSPathFinderSynFileColumns.ProteinDesc },
+                { "ProteinLength", MSPathFinderSynFileColumns.ProteinLength },
+                { "ResidueStart", MSPathFinderSynFileColumns.ResidueStart },
+                { "ResidueEnd", MSPathFinderSynFileColumns.ResidueEnd },
+                { "MatchedFragments", MSPathFinderSynFileColumns.MatchedFragments },
+                { "SpecEValue", MSPathFinderSynFileColumns.SpecEValue },
+                { "EValue", MSPathFinderSynFileColumns.EValue },
+                { "QValue", MSPathFinderSynFileColumns.QValue },
+                { "PepQValue", MSPathFinderSynFileColumns.PepQValue },
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -179,6 +169,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MSPathFinderSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -335,17 +345,17 @@ namespace PHRPReader.Reader
                 var success = false;
 
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.ResultID), mColumnHeaders, 0);
                     psm.ScoreRank = 1;
 
-                    var sequence = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Sequence, mColumnHeaders);
+                    var sequence = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Sequence), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -356,13 +366,13 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(sequence, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Charge), mColumnHeaders, 0));
 
-                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);
 
                     // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
-                    psm.PrecursorNeutralMass = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Mass), mColumnHeaders, 0.0);
 
                     // Collision mode, precursor neutral mass, etc. are not applicable
                     // psm.CollisionMode =
@@ -386,18 +396,18 @@ namespace PHRPReader.Reader
 
                 // Store the remaining data
 
-                AddScore(psm, columns, DATA_COLUMN_MostAbundantIsotopeMz);
-                AddScore(psm, columns, DATA_COLUMN_Modifications);
-                AddScore(psm, columns, DATA_COLUMN_Composition);
-                AddScore(psm, columns, DATA_COLUMN_ProteinDesc);
-                AddScore(psm, columns, DATA_COLUMN_ProteinLength);
-                AddScore(psm, columns, DATA_COLUMN_ResidueStart);
-                AddScore(psm, columns, DATA_COLUMN_ResidueEnd);
-                AddScore(psm, columns, DATA_COLUMN_MatchedFragments);
-                AddScore(psm, columns, DATA_COLUMN_SpecEValue);
-                AddScore(psm, columns, DATA_COLUMN_EValue);
-                AddScore(psm, columns, DATA_COLUMN_QValue);
-                AddScore(psm, columns, DATA_COLUMN_PepQValue);
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.MostAbundantIsotopeMz));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.Modifications));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.Composition));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.ProteinDesc));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.ProteinLength));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.ResidueStart));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.ResidueEnd));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.MatchedFragments));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.SpecEValue));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.EValue));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.QValue));
+                AddScore(psm, columns, GetColumnNameByID(MSPathFinderSynFileColumns.PepQValue));
 
                 return true;
             }

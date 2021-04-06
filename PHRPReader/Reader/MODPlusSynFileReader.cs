@@ -24,32 +24,25 @@ namespace PHRPReader.Reader
         // ReSharper disable once CommentTypo
         // Ignore Spelling: da, massdiff, MODp, modp, prot, tol
 
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Spectrum_Index = "Spectrum_Index";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_NTT = "NTT";
-        public const string DATA_COLUMN_Modification_Annotation = "Modification_Annotation";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Peptide_Position = "Peptide_Position";
-        public const string DATA_COLUMN_Score = "Score";
-        public const string DATA_COLUMN_Probability = "Probability";
-        public const string DATA_COLUMN_Rank_Score = "Rank_Score";
-        public const string DATA_COLUMN_QValue = "QValue";
-
+        /// <summary>
+        /// MODPlus synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_modp_syn.txt";
+
+        /// <summary>
+        /// MODPlus first hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_modp_fht.txt";
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         private const string MODPlus_SEARCH_ENGINE_NAME = "MODPlus";
 
-#pragma warning restore 1591
+        /// <summary>
+        /// Mapping from enum to synopsis file column name for MODPlus
+        /// </summary>
+        private static readonly Dictionary<MODPlusSynFileColumns, string> mSynopsisFileColumn = new();
 
         /// <summary>
         /// First hits file
@@ -145,28 +138,26 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MODPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MODPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            return new(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MODPlusSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MODPlusSynFileColumns.Scan},
-                {DATA_COLUMN_Spectrum_Index, MODPlusSynFileColumns.Spectrum_Index},
-                {DATA_COLUMN_Charge, MODPlusSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, MODPlusSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, MODPlusSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, MODPlusSynFileColumns.DelM_PPM},
-                {DATA_COLUMN_MH, MODPlusSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, MODPlusSynFileColumns.Peptide},
-                {DATA_COLUMN_NTT, MODPlusSynFileColumns.NTT},
-                {DATA_COLUMN_Modification_Annotation, MODPlusSynFileColumns.ModificationAnnotation},
-                {DATA_COLUMN_Protein, MODPlusSynFileColumns.Protein},
-                {DATA_COLUMN_Peptide_Position, MODPlusSynFileColumns.Peptide_Position},
-                {DATA_COLUMN_Score, MODPlusSynFileColumns.Score},
-                {DATA_COLUMN_Probability, MODPlusSynFileColumns.Probability},
-                {DATA_COLUMN_Rank_Score, MODPlusSynFileColumns.Rank_Score},
-                {DATA_COLUMN_QValue, MODPlusSynFileColumns.QValue}
+                { "ResultID", MODPlusSynFileColumns.ResultID },
+                { "Scan", MODPlusSynFileColumns.Scan },
+                { "Spectrum_Index", MODPlusSynFileColumns.Spectrum_Index },
+                { "Charge", MODPlusSynFileColumns.Charge },
+                { "PrecursorMZ", MODPlusSynFileColumns.PrecursorMZ },
+                { "DelM", MODPlusSynFileColumns.DelM },
+                { "DelM_PPM", MODPlusSynFileColumns.DelM_PPM },
+                { "MH", MODPlusSynFileColumns.MH },
+                { "Peptide", MODPlusSynFileColumns.Peptide },
+                { "NTT", MODPlusSynFileColumns.NTT },
+                { "ModificationAnnotation", MODPlusSynFileColumns.ModificationAnnotation },
+                { "Protein", MODPlusSynFileColumns.Protein },
+                { "Peptide_Position", MODPlusSynFileColumns.Peptide_Position },
+                { "Score", MODPlusSynFileColumns.Score },
+                { "Probability", MODPlusSynFileColumns.Probability },
+                { "Rank_Score", MODPlusSynFileColumns.Rank_Score },
+                { "QValue", MODPlusSynFileColumns.QValue }
             };
-
-            return headerColumns;
         }
 
         /// <summary>
@@ -180,6 +171,26 @@ namespace PHRPReader.Reader
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the synopsis file column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MODPlusSynFileColumns column)
+        {
+            if (mSynopsisFileColumn.Count > 0)
+            {
+                return mSynopsisFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mSynopsisFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mSynopsisFileColumn[column];
         }
 
         /// <summary>
@@ -472,17 +483,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_Score, mColumnHeaders, 1);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.ResultID), mColumnHeaders, 0);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.Rank_Score), mColumnHeaders, 1);
 
-                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.Peptide), mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -493,16 +504,16 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.Charge), mColumnHeaders, 0));
 
-                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.DelM), mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.DelM_PPM), mColumnHeaders);
 
                     success = true;
                 }
@@ -515,16 +526,16 @@ namespace PHRPReader.Reader
                     }
 
                     // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_Spectrum_Index);
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.Spectrum_Index));
 
-                    AddScore(psm, columns, DATA_COLUMN_MH);
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.MH));
 
-                    AddScore(psm, columns, DATA_COLUMN_Modification_Annotation);
-                    AddScore(psm, columns, DATA_COLUMN_Peptide_Position);
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.ModificationAnnotation));
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.Peptide_Position));
 
-                    AddScore(psm, columns, DATA_COLUMN_Score);
-                    AddScore(psm, columns, DATA_COLUMN_Probability);
-                    AddScore(psm, columns, DATA_COLUMN_QValue);
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.Score));
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.Probability));
+                    AddScore(psm, columns, GetColumnNameByID(MODPlusSynFileColumns.QValue));
                 }
             }
             catch (Exception ex)
