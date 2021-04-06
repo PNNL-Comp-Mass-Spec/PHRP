@@ -1630,8 +1630,8 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     headerNames = (from item in headerColumns
-                                   where item.Key != MSAlignSynFileReader.DATA_COLUMN_Species_ID &&
-                                         item.Key != MSAlignSynFileReader.DATA_COLUMN_FragMethod
+                                   where item.Key != MSAlignSynFileReader.GetColumnNameByID(MSAlignSynFileColumns.Species_ID) &&
+                                         item.Key != MSAlignSynFileReader.GetColumnNameByID(MSAlignSynFileColumns.FragMethod)
                                    orderby item.Value
                                    select item.Key).ToList();
                 }
