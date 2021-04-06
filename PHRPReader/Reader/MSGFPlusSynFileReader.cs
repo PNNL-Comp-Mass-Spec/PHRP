@@ -26,42 +26,13 @@ namespace PHRPReader.Reader
 
 #pragma warning disable 1591
 
-        public const string DATA_COLUMN_ResultID = "ResultID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_FragMethod = "FragMethod";
-        public const string DATA_COLUMN_SpecIndex = "SpecIndex";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_PrecursorMZ = "PrecursorMZ";
-        public const string DATA_COLUMN_DelM = "DelM";
-        public const string DATA_COLUMN_DelM_PPM = "DelM_PPM";
-        public const string DATA_COLUMN_MH = "MH";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_NTT = "NTT";
-        public const string DATA_COLUMN_DeNovoScore = "DeNovoScore";
-        public const string DATA_COLUMN_MSGFScore = "MSGFScore";
+        // Constants for legacy column names for tool MSGFDB
+        public const string MSGFDB_SpecProb = "MSGFDB_SpecProb";
+        private const string MSGFDB_RankSpecProb = "Rank_MSGFDB_SpecProb";
+        private const string MSGFDB_PValue = "PValue";
 
-        public const string DATA_COLUMN_MSGFDB_SpecProb = "MSGFDB_SpecProb";           // MSGFDB
-        public const string DATA_COLUMN_Rank_MSGFDB_SpecProb = "Rank_MSGFDB_SpecProb"; // MSGFDB
-
-        public const string DATA_COLUMN_MSGFPlus_SpecEValue = "MSGFDB_SpecEValue";           // MS-GF+
-        public const string DATA_COLUMN_Rank_MSGFPlus_SpecEValue = "Rank_MSGFDB_SpecEValue"; // MS-GF+
-
-        public const string DATA_COLUMN_PValue = "PValue"; // MSGFDB
-        public const string DATA_COLUMN_EValue = "EValue"; // MS-GF+
-
-        public const string DATA_COLUMN_FDR = "FDR";        // MSGFDB; Only present if a Target/Decoy (TDA) search was used
-        public const string DATA_COLUMN_PepFDR = "PepFDR";  // MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
-
-        public const string DATA_COLUMN_QValue = "QValue";       // MS-GF+ reports QValue instead of FDR
-        public const string DATA_COLUMN_PepQValue = "PepQValue"; // MS-GF+ reports pepQValue instead of PepFDR
-
-        public const string DATA_COLUMN_EFDR = "EFDR";  // Only present if a Target/Decoy (TDA) search was not used
-
-        public const string DATA_COLUMN_IMS_Scan = "IMS_Scan";
-        public const string DATA_COLUMN_IMS_Drift_Time = "IMS_Drift_Time";
-
-        public const string DATA_COLUMN_Isotope_Error = "IsotopeError"; // Only reported by MS-GF+
+        private const string MSGFDB_FDR = "FDR";        // MSGFDB; Only present if a Target/Decoy (TDA) search was used
+        private const string MSGFDB_PepFDR = "PepFDR";  // MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
         // These suffixes were changed from_msgfdb to _msgfplus in November 2016
         public const string FILENAME_SUFFIX_SYN = "_msgfplus_syn.txt";
@@ -76,6 +47,16 @@ namespace PHRPReader.Reader
         public const string PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM = "PMTolerance";
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
+
+        /// <summary>
+        /// Mapping from enum to column name for legacy tool MSGFDB
+        /// </summary>
+        private static readonly Dictionary<MSGFDBSynFileColumns, string> mMSGFDBColumns = new();
+
+        /// <summary>
+        /// Mapping from enum to column name for MS-GF+
+        /// </summary>
+        private static readonly Dictionary<MSGFPlusSynFileColumns, string> mMSGFPlusColumns = new();
 
 #pragma warning restore 1591
 
@@ -287,37 +268,45 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
-        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeExtras = false)
         {
             var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MSGFPlusSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MSGFPlusSynFileColumns.Scan},
-                {DATA_COLUMN_FragMethod, MSGFPlusSynFileColumns.FragMethod},
-                {DATA_COLUMN_SpecIndex, MSGFPlusSynFileColumns.SpecIndex},
-                {DATA_COLUMN_Charge, MSGFPlusSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, MSGFPlusSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, MSGFPlusSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, MSGFPlusSynFileColumns.DelMPPM},
-                {DATA_COLUMN_MH, MSGFPlusSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, MSGFPlusSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, MSGFPlusSynFileColumns.Protein},
-                {DATA_COLUMN_NTT, MSGFPlusSynFileColumns.NTT},
-                {DATA_COLUMN_DeNovoScore, MSGFPlusSynFileColumns.DeNovoScore},
-                {DATA_COLUMN_MSGFScore, MSGFPlusSynFileColumns.MSGFScore},
-                {DATA_COLUMN_MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_Rank_MSGFDB_SpecProb, MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_PValue, MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_EValue, MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_FDR, MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_QValue, MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_PepFDR, MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_PepQValue, MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_EFDR, MSGFPlusSynFileColumns.EFDR},
-                {DATA_COLUMN_Isotope_Error, MSGFPlusSynFileColumns.IsotopeError}
+                {"ResultID", MSGFPlusSynFileColumns.ResultID},
+                {"Scan", MSGFPlusSynFileColumns.Scan},
+                {"FragMethod", MSGFPlusSynFileColumns.FragMethod},
+                {"SpecIndex", MSGFPlusSynFileColumns.SpecIndex},
+                {"Charge", MSGFPlusSynFileColumns.Charge},
+                {"PrecursorMZ", MSGFPlusSynFileColumns.PrecursorMZ},
+                {"DelM", MSGFPlusSynFileColumns.DelM},
+                {"DelM_PPM", MSGFPlusSynFileColumns.DelMPPM},
+                {"MH", MSGFPlusSynFileColumns.MH},
+                {"Peptide", MSGFPlusSynFileColumns.Peptide},
+                {"Protein", MSGFPlusSynFileColumns.Protein},
+                {"NTT", MSGFPlusSynFileColumns.NTT},
+                {"DeNovoScore", MSGFPlusSynFileColumns.DeNovoScore},
+                {"MSGFScore", MSGFPlusSynFileColumns.MSGFScore},
+                {MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecEValue},
+                {"MSGFDB_SpecEValue", MSGFPlusSynFileColumns.SpecEValue},
+                {MSGFDB_RankSpecProb, MSGFPlusSynFileColumns.RankSpecEValue},
+                {"Rank_MSGFDB_SpecEValue", MSGFPlusSynFileColumns.RankSpecEValue},
+                {MSGFDB_PValue, MSGFPlusSynFileColumns.EValue},
+                {"EValue", MSGFPlusSynFileColumns.EValue},
+                {MSGFDB_FDR, MSGFPlusSynFileColumns.QValue},
+                {"QValue", MSGFPlusSynFileColumns.QValue},
+                {MSGFDB_PepFDR, MSGFPlusSynFileColumns.PepQValue},
+                {"PepQValue", MSGFPlusSynFileColumns.PepQValue},
+                {"EFDR", MSGFPlusSynFileColumns.EFDR},
+                { "IsotopeError", MSGFPlusSynFileColumns.IsotopeError}
             };
+
+            if (!includeExtras)
+            {
+                return headerColumns;
+            }
+
+            headerColumns.Add("IMS_Scan", MSGFPlusSynFileColumns.IMSScan);
+            headerColumns.Add("IMS_Drift_Time", MSGFPlusSynFileColumns.IMSDriftTime);
 
             return headerColumns;
         }
@@ -331,10 +320,50 @@ namespace PHRPReader.Reader
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
-            var headerColumns = GetColumnHeaderNamesAndIDs();
+            var headerColumns = GetColumnHeaderNamesAndIDs(true);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
+        /// <summary>
+        /// Get the MS-GF+ column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MSGFPlusSynFileColumns column)
+        {
+            if (mMSGFPlusColumns.Count > 0)
+            {
+                return mMSGFPlusColumns[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs(true))
+            {
+                mMSGFPlusColumns.Add(item.Value, item.Key);
+            }
+
+            return mMSGFPlusColumns[column];
+        }
+
+        /// <summary>
+        /// Get the MSGFDB column name associated with the given num
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetMSGFDBColumnNameByID(MSGFDBSynFileColumns column)
+        {
+            if (mMSGFDBColumns.Count > 0)
+            {
+                return mMSGFDBColumns[column];
+            }
+
+            mMSGFDBColumns.Add(MSGFDBSynFileColumns.SpecProb, MSGFDB_SpecProb);
+            mMSGFDBColumns.Add(MSGFDBSynFileColumns.RankSpecProb, MSGFDB_RankSpecProb);
+            mMSGFDBColumns.Add(MSGFDBSynFileColumns.PValue, MSGFDB_PValue);
+            mMSGFDBColumns.Add(MSGFDBSynFileColumns.FDR, MSGFDB_FDR);
+            mMSGFDBColumns.Add(MSGFDBSynFileColumns.PepFDR, MSGFDB_PepFDR);
+
+            return mMSGFDBColumns[column];
+        }
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
@@ -562,28 +591,28 @@ namespace PHRPReader.Reader
             {
                 var columns = line.Split('\t');
 
-                var msgfPlusResults = ReaderFactory.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0;
+                var msgfPlusResults = ReaderFactory.LookupColumnIndex(GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue), mColumnHeaders) >= 0;
 
                 psm.DataLineText = line;
-                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                     return false;
                 }
 
-                psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.ResultID), mColumnHeaders, 0);
 
                 if (msgfPlusResults)
                 {
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue, mColumnHeaders, 1);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.RankSpecEValue), mColumnHeaders, 1);
                 }
                 else
                 {
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.RankSpecProb), mColumnHeaders, 1);
                 }
 
-                var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.Peptide), mColumnHeaders);
 
                 if (fastReadMode)
                 {
@@ -594,26 +623,26 @@ namespace PHRPReader.Reader
                     psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.Charge), mColumnHeaders, 0));
 
-                var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.Protein), mColumnHeaders);
                 psm.AddProtein(protein);
 
-                psm.CollisionMode = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_FragMethod, mColumnHeaders, "n/a");
+                psm.CollisionMode = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.FragMethod), mColumnHeaders, "n/a");
 
-                var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
                 psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.DelMPPM), mColumnHeaders);
 
                 if (msgfPlusResults)
                 {
-                    psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders);
+                    psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue), mColumnHeaders);
                 }
                 else
                 {
-                    psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders);
+                    psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb), mColumnHeaders);
                 }
 
                 if (psm.MSGFSpecEValue.Length > 13)
@@ -631,34 +660,37 @@ namespace PHRPReader.Reader
                 }
 
                 // Store the remaining scores
-                AddScore(psm, columns, DATA_COLUMN_DeNovoScore);
+                AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.DeNovoScore));
 
-                AddScore(psm, columns, DATA_COLUMN_MSGFScore);
+                AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore));
 
                 if (msgfPlusResults)
                 {
-                    AddScore(psm, columns, DATA_COLUMN_MSGFPlus_SpecEValue);
-                    AddScore(psm, columns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue);
-                    AddScore(psm, columns, DATA_COLUMN_EValue);
-                    AddScore(psm, columns, DATA_COLUMN_QValue);
-                    AddScore(psm, columns, DATA_COLUMN_PepQValue);
-                    AddScore(psm, columns, DATA_COLUMN_Isotope_Error);
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.RankSpecEValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.EValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.QValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.PepQValue));
+                    AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.IsotopeError));
 
                     // Duplicate the score values to provide backwards compatibility
-                    if (psm.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var value))
-                        psm.SetScore(DATA_COLUMN_MSGFDB_SpecProb, value);
-                    if (psm.TryGetScore(DATA_COLUMN_Rank_MSGFPlus_SpecEValue, out value))
-                        psm.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, value);
-                    if (psm.TryGetScore(DATA_COLUMN_QValue, out value))
-                        psm.SetScore(DATA_COLUMN_FDR, value);
-                    if (psm.TryGetScore(DATA_COLUMN_PepQValue, out value))
-                        psm.SetScore(DATA_COLUMN_PepFDR, value);
+                    if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue), out var value))
+                        psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb), value);
+
+                    if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.RankSpecEValue), out value))
+                        psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.RankSpecProb), value);
+
+                    if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.QValue), out value))
+                        psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.FDR), value);
+
+                    if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.PepQValue), out value))
+                        psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PepFDR), value);
 
                     var pValueStored = false;
 
-                    if (psm.TryGetScore(DATA_COLUMN_EValue, out var eValueText))
+                    if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.EValue), out var eValueText))
                     {
-                        if (psm.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var specEValueText))
+                        if (psm.TryGetScore(GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue), out var specEValueText))
                         {
                             // Compute PValue using EValue and SpecEValue
                             if (double.TryParse(eValueText, out var eValue))
@@ -672,11 +704,11 @@ namespace PHRPReader.Reader
 
                                         if (Math.Abs(pValue) <= double.Epsilon)
                                         {
-                                            psm.SetScore(DATA_COLUMN_PValue, "0");
+                                            psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PValue), "0");
                                         }
                                         else
                                         {
-                                            psm.SetScore(DATA_COLUMN_PValue, pValue.ToString("0.00000E-00"));
+                                            psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PValue), pValue.ToString("0.00000E-00"));
                                         }
 
                                         pValueStored = true;
@@ -688,24 +720,24 @@ namespace PHRPReader.Reader
                         if (!pValueStored)
                         {
                             // Store E-value as P-value (these values are not identical, and will only be close for high-confidence results, i.e. results with FDR < 2%)
-                            psm.SetScore(DATA_COLUMN_PValue, eValueText);
+                            psm.SetScore(GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PValue), eValueText);
                         }
                     }
                 }
                 else
                 {
-                    AddScore(psm, columns, DATA_COLUMN_MSGFDB_SpecProb);
-                    AddScore(psm, columns, DATA_COLUMN_Rank_MSGFDB_SpecProb);
-                    AddScore(psm, columns, DATA_COLUMN_PValue);
-                    AddScore(psm, columns, DATA_COLUMN_FDR);
-                    AddScore(psm, columns, DATA_COLUMN_PepFDR);
+                    AddScore(psm, columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb));
+                    AddScore(psm, columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.RankSpecProb));
+                    AddScore(psm, columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PValue));
+                    AddScore(psm, columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.FDR));
+                    AddScore(psm, columns, GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.PepFDR));
                 }
 
-                AddScore(psm, columns, DATA_COLUMN_EFDR); // This column will not be present if a Target/Decoy (TDA) search was performed
+                AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.EFDR)); // This column will not be present if a Target/Decoy (TDA) search was performed
 
-                AddScore(psm, columns, DATA_COLUMN_IMS_Scan);
+                AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.IMSScan));
 
-                AddScore(psm, columns, DATA_COLUMN_IMS_Drift_Time);
+                AddScore(psm, columns, GetColumnNameByID(MSGFPlusSynFileColumns.IMSDriftTime));
 
                 return true;
             }
