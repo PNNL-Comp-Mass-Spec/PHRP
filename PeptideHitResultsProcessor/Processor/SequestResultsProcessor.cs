@@ -192,7 +192,7 @@ namespace PeptideHitResultsProcessor.Processor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file,
             //  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
 
-            var columnMapping = new Dictionary<SequestSynFileReader.SequestSynopsisFileColumns, int>();
+            var columnMapping = new Dictionary<SequestSynopsisFileColumns, int>();
 
             try
             {
@@ -374,7 +374,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseSequestResultsFileEntry(
             string lineIn,
-            IDictionary<SequestSynFileReader.SequestSynopsisFileColumns, int> columnMapping,
+            IDictionary<SequestSynopsisFileColumns, int> columnMapping,
             SequestResults searchResult,
             ref string errorLog)
         {
@@ -391,22 +391,22 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.RowIndex], out int resultId))
+                if (!GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.RowIndex], out int resultId))
                 {
                     ReportError("RowIndex column is missing or invalid", true);
                 }
 
                 searchResult.ResultID = resultId;
 
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.NumScans], out string numScans);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.Charge], out string charge);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.PeptideMH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.XCorr], out string peptideXCorr);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.DeltaCn], out string peptideDeltaCn);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.Sp], out string peptideSp);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.ProteinName], out string proteinName);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.MultipleProteinCount], out string multipleProteinCount);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.NumScans], out string numScans);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.PeptideMH], out string peptideMh);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.XCorr], out string peptideXCorr);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.DeltaCn], out string peptideDeltaCn);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.Sp], out string peptideSp);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.ProteinName], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.MultipleProteinCount], out string multipleProteinCount);
 
                 searchResult.Scan = scan;
                 searchResult.NumScans = numScans;
@@ -418,7 +418,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ProteinName = proteinName;
                 searchResult.MultipleProteinCount = multipleProteinCount;
 
-                if (!GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.PeptideSequence], out string peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.PeptideSequence], out string peptideSequenceWithMods))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
@@ -435,18 +435,18 @@ namespace PeptideHitResultsProcessor.Processor
                 // will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.DeltaCn2], out string peptideDeltaCn2);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.RankSP], out string peptideRankSp);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.RankXC], out string peptideRankXc);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.DelM], out string peptideDeltaMass);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.XcRatio], out string peptideXcRatio);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.PassFilt], out string peptidePassFilt);           // Legacy/Unused
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.MScore], out string peptideMScore);               // Legacy/Unused
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.NTT], out string peptideNtt);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.DeltaCn2], out string peptideDeltaCn2);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.RankSP], out string peptideRankSp);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.RankXC], out string peptideRankXc);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.DelM], out string peptideDeltaMass);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.XcRatio], out string peptideXcRatio);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.PassFilt], out string peptidePassFilt);           // Legacy/Unused
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.MScore], out string peptideMScore);               // Legacy/Unused
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.NTT], out string peptideNtt);
 
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.IonsObserved], out string ionsObserved);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.IonsExpected], out string ionsExpected);
-                GetColumnValue(splitLine, columnMapping[SequestSynFileReader.SequestSynopsisFileColumns.DelMPPM], out string delMppm);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.IonsObserved], out string ionsObserved);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.IonsExpected], out string ionsExpected);
+                GetColumnValue(splitLine, columnMapping[SequestSynopsisFileColumns.DelMPPM], out string delMppm);
 
                 searchResult.PeptideDeltaCn2 = peptideDeltaCn2;
                 searchResult.PeptideRankSP = peptideRankSp;
@@ -621,7 +621,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseSequestSynFileHeaderLine(
             string lineIn,
-            IDictionary<SequestSynFileReader.SequestSynopsisFileColumns, int> columnMapping)
+            IDictionary<SequestSynopsisFileColumns, int> columnMapping)
         {
             // Parse the header line
 
@@ -632,7 +632,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (SequestSynFileReader.SequestSynopsisFileColumns resultColumn in Enum.GetValues(typeof(SequestSynFileReader.SequestSynopsisFileColumns)))
+                foreach (SequestSynopsisFileColumns resultColumn in Enum.GetValues(typeof(SequestSynopsisFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
