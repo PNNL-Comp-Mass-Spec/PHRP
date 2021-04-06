@@ -52,39 +52,8 @@ namespace PHRPReader.Reader
         private const string SEQ_SEARCH_ENGINE_NAME = "SEQUEST";
 
         /// <summary>
-        /// These columns correspond to the tab-delimited file created directly by SEQUEST
+        /// Mapping from enum to synopsis file column name for SEQUEST
         /// </summary>
-        public enum SequestSynopsisFileColumns
-        {
-            RowIndex = 0,
-            Scan = 1,
-            NumScans = 2,
-            Charge = 3,
-            PeptideMH = 4,
-            XCorr = 5,
-            DeltaCn = 6,
-            Sp = 7,
-            ProteinName = 8,                 // Aka Reference
-            MultipleProteinCount = 9,        // Aka MO = MultipleORFCount; this is 0 if the peptide is in just one protein; 1 if in 2 proteins, etc.
-            PeptideSequence = 10,            // This is the sequence with prefix and suffix residues and also with modification symbols
-            DeltaCn2 = 11,
-            RankSP = 12,
-            RankXC = 13,
-            DelM = 14,
-            XcRatio = 15,
-            PassFilt = 16,                   // Legacy/unused
-            MScore = 17,                     // Legacy/unused
-            NTT = 18,                        // Number of tryptic termini
-            IonsObserved = 19,               // Added in August 2011
-            IonsExpected = 20,               // Added in August 2011
-            DelMPPM = 21,                    // Added in August 2011
-            Cleavage_State = 22,             // This column and the ones after it are computed by this program and appended to the input file or saved in a new file
-            Terminus_State = 23,
-            Mod_Count = 24,
-            Mod_Description = 25,
-            Monoisotopic_Mass = 26
-        }
-
 #pragma warning restore 1591
 
         /// <summary>
