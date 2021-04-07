@@ -19,7 +19,7 @@ using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
-using PRISM.AppSettings;
+using PRISM;
 
 namespace PeptideHitResultsProcessor.Processor
 {
@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 1) ProcessFile reads MaxQuant results file Dataset_IcTda.tsv
+    /// 1) ProcessFile reads MaxQuant results file msms.txt
     /// </para>
     /// <para>
     /// 2) It calls CreateSynResultsFile to create the _syn.txt file
@@ -96,6 +96,24 @@ namespace PeptideHitResultsProcessor.Processor
         public const string TOOL_NAME = "MaxQuant";
 
         public const string MSMS_FILE_NAME = "msms.txt";
+
+        public const string PEPTIDES_FILE_NAME = "peptides.txt";
+
+        /// <summary>
+        /// Andromeda score threshold to use when creating the synopsis file
+        /// </summary>
+        /// <remarks>
+        /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
+        /// </remarks>
+        public const int DEFAULT_ANDROMEDA_SCORE_THRESHOLD = 50;
+
+        /// <summary>
+        /// PEP score threshold to use when creating the synopsis file
+        /// </summary>
+        /// <remarks>
+        /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
+        /// </remarks>
+        public const float DEFAULT_PEP_THRESHOLD = 0.01f;
 
         // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MaxQuant = "_";
@@ -751,7 +769,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
-                var inputFile = new FileInfo(Path.Combine(inputDirectory.FullName, "peptides.txt"));
+                var inputFile = new FileInfo(Path.Combine(inputDirectory.FullName, PEPTIDES_FILE_NAME));
                 if (!inputFile.Exists)
                 {
                     ReportWarning("MaxQuant peptides.txt file not found: " + inputFile.FullName);
@@ -1532,7 +1550,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">MaxQuant results file (Dataset_IcTda.tsv)</param>
+        /// <param name="inputFilePath">MaxQuant results file (msms.txt); alternatively, a directory with files msms.txt and peptides.txt</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>
