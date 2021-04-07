@@ -112,7 +112,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public XTandemResultsProcessor()
+        public XTandemResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "July 10, 2019";
 
@@ -514,7 +514,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        if (CreateModificationSummaryFile)
+                        if (Options.CreateModificationSummaryFile)
                         {
                             // Create the modification summary file
                             var inputFile = new FileInfo(inputFilePath);
@@ -617,7 +617,7 @@ namespace PeptideHitResultsProcessor.Processor
                 groupIDInXMLFile = XMLTextReaderGetAttributeValue(xmlReader, "id", string.Empty);
 
                 var firstResult = new XTandemResults(mPeptideMods, mPeptideSeqMassCalculator);
-                firstResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                firstResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                 // Initially set .ResultID to groupIDInXMLFile
                 // ResultID will get updated to a sequentially assigned number (mNextResultID) if we write the result out to the _xt.txt file
@@ -671,8 +671,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 else
                                 {
                                     result = new XTandemResults(mPeptideMods, mPeptideSeqMassCalculator);
-                                    result.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange,
-                                        PeptideCTerminusMassChange);
+                                    result.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                                     // Copy the info from firstResult to this search result
                                     // ResultID will get updated to a sequentially assigned number (mNextResultID) if we write the result out to the _xt.txt file
@@ -1282,14 +1281,14 @@ namespace PeptideHitResultsProcessor.Processor
                                     {
                                         if (SynFileReaderBaseClass.IsNumber(value))
                                         {
-                                            PeptideNTerminusMassChange = double.Parse(value);
+                                            Options.PeptideNTerminusMassChange = double.Parse(value);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
                                     {
                                         if (SynFileReaderBaseClass.IsNumber(value))
                                         {
-                                            PeptideCTerminusMassChange = double.Parse(value);
+                                            Options.PeptideCTerminusMassChange = double.Parse(value);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_Cleavage_Site]))
@@ -1317,7 +1316,7 @@ namespace PeptideHitResultsProcessor.Processor
                                                 rightSpec = rightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
                                             }
 
-                                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftSpec, rightSpec);
+                                            Options.EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftSpec, rightSpec);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_ModificationMass]))
@@ -1533,7 +1532,7 @@ namespace PeptideHitResultsProcessor.Processor
                     xtandemXTFilePath = Path.Combine(outputDirectoryPath, xtandemXTFilePath);
                     success = ParseXTandemResultsFile(inputFile.FullName, xtandemXTFilePath, false);
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(inputFile, outputDirectoryPath, xtandemXTFilePath);
                     }
@@ -1569,7 +1568,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
-            if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+            if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
             {
                 success = true;
             }

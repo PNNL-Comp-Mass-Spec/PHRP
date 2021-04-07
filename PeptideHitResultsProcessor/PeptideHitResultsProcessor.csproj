@@ -68,6 +68,7 @@
     <Compile Include="Data\XTandemResults.cs" />
     <Compile Include="Data\UniqueSequencesContainer.cs" />
     <Compile Include="clsPHRPBaseClass.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="Processor\InSpecTResultsProcessor.cs" />
     <Compile Include="Processor\MaxQuantResultsProcessor.cs" />
     <Compile Include="Processor\MODaResultsProcessor.cs" />

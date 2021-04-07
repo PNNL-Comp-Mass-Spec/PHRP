@@ -124,44 +124,50 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
+                var defaultOptions = new PHRPOptions();
+
                 // Initialize m_PeptideHitResultsProcessor
                 switch (m_PeptideHitResultsFileFormat)
                 {
                     case ResultsFileFormat.XTandemXMLFile:
-                        m_PeptideHitResultsProcessor = new XTandemResultsProcessor();
+                        m_PeptideHitResultsProcessor = new XTandemResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.SequestFirstHitsFile:
                     case ResultsFileFormat.SequestSynopsisFile:
-                        m_PeptideHitResultsProcessor = new SequestResultsProcessor();
+                        m_PeptideHitResultsProcessor = new SequestResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.InspectTXTFile:
-                        m_PeptideHitResultsProcessor = new InSpecTResultsProcessor();
+                        m_PeptideHitResultsProcessor = new InSpecTResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.MSGFPlusTXTFile:
-                        m_PeptideHitResultsProcessor = new MSGFPlusResultsProcessor();
+                        m_PeptideHitResultsProcessor = new MSGFPlusResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.MSAlignTXTFile:
-                        m_PeptideHitResultsProcessor = new MSAlignResultsProcessor();
+                        m_PeptideHitResultsProcessor = new MSAlignResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.MODaTXTFile:
-                        m_PeptideHitResultsProcessor = new MODaResultsProcessor();
+                        m_PeptideHitResultsProcessor = new MODaResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.MODPlusTXTFile:
-                        m_PeptideHitResultsProcessor = new MODaResultsProcessor();
+                        m_PeptideHitResultsProcessor = new MODaResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.MSPathFinderTSVFile:
-                        m_PeptideHitResultsProcessor = new MSPathFinderResultsProcessor();
+                        m_PeptideHitResultsProcessor = new MSPathFinderResultsProcessor(defaultOptions);
                         break;
 
                     case ResultsFileFormat.TopPICTXTFile:
-                        m_PeptideHitResultsProcessor = new TopPICResultsProcessor();
+                        m_PeptideHitResultsProcessor = new TopPICResultsProcessor(defaultOptions);
+                        break;
+
+                    case ResultsFileFormat.MaxQuantTXTFile:
+                        m_PeptideHitResultsProcessor = new MaxQuantResultsProcessor(defaultOptions);
                         break;
 
                     default:
@@ -177,13 +183,13 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsProcessor.ProgressReset += PeptideHitResultsProcessor_ProgressReset;
 
                 // Define the auxiliary file paths
-                m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
-                m_PeptideHitResultsProcessor.ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath;
-                m_PeptideHitResultsProcessor.SearchToolParameterFilePath = m_ParameterFilePath;
-                m_PeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+                m_PeptideHitResultsProcessor.Options.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
+                m_PeptideHitResultsProcessor.Options.ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath;
+                m_PeptideHitResultsProcessor.Options.SearchToolParameterFilePath = m_ParameterFilePath;
+                m_PeptideHitResultsProcessor.Options.InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-                m_PeptideHitResultsProcessor.CreateFirstHitsFile = CreateFirstHitsFile;
-                m_PeptideHitResultsProcessor.CreateSynopsisFile = CreateSynopsisFile;
+                m_PeptideHitResultsProcessor.Options.CreateFirstHitsFile = CreateFirstHitsFile;
+                m_PeptideHitResultsProcessor.Options.CreateSynopsisFile = CreateSynopsisFile;
 
                 m_thThread = new Thread(ProcessPeptideHitResultsFileWork);
                 m_thThread.Start();

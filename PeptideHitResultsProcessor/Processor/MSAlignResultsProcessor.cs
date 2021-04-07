@@ -23,7 +23,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: monoisotopic, enums, txt, histone, methylation, fht, Da, Prsm, IodoAcet, IodoAcid, Frag, pvalue, Defs
 
-        public MSAlignResultsProcessor()
+        public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 27, 2021";
             InitializeLocalVariables();
@@ -709,7 +709,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -835,7 +835,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1373,7 +1373,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
-                    var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(SearchToolParameterFilePath, out var msAlignModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(Options.SearchToolParameterFilePath, out var msAlignModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1411,7 +1411,7 @@ namespace PeptideHitResultsProcessor.Processor
                     pepToProteinMapping.Clear();
                     pepToProteinMapping.TrimExcess();
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }
@@ -1466,7 +1466,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                 {
                     success = true;
                 }
@@ -1474,7 +1474,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Auto-change mIgnorePeptideToProteinMapperErrors to True
                     // We do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
-                    IgnorePeptideToProteinMapperErrors = true;
+                    Options.IgnorePeptideToProteinMapperErrors = true;
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
@@ -1588,7 +1588,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
+                if (searchResults[index].PValueNum <= Options.MSAlignAndTopPICSynopsisFilePValueThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }

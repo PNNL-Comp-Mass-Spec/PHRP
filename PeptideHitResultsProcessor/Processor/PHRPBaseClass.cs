@@ -34,14 +34,16 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : PRISM.EventNotifier
     {
-        // Ignore Spelling: Da, A-Za-z, Fscore, prot, mts, MSFragger, xxx
+        // Ignore Spelling: Da, A-Za-z, Fscore, MaxQuant, prot, mts, MSFragger, xxx
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected PHRPBaseClass()
+        protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "March 26, 2021";
+            FileDate = "April 6, 2021";
+
+            Options = options;
 
             mPeptideSeqMassCalculator = new PeptideMassCalculator { ChargeCarrierMass = PeptideMassCalculator.MASS_PROTON };
 
@@ -59,7 +61,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             mProteinNameOrder = new Dictionary<string, int>();
 
-            InitializeLocalVariables();
+            mErrorCode = PHRPErrorCode.NoError;
+            mErrorMessage = string.Empty;
         }
 
         private const string UNIQUE_SEQ_TO_PROTEIN_MAP_SEP = "_";
@@ -163,8 +166,8 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected PHRPErrorCode mErrorCode = PHRPErrorCode.NoError;
-        protected string mErrorMessage = string.Empty;
+        protected PHRPErrorCode mErrorCode;
+        protected string mErrorMessage;
 
         protected readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
@@ -202,94 +205,20 @@ namespace PeptideHitResultsProcessor.Processor
 
         public bool AbortProcessing { get; set; }
 
-        public bool CreateModificationSummaryFile { get; set; }
-
-        public bool CreateFirstHitsFile { get; set; }
-
-        public bool CreateSynopsisFile { get; set; }
-
-        /// <summary>
-        /// Create protein mods file
-        /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
-        public bool CreateProteinModsFile { get; set; }
-
-        public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
-
         public PHRPErrorCode ErrorCode => mErrorCode;
 
         public string ErrorMessage => GetErrorMessage();
-
-        public string FastaFilePath { get; set; }
 
         public string FileVersion => GetVersionForExecutingAssembly();
 
         public string FileDate { get; protected set; }
 
-        public bool IgnorePeptideToProteinMapperErrors { get; set; }
-
-        /// <summary>
-        /// Inspect synopsis file p-value threshold
-        /// </summary>
-        /// <remarks>Lower p-values are higher confidence results</remarks>
-        public float InspectSynopsisFilePValueThreshold { get; set; }
-
-        public string MassCorrectionTagsFilePath { get; set; }
-
-        public string ModificationDefinitionsFilePath { get; set; }
-
-        /// <summary>
-        /// Used by MODaResultsProcessor and MODPlusResultsProcessor
-        /// </summary>
-        /// <remarks>Higher probability are higher confidence results</remarks>
-        public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
-
-        /// <summary>
-        /// Used by MSAlign and TopPIC
-        /// </summary>
-        /// <remarks>Lower p-values are higher confidence results</remarks>
-        public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
-
-        /// <summary>
-        /// Used by MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
-        /// </summary>
-        /// <remarks>Lower E-values are higher confidence results</remarks>
-        public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
-
-        /// <summary>
-        /// MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
-        /// </summary>
-        /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
-        public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
-
-        /// <summary>
-        /// Typical non-zero value is 17.0027387
-        /// </summary>
-        /// <remarks>Ignored if equal to 0</remarks>
-        public double PeptideCTerminusMassChange { get; set; }
-
-        /// <summary>
-        /// Typical non-zero value is 1.0078246
-        /// </summary>
-        /// <remarks>Ignored if equal to 0</remarks>
-        public double PeptideNTerminusMassChange { get; set; }
-
-        public bool ProteinModsFileIncludesReversedProteins { get; set; }
+        public PHRPOptions Options { get; }
 
         public string ProgressStepDescription => mProgressStepDescription;
 
         // ProgressPercentComplete ranges from 0 to 100, but can contain decimal percentage values
         public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
-
-        /// <summary>
-        /// Search tool parameter file path
-        /// </summary>
-        /// <remarks>Used by InSpecTResultsProcessor and MSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
-        public string SearchToolParameterFilePath { get; set; }
-
-        public bool UseExistingMTSPepToProteinMapFile { get; set; }
-
-        public bool WarnMissingParameterFileSection { get; set; }
 
         public void AbortProcessingNow()
         {
@@ -359,7 +288,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected bool CacheProteinNamesFromFasta()
         {
-            if (string.IsNullOrWhiteSpace(FastaFilePath))
+            if (string.IsNullOrWhiteSpace(Options.FastaFilePath))
             {
                 // Nothing to do
                 return true;
@@ -374,7 +303,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var proteinNumber = 0;
 
-                using (var reader = new StreamReader(new FileStream(FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(Options.FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     while (!reader.EndOfStream)
                     {
@@ -403,7 +332,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                ReportError("Error caching protein names from fasta file " + Path.GetFileName(FastaFilePath) + ": " + ex.Message);
+                ReportError("Error caching protein names from fasta file " + Path.GetFileName(Options.FastaFilePath) + ": " + ex.Message);
                 return false;
             }
         }
@@ -844,22 +773,22 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(FastaFilePath))
+                if (string.IsNullOrEmpty(Options.FastaFilePath))
                 {
                     SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined");
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
-                if (!File.Exists(FastaFilePath))
+                if (!File.Exists(Options.FastaFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " + FastaFilePath);
+                    SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " + Options.FastaFilePath);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
                 // Verify that the fasta file is not a DNA-sequence based fasta file
-                success = ValidateProteinFastaFile(FastaFilePath);
+                success = ValidateProteinFastaFile(Options.FastaFilePath);
                 if (!success)
                 {
                     return false;
@@ -887,7 +816,7 @@ namespace PeptideHitResultsProcessor.Processor
                     OutputProteinSequence = false,
                     PeptideFileSkipFirstLine = false,
                     RemoveSymbolCharacters = true,
-                    ProteinInputFilePath = FastaFilePath,
+                    ProteinInputFilePath = Options.FastaFilePath,
                     SaveProteinToPeptideMappingFile = true,
                     SearchAllProteinsForPeptideSequence = true,
                     SearchAllProteinsSkipCoverageComputationSteps = true
@@ -936,7 +865,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 success = false;
                                 break;
                             }
-                            success = ValidatePeptideToProteinMapResults(resultsFilePath, IgnorePeptideToProteinMapperErrors);
+                            success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
                         }
                         else
                         {
@@ -953,13 +882,13 @@ namespace PeptideHitResultsProcessor.Processor
                                 SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.GetErrorMessage());
                             }
 
-                            if (IgnorePeptideToProteinMapperErrors)
+                            if (Options.IgnorePeptideToProteinMapperErrors)
                             {
                                 ReportWarning("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True");
 
                                 if (File.Exists(resultsFilePath))
                                 {
-                                    success = ValidatePeptideToProteinMapResults(resultsFilePath, IgnorePeptideToProteinMapperErrors);
+                                    success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
                                 }
                                 else
                                 {
@@ -1180,7 +1109,7 @@ namespace PeptideHitResultsProcessor.Processor
                             psmCount++;
 
                             var skipProtein = false;
-                            if (!ProteinModsFileIncludesReversedProteins)
+                            if (!Options.ProteinModsFileIncludesReversedProteins)
                             {
                                 skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
                                 if (skipProtein)
@@ -1427,41 +1356,6 @@ namespace PeptideHitResultsProcessor.Processor
             return version;
         }
 
-        private void InitializeLocalVariables()
-        {
-            mErrorCode = PHRPErrorCode.NoError;
-            mErrorMessage = string.Empty;
-            WarnMissingParameterFileSection = false;
-
-            CreateModificationSummaryFile = true;
-            CreateProteinModsFile = false;
-            FastaFilePath = string.Empty;
-            IgnorePeptideToProteinMapperErrors = false;
-            ProteinModsFileIncludesReversedProteins = false;
-            UseExistingMTSPepToProteinMapFile = false;
-
-            CreateFirstHitsFile = true;
-            CreateSynopsisFile = true;
-
-            MassCorrectionTagsFilePath = string.Empty;
-            ModificationDefinitionsFilePath = string.Empty;
-            SearchToolParameterFilePath = string.Empty;
-
-            InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
-
-            MODaMODPlusSynopsisFileProbabilityThreshold = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
-
-            MSAlignAndTopPICSynopsisFilePValueThreshold = MSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
-
-            MSGFPlusSynopsisFileEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MSGFPlusSynopsisFileSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
-
-            EnzymeMatchSpec = PeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
-
-            PeptideNTerminusMassChange = PeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE;
-            PeptideCTerminusMassChange = PeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
-        }
-
         /// <summary>
         /// Initializes the StreamWriter objects using baseOutputFilePath as a base name and replacing the suffix with the default suffix names
         /// </summary>
@@ -1625,7 +1519,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!settingsFile.SectionPresent(OPTIONS_SECTION))
                     {
                         // Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
-                        if (WarnMissingParameterFileSection)
+                        if (Options.WarnMissingParameterFileSection)
                         {
                             SetErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
                             SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
@@ -1634,19 +1528,19 @@ namespace PeptideHitResultsProcessor.Processor
                         return true;
                     }
 
-                    MassCorrectionTagsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", MassCorrectionTagsFilePath);
-                    ModificationDefinitionsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", ModificationDefinitionsFilePath);
-                    SearchToolParameterFilePath = settingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", SearchToolParameterFilePath);
+                    Options.MassCorrectionTagsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", Options.MassCorrectionTagsFilePath);
+                    Options.ModificationDefinitionsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", Options.ModificationDefinitionsFilePath);
+                    Options.SearchToolParameterFilePath = settingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", Options.SearchToolParameterFilePath);
 
-                    CreateModificationSummaryFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", CreateModificationSummaryFile);
+                    Options.CreateModificationSummaryFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", Options.CreateModificationSummaryFile);
 
-                    CreateProteinModsFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", CreateProteinModsFile);
-                    FastaFilePath = settingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", FastaFilePath);
-                    ProteinModsFileIncludesReversedProteins = settingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", ProteinModsFileIncludesReversedProteins);
-                    UseExistingMTSPepToProteinMapFile = settingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", UseExistingMTSPepToProteinMapFile);
+                    Options.CreateProteinModsFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", Options.CreateProteinModsFile);
+                    Options.FastaFilePath = settingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", Options.FastaFilePath);
+                    Options.ProteinModsFileIncludesReversedProteins = settingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", Options.ProteinModsFileIncludesReversedProteins);
+                    Options.UseExistingMTSPepToProteinMapFile = settingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", Options.UseExistingMTSPepToProteinMapFile);
 
-                    var leftResidueRegEx = string.Copy(EnzymeMatchSpec.LeftResidueRegEx);
-                    var rightResidueRegEx = string.Copy(EnzymeMatchSpec.RightResidueRegEx);
+                    var leftResidueRegEx = string.Copy(Options.EnzymeMatchSpec.LeftResidueRegEx);
+                    var rightResidueRegEx = string.Copy(Options.EnzymeMatchSpec.RightResidueRegEx);
 
                     leftResidueRegEx = settingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", leftResidueRegEx, out var valueNotPresent);
                     if (!valueNotPresent)
@@ -1655,12 +1549,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (!valueNotPresent)
                         {
-                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftResidueRegEx, rightResidueRegEx);
+                            Options.EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftResidueRegEx, rightResidueRegEx);
                         }
                     }
 
-                    PeptideNTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", PeptideNTerminusMassChange);
-                    PeptideCTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", PeptideCTerminusMassChange);
+                    Options.PeptideNTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", Options.PeptideNTerminusMassChange);
+                    Options.PeptideCTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", Options.PeptideCTerminusMassChange);
                 }
             }
             catch (Exception ex)
@@ -1869,7 +1763,7 @@ namespace PeptideHitResultsProcessor.Processor
             var fileNotFound = false;
 
             // Note: If mMassCorrectionTagsFilePath is blank, the mass correction tags will be reset to the defaults and success will be True
-            var success = mPeptideMods.ReadMassCorrectionTagsFile(MassCorrectionTagsFilePath, ref fileNotFound);
+            var success = mPeptideMods.ReadMassCorrectionTagsFile(Options.MassCorrectionTagsFilePath, ref fileNotFound);
             if (!success)
             {
                 if (fileNotFound)
@@ -1883,13 +1777,13 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Note: If mModificationDefinitionsFilePath is blank, the modifications will be cleared and success will be True
-            success = mPeptideMods.ReadModificationDefinitionsFile(ModificationDefinitionsFilePath, ref fileNotFound);
+            success = mPeptideMods.ReadModificationDefinitionsFile(Options.ModificationDefinitionsFilePath, ref fileNotFound);
             if (!success)
             {
                 if (fileNotFound)
                 {
                     SetErrorCode(PHRPErrorCode.ModificationDefinitionFileNotFound);
-                    ReportWarning("File not found: " + ModificationDefinitionsFilePath);
+                    ReportWarning("File not found: " + Options.ModificationDefinitionsFilePath);
                 }
                 else
                 {
@@ -2169,7 +2063,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
 
-            if (!CreateProteinModsFile)
+            if (!Options.CreateProteinModsFile)
             {
                 UpdateProgress(percentComplete);
                 return;
@@ -2374,7 +2268,7 @@ namespace PeptideHitResultsProcessor.Processor
                                                 "did not match to a protein in the FASTA file ({4})",
                                                 errorPercent, peptideCountNoMatch, peptideCount,
                                                 Path.GetFileName(peptideToProteinMapFilePath),
-                                                Path.GetFileName(FastaFilePath));
+                                                Path.GetFileName(Options.FastaFilePath));
 
                     if (ignorePeptideToProteinMapperErrors || errorPercent < 0.1)
                     {

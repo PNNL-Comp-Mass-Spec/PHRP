@@ -66,7 +66,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public MaxQuantResultsProcessor()
+        public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "April 3, 2021";
 
@@ -515,7 +515,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                 {
                     success = true;
                 }
@@ -857,7 +857,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -984,7 +984,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1580,7 +1580,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Load the MaxQuant Parameter File so that we can determine the modification names
-                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var modInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1606,7 +1606,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMaxQuantSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modInfo);
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         // Check for an empty synopsis file
                         if (!ValidateFileHasData(synOutputFilePath, "Synopsis file", out var errorMessage))
@@ -1676,11 +1676,12 @@ namespace PeptideHitResultsProcessor.Processor
             ExpandListIfRequired(filteredSearchResults, endIndex - startIndex + 1);
 
             // Now store the matches that pass the filters
-            //  Either Score > 50
-            //  or     pep < 0.01
+            //  Either Andromeda Score > AndromedaScoreThreshold
+            //  or     pep < PosteriorErrorProbabilityThreshold
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].ScoreValue >= 50 || searchResults[index].PEPValue < 0.01)
+                if (searchResults[index].ScoreValue >= Options.MaxQuantAndromedaScoreThreshold ||
+                    searchResults[index].PEPValue < Options.MaxQuantPosteriorErrorProbabilityThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }

@@ -904,19 +904,20 @@ namespace PeptideHitResultsProcessor.Data
             }
         }
 
-        public void UpdateSearchResultEnzymeAndTerminusInfo(PeptideCleavageStateCalculator.EnzymeMatchSpecInfo udtEnzymeMatchSpec, double peptideNTerminusMassChange, double peptideCTerminusMassChange)
+        public void UpdateSearchResultEnzymeAndTerminusInfo(PHRPOptions options)
         {
-            SetEnzymeMatchSpec(udtEnzymeMatchSpec);
+            // options.EnzymeMatchSpec, options.PeptideNTerminusMassChange, options.PeptideCTerminusMassChange
+            SetEnzymeMatchSpec(options.EnzymeMatchSpec);
 
             // Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-            if (Math.Abs(peptideNTerminusMassChange - 0) > float.Epsilon)
+            if (Math.Abs(options.PeptideNTerminusMassChange) > float.Epsilon)
             {
-                UpdatePeptideNTerminusMass(peptideNTerminusMassChange);
+                UpdatePeptideNTerminusMass(options.PeptideNTerminusMassChange);
             }
 
-            if (Math.Abs(peptideCTerminusMassChange - 0) > float.Epsilon)
+            if (Math.Abs(options.PeptideCTerminusMassChange) > float.Epsilon)
             {
-                UpdatePeptideCTerminusMass(peptideCTerminusMassChange);
+                UpdatePeptideCTerminusMass(options.PeptideCTerminusMassChange);
             }
         }
 

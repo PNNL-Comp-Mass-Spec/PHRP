@@ -67,7 +67,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public MSGFPlusResultsProcessor()
+        public MSGFPlusResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "February 3, 2021";
             mModMassRegEx = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
@@ -1398,8 +1398,8 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool MSGFPlusResultPassesSynFilter(MSGFPlusSearchResult msgfPlusSearchResultType)
         {
-            return msgfPlusSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
-                   msgfPlusSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
+            return msgfPlusSearchResultType.EValueNum <= Options.MSGFPlusSynopsisFileEValueThreshold ||
+                   msgfPlusSearchResultType.SpecEValueNum <= Options.MSGFPlusSynopsisFileSpecEValueThreshold ||
                    msgfPlusSearchResultType.QValueNum > 0 && msgfPlusSearchResultType.QValueNum < 0.01;
         }
 
@@ -1447,7 +1447,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -1583,7 +1583,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -2335,13 +2335,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Load the MS-GF+ Parameter File so that we can determine the modification names and masses
                     // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
-                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var msgfPlusModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var msgfPlusModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
                     }
 
-                    if (!LoadSearchEngineParamFile(SearchToolParameterFilePath))
+                    if (!LoadSearchEngineParamFile(Options.SearchToolParameterFilePath))
                     {
                         return false;
                     }
@@ -2356,7 +2356,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-                        MSGFPlusSynFileReader.UpdateMassCalculatorMasses(SearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator,
+                        MSGFPlusSynFileReader.UpdateMassCalculatorMasses(Options.SearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator,
                             out var localErrorMsg);
 
                         if (!string.IsNullOrWhiteSpace(localErrorMsg) && string.IsNullOrWhiteSpace(mErrorMessage))
@@ -2376,7 +2376,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     string fhtOutputFilePath;
 
-                    if (CreateFirstHitsFile)
+                    if (Options.CreateFirstHitsFile)
                     {
                         // Read the FASTA file to cache the protein names in memory
                         // These will be used when creating the first hits file
@@ -2401,7 +2401,7 @@ namespace PeptideHitResultsProcessor.Processor
                         fhtOutputFilePath = string.Empty;
                     }
 
-                    if (CreateSynopsisFile)
+                    if (Options.CreateSynopsisFile)
                     {
                         // Create the synopsis output file
                         ResetProgress("Creating the SYN file", true);
@@ -2436,7 +2436,7 @@ namespace PeptideHitResultsProcessor.Processor
                         pepToProteinMapping.Clear();
                         pepToProteinMapping.TrimExcess();
 
-                        if (success && CreateProteinModsFile)
+                        if (success && Options.CreateProteinModsFile)
                         {
                             success = CreateProteinModsFileWork(baseName, inputFile, fhtOutputFilePath, synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath);
                         }
@@ -2502,7 +2502,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                    if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                     {
                         success = true;
                     }
@@ -2510,7 +2510,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         // Auto-change IgnorePeptideToProteinMapperErrors to True
                         // We do this for MS-GF+ since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
-                        IgnorePeptideToProteinMapperErrors = true;
+                        Options.IgnorePeptideToProteinMapperErrors = true;
                         success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                         if (!success)
                         {

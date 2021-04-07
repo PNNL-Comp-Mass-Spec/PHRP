@@ -32,13 +32,18 @@ namespace PeptideHitResultsProcRunner
         // ReSharper disable once CommentTypo
         // Ignore Spelling: Battelle, parm, proc, MODa, enums, fasta
 
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public PeptideHitResultsProcRunner()
+        public PeptideHitResultsProcRunner(PHRPOptions options)
         {
             mFileDate = Program.PROGRAM_DATE;
-            InitializeLocalVariables();
+            Options = options;
+
+            mPeptideHitResultsFileFormat = ResultsFileFormat.AutoDetermine;
+            mUseExistingMTSPepToProteinMapFile = false;
+            mLocalErrorCode = ResultsProcessorErrorCodes.NoError;
         }
 
         /// <summary>
@@ -64,11 +69,7 @@ namespace PeptideHitResultsProcRunner
 
         private bool mFilePathsShown = false;
 
-        public bool CreateFirstHitsFile { get; set; }
-
-        public bool CreateSynopsisFile { get; set; }
-
-        public bool CreateProteinModsFile { get; set; }
+        public PHRPOptions Options { get; private set; }
 
         /// <summary>
         /// Create Protein Mods Using PHRP Data File
@@ -80,35 +81,7 @@ namespace PeptideHitResultsProcRunner
         /// </remarks>
         public bool CreateProteinModsUsingPHRPDataFile { get; set; }
 
-        public string FastaFilePath { get; set; }
-
-        public bool IgnorePeptideToProteinMapperErrors { get; set; }
-
-        public float InspectSynopsisFilePValueThreshold { get; set; }
-
         public ResultsProcessorErrorCodes LocalErrorCode => mLocalErrorCode;
-
-        public string MassCorrectionTagsFilePath { get; set; }
-
-        public string ModificationDefinitionsFilePath { get; set; }
-
-        public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
-
-        public float MsgfPlusEValueThreshold { get; set; }
-
-        public float MsgfPlusSpecEValueThreshold { get; set; }
-
-        public bool ProteinModsFileIncludesReversedProteins { get; set; }
-
-        public string SearchToolParameterFilePath { get; set; }
-
-        /// <summary>
-        /// Use Existing MTS PepToProtein Map File
-        /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
-        public bool UseExistingMTSPepToProteinMapFile { get; set; }
-
-        public bool WarnMissingParameterFileSection { get; set; }
 
         /// <summary>
         /// If filePath is an empty string, return textIfEmptyPath
@@ -159,34 +132,6 @@ namespace PeptideHitResultsProcRunner
             return GetBaseClassErrorMessage();
         }
 
-        private void InitializeLocalVariables()
-        {
-            mPeptideHitResultsFileFormat = ResultsFileFormat.AutoDetermine;
-
-            MassCorrectionTagsFilePath = string.Empty;
-            ModificationDefinitionsFilePath = string.Empty;
-            SearchToolParameterFilePath = string.Empty;
-
-            CreateProteinModsFile = false;
-            FastaFilePath = string.Empty;
-            IgnorePeptideToProteinMapperErrors = false;
-            ProteinModsFileIncludesReversedProteins = false;
-            mUseExistingMTSPepToProteinMapFile = false;
-
-            CreateFirstHitsFile = false;
-            CreateSynopsisFile = false;
-            InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
-
-            MODaMODPlusSynopsisFileProbabilityThreshold = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
-
-            MsgfPlusEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MsgfPlusSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
-
-            WarnMissingParameterFileSection = true;
-
-            mLocalErrorCode = ResultsProcessorErrorCodes.NoError;
-        }
-
         private void InitializePeptideHitResultsProcessor(string inputFilePath)
         {
             if (mObtainModificationDefinitionsFromDMS)
@@ -196,26 +141,9 @@ namespace PeptideHitResultsProcRunner
 
             var sourceFile = new FileInfo(inputFilePath);
 
-            mPeptideHitResultsProcessor.MassCorrectionTagsFilePath = ResolveFilePath(sourceFile.DirectoryName, MassCorrectionTagsFilePath);
-            mPeptideHitResultsProcessor.ModificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, ModificationDefinitionsFilePath);
-            mPeptideHitResultsProcessor.SearchToolParameterFilePath = ResolveFilePath(sourceFile.DirectoryName, SearchToolParameterFilePath);
-
-            mPeptideHitResultsProcessor.CreateProteinModsFile = CreateProteinModsFile;
-            mPeptideHitResultsProcessor.FastaFilePath = FastaFilePath;
-            mPeptideHitResultsProcessor.IgnorePeptideToProteinMapperErrors = IgnorePeptideToProteinMapperErrors;
-            mPeptideHitResultsProcessor.ProteinModsFileIncludesReversedProteins = ProteinModsFileIncludesReversedProteins;
-            mPeptideHitResultsProcessor.UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile;
-
-            mPeptideHitResultsProcessor.CreateFirstHitsFile = CreateFirstHitsFile;
-            mPeptideHitResultsProcessor.CreateSynopsisFile = CreateSynopsisFile;
-            mPeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = InspectSynopsisFilePValueThreshold;
-
-            mPeptideHitResultsProcessor.MODaMODPlusSynopsisFileProbabilityThreshold = MODaMODPlusSynopsisFileProbabilityThreshold;
-
-            mPeptideHitResultsProcessor.MSGFPlusSynopsisFileEValueThreshold = MsgfPlusEValueThreshold;
-            mPeptideHitResultsProcessor.MSGFPlusSynopsisFileSpecEValueThreshold = MsgfPlusSpecEValueThreshold;
-
-            mPeptideHitResultsProcessor.WarnMissingParameterFileSection = WarnMissingParameterFileSection;
+            mPeptideHitResultsProcessor.Options.MassCorrectionTagsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.MassCorrectionTagsFilePath);
+            mPeptideHitResultsProcessor.Options.ModificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.ModificationDefinitionsFilePath);
+            mPeptideHitResultsProcessor.Options.SearchToolParameterFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.SearchToolParameterFilePath);
         }
 
         private void LoadModificationInfoFromDMS()
@@ -488,52 +416,52 @@ namespace PeptideHitResultsProcRunner
             LogMessage("Processing options for " + resultsProcessor);
 
             LogMessage(string.Format("{0,-45} {1}",
-                "Search Tool Parameter File:", FilePathOrText(resultsProcessor.SearchToolParameterFilePath, "Not defined")));
+                "Search Tool Parameter File:", FilePathOrText(resultsProcessor.Options.SearchToolParameterFilePath, "Not defined")));
 
             LogMessage(string.Format("{0,-45} {1}",
-                "Modification Definitions File:", FilePathOrText(resultsProcessor.ModificationDefinitionsFilePath, "Not defined")));
+                "Modification Definitions File:", FilePathOrText(resultsProcessor.Options.ModificationDefinitionsFilePath, "Not defined")));
 
             LogMessage(string.Format("{0,-45} {1}",
-                "Mass Correction Tags File:", FilePathOrText(resultsProcessor.MassCorrectionTagsFilePath, "Use internally defined tags")));
+                "Mass Correction Tags File:", FilePathOrText(resultsProcessor.Options.MassCorrectionTagsFilePath, "Use internally defined tags")));
 
             LogMessage(string.Format("{0,-45} {1}",
-                "FASTA File:", FilePathOrText(resultsProcessor.FastaFilePath, "Not defined")));
-
-            Console.WriteLine();
-            LogMessage(string.Format("{0,-45} {1}",
-                "Create Protein Mods File:", resultsProcessor.CreateProteinModsFile));
-
-            LogMessage(string.Format("{0,-45} {1}",
-                "Ignore Peptide to Protein Mapper Errors:", resultsProcessor.IgnorePeptideToProteinMapperErrors));
-
-            LogMessage(string.Format("{0,-45} {1}",
-                "Protein Mods File Includes Reversed Proteins:", resultsProcessor.ProteinModsFileIncludesReversedProteins));
-
-            LogMessage(string.Format("{0,-45} {1}",
-                "Use Existing MTS PepToProtein Map File:", resultsProcessor.UseExistingMTSPepToProteinMapFile));
+                "FASTA File:", FilePathOrText(resultsProcessor.Options.FastaFilePath, "Not defined")));
 
             Console.WriteLine();
             LogMessage(string.Format("{0,-45} {1}",
-                "Create First Hits File:", resultsProcessor.CreateFirstHitsFile));
+                "Create Protein Mods File:", resultsProcessor.Options.CreateProteinModsFile));
 
             LogMessage(string.Format("{0,-45} {1}",
-                "Create Synopsis File:", resultsProcessor.CreateSynopsisFile));
+                "Ignore Peptide to Protein Mapper Errors:", resultsProcessor.Options.IgnorePeptideToProteinMapperErrors));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Protein Mods File Includes Reversed Proteins:", resultsProcessor.Options.ProteinModsFileIncludesReversedProteins));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Use Existing MTS PepToProtein Map File:", resultsProcessor.Options.UseExistingMTSPepToProteinMapFile));
+
+            Console.WriteLine();
+            LogMessage(string.Format("{0,-45} {1}",
+                "Create First Hits File:", resultsProcessor.Options.CreateFirstHitsFile));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Create Synopsis File:", resultsProcessor.Options.CreateSynopsisFile));
 
             if (resultsProcessor is InSpecTResultsProcessor)
             {
                 LogMessage(string.Format("{0,-45} {1:E2}",
-                    "Inspect Synopsis File PValue Threshold:", resultsProcessor.InspectSynopsisFilePValueThreshold));
+                    "Inspect Synopsis File PValue Threshold:", resultsProcessor.Options.InspectSynopsisFilePValueThreshold));
             }
 
             Console.WriteLine();
             LogMessage(string.Format("{0,-49} {1:E2}",
-                "MODa/MODPlus Synopsis File Probability Threshold:", resultsProcessor.MODaMODPlusSynopsisFileProbabilityThreshold));
+                "MODa/MODPlus Synopsis File Probability Threshold:", resultsProcessor.Options.MODaMODPlusSynopsisFileProbabilityThreshold));
 
             LogMessage(string.Format("{0,-49} {1:E2}",
-                "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.MSGFPlusSynopsisFileEValueThreshold));
+                "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileEValueThreshold));
 
             LogMessage(string.Format("{0,-49} {1:E2}",
-                "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.MSGFPlusSynopsisFileSpecEValueThreshold));
+                "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileSpecEValueThreshold));
 
             Console.WriteLine();
         }
@@ -611,27 +539,27 @@ namespace PeptideHitResultsProcRunner
                 switch (PeptideHitResultType)
                 {
                     case PeptideHitResultTypes.Sequest:
-                        mPeptideHitResultsProcessor = new SequestResultsProcessor();
+                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
                         break;
 
                     case PeptideHitResultTypes.XTandem:
-                        mPeptideHitResultsProcessor = new XTandemResultsProcessor();
+                        mPeptideHitResultsProcessor = new XTandemResultsProcessor(Options);
                         break;
 
                     case PeptideHitResultTypes.Inspect:
-                        mPeptideHitResultsProcessor = new InSpecTResultsProcessor();
+                        mPeptideHitResultsProcessor = new InSpecTResultsProcessor(Options);
                         break;
 
                     case PeptideHitResultTypes.MSGFPlus:
-                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor();
+                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor(Options);
                         break;
 
                     case PeptideHitResultTypes.MSAlign:
-                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor();
+                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor(Options);
                         break;
 
                     case PeptideHitResultTypes.MODa:
-                        mPeptideHitResultsProcessor = new MODaResultsProcessor();
+                        mPeptideHitResultsProcessor = new MODaResultsProcessor(Options);
                         break;
 
                     default:
@@ -727,52 +655,52 @@ namespace PeptideHitResultsProcRunner
                 switch (peptideHitResultsFormat)
                 {
                     case ResultsFileFormat.SequestFirstHitsFile:
-                        mPeptideHitResultsProcessor = new SequestResultsProcessor();
+                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
                         LogMessage("Detected SEQUEST First Hits file");
                         break;
 
                     case ResultsFileFormat.SequestSynopsisFile:
-                        mPeptideHitResultsProcessor = new SequestResultsProcessor();
+                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
                         LogMessage("Detected SEQUEST Synopsis file");
                         break;
 
                     case ResultsFileFormat.XTandemXMLFile:
-                        mPeptideHitResultsProcessor = new XTandemResultsProcessor();
+                        mPeptideHitResultsProcessor = new XTandemResultsProcessor(Options);
                         LogMessage("Detected X!Tandem XML file");
                         break;
 
                     case ResultsFileFormat.InspectTXTFile:
-                        mPeptideHitResultsProcessor = new InSpecTResultsProcessor();
+                        mPeptideHitResultsProcessor = new InSpecTResultsProcessor(Options);
                         LogMessage("Detected Inspect results file");
                         break;
 
                     case ResultsFileFormat.MSGFPlusTXTFile:
-                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor();
+                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor(Options);
                         LogMessage("Detected MSGF+ results file");
                         break;
 
                     case ResultsFileFormat.MSAlignTXTFile:
-                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor();
+                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor(Options);
                         LogMessage("Detected MSAlign results file");
                         break;
 
                     case ResultsFileFormat.MODaTXTFile:
-                        mPeptideHitResultsProcessor = new MODaResultsProcessor();
+                        mPeptideHitResultsProcessor = new MODaResultsProcessor(Options);
                         LogMessage("Detected MODa results file");
                         break;
 
                     case ResultsFileFormat.MODPlusTXTFile:
-                        mPeptideHitResultsProcessor = new MODPlusResultsProcessor();
+                        mPeptideHitResultsProcessor = new MODPlusResultsProcessor(Options);
                         LogMessage("Detected MODPlus results file");
                         break;
 
                     case ResultsFileFormat.MSPathFinderTSVFile:
-                        mPeptideHitResultsProcessor = new MSPathFinderResultsProcessor();
+                        mPeptideHitResultsProcessor = new MSPathFinderResultsProcessor(Options);
                         LogMessage("Detected MSPathFinder results file");
                         break;
 
                     case ResultsFileFormat.TopPICTXTFile:
-                        mPeptideHitResultsProcessor = new TopPICResultsProcessor();
+                        mPeptideHitResultsProcessor = new TopPICResultsProcessor(Options);
                         LogMessage("Detected TopPIC results file");
                         break;
 

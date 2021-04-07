@@ -18,6 +18,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using PeptideHitResultsProcessor;
 using PeptideHitResultsProcessor.Processor;
 using PRISM;
 
@@ -27,35 +28,17 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa
 
-        public const string PROGRAM_DATE = "March 25, 2021";
+        public const string PROGRAM_DATE = "April 6, 2021";
+
+        private static readonly PHRPOptions Options = new();
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
         private static string mParameterFilePath;                        // Optional
 
-        private static string mMassCorrectionTagsFilePath;               // Optional
-        private static string mModificationDefinitionsFilePath;          // Optional
-        private static string mSearchToolParameterFilePath;              // Optional
-
-        // Note: If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath
-        private static bool mCreateProteinModsFile;
-        private static string mFastaFilePath;
-        private static bool mIgnorePeptideToProteinMapperErrors;
-        private static bool mProteinModsFileIncludesReversedProteins;
-        private static bool mUseExistingMTSPepToProteinMapFile;
-
         // Setting this to true assumes the input file is a valid PHRP data file
         // Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
         private static bool mCreateProteinModsUsingPHRPDataFile;
-
-        private static bool mCreateFirstHitsFile;
-        private static bool mCreateSynopsisFile;
-
-        private static float mMsgfPlusEValueThreshold;
-        private static float mMsgfPlusSpecEValueThreshold;
-        private static float mInspectSynopsisFilePValueThreshold;
-
-        private static float mMODaMODPlusSynopsisFileProbabilityThreshold;
 
         private static string mOutputDirectoryAlternatePath;                // Optional
         private static bool mRecreateDirectoryHierarchyInAlternatePath;     // Optional
@@ -90,33 +73,15 @@ namespace PeptideHitResultsProcRunner
             mOutputDirectoryPath = string.Empty;
             mParameterFilePath = string.Empty;
 
-            mMassCorrectionTagsFilePath = string.Empty;
-            mModificationDefinitionsFilePath = string.Empty;
-            mSearchToolParameterFilePath = string.Empty;
-
-            mCreateProteinModsFile = false;
-            mFastaFilePath = string.Empty;
-            mIgnorePeptideToProteinMapperErrors = false;
-            mProteinModsFileIncludesReversedProteins = false;
-            mUseExistingMTSPepToProteinMapFile = false;
-
             mCreateProteinModsUsingPHRPDataFile = false;
-
-            mMsgfPlusEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            mMsgfPlusSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
-
-            // These should default to True
-            mCreateFirstHitsFile = true;
-            mCreateSynopsisFile = true;
-            mInspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
-
-            mMODaMODPlusSynopsisFileProbabilityThreshold = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
             mMaxLevelsToRecurse = 0;
 
             mLogMessagesToFile = false;
             mLogFilePath = string.Empty;
             mLogDirectoryPath = string.Empty;
+
+            Options.WarnMissingParameterFileSection = true;
 
             try
             {
@@ -137,27 +102,12 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 // Note: Most of the options will get overridden if defined in the parameter file
-                mPeptideHitResultsProcRunner = new PeptideHitResultsProcRunner
+                mPeptideHitResultsProcRunner = new PeptideHitResultsProcRunner(Options)
                 {
                     LogMessagesToFile = mLogMessagesToFile,
                     LogFilePath = mLogFilePath,
                     LogDirectoryPath = mLogDirectoryPath,
-                    MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
-                    ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
-                    SearchToolParameterFilePath = mSearchToolParameterFilePath,
-                    WarnMissingParameterFileSection = true,
-                    CreateProteinModsFile = mCreateProteinModsFile,
-                    FastaFilePath = mFastaFilePath,
-                    IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
-                    ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
-                    UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
-                    CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
-                    MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
-                    MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
-                    CreateFirstHitsFile = mCreateFirstHitsFile,
-                    CreateSynopsisFile = mCreateSynopsisFile,
-                    InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
-                    MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+                    CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
                 };
 
                 var commandLineArgs = GetCommandLineArgs();
@@ -297,10 +247,12 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns True if no problems; otherwise, returns false
 
+            // ReSharper disable once StringLiteralTypo
             var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn", "InsFHT", "InsSyn", "SynProb", "S", "A",
-                "R", "L" };
+                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn",
+                "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP",
+                "S", "A", "R", "L" };
 
             try
             {
@@ -328,15 +280,15 @@ namespace PeptideHitResultsProcRunner
                 if (parseCommandLine.RetrieveValueForParameter("P", out value))
                     mParameterFilePath = string.Copy(value);
                 if (parseCommandLine.RetrieveValueForParameter("M", out value))
-                    mModificationDefinitionsFilePath = string.Copy(value);
+                    Options.ModificationDefinitionsFilePath = string.Copy(value);
                 if (parseCommandLine.RetrieveValueForParameter("T", out value))
-                    mMassCorrectionTagsFilePath = string.Copy(value);
+                    Options.MassCorrectionTagsFilePath = string.Copy(value);
                 if (parseCommandLine.RetrieveValueForParameter("N", out value))
-                    mSearchToolParameterFilePath = string.Copy(value);
+                    Options.SearchToolParameterFilePath = string.Copy(value);
 
                 if (parseCommandLine.IsParameterPresent("ProteinMods"))
                 {
-                    mCreateProteinModsFile = true;
+                    Options.CreateProteinModsFile = true;
                 }
 
                 if (parseCommandLine.IsParameterPresent("ProteinModsViaPHRP"))
@@ -345,25 +297,25 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 if (parseCommandLine.RetrieveValueForParameter("F", out value))
-                    mFastaFilePath = string.Copy(value);
+                    Options.FastaFilePath = string.Copy(value);
 
                 if (parseCommandLine.RetrieveValueForParameter("Fasta", out value))
-                    mFastaFilePath = string.Copy(value);
+                    Options.FastaFilePath = string.Copy(value);
 
                 if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
-                    mIgnorePeptideToProteinMapperErrors = true;
+                    Options.IgnorePeptideToProteinMapperErrors = true;
 
                 if (parseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
-                    mProteinModsFileIncludesReversedProteins = true;
+                    Options.ProteinModsFileIncludesReversedProteins = true;
 
                 if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
-                    mUseExistingMTSPepToProteinMapFile = true;
+                    Options.UseExistingMTSPepToProteinMapFile = true;
 
                 if (parseCommandLine.RetrieveValueForParameter("FHT", out value))
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateFirstHitsFile = blnValue;
+                        Options.CreateFirstHitsFile = blnValue;
                     }
                 }
 
@@ -371,7 +323,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateSynopsisFile = blnValue;
+                        Options.CreateSynopsisFile = blnValue;
                     }
                 }
 
@@ -380,7 +332,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateFirstHitsFile = blnValue;
+                        Options.CreateFirstHitsFile = blnValue;
                     }
                 }
 
@@ -389,7 +341,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateSynopsisFile = blnValue;
+                        Options.CreateSynopsisFile = blnValue;
                     }
                 }
 
@@ -397,7 +349,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (float.TryParse(value, out var floatValue))
                     {
-                        mMsgfPlusEValueThreshold = floatValue;
+                        Options.MSGFPlusSynopsisFileEValueThreshold = floatValue;
                     }
                 }
 
@@ -405,7 +357,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (float.TryParse(value, out var floatValue))
                     {
-                        mMsgfPlusSpecEValueThreshold = floatValue;
+                        Options.MSGFPlusSynopsisFileSpecEValueThreshold = floatValue;
                     }
                 }
 
@@ -413,7 +365,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (float.TryParse(value, out var floatValue))
                     {
-                        mInspectSynopsisFilePValueThreshold = floatValue;
+                        Options.InspectSynopsisFilePValueThreshold = floatValue;
                     }
                 }
 
@@ -421,7 +373,24 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (float.TryParse(value, out var floatValue))
                     {
-                        mMODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
+                        Options.MODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
+                    }
+                }
+
+                if (parseCommandLine.RetrieveValueForParameter("MaxQScore", out value))
+                {
+                    if (int.TryParse(value, out var intValue))
+                    {
+                        Options.MaxQuantAndromedaScoreThreshold = intValue;
+                    }
+                }
+
+                // ReSharper disable once StringLiteralTypo
+                if (parseCommandLine.RetrieveValueForParameter("MaxQPEP", out value))
+                {
+                    if (float.TryParse(value, out var floatValue))
+                    {
+                        Options.MaxQuantPosteriorErrorProbabilityThreshold = floatValue;
                     }
                 }
 

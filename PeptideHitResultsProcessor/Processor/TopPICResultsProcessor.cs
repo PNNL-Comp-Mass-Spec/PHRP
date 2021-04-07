@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: monoisotopic, Battelle, txt, enums, acetyl, methylation, toppic, syn, fht, Prsm, Da, Pvalue, Frag
 
-        public TopPICResultsProcessor()
+        public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "July 10, 2019";
             InitializeLocalVariables();
@@ -764,7 +764,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -890,7 +890,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1466,7 +1466,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the TopPIC Parameter File so that we can determine whether Cysteine residues are statically modified
-                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var topPicModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var topPicModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1504,7 +1504,7 @@ namespace PeptideHitResultsProcessor.Processor
                     pepToProteinMapping.Clear();
                     pepToProteinMapping.TrimExcess();
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }
@@ -1553,7 +1553,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                 {
                     success = true;
                 }
@@ -1561,7 +1561,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Auto-change mIgnorePeptideToProteinMapperErrors to True
                     // We do this since a small number of peptides reported by TopPIC don't perfectly match the fasta file
-                    IgnorePeptideToProteinMapperErrors = true;
+                    Options.IgnorePeptideToProteinMapperErrors = true;
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
@@ -1656,8 +1656,8 @@ namespace PeptideHitResultsProcessor.Processor
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (dataHasPValues && searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold ||
-                    !dataHasPValues && searchResults[index].EValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
+                if (dataHasPValues && searchResults[index].PValueNum <= Options.MSAlignAndTopPICSynopsisFilePValueThreshold ||
+                    !dataHasPValues && searchResults[index].EValueNum <= Options.MSAlignAndTopPICSynopsisFilePValueThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }

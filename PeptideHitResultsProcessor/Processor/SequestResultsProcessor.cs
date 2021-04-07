@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: fht, methylation
 
-        public SequestResultsProcessor()
+        public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
@@ -214,7 +214,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -328,7 +328,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -536,7 +536,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = false;
                 }
 
-                if (success && CreateProteinModsFile)
+                if (success && Options.CreateProteinModsFile)
                 {
                     success = CreateProteinModsFileWork(inputFile, outputDirectoryPath);
                 }
@@ -587,7 +587,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
-            if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+            if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
             {
                 success = true;
             }

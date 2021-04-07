@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: fht, txt, phos, methylation, nterminal, cterminal, Pos, ModDefs, Da
 
-        public InSpecTResultsProcessor()
+        public InSpecTResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
@@ -962,7 +962,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -1097,7 +1097,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1478,7 +1478,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the Inspect Parameter File so that we can determine the modification names and masses
-                    if (!ExtractModInfoFromInspectParamFile(SearchToolParameterFilePath, out var inspectModInfo))
+                    if (!ExtractModInfoFromInspectParamFile(Options.SearchToolParameterFilePath, out var inspectModInfo))
                     {
                         if (inspectModInfo == null || inspectModInfo.Count == 0)
                         {
@@ -1497,7 +1497,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Resolve the mods in mInspectModInfo with the ModDefs mods
                     ResolveInspectModsWithModDefinitions(inspectModInfo);
 
-                    if (CreateFirstHitsFile)
+                    if (Options.CreateFirstHitsFile)
                     {
                         // Create the first hits output file
                         ResetProgress("Creating the FHT file (top TotalPRMScore)", true);
@@ -1516,7 +1516,7 @@ namespace PeptideHitResultsProcessor.Processor
                         success = CreateFHTorSYNResultsFile(inputFilePath, outputFilePath, inspectModInfo, FilteredOutputFileTypeConstants.FHTbyFScore);
                     }
 
-                    if (CreateSynopsisFile)
+                    if (Options.CreateSynopsisFile)
                     {
                         // Create the synopsis output file
                         ResetProgress("Creating the SYN file", true);
@@ -1544,7 +1544,7 @@ namespace PeptideHitResultsProcessor.Processor
                         pepToProteinMapping.Clear();
                         pepToProteinMapping.TrimExcess();
 
-                        if (success && CreateProteinModsFile)
+                        if (success && Options.CreateProteinModsFile)
                         {
                             if (string.IsNullOrWhiteSpace(synOutputFilePath))
                             {
@@ -1891,7 +1891,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Now store or write out the matches that pass the filters
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (searchResultsCurrentScan[index].PValueNum <= InspectSynopsisFilePValueThreshold ||
+                if (searchResultsCurrentScan[index].PValueNum <= Options.InspectSynopsisFilePValueThreshold ||
                     searchResultsCurrentScan[index].TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD ||
                     searchResultsCurrentScan[index].FScoreNum >= FSCORE_THRESHOLD)
                 {

@@ -63,7 +63,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public MSPathFinderResultsProcessor()
+        public MSPathFinderResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "September 28, 2020";
 
@@ -398,7 +398,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                 {
                     success = true;
                 }
@@ -520,8 +520,8 @@ namespace PeptideHitResultsProcessor.Processor
                         UpdateSynopsisFileCreationProgress(reader);
                     }
 
-                    // Sort the SearchResults by scan, charge, and ascending SpecEValue
-                    searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanChargeScorePeptide());
+                    // Sort the SearchResults by scan, ascending SpecEValue, and peptide
+                    searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanScorePeptide());
 
                     // Now filter the data
 
@@ -686,7 +686,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -810,7 +810,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1280,20 +1280,20 @@ namespace PeptideHitResultsProcessor.Processor
                     var inputFile = new FileInfo(inputFilePath);
 
                     // Load the MSPathFinder Parameter File so that we can determine the modification names and masses
-                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var modInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
                     }
 
                     // Re-parse the MSPathFinder parameter file to look for NumMatchesPerSpec
-                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(SearchToolParameterFilePath);
+                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(Options.SearchToolParameterFilePath);
                     if (numMatchesPerSpec > 1)
                     {
                         // Auto-change IgnorePeptideToProteinMapperErrors to True
                         // since the MSPathFinder parameter file has NumMatchesPerSpec of 2 or higher
                         // (which results in PSMs associated with decoy proteins)
-                        IgnorePeptideToProteinMapperErrors = true;
+                        Options.IgnorePeptideToProteinMapperErrors = true;
 
                         OnDebugEvent(string.Format(
                             "Set IgnorePeptideToProteinMapperErrors to true since NumMatchesPerSpec is {0} in the MSPathFinder parameter file",
@@ -1325,7 +1325,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modInfo);
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         // Check for an empty synopsis file
                         if (!ValidateFileHasData(synOutputFilePath, "Synopsis file", out var errorMessage))
@@ -1399,7 +1399,7 @@ namespace PeptideHitResultsProcessor.Processor
             //  or     QValue < 10
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)
+                if (searchResults[index].SpecEValueNum <= Options.MSGFPlusSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
@@ -1495,7 +1495,7 @@ namespace PeptideHitResultsProcessor.Processor
             SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
 
-        private class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<MSPathFinderSearchResult>
+        private class MSPathFinderSearchResultsComparerScanScorePeptide : IComparer<MSPathFinderSearchResult>
         {
             public int Compare(MSPathFinderSearchResult x, MSPathFinderSearchResult y)
             {

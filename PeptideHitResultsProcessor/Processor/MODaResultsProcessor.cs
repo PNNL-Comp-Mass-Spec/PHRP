@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: moda, MODa, txt, fht, mgf, methylation, ModDefs
 
-        public MODaResultsProcessor()
+        public MODaResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "July 10, 2019";
             InitializeLocalVariables();
@@ -804,7 +804,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 try
                 {
-                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                    searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
                     var errorLog = string.Empty;
 
@@ -934,7 +934,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (CreateModificationSummaryFile)
+                    if (Options.CreateModificationSummaryFile)
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
@@ -1420,7 +1420,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the MODa Parameter File to look for any static mods
-                    var modInfoExtracted = ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, out var modaModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMODaParamFile(Options.SearchToolParameterFilePath, out var modaModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1465,7 +1465,7 @@ namespace PeptideHitResultsProcessor.Processor
                     pepToProteinMapping.Clear();
                     pepToProteinMapping.TrimExcess();
 
-                    if (success && CreateProteinModsFile)
+                    if (success && Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }
@@ -1524,7 +1524,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
                 {
                     success = true;
                 }
@@ -1532,7 +1532,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Auto-change mIgnorePeptideToProteinMapperErrors to True
                     // We do this since a small number of peptides reported by MODa don't perfectly match the fasta file
-                    IgnorePeptideToProteinMapperErrors = true;
+                    Options.IgnorePeptideToProteinMapperErrors = true;
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
@@ -1619,7 +1619,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].ProbabilityNum >= MODaMODPlusSynopsisFileProbabilityThreshold)
+                if (searchResults[index].ProbabilityNum >= Options.MODaMODPlusSynopsisFileProbabilityThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
