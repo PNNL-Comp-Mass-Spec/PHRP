@@ -1,6 +1,6 @@
 ﻿namespace PeptideHitResultsProcessor
 {
-    // Ignore Spelling: MODa
+    // Ignore Spelling: MaxQuant, MODa
 
     public enum PHRPErrorCode
     {
@@ -126,6 +126,11 @@
         /// TopPIC
         /// </summary>
         // ReSharper disable once IdentifierTypo
-        TopPICTXTFile = 10
+        TopPICTXTFile = 10,
+
+        /// <summary>
+        /// MaxQuant
+        /// </summary>
+        MaxQuantTXTFile = 11
     }
 }
