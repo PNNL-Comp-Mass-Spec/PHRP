@@ -43,8 +43,8 @@ namespace PeptideHitResultsProcessor.Processor
     ///    The data is stored in a list
     ///      searchResultsUnfiltered = new List of MaxQuantSearchResult
     /// </para>
-    /// <para>
-    /// 5) Once the entire .tsv has been read, searchResultsUnfiltered is sorted by scan, charge, and ascending SpecEValue
+    /// <para>d
+    /// 5) Once the entire .tsv has been read, searchResultsUnfiltered is sorted by scan, charge, and descending Andromeda score
     /// </para>
     /// <para>
     /// 6) StoreSynMatches stores filter-passing values in a new list
@@ -52,7 +52,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </para>
     /// <para>
     /// 7) SortAndWriteFilteredSearchResults performs one more sort, then writes out to disk
-    ///    Sorts ascending by SpecEValue, QValue, Scan, Peptide, and Protein
+    ///    Sorts descending Andromeda score, Scan, Peptide, and Protein
     /// </para>
     /// </remarks>
     public class MaxQuantResultsProcessor : PHRPBaseClass
@@ -670,7 +670,7 @@ namespace PeptideHitResultsProcessor.Processor
                         UpdateSynopsisFileCreationProgress(reader);
                     }
 
-                    // Sort the SearchResults by scan, charge, and ascending SpecEValue
+                    // Sort the SearchResults by scan, charge, and descending Andromeda score
                     searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerScanChargeScorePeptide());
 
                     // Now filter the data
@@ -1662,7 +1662,7 @@ namespace PeptideHitResultsProcessor.Processor
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             ref string errorLog)
         {
-            // Sort filteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
+            // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Protein
             var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.Protein select item;
 
             var index = 1;
@@ -1815,12 +1815,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Scan is the same; check Score
-                if (x.ScoreValue > y.ScoreValue)
+                if (x.ScoreValue < y.ScoreValue)
                 {
                     return 1;
                 }
 
-                if (x.ScoreValue < y.ScoreValue)
+                if (x.ScoreValue > y.ScoreValue)
                 {
                     return -1;
                 }
