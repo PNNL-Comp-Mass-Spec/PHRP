@@ -64,11 +64,14 @@ namespace PeptideHitResultsProcRunner
 
         protected ResultsProcessorErrorCodes mLocalErrorCode;
 
-        private bool mOptionsDisplayed = false;
+        private bool mOptionsDisplayed;
 
-        private bool mFilePathsShown = false;
+        private bool mFilePathsShown;
 
-        public PHRPOptions Options { get; private set; }
+        /// <summary>
+        /// Processing options
+        /// </summary>
+        public PHRPOptions Options { get; }
 
         /// <summary>
         /// Create Protein Mods Using PHRP Data File
