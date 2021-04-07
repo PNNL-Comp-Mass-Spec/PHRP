@@ -1060,7 +1060,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="rowNumber">Row number (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantResultsFileEntry(
-            Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
+            IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
             ref MaxQuantSearchResult udtSearchResult,
             out List<string> proteinNames,
@@ -1579,7 +1579,17 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
+                // Check whether inputFilePath is a directory path
+                var candidateDirectory = new DirectoryInfo(inputFilePath);
+                if (candidateDirectory.Exists)
+                {
+                    ResetProgress("Parsing " + candidateDirectory.FullName);
+                    inputFilePath = Path.Combine(candidateDirectory.FullName, MSMS_FILE_NAME);
+                }
+                else
+                {
+                    ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
+                }
 
                 if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
