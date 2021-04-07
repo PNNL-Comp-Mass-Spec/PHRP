@@ -30,8 +30,7 @@ namespace PeptideHitResultsProcRunner
     public class PeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: Battelle, parm, proc, MODa, enums, fasta
-
+        // Ignore Spelling: Battelle, enums, fasta, MaxQuant, MODa, parm, proc
 
         /// <summary>
         /// Constructor
@@ -524,6 +523,11 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected TopPIC results file");
                         break;
 
+                    case ResultsFileFormat.MaxQuantTXTFile:
+                        PeptideHitResultType = PeptideHitResultTypes.MaxQuant;
+                        LogMessage("Detected MaxQuant results file");
+                        break;
+
                     default:
                         // Includes PeptideHitResultsFileFormatConstants.AutoDetermine
                         PeptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
@@ -704,8 +708,14 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected TopPIC results file");
                         break;
 
+                    case ResultsFileFormat.MaxQuantTXTFile:
+                        mPeptideHitResultsProcessor = new MaxQuantResultsProcessor(Options);
+                        LogMessage("Detected MaxQuant results file");
+                        break;
+
                     case ResultsFileFormat.AutoDetermine:
                         throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (peptideHitResultsFormat)");
+
                     default:
                         // Unknown format
                         throw new Exception("This code should not be reached; logic error in default: branch of switch (peptideHitResultsFormat)");

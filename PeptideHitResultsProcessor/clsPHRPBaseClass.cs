@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using PeptideHitResultsProcessor.Processor;
 
 namespace PeptideHitResultsProcessor
 {
@@ -78,7 +79,8 @@ namespace PeptideHitResultsProcessor
             MODaTXTFile = 7,
             MODPlusTXTFile = 8,
             MSPathFinderTSVFile = 9,
-            TopPICTXTFile = 10
+            TopPICTXTFile = 10,
+            MaxQuantTXTFile = 11
         }
 
         [Obsolete("Superseded by PHRPErrorCode")]
@@ -217,6 +219,7 @@ namespace PeptideHitResultsProcessor
                 PeptideHitResultsFileFormatConstants.MODPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX),
                 PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile => Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX),
                 PeptideHitResultsFileFormatConstants.TopPICTXTFile => Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MaxQuantTXTFile => Path.Combine(sourceDirectoryPath, MaxQuantResultsProcessor.MSMS_FILE_NAME),
                 _ => AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath)
             };
         }

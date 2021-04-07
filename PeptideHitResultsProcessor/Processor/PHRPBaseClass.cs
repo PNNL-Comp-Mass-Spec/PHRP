@@ -245,6 +245,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ResultsFileFormat.MODPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX),
                 ResultsFileFormat.MSPathFinderTSVFile => Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX),
                 ResultsFileFormat.TopPICTXTFile => Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MaxQuantTXTFile => Path.Combine(sourceDirectoryPath, MaxQuantResultsProcessor.MSMS_FILE_NAME),
                 _ => AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath)
             };
         }
@@ -502,7 +503,9 @@ namespace PeptideHitResultsProcessor.Processor
                 return ResultsFileFormat.AutoDetermine;
 
             var extensionLCase = Path.GetExtension(filePath).ToLower();
-            var baseFileName = Path.GetFileNameWithoutExtension(filePath).ToLower();
+
+            var fileName = Path.GetFileName(filePath);
+            var baseFileName = Path.GetFileNameWithoutExtension(filePath);
 
             if (extensionLCase == ".xml")
             {
@@ -558,10 +561,22 @@ namespace PeptideHitResultsProcessor.Processor
                 return ResultsFileFormat.TopPICTXTFile;
             }
 
+            if (fileName.Equals(MaxQuantResultsProcessor.MSMS_FILE_NAME, StringComparison.OrdinalIgnoreCase) ||
+                fileName.EndsWith(MaxQuantResultsProcessor.MSMS_FILE_NAME, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResultsFileFormat.MaxQuantTXTFile;
+            }
+            
             if (extensionLCase == ".tsv")
             {
                 // Assume this is an MS-GF+ TSV file
                 return ResultsFileFormat.MSGFPlusTXTFile;
+            }
+
+            var candidateDirectory = new DirectoryInfo(filePath);
+            if (candidateDirectory.Exists && candidateDirectory.GetFiles(MaxQuantResultsProcessor.MSMS_FILE_NAME).Length > 1)
+            {
+                return ResultsFileFormat.MaxQuantTXTFile;
             }
 
             // Unknown extension

@@ -348,6 +348,10 @@ namespace PeptideHitResultsProcessor
             {
                 m_PeptideHitResultsFileFormat = ResultsFileFormat.TopPICTXTFile;
             }
+            else if (AnalysisToolName.IndexOf(MaxQuantResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = ResultsFileFormat.MaxQuantTXTFile;
+            }
             else if (AnalysisToolName.IndexOf("DataExtractor", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 // Data Extractor step-tool; we'll need to auto-determine the results format
