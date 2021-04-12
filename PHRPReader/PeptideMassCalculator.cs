@@ -351,7 +351,7 @@ namespace PHRPReader
 
             foreach (var modifiedResidue in modifiedResidues)
             {
-                // Note: do not use String.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
+                // Note: do not use string.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
 
                 if (modifiedResidue.AffectedAtom == default(char) || modifiedResidue.AffectedAtom == NO_AFFECTED_ATOM_SYMBOL)
                 {

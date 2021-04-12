@@ -154,7 +154,7 @@ namespace PHRPReader.Reader
 
                     if (searchEngineParams.Parameters.TryGetValue("peptide_mass_units", out var peptideMassUnits))
                     {
-                        if (!String.IsNullOrEmpty(peptideMassUnits))
+                        if (!string.IsNullOrEmpty(peptideMassUnits))
                         {
                             int.TryParse(peptideMassUnits, out units);
                         }
