@@ -86,7 +86,6 @@ namespace PeptideHitResultsProcessor.Data
         public string PeptideID { get; set; }
         public string ModPeptideID { get; set; }
         public string EvidenceID { get; set; }
-        public string OxidationSiteIDs { get; set; }
 
         /// <summary>
         /// Constructor
@@ -136,7 +135,6 @@ namespace PeptideHitResultsProcessor.Data
             PeptideID = string.Empty;
             ModPeptideID = string.Empty;
             EvidenceID = string.Empty;
-            OxidationSiteIDs = string.Empty;
         }
     }
 }
