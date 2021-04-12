@@ -95,9 +95,9 @@ namespace PeptideHitResultsProcessor
         public bool ProteinModsFileIncludesReversedProteins { get; set; }
 
         /// <summary>
-        /// Search tool parameter file path
+        /// Search tool parameter file path (aka SearchEngineParamFileName)
         /// </summary>
-        /// <remarks>Used by InSpecTResultsProcessor and MSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
+        /// <remarks>Used by MSGFPlusResultsProcessor, MaxQuantResultsProcessor, and others</remarks>
         public string SearchToolParameterFilePath { get; set; }
 
         /// <summary>
