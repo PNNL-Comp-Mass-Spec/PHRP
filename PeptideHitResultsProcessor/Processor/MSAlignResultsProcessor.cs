@@ -579,13 +579,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the MSAlign parameter file
         /// </summary>
         /// <param name="msAlignParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromMSAlignParamFile(string msAlignParamFilePath, out List<ModificationDefinition> modInfo)
+        private bool ExtractModInfoFromMSAlignParamFile(string msAlignParamFilePath, out List<ModificationDefinition> modList)
         {
-            var success = false;
-
-            modInfo = new List<ModificationDefinition>();
+            modList = new List<ModificationDefinition>();
 
             try
             {
@@ -1533,20 +1531,20 @@ namespace PeptideHitResultsProcessor.Processor
             if (msAlignModInfo == null)
                 return;
 
-            foreach (var modInfo in msAlignModInfo)
+            foreach (var modDef in msAlignModInfo)
             {
-                if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                if (string.IsNullOrEmpty(modDef.TargetResidues))
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                        modInfo.ModificationMass, modInfo.ModificationType, default,
+                        modDef.ModificationMass, modDef.ModificationType, default,
                         AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                 }
                 else
                 {
-                    foreach (var chTargetResidue in modInfo.TargetResidues)
+                    foreach (var chTargetResidue in modDef.TargetResidues)
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
+                            modDef.ModificationMass, modDef.ModificationType, chTargetResidue,
                             AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                     }
                 }

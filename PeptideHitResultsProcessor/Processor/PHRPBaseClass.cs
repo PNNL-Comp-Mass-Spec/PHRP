@@ -122,15 +122,13 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public SearchOptionModificationInfo Clone()
             {
-                var modInfo = new SearchOptionModificationInfo
+                return new()
                 {
                     SortOrder = SortOrder,
                     ModificationMass = ModificationMass,
                     TargetResidues = TargetResidues,
                     ModificationType = ModificationType
                 };
-
-                return modInfo;
             }
 
             /// <summary>
@@ -1778,6 +1776,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (fileNotFound)
                 {
                     SetErrorCode(PHRPErrorCode.MassCorrectionTagsFileNotFound);
+                    OnWarningEvent("Mass Correction Tags file not found: " + Options.MassCorrectionTagsFilePath);
                 }
                 else
                 {
@@ -1841,19 +1840,18 @@ namespace PeptideHitResultsProcessor.Processor
 
             for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
             {
-                var modInfo = mPeptideMods.GetModificationByIndex(index);
-                var searchResult = modInfo;
-                if (searchResult.OccurrenceCount <= 0 && searchResult.UnknownModAutoDefined)
+                var modDef = mPeptideMods.GetModificationByIndex(index);
+                if (modDef.OccurrenceCount <= 0 && modDef.UnknownModAutoDefined)
                     continue;
 
                 var data = new List<string>
                 {
-                    searchResult.ModificationSymbol.ToString(),
-                    searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture),
-                    searchResult.TargetResidues,
-                    ModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
-                    searchResult.MassCorrectionTag,
-                    searchResult.OccurrenceCount.ToString()
+                    modDef.ModificationSymbol.ToString(),
+                    modDef.ModificationMass.ToString(CultureInfo.InvariantCulture),
+                    modDef.TargetResidues,
+                    ModificationDefinition.ModificationTypeToModificationSymbol(modDef.ModificationType).ToString(),
+                    modDef.MassCorrectionTag,
+                    modDef.OccurrenceCount.ToString()
                 };
                 writer.WriteLine(CollapseList(data));
             }
@@ -2128,30 +2126,29 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Open the file and confirm it has data rows
-                using (var reader = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream && !dataFound)
                 {
-                    while (!reader.EndOfStream && !dataFound)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    if (numericDataColIndex < 0)
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrEmpty(lineIn))
+                        dataFound = true;
+                    }
+                    else
+                    {
+                        // Split on the tab character and check if the first column is numeric
+                        var splitLine = lineIn.Split('\t');
+
+                        if (splitLine.Length <= numericDataColIndex)
                             continue;
 
-                        if (numericDataColIndex < 0)
+                        if (double.TryParse(splitLine[numericDataColIndex], out _))
                         {
                             dataFound = true;
-                        }
-                        else
-                        {
-                            // Split on the tab character and check if the first column is numeric
-                            var splitLine = lineIn.Split('\t');
-
-                            if (splitLine.Length <= numericDataColIndex)
-                                continue;
-
-                            if (double.TryParse(splitLine[numericDataColIndex], out _))
-                            {
-                                dataFound = true;
-                            }
                         }
                     }
                 }
@@ -2160,14 +2157,14 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     errorMessage = fileDescription + " is empty (no data)";
                 }
+
+                return dataFound;
             }
             catch (Exception)
             {
                 errorMessage = "Exception validating " + fileDescription + " file";
                 return false;
             }
-
-            return dataFound;
         }
 
         /// <summary>
@@ -2220,43 +2217,11 @@ namespace PeptideHitResultsProcessor.Processor
         {
             bool success;
 
-            var peptideCount = 0;
-            var peptideCountNoMatch = 0;
-            var linesRead = 0;
-            var chSplitChars = new[] { '\t' };
-
             try
             {
                 // Validate that none of the results in peptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH ( __NoMatch__ )
 
-                var lastPeptide = string.Empty;
-
-                using (var reader = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        var lineIn = reader.ReadLine();
-                        linesRead++;
-
-                        if (linesRead <= 1 || string.IsNullOrEmpty(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split(chSplitChars, 2);
-                        if (splitLine.Length == 0)
-                            continue;
-
-                        if (splitLine[0] != lastPeptide)
-                        {
-                            peptideCount++;
-                            lastPeptide = string.Copy(splitLine[0]);
-                        }
-
-                        if (lineIn.Contains(PROTEIN_NAME_NO_MATCH))
-                        {
-                            peptideCountNoMatch++;
-                        }
-                    }
-                }
+                var peptideCount = ValidatePeptideToProteinMapResultsWork(peptideToProteinMapFilePath, out var peptideCountNoMatch);
 
                 if (peptideCount == 0)
                 {
@@ -2299,6 +2264,45 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
+        }
+
+        private static int ValidatePeptideToProteinMapResultsWork(string peptideToProteinMapFilePath, out int peptideCountNoMatch)
+        {
+            var peptideCount = 0;
+            var linesRead = 0;
+            var chSplitChars = new[] { '\t' };
+
+            var lastPeptide = string.Empty;
+
+            peptideCountNoMatch = 0;
+
+            using var reader = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+            while (!reader.EndOfStream)
+            {
+                var lineIn = reader.ReadLine();
+                linesRead++;
+
+                if (linesRead <= 1 || string.IsNullOrEmpty(lineIn))
+                    continue;
+
+                var splitLine = lineIn.Split(chSplitChars, 2);
+                if (splitLine.Length == 0)
+                    continue;
+
+                if (splitLine[0] != lastPeptide)
+                {
+                    peptideCount++;
+                    lastPeptide = string.Copy(splitLine[0]);
+                }
+
+                if (lineIn.Contains(PROTEIN_NAME_NO_MATCH))
+                {
+                    peptideCountNoMatch++;
+                }
+            }
+
+            return peptideCount;
         }
 
         protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputDirectoryPath)

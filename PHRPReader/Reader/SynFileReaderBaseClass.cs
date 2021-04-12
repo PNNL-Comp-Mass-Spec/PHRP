@@ -568,11 +568,11 @@ namespace PHRPReader.Reader
             {
                 mNewPeptide.Append(cleanSequence[index]);
 
-                foreach (var modInfo in modifiedResidues)
+                foreach (var modDef in modifiedResidues)
                 {
-                    if (modInfo.ResidueLocInPeptide == index + 1)
+                    if (modDef.ResidueLocInPeptide == index + 1)
                     {
-                        mNewPeptide.Append(NumToStringPlusMinus(modInfo.ModDefinition.ModificationMass, 4));
+                        mNewPeptide.Append(NumToStringPlusMinus(modDef.ModDefinition.ModificationMass, 4));
                     }
                 }
             }

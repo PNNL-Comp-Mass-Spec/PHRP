@@ -552,13 +552,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Load the static mods defined in the MODa parameter file
         /// </summary>
         /// <param name="modaParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ExtractModInfoFromMODaParamFile(string modaParamFilePath, out List<ModificationDefinition> modInfo)
+        private bool ExtractModInfoFromMODaParamFile(string modaParamFilePath, out List<ModificationDefinition> modList)
         {
-            var success = false;
-
-            modInfo = new List<ModificationDefinition>();
+            modList = new List<ModificationDefinition>();
 
             try
             {
@@ -1568,17 +1566,17 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Call .LookupModificationDefinitionByMass for each entry in modaModInfo
-            foreach (var modInfo in modaModInfo)
+            foreach (var modDef in modaModInfo)
             {
-                if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                if (string.IsNullOrEmpty(modDef.TargetResidues))
                 {
-                    mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, default, AminoAcidModInfo.ResidueTerminusState.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
+                    mPeptideMods.LookupModificationDefinitionByMassAndModType(modDef.ModificationMass, modDef.ModificationType, default, AminoAcidModInfo.ResidueTerminusState.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
                 }
                 else
                 {
-                    foreach (var targetResidue in modInfo.TargetResidues)
+                    foreach (var targetResidue in modDef.TargetResidues)
                     {
-                        mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, targetResidue, AminoAcidModInfo.ResidueTerminusState.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
+                        mPeptideMods.LookupModificationDefinitionByMassAndModType(modDef.ModificationMass, modDef.ModificationType, targetResidue, AminoAcidModInfo.ResidueTerminusState.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
                     }
                 }
             }

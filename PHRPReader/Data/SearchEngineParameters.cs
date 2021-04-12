@@ -77,7 +77,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
-        public List<ModificationDefinition> ModInfo { get; }
+        public List<ModificationDefinition> ModList { get; }
 
         /// <summary>
         /// Parameter dictionary (key/value pairs)
@@ -141,8 +141,8 @@ namespace PHRPReader.Data
         /// Constructor
         /// </summary>
         /// <param name="searchEngineName"></param>
-        /// <param name="modInfo"></param>
-        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modInfo) : this(searchEngineName, modInfo, null)
+        /// <param name="modList"></param>
+        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modList) : this(searchEngineName, modList, null)
         {
         }
 
@@ -150,18 +150,18 @@ namespace PHRPReader.Data
         /// Constructor
         /// </summary>
         /// <param name="searchEngineName"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <param name="parameters"></param>
-        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modInfo, Dictionary<string, string> parameters)
+        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modList, Dictionary<string, string> parameters)
         {
             InitializeDefaults();
 
             mSearchEngineName = searchEngineName;
             mSearchEngineParamFilePath = string.Empty;
 
-            ModInfo = modInfo;
+            ModList = modList;
 
-            ModInfo = modInfo ?? new List<ModificationDefinition>();
+            ModList = modList ?? new List<ModificationDefinition>();
 
             if (Parameters == null)
             {
@@ -176,10 +176,10 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add a new dynamic or static modification
         /// </summary>
-        /// <param name="modInfo"></param>
-        public void AddModification(ModificationDefinition modInfo)
+        /// <param name="modDef"></param>
+        public void AddModification(ModificationDefinition modDef)
         {
-            ModInfo.Add(modInfo);
+            ModList.Add(modDef);
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace PHRPReader.Data
         /// </summary>
         public void ClearModifications()
         {
-            ModInfo.Clear();
+            ModList.Clear();
         }
 
         /// <summary>

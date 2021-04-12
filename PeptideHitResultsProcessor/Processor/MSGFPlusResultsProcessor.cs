@@ -1095,11 +1095,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Extracts mod info from either a MS-GF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="msgfPlusParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if success; false if a problem</returns>
         private bool ExtractModInfoFromParamFile(
             string msgfPlusParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);
 
@@ -1109,7 +1109,7 @@ namespace PeptideHitResultsProcessor.Processor
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 msgfPlusParamFilePath,
                 MSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
-                out modInfo);
+                out modList);
 
             if (!success || mErrorCode != PHRPErrorCode.NoError)
             {
@@ -1121,7 +1121,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return false;
             }
 
-            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
 
             return true;
         }

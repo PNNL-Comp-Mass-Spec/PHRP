@@ -833,7 +833,7 @@ namespace PHRPReader.Reader
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 searchEngineParamFilePath,
                 MSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
-                out var modInfo);
+                out var modDef);
 
             if (!success)
             {
@@ -841,7 +841,7 @@ namespace PHRPReader.Reader
                 return false;
             }
 
-            var customAminoAcidDefs = (from item in modInfo where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA select item).ToList();
+            var customAminoAcidDefs = (from item in modDef where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA select item).ToList();
             if (customAminoAcidDefs.Count == 0)
             {
                 // There are no custom amino acids

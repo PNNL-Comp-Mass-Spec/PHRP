@@ -569,15 +569,15 @@ namespace PeptideHitResultsProcessor.Processor
         /// Load the static mods defined in the MODPlus parameter file
         /// </summary>
         /// <param name="modPlusParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>
         /// We don't care about the dynamic mods because there are so many possible mods.
         /// We'll add each dynamic mod as we encounter it in the results
         /// </remarks>
-        private bool ExtractModInfoFromMODPlusParamFile(string modPlusParamFilePath, out List<ModificationDefinition> modInfo)
+        private bool ExtractModInfoFromMODPlusParamFile(string modPlusParamFilePath, out List<ModificationDefinition> modList)
         {
-            modInfo = new List<ModificationDefinition>();
+            modList = new List<ModificationDefinition>();
 
             try
             {
@@ -630,7 +630,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 }
 
                                 var modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residue, modType, massCorrectionTag);
-                                modInfo.Add(modDef);
+                                modList.Add(modDef);
                             }
                         }
                     }
@@ -1432,20 +1432,20 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Call .LookupModificationDefinitionByMass for each entry in modPlusModInfo
-            foreach (var modInfo in modPlusModInfo)
+            foreach (var modDef in modPlusModInfo)
             {
-                if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                if (string.IsNullOrEmpty(modDef.TargetResidues))
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                        modInfo.ModificationMass, modInfo.ModificationType, default,
+                        modDef.ModificationMass, modDef.ModificationType, default,
                         AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                 }
                 else
                 {
-                    foreach (var chTargetResidue in modInfo.TargetResidues)
+                    foreach (var chTargetResidue in modDef.TargetResidues)
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
+                            modDef.ModificationMass, modDef.ModificationType, chTargetResidue,
                             AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                     }
                 }

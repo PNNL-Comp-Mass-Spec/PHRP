@@ -648,12 +648,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the TopPIC parameter file
         /// </summary>
         /// <param name="topPICParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
         /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string topPICParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
 
@@ -663,7 +663,7 @@ namespace PeptideHitResultsProcessor.Processor
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 topPICParamFilePath,
                 MSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
-                out modInfo);
+                out modList);
 
             if (!success || mErrorCode != PHRPErrorCode.NoError)
             {
@@ -675,7 +675,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return false;
             }
 
-            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
 
             return true;
         }

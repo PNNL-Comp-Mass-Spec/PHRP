@@ -188,11 +188,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         private void AddModificationsToResidues(
             MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(searchResult.Modifications))
             {
@@ -224,7 +224,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var modName = reMatch.Groups["ModName"].Value;
                 var residueNumber = reMatch.Groups["ResidueNumber"].Value;
 
-                foreach (var modDef in modInfo)
+                foreach (var modDef in modList)
                 {
                     if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
@@ -281,7 +281,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool AddModificationsAndComputeMass(
             MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             bool success;
 
@@ -293,7 +293,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // searchResult.SearchResultAddIsotopicModifications(updateModOccurrenceCounts)
 
                 // Parse .Modifications to determine the modified residues present
-                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modInfo);
+                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modList);
 
                 // Compute the monoisotopic mass for this peptide
                 searchResult.ComputeMonoisotopicMass();
@@ -323,10 +323,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
         /// <param name="modificationList">Comma separated list of modifications, e.g. Dehydro 52,Dehydro 63</param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         private double ComputeTotalModMass(
             string modificationList,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -351,7 +351,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var modName = reMatch.Groups["ModName"].Value;
 
-                foreach (var modDef in modInfo)
+                foreach (var modDef in modList)
                 {
                     if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
@@ -448,12 +448,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             try
             {
@@ -566,12 +566,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the MSPathFinder parameter file
         /// </summary>
         /// <param name="msPathFinderParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
         /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string msPathFinderParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
             RegisterEvents(modFileProcessor);
@@ -581,7 +581,7 @@ namespace PeptideHitResultsProcessor.Processor
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 msPathFinderParamFilePath,
                 MSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
-                out modInfo);
+                out modList);
 
             if (!success || mErrorCode != PHRPErrorCode.NoError)
             {
@@ -593,7 +593,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return false;
             }
 
-            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
 
             return true;
         }
@@ -642,13 +642,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathfinderSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -860,7 +860,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <param name="rowNumber">Row number (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
@@ -868,7 +868,7 @@ namespace PeptideHitResultsProcessor.Processor
             ref MSPathFinderSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int rowNumber)
         {
             try
@@ -917,7 +917,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
 
                 // Parse the list of modified residues to determine the total mod mass
-                var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
+                var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modList);
 
                 // Compute monoisotopic mass of the peptide
                 udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
@@ -1278,7 +1278,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var inputFile = new FileInfo(inputFilePath);
 
                     // Load the MSPathFinder Parameter File so that we can determine the modification names and masses
-                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modList);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1315,13 +1315,13 @@ namespace PeptideHitResultsProcessor.Processor
                     // The synopsis file name will be of the form BasePath_mspath_syn.txt
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
-                    success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modInfo);
+                    success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modList);
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
-                    success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modInfo);
+                    success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modList);
 
                     if (success && Options.CreateProteinModsFile)
                     {

@@ -9,6 +9,8 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PeptideMassCalculatorUnitTests
     {
+        // Ignore Spelling: Da
+
         private PeptideMassCalculator mPeptideMassCalculator;
 
         [SetUp]

@@ -328,11 +328,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         private void AddModificationsToResidues(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(searchResult.Modifications) || searchResult.Modifications.Equals("Unmodified"))
             {
@@ -414,7 +414,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool AddModificationsAndComputeMass(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             bool success;
 
@@ -426,7 +426,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // searchResult.SearchResultAddIsotopicModifications(updateModOccurrenceCounts)
 
                 // Parse .Modifications to determine the modified residues present
-                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modInfo);
+                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modList);
 
                 // Compute the monoisotopic mass for this peptide
                 searchResult.ComputeMonoisotopicMass();
@@ -462,10 +462,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
         /// <param name="modificationList">Comma separated list of modifications, e.g. "Acetyl (Protein N-term),Oxidation (M)" or "2 Oxidation (M) "</param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         private double ComputeTotalModMass(
             string modificationList,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -486,7 +486,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var modName = match.Success ? match.Groups["ModName"].Value : modItem;
 
-                foreach (var modDef in modInfo)
+                foreach (var modDef in modList)
                 {
                     if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
@@ -584,13 +584,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="maxQuantPeptides"></param>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             try
             {
@@ -646,7 +646,7 @@ namespace PeptideHitResultsProcessor.Processor
                         var udtSearchResult = new MaxQuantSearchResult();
 
                         var validSearchResult =
-                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modInfo, rowNumber);
+                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, rowNumber);
 
                         if (validSearchResult)
                         {
@@ -717,11 +717,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the MaxQuant parameter file
         /// </summary>
         /// <param name="maxQuantParamFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string maxQuantParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             var success = false;
 
@@ -832,13 +832,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -1055,7 +1055,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="proteinNames"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <param name="rowNumber">Row number (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantResultsFileEntry(
@@ -1065,7 +1065,7 @@ namespace PeptideHitResultsProcessor.Processor
             out List<string> proteinNames,
             ref string errorLog,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int rowNumber)
         {
             proteinNames = new List<string>();
@@ -1167,7 +1167,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EvidenceID], out udtSearchResult.EvidenceID);
 
                 // Parse the modification list to determine the total mod mass
-                var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
+                var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modList);
 
                 // Compute monoisotopic mass of the peptide
                 udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
@@ -1625,13 +1625,13 @@ namespace PeptideHitResultsProcessor.Processor
                     // The synopsis file name will be of the form Dataset_maxq_syn.txt
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
-                    success = CreateSynResultsFile(maxQuantPeptides, inputFilePath, synOutputFilePath, modInfo);
+                    success = CreateSynResultsFile(maxQuantPeptides, inputFilePath, synOutputFilePath, modList);
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
-                    success = ParseMaxQuantSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modInfo);
+                    success = ParseMaxQuantSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modList);
 
                     if (success && Options.CreateProteinModsFile)
                     {

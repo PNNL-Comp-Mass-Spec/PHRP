@@ -274,9 +274,9 @@ namespace PHRPReader
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="modSpecFormat"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True if success; false if a problem</returns>
-        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<ModInfo> modInfo)
+        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<ModInfo> modList)
         {
             var tagNamesToFind = new List<string> {
                 PARAM_TAG_MOD_STATIC,
@@ -284,7 +284,7 @@ namespace PHRPReader
                 PARAM_TAG_CUSTOM_AA };
 
             // Initialization
-            modInfo = new List<ModInfo>();
+            modList = new List<ModInfo>();
 
             var unnamedModID = 0;
             mErrorMessage = string.Empty;
@@ -718,16 +718,16 @@ namespace PHRPReader
         /// <summary>
         /// Resolve MS-GF+, MSPathFinder, or TopPIC mods with mod definitions
         /// </summary>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <param name="peptideMods"></param>
-        public void ResolveMSGFPlusModsWithModDefinitions(List<ModInfo> modInfo, PeptideModificationContainer peptideMods)
+        public void ResolveMSGFPlusModsWithModDefinitions(List<ModInfo> modList, PeptideModificationContainer peptideMods)
         {
-            if (modInfo == null)
+            if (modList == null)
                 return;
 
-            for (var index = 0; index <= modInfo.Count - 1; index++)
+            for (var index = 0; index <= modList.Count - 1; index++)
             {
-                var udtModInfo = modInfo[index];
+                var udtModInfo = modList[index];
                 int resIndexStart;
                 int resIndexEnd;
 
@@ -821,7 +821,7 @@ namespace PHRPReader
                     }
                 }
 
-                modInfo[index] = udtModInfo;
+                modList[index] = udtModInfo;
             }
         }
 

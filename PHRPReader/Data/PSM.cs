@@ -303,10 +303,10 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="modInfo">Modification info class</param>
-        public void AddModifiedResidue(AminoAcidModInfo modInfo)
+        /// <param name="modDef">Modification info class</param>
+        public void AddModifiedResidue(AminoAcidModInfo modDef)
         {
-            ModifiedResidues.Add(modInfo);
+            ModifiedResidues.Add(modDef);
         }
 
         /// <summary>
