@@ -427,116 +427,108 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Initialize variables
                 var previousScan = int.MinValue;
-                IComparer<InspectSearchResult> sortComparer;
-
-                if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                
+                IComparer<InspectSearchResult> sortComparer = filteredOutputFileType switch
                 {
                     // Writes the synopsis file, which writes every record with a p-value below a set threshold or a TotalPRMScore above a certain threshold
-                    sortComparer = new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc();
-                }
-                else
-                {
-                    if (filteredOutputFileType == FilteredOutputFileTypeConstants.FHTbyTotalPRM)
-                    {
-                        // Write the PRM first-hits file, which writes the record with the highest TotalPRMScore
-                        sortComparer = new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc();
-                    }
-                    else
-                    {
-                        // FilteredOutputFileTypeConstants.FHTbyFScore
-                        // Write the FScore first-hits file, which writes the record with the highest FScore
-                        sortComparer = new InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc();
-                    }
-                }
+                    FilteredOutputFileTypeConstants.SynFile => new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc(),
+
+                    // Write the PRM first-hits file, which writes the record with the highest TotalPRMScore
+                    FilteredOutputFileTypeConstants.FHTbyTotalPRM => new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc(),
+
+                    // Writes the synopsis file, which writes every record with a p-value below a set threshold or a TotalPRMScore above a certain threshold
+                    FilteredOutputFileTypeConstants.FHTbyFScore => new InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc(),
+
+                    _ => throw new ArgumentOutOfRangeException(nameof(filteredOutputFileType), filteredOutputFileType, null)
+                };
 
                 try
                 {
                     // Open the input file and parse it
                     // Initialize the stream reader and the stream Text writer
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                    // Write the header line
+                    WriteSynFHTFileHeader(writer, ref errorLog);
+
+                    errorLog = string.Empty;
+                    var resultsProcessed = 0;
+
+                    // Initialize array that will hold all of the records for a given scan
+                    var currentScanResultsCount = 0;
+                    var searchResultsCurrentScan = new InspectSearchResult[10];
+
+                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                    var filteredSearchResults = new List<InspectSearchResult>();
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        // Write the header line
-                        WriteSynFHTFileHeader(writer, ref errorLog);
+                        var lineIn = reader.ReadLine();
 
-                        errorLog = string.Empty;
-                        var resultsProcessed = 0;
-
-                        // Initialize array that will hold all of the records for a given scan
-                        var currentScanResultsCount = 0;
-                        var searchResultsCurrentScan = new InspectSearchResult[10];
-
-                        // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<InspectSearchResult>();
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
-
-                            // Initialize searchResult
-                            udtSearchResult.Clear();
-
-                            var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
-
-                            resultsProcessed++;
-                            if (!validSearchResult)
-                            {
-                                continue;
-                            }
-
-                            if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
-                            {
-                                // New scan encountered; sort and filter the data in searchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-                                if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
-                                {
-                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
-                                                    filteredSearchResults, ref errorLog, ref sortComparer);
-                                }
-                                else
-                                {
-                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
-                                                     filteredSearchResults, ref errorLog, ref sortComparer);
-                                }
-
-                                currentScanResultsCount = 0;
-                            }
-
-                            AddCurrentRecordToSearchResults(ref currentScanResultsCount, searchResultsCurrentScan, udtSearchResult);
-
-                            previousScan = udtSearchResult.ScanNum;
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
+                            continue;
                         }
 
-                        // Store the last record
-                        if (currentScanResultsCount > 0)
+                        // Initialize searchResult
+                        udtSearchResult.Clear();
+
+                        var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
+
+                        resultsProcessed++;
+                        if (!validSearchResult)
                         {
+                            continue;
+                        }
+
+                        if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
+                        {
+                            // New scan encountered; sort and filter the data in searchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
                             if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                             {
-                                StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
-                                                ref errorLog, ref sortComparer);
+                                StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
+                                    filteredSearchResults, ref errorLog, ref sortComparer);
                             }
                             else
                             {
-                                StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
-                                                 ref errorLog, ref sortComparer);
+                                StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
+                                    filteredSearchResults, ref errorLog, ref sortComparer);
                             }
 
                             currentScanResultsCount = 0;
                         }
 
-                        if (SortFHTAndSynFiles)
+                        AddCurrentRecordToSearchResults(ref currentScanResultsCount, searchResultsCurrentScan, udtSearchResult);
+
+                        previousScan = udtSearchResult.ScanNum;
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
+                    }
+
+                    // Store the last record
+                    if (currentScanResultsCount > 0)
+                    {
+                        if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                         {
-                            // Sort the data in filteredSearchResults then write out to disk
-                            SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                            StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
+                                ref errorLog, ref sortComparer);
                         }
+                        else
+                        {
+                            StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
+                                ref errorLog, ref sortComparer);
+                        }
+
+                        currentScanResultsCount = 0;
+                    }
+
+                    if (SortFHTAndSynFiles)
+                    {
+                        // Sort the data in filteredSearchResults then write out to disk
+                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                     }
 
                     // Inform the user if any errors occurred
@@ -647,11 +639,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the Inspect parameter file
         /// </summary>
         /// <param name="inspectParameterFilePath"></param>
-        /// <param name="modInfo"></param>
+        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, out List<ModInfo> modInfo)
+        private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, out List<ModInfo> modList)
         {
-            modInfo = new List<ModInfo>();
+            modList = new List<ModInfo>();
 
             try
             {
@@ -665,95 +657,94 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Read the contents of the inspect parameter file
-                using (var reader = new StreamReader(new FileStream(inspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(inspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
+
+                    var dataLine = lineIn.Trim();
+                    if (dataLine.Length == 0)
+                        continue;
+
+                    if (dataLine[0] == '#')
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                            continue;
-
-                        var dataLine = lineIn.Trim();
-                        if (dataLine.Length == 0)
-                            continue;
-
-                        if (dataLine[0] == '#')
-                        {
-                            // Comment line; skip it
-                            continue;
-                        }
-
-                        if (!dataLine.StartsWith("mod", StringComparison.OrdinalIgnoreCase))
-                            continue;
-
-                        // Modification definition line
-
-                        // Split the line on commas
-                        var splitLine = dataLine.Split(',');
-
-                        if (splitLine.Length < 3 || splitLine[0].ToLower().Trim() != "mod")
-                            continue;
-
-                        var modDef = new ModInfo()
-                        {
-                            ModMass = splitLine[1],
-                            Residues = splitLine[2],
-                            ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString()
-                        };
-
-                        if (splitLine.Length >= 4)
-                        {
-                            switch (splitLine[3].ToLower())
-                            {
-                                case "opt":
-                                    modDef.ModType = InspectModType.DynamicMod;
-                                    break;
-                                case "fix":
-                                    modDef.ModType = InspectModType.StaticMod;
-                                    break;
-                                case "nterminal":
-                                    modDef.ModType = InspectModType.DynNTermPeptide;
-                                    break;
-                                case "cterminal":
-                                    modDef.ModType = InspectModType.DynCTermPeptide;
-                                    break;
-                                default:
-                                    ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
-                                    modDef.ModType = InspectModType.DynamicMod;
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            // Assume dynamic if not specified
-                            modDef.ModType = InspectModType.DynamicMod;
-                        }
-
-                        if (splitLine.Length >= 5)
-                        {
-                            modDef.ModName = splitLine[4].ToLower();
-                            if (modDef.ModName.Length > 4)
-                            {
-                                // Only keep the first 4 characters of the modification name
-                                modDef.ModName = modDef.ModName.Substring(0, 4);
-                            }
-                        }
-                        else
-                        {
-                            unnamedModID++;
-                            modDef.ModName = "UnnamedMod" + unnamedModID.ToString();
-                        }
-
-                        // Check for phosphorylation
-                        // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
-                        //  However, we want to use the more precise mass of 79.9663
-                        if (modDef.ModName == PHOS_MOD_NAME.ToLower() && modDef.ModMass == "80")
-                        {
-                            modDef.ModMass = PHOS_MOD_MASS;
-                        }
-
-                        modInfo.Add(modDef);
+                        // Comment line; skip it
+                        continue;
                     }
+
+                    if (!dataLine.StartsWith("mod", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Modification definition line
+
+                    // Split the line on commas
+                    var splitLine = dataLine.Split(',');
+
+                    if (splitLine.Length < 3 || splitLine[0].ToLower().Trim() != "mod")
+                        continue;
+
+                    var modDef = new ModInfo()
+                    {
+                        ModMass = splitLine[1],
+                        Residues = splitLine[2],
+                        ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString()
+                    };
+
+                    if (splitLine.Length >= 4)
+                    {
+                        switch (splitLine[3].ToLower())
+                        {
+                            case "opt":
+                                modDef.ModType = InspectModType.DynamicMod;
+                                break;
+                            case "fix":
+                                modDef.ModType = InspectModType.StaticMod;
+                                break;
+                            case "nterminal":
+                                modDef.ModType = InspectModType.DynNTermPeptide;
+                                break;
+                            case "cterminal":
+                                modDef.ModType = InspectModType.DynCTermPeptide;
+                                break;
+                            default:
+                                ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
+                                modDef.ModType = InspectModType.DynamicMod;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Assume dynamic if not specified
+                        modDef.ModType = InspectModType.DynamicMod;
+                    }
+
+                    if (splitLine.Length >= 5)
+                    {
+                        modDef.ModName = splitLine[4].ToLower();
+                        if (modDef.ModName.Length > 4)
+                        {
+                            // Only keep the first 4 characters of the modification name
+                            modDef.ModName = modDef.ModName.Substring(0, 4);
+                        }
+                    }
+                    else
+                    {
+                        unnamedModID++;
+                        modDef.ModName = "UnnamedMod" + unnamedModID.ToString();
+                    }
+
+                    // Check for phosphorylation
+                    // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
+                    //  However, we want to use the more precise mass of 79.9663
+                    if (modDef.ModName == PHOS_MOD_NAME.ToLower() && modDef.ModMass == "80")
+                    {
+                        modDef.ModMass = PHOS_MOD_MASS;
+                    }
+
+                    modList.Add(modDef);
                 }
 
                 Console.WriteLine();
@@ -968,133 +959,132 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var headerParsed = false;
-
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        var lineIn = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            var dataLine = true;
+                        var dataLine = true;
 
-                            if (!headerParsed)
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
+                            if (validHeader)
                             {
-                                var validHeader = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
-                                if (validHeader)
-                                {
-                                    dataLine = false;
-                                }
-                                else
-                                {
-                                    // Error parsing header; assume this is a data line
-                                    dataLine = true;
-                                }
-                                headerParsed = true;
-                            }
-
-                            bool validSearchResult;
-                            if (dataLine)
-                            {
-                                validSearchResult = ParseInspectSynFileEntry(lineIn, columnMapping, searchResult, ref errorLog, out currentPeptideWithMods);
+                                dataLine = false;
                             }
                             else
                             {
-                                validSearchResult = false;
+                                // Error parsing header; assume this is a data line
+                                dataLine = true;
                             }
+                            headerParsed = true;
+                        }
 
-                            if (!validSearchResult)
+                        bool validSearchResult;
+                        if (dataLine)
+                        {
+                            validSearchResult = ParseInspectSynFileEntry(lineIn, columnMapping, searchResult, ref errorLog, out currentPeptideWithMods);
+                        }
+                        else
+                        {
+                            validSearchResult = false;
+                        }
+
+                        if (!validSearchResult)
+                        {
+                            continue;
+                        }
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+                        bool firstMatchForGroup;
+
+                        if (searchResult.TotalPRMScore == previousTotalPRMScore)
+                        {
+                            // New result has the same TotalPRMScore as the previous result
+                            // See if peptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
+
+                            if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
                             {
-                                continue;
-                            }
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-                            bool firstMatchForGroup;
-
-                            if (searchResult.TotalPRMScore == previousTotalPRMScore)
-                            {
-                                // New result has the same TotalPRMScore as the previous result
-                                // See if peptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
-
-                                if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
-                                {
-                                    firstMatchForGroup = false;
-                                }
-                                else
-                                {
-                                    peptidesFoundForTotalPRMScoreLevel.Add(key);
-                                    firstMatchForGroup = true;
-                                }
+                                firstMatchForGroup = false;
                             }
                             else
                             {
-                                // New TotalPRMScore
-                                // Reset peptidesFoundForTotalPRMScoreLevel
-                                peptidesFoundForTotalPRMScoreLevel.Clear();
-
-                                // Update previousTotalPRMScore
-                                previousTotalPRMScore = searchResult.TotalPRMScore;
-
-                                // Append a new entry to peptidesFoundForTotalPRMScoreLevel
                                 peptidesFoundForTotalPRMScoreLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
-
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            if (pepToProteinMapping.Count > 0)
-                            {
-                                // Add the additional proteins for this peptide
-
-                                // Use binary search to find this peptide in pepToProteinMapping
-                                var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
-
-                                if (pepToProteinMapIndex >= 0)
-                                {
-                                    // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                    var currentProtein = string.Copy(searchResult.ProteinName);
-                                    do
-                                    {
-                                        if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
-                                        {
-                                            searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                            SaveResultsFileEntrySeqInfo(searchResult, false);
-                                        }
-
-                                        pepToProteinMapIndex++;
-                                    } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
-                                             currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
-                                }
-                                else
-                                {
-                                    // Match not found; this is unexpected
-                                    ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
-                                }
-                            }
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
                         }
+                        else
+                        {
+                            // New TotalPRMScore
+                            // Reset peptidesFoundForTotalPRMScoreLevel
+                            peptidesFoundForTotalPRMScoreLevel.Clear();
+
+                            // Update previousTotalPRMScore
+                            previousTotalPRMScore = searchResult.TotalPRMScore;
+
+                            // Append a new entry to peptidesFoundForTotalPRMScoreLevel
+                            peptidesFoundForTotalPRMScoreLevel.Add(key);
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        if (pepToProteinMapping.Count > 0)
+                        {
+                            // Add the additional proteins for this peptide
+
+                            // Use binary search to find this peptide in pepToProteinMapping
+                            var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
+
+                            if (pepToProteinMapIndex >= 0)
+                            {
+                                // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
+                                var currentProtein = string.Copy(searchResult.ProteinName);
+                                do
+                                {
+                                    if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
+                                    {
+                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        SaveResultsFileEntrySeqInfo(searchResult, false);
+                                    }
+
+                                    pepToProteinMapIndex++;
+                                } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                         currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
+                            }
+                            else
+                            {
+                                // Match not found; this is unexpected
+                                ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                            }
+                        }
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)

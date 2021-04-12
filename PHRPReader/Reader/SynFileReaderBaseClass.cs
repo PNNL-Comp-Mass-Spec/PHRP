@@ -1053,50 +1053,49 @@ namespace PHRPReader.Reader
 
                 searchEngineParams.UpdateSearchEngineParamFilePath(paramFilePath);
 
-                using (var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var dataLine = lineIn.TrimStart();
+
+                    if (string.IsNullOrWhiteSpace(dataLine) || dataLine.StartsWith("#") || !dataLine.Contains('='))
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrEmpty(lineIn))
-                            continue;
+                        continue;
+                    }
 
-                        var dataLine = lineIn.TrimStart();
+                    // Split the line on the equals sign
+                    var kvSetting = ParseKeyValueSetting(dataLine, '=', "#");
 
-                        if (string.IsNullOrWhiteSpace(dataLine) || dataLine.StartsWith("#") || !dataLine.Contains('='))
+                    if (string.IsNullOrEmpty(kvSetting.Key))
+                    {
+                        continue;
+                    }
+
+                    if (peptideHitResultType == PeptideHitResultTypes.MODa &&
+                        string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // ModA defines all of its static modifications with the ADD keyword
+                        // Split the value at the comma and create a new setting entry with the residue name
+                        kvSetting = GetMODaStaticModSetting(kvSetting, out var warningMessageAddon);
+                        if (!string.IsNullOrWhiteSpace(warningMessageAddon))
                         {
-                            continue;
-                        }
-
-                        // Split the line on the equals sign
-                        var kvSetting = ParseKeyValueSetting(dataLine, '=', "#");
-
-                        if (string.IsNullOrEmpty(kvSetting.Key))
-                        {
-                            continue;
-                        }
-
-                        if (peptideHitResultType == PeptideHitResultTypes.MODa &&
-                            string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
-                        {
-                            // ModA defines all of its static modifications with the ADD keyword
-                            // Split the value at the comma and create a new setting entry with the residue name
-                            kvSetting = GetMODaStaticModSetting(kvSetting, out var warningMessageAddon);
-                            if (!string.IsNullOrWhiteSpace(warningMessageAddon))
+                            if (string.IsNullOrWhiteSpace(warningMessage))
                             {
-                                if (string.IsNullOrWhiteSpace(warningMessage))
-                                {
-                                    warningMessage = string.Copy(warningMessageAddon);
-                                }
-                                else if (!warningMessage.Contains(warningMessageAddon))
-                                {
-                                    warningMessage += "; " + string.Copy(warningMessageAddon);
-                                }
+                                warningMessage = string.Copy(warningMessageAddon);
+                            }
+                            else if (!warningMessage.Contains(warningMessageAddon))
+                            {
+                                warningMessage += "; " + string.Copy(warningMessageAddon);
                             }
                         }
-
-                        searchEngineParams.AddUpdateParameter(kvSetting);
                     }
+
+                    searchEngineParams.AddUpdateParameter(kvSetting);
                 }
 
                 return true;
@@ -1147,41 +1146,40 @@ namespace PHRPReader.Reader
                 var validDate = false;
                 var validVersion = false;
 
-                using (var reader = new StreamReader(new FileStream(toolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(toolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var dataLine = lineIn.TrimStart();
+
+                    // Split the line on a colon
+                    var kvSetting = ParseKeyValueSetting(dataLine, ':');
+
+                    if (kvSetting.Key.Equals("date", StringComparison.OrdinalIgnoreCase))
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrEmpty(lineIn))
-                            continue;
-
-                        var dataLine = lineIn.TrimStart();
-
-                        // Split the line on a colon
-                        var kvSetting = ParseKeyValueSetting(dataLine, ':');
-
-                        if (kvSetting.Key.Equals("date", StringComparison.OrdinalIgnoreCase))
+                        validDate = DateTime.TryParse(kvSetting.Value, out searchDate);
+                    }
+                    else if (kvSetting.Key.Equals("ToolVersionInfo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!string.IsNullOrEmpty(kvSetting.Value))
                         {
-                            validDate = DateTime.TryParse(kvSetting.Value, out searchDate);
+                            searchEngineVersion = string.Copy(kvSetting.Value);
+                            validVersion = true;
                         }
-                        else if (kvSetting.Key.Equals("ToolVersionInfo", StringComparison.OrdinalIgnoreCase))
+                        else
                         {
-                            if (!string.IsNullOrEmpty(kvSetting.Value))
+                            // The next line contains the search engine version
+                            if (!reader.EndOfStream)
                             {
-                                searchEngineVersion = string.Copy(kvSetting.Value);
-                                validVersion = true;
-                            }
-                            else
-                            {
-                                // The next line contains the search engine version
-                                if (!reader.EndOfStream)
+                                var searchEngineLine = reader.ReadLine();
+                                if (!string.IsNullOrEmpty(searchEngineLine))
                                 {
-                                    var searchEngineLine = reader.ReadLine();
-                                    if (!string.IsNullOrEmpty(searchEngineLine))
-                                    {
-                                        searchEngineVersion = string.Copy(searchEngineLine.Trim());
-                                        validVersion = true;
-                                    }
+                                    searchEngineVersion = string.Copy(searchEngineLine.Trim());
+                                    validVersion = true;
                                 }
                             }
                         }

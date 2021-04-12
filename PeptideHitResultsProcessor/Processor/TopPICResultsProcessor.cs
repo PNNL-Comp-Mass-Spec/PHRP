@@ -547,87 +547,86 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var headerParsed = false;
+                var dataHasPValues = false;
+
+                mDeltaMassWarningCount = 0;
+
+                // Initialize array that will hold all of the records in the TopPIC result file
+                var searchResultsUnfiltered = new List<TopPICSearchResult>();
+
+                // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                var filteredSearchResults = new List<TopPICSearchResult>();
+
+                // Parse the input file
+                while (!reader.EndOfStream && !AbortProcessing)
                 {
-                    var headerParsed = false;
-                    var dataHasPValues = false;
-
-                    mDeltaMassWarningCount = 0;
-
-                    // Initialize array that will hold all of the records in the TopPIC result file
-                    var searchResultsUnfiltered = new List<TopPICSearchResult>();
-
-                    // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<TopPICSearchResult>();
-
-                    // Parse the input file
-                    while (!reader.EndOfStream && !AbortProcessing)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                        {
-                            continue;
-                        }
-
-                        if (!headerParsed)
-                        {
-                            var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
-                            if (!validHeader)
-                            {
-                                // Error parsing header
-                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                return false;
-                            }
-
-                            headerParsed = true;
-
-                            dataHasPValues = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
-
-                            // Write the header line
-                            WriteSynFHTFileHeader(writer, dataHasPValues, ref errorLog);
-
-                            continue;
-                        }
-
-                        var udtSearchResult = new TopPICSearchResult();
-                        var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
-
-                        if (validSearchResult)
-                        {
-                            searchResultsUnfiltered.Add(udtSearchResult);
-                        }
-
-                        // Update the progress
-                        UpdateSynopsisFileCreationProgress(reader);
+                        continue;
                     }
 
-                    // Sort the SearchResults by scan, charge, and ascending PValue
-                    searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
-
-                    // Now filter the data
-
-                    // Initialize variables
-                    var startIndex = 0;
-
-                    while (startIndex < searchResultsUnfiltered.Count)
+                    if (!headerParsed)
                     {
-                        var endIndex = startIndex;
-                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
+                        if (!validHeader)
                         {
-                            endIndex++;
+                            // Error parsing header
+                            SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                            return false;
                         }
 
-                        // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults, dataHasPValues);
+                        headerParsed = true;
 
-                        startIndex = endIndex + 1;
+                        dataHasPValues = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
+
+                        // Write the header line
+                        WriteSynFHTFileHeader(writer, dataHasPValues, ref errorLog);
+
+                        continue;
                     }
 
-                    // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, dataHasPValues);
+                    var udtSearchResult = new TopPICSearchResult();
+                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+
+                    if (validSearchResult)
+                    {
+                        searchResultsUnfiltered.Add(udtSearchResult);
+                    }
+
+                    // Update the progress
+                    UpdateSynopsisFileCreationProgress(reader);
                 }
+
+                // Sort the SearchResults by scan, charge, and ascending PValue
+                searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
+
+                // Now filter the data
+
+                // Initialize variables
+                var startIndex = 0;
+
+                while (startIndex < searchResultsUnfiltered.Count)
+                {
+                    var endIndex = startIndex;
+                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults, dataHasPValues);
+
+                    startIndex = endIndex + 1;
+                }
+
+                // Sort the data in filteredSearchResults then write out to disk
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, dataHasPValues);
 
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
@@ -770,124 +769,123 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                    var resultsProcessed = 0;
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var resultsProcessed = 0;
-                        var headerParsed = false;
-
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        var lineIn = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
+                            continue;
+                        }
+
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseTopPICSynFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
                             {
-                                continue;
+                                // Error parsing header
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                                return false;
                             }
+                            headerParsed = true;
+                            continue;
+                        }
 
-                            if (!headerParsed)
+                        var validSearchResult = ParseTopPICSynFileEntry(lineIn, searchResult, ref errorLog,
+                            resultsProcessed, columnMapping,
+                            out var currentPeptideWithMods);
+
+                        resultsProcessed++;
+                        if (!validSearchResult)
+                            continue;
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+
+                        bool firstMatchForGroup;
+                        if (searchResult.PValue == previousPValue)
+                        {
+                            // New result has the same PValue as the previous result
+                            // See if peptidesFoundForPValueLevel contains the peptide, scan and charge
+
+                            if (peptidesFoundForPValueLevel.Contains(key))
                             {
-                                var validHeader = ParseTopPICSynFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-                                continue;
-                            }
-
-                            var validSearchResult = ParseTopPICSynFileEntry(lineIn, searchResult, ref errorLog,
-                                                                            resultsProcessed, columnMapping,
-                                                                            out var currentPeptideWithMods);
-
-                            resultsProcessed++;
-                            if (!validSearchResult)
-                                continue;
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-
-                            bool firstMatchForGroup;
-                            if (searchResult.PValue == previousPValue)
-                            {
-                                // New result has the same PValue as the previous result
-                                // See if peptidesFoundForPValueLevel contains the peptide, scan and charge
-
-                                if (peptidesFoundForPValueLevel.Contains(key))
-                                {
-                                    firstMatchForGroup = false;
-                                }
-                                else
-                                {
-                                    peptidesFoundForPValueLevel.Add(key);
-                                    firstMatchForGroup = true;
-                                }
+                                firstMatchForGroup = false;
                             }
                             else
                             {
-                                // New PValue
-                                // Reset peptidesFoundForPValueLevel
-                                peptidesFoundForPValueLevel.Clear();
-
-                                // Update previousPValue
-                                previousPValue = searchResult.PValue;
-
-                                // Append a new entry to peptidesFoundForPValueLevel
                                 peptidesFoundForPValueLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
-
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" +
-                                                searchResult.ResultID + "'\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            if (pepToProteinMapping.Count > 0)
-                            {
-                                // Add the additional proteins for this peptide
-
-                                // Use binary search to find this peptide in pepToProteinMapping
-                                var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
-
-                                if (pepToProteinMapIndex >= 0)
-                                {
-                                    // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                    var currentProtein = string.Copy(searchResult.ProteinName);
-                                    do
-                                    {
-                                        if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
-                                        {
-                                            searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                            SaveResultsFileEntrySeqInfo(searchResult, false);
-                                        }
-
-                                        pepToProteinMapIndex++;
-                                    } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
-                                             currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
-                                }
-                                else
-                                {
-                                    // Match not found; this is unexpected
-                                    ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
-                                }
-                            }
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
                         }
+                        else
+                        {
+                            // New PValue
+                            // Reset peptidesFoundForPValueLevel
+                            peptidesFoundForPValueLevel.Clear();
+
+                            // Update previousPValue
+                            previousPValue = searchResult.PValue;
+
+                            // Append a new entry to peptidesFoundForPValueLevel
+                            peptidesFoundForPValueLevel.Add(key);
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" +
+                                            searchResult.ResultID + "'\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        if (pepToProteinMapping.Count > 0)
+                        {
+                            // Add the additional proteins for this peptide
+
+                            // Use binary search to find this peptide in pepToProteinMapping
+                            var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
+
+                            if (pepToProteinMapIndex >= 0)
+                            {
+                                // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
+                                var currentProtein = string.Copy(searchResult.ProteinName);
+                                do
+                                {
+                                    if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
+                                    {
+                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        SaveResultsFileEntrySeqInfo(searchResult, false);
+                                    }
+
+                                    pepToProteinMapIndex++;
+                                } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                         currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
+                            }
+                            else
+                            {
+                                // Match not found; this is unexpected
+                                ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                            }
+                        }
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)

@@ -1195,8 +1195,6 @@ namespace PHRPReader.Data
         /// <returns>True if successful, false if an error</returns>
         public bool ReadMassCorrectionTagsFile(string filePath, ref bool fileNotFound)
         {
-            bool success;
-
             try
             {
                 // Open the mass correction tags file
@@ -1207,56 +1205,52 @@ namespace PHRPReader.Data
                 if (string.IsNullOrWhiteSpace(filePath))
                 {
                     SetDefaultMassCorrectionTags();
-                    success = true;
+                    return true;
                 }
-                else if (!File.Exists(filePath))
+
+                if (!File.Exists(filePath))
                 {
                     ErrorMessage = "Mass CorrectionTags File Not Found: " + filePath;
                     SetDefaultMassCorrectionTags();
                     fileNotFound = true;
-                    success = false;
+                    return false;
                 }
-                else
+
+                using var massCorrectionTagsReader = new StreamReader(filePath);
+
+                mMassCorrectionTags.Clear();
+
+                while (!massCorrectionTagsReader.EndOfStream)
                 {
-                    using (var massCorrectionTagsReader = new StreamReader(filePath))
+                    var lineIn = massCorrectionTagsReader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (splitLine.Length >= 2)
                     {
-                        mMassCorrectionTags.Clear();
-
-                        while (!massCorrectionTagsReader.EndOfStream)
+                        // See if the first column contains 1 or more characters and if the second column contains a number
+                        // Note that StoreMassCorrectionTag() will trim spaces from the end of the mass correction tag names
+                        if (splitLine[0].Trim().Length >= 1 && SynFileReaderBaseClass.IsNumber(splitLine[1]))
                         {
-                            var lineIn = massCorrectionTagsReader.ReadLine();
-                            if (string.IsNullOrEmpty(lineIn))
-                                continue;
-
-                            var splitLine = lineIn.Split('\t');
-
-                            if (splitLine.Length >= 2)
-                            {
-                                // See if the first column contains 1 or more characters and if the second column contains a number
-                                // Note that StoreMassCorrectionTag() will trim spaces from the end of the mass correction tag names
-                                if (splitLine[0].Trim().Length >= 1 && SynFileReaderBaseClass.IsNumber(splitLine[1]))
-                                {
-                                    StoreMassCorrectionTag(splitLine[0], double.Parse(splitLine[1]));
-                                }
-                            }
+                            StoreMassCorrectionTag(splitLine[0], double.Parse(splitLine[1]));
                         }
                     }
-
-                    success = true;
-
-                    if (mMassCorrectionTags.Count == 0)
-                    {
-                        SetDefaultMassCorrectionTags();
-                    }
                 }
+
+                if (mMassCorrectionTags.Count == 0)
+                {
+                    SetDefaultMassCorrectionTags();
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 ErrorMessage = "Error reading Mass Correction Tags file (" + filePath + "): " + ex.Message;
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         /// <summary>
@@ -1267,8 +1261,6 @@ namespace PHRPReader.Data
         /// <returns>True if successful, false if an error</returns>
         public bool ReadModificationDefinitionsFile(string filePath, ref bool fileNotFound)
         {
-            bool success;
-
             try
             {
                 // Open the modification file
@@ -1284,172 +1276,168 @@ namespace PHRPReader.Data
                 if (string.IsNullOrWhiteSpace(filePath))
                 {
                     ClearModifications();
-                    success = true;
+                    return true;
                 }
-                else if (!File.Exists(filePath))
+
+                if (!File.Exists(filePath))
                 {
                     ErrorMessage = "Modification Definition File Not Found: " + filePath;
                     ClearModifications();
                     fileNotFound = true;
-                    success = false;
+                    return false;
                 }
-                else
+
+                using var modFileReader = new StreamReader(filePath);
+
+                ClearModifications();
+
+                while (!modFileReader.EndOfStream)
                 {
-                    using (var modFileReader = new StreamReader(filePath))
+                    var lineIn = modFileReader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (splitLine.Length < 2)
+                        continue;
+
+                    // See if the first column contains a single character and if the second column contains a number
+
+                    if (splitLine[0].Trim().Length != 1 || !SynFileReaderBaseClass.IsNumber(splitLine[1]))
+                        continue;
+
+                    var modificationDefinition = new ModificationDefinition(splitLine[0].Trim()[0], double.Parse(splitLine[1]));
+
+                    if (splitLine.Length >= 3)
                     {
-                        ClearModifications();
+                        // Parse the target residues list
+                        var residues = splitLine[2].Trim().ToUpper();
 
-                        while (!modFileReader.EndOfStream)
+                        var residuesClean = string.Empty;
+                        foreach (var chChar in residues)
                         {
-                            var lineIn = modFileReader.ReadLine();
-                            if (string.IsNullOrEmpty(lineIn))
-                                continue;
-
-                            var splitLine = lineIn.Split('\t');
-
-                            if (splitLine.Length < 2)
-                                continue;
-
-                            // See if the first column contains a single character and if the second column contains a number
-
-                            if (splitLine[0].Trim().Length != 1 || !SynFileReaderBaseClass.IsNumber(splitLine[1]))
-                                continue;
-
-                            var modificationDefinition = new ModificationDefinition(splitLine[0].Trim()[0], double.Parse(splitLine[1]));
-
-                            if (splitLine.Length >= 3)
+                            if (char.IsUpper(chChar))
                             {
-                                // Parse the target residues list
-                                var residues = splitLine[2].Trim().ToUpper();
+                                residuesClean += chChar;
+                            }
+                            else if (chChar == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
+                                     chChar == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS ||
+                                     chChar == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
+                                     chChar == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+                            {
+                                residuesClean += chChar;
+                            }
+                        }
 
-                                var residuesClean = string.Empty;
-                                foreach (var chChar in residues)
-                                {
-                                    if (char.IsUpper(chChar))
-                                    {
-                                        residuesClean += chChar;
-                                    }
-                                    else if (chChar == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
-                                             chChar == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS ||
-                                             chChar == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
-                                             chChar == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
-                                    {
-                                        residuesClean += chChar;
-                                    }
-                                }
+                        if (residuesClean.Length > 0)
+                        {
+                            modificationDefinition.TargetResidues = string.Copy(residuesClean);
+                        }
 
-                                if (residuesClean.Length > 0)
-                                {
-                                    modificationDefinition.TargetResidues = string.Copy(residuesClean);
-                                }
-
-                                if (splitLine.Length >= 4)
-                                {
-                                    // Store the modification type
-                                    if (splitLine[3].Trim().Length == 1)
-                                    {
-                                        modificationDefinition.ModificationType = ModificationDefinition.ModificationSymbolToModificationType(splitLine[3].ToUpper().Trim()[0]);
-                                    }
-
-                                    // If the .ModificationType is unknown, change it to Dynamic
-                                    if (modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
-                                    {
-                                        modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
-                                    }
-
-                                    if (splitLine.Length >= 5)
-                                    {
-                                        modificationDefinition.MassCorrectionTag = splitLine[4].Trim();
-
-                                        if (splitLine.Length >= 6)
-                                        {
-                                            splitLine[5] = splitLine[5].Trim();
-                                            if (splitLine[5].Length > 0)
-                                            {
-                                                modificationDefinition.AffectedAtom = splitLine[5][0];
-                                            }
-                                            else
-                                            {
-                                                modificationDefinition.AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
-                                            }
-                                        }
-                                    }
-                                }
+                        if (splitLine.Length >= 4)
+                        {
+                            // Store the modification type
+                            if (splitLine[3].Trim().Length == 1)
+                            {
+                                modificationDefinition.ModificationType = ModificationDefinition.ModificationSymbolToModificationType(splitLine[3].ToUpper().Trim()[0]);
                             }
 
-                            // Check whether the modification type is Static and the .TargetResidues are one of: <>[]
-                            // If so, update the modification type as needed
-                            if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
+                            // If the .ModificationType is unknown, change it to Dynamic
+                            if (modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
                             {
-                                if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
-                                    modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                                modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
+                            }
+
+                            if (splitLine.Length >= 5)
+                            {
+                                modificationDefinition.MassCorrectionTag = splitLine[4].Trim();
+
+                                if (splitLine.Length >= 6)
                                 {
-                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
+                                    splitLine[5] = splitLine[5].Trim();
+                                    if (splitLine[5].Length > 0)
+                                    {
+                                        modificationDefinition.AffectedAtom = splitLine[5][0];
+                                    }
+                                    else
+                                    {
+                                        modificationDefinition.AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+                                    }
                                 }
-                                else if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
-                                         modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
-                                {
-                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
-                                }
-                            }
-
-                            // Validate some of the settings if the modification type is IsotopicMod or TerminalPeptideStaticMod or ProteinTerminusStaticMod
-                            var validMod = true;
-                            switch (modificationDefinition.ModificationType)
-                            {
-                                case ModificationDefinition.ResidueModificationType.IsotopicMod:
-                                    modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
-                                    if (modificationDefinition.AffectedAtom == PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL)
-                                    {
-                                        validMod = false;
-                                    }
-                                    break;
-                                case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
-                                    modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
-                                    if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() &&
-                                        modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
-                                    {
-                                        validMod = false;
-                                    }
-                                    break;
-                                case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
-                                    modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
-                                    if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString() &&
-                                        modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
-                                    {
-                                        validMod = false;
-                                    }
-                                    break;
-                                case ModificationDefinition.ResidueModificationType.UnknownType:
-                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
-                                    break;
-                            }
-
-                            if (modificationDefinition.MassCorrectionTag == ModificationDefinition.INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME)
-                            {
-                                // Try to determine the mass correction name
-                                modificationDefinition.MassCorrectionTag = LookupMassCorrectionTagByMass(modificationDefinition.ModificationMass);
-                            }
-
-                            if (validMod)
-                            {
-                                AddModification(modificationDefinition, false);
                             }
                         }
                     }
 
-                    // Note that this method will call UpdateDefaultModificationSymbols()
-                    ValidateModificationsVsDefaultModificationSymbols();
-                    success = true;
+                    // Check whether the modification type is Static and the .TargetResidues are one of: <>[]
+                    // If so, update the modification type as needed
+                    if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
+                    {
+                        if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
+                            modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                        {
+                            modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
+                        }
+                        else if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
+                                 modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+                        {
+                            modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
+                        }
+                    }
+
+                    // Validate some of the settings if the modification type is IsotopicMod or TerminalPeptideStaticMod or ProteinTerminusStaticMod
+                    var validMod = true;
+                    switch (modificationDefinition.ModificationType)
+                    {
+                        case ModificationDefinition.ResidueModificationType.IsotopicMod:
+                            modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
+                            if (modificationDefinition.AffectedAtom == PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL)
+                            {
+                                validMod = false;
+                            }
+                            break;
+                        case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
+                            modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
+                            if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() &&
+                                modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
+                            {
+                                validMod = false;
+                            }
+                            break;
+                        case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
+                            modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
+                            if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString() &&
+                                modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
+                            {
+                                validMod = false;
+                            }
+                            break;
+                        case ModificationDefinition.ResidueModificationType.UnknownType:
+                            modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
+                            break;
+                    }
+
+                    if (modificationDefinition.MassCorrectionTag == ModificationDefinition.INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME)
+                    {
+                        // Try to determine the mass correction name
+                        modificationDefinition.MassCorrectionTag = LookupMassCorrectionTagByMass(modificationDefinition.ModificationMass);
+                    }
+
+                    if (validMod)
+                    {
+                        AddModification(modificationDefinition, false);
+                    }
                 }
+
+                // Note that this method will call UpdateDefaultModificationSymbols()
+                ValidateModificationsVsDefaultModificationSymbols();
+                return true;
             }
             catch (Exception ex)
             {
                 ErrorMessage = "Error reading Modification Definition file (" + filePath + "): " + ex.Message;
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         /// <summary>

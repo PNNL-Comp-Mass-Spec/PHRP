@@ -462,90 +462,89 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var headerParsed = false;
+                var rowNumber = 0;
+
+                // Initialize the list that will hold all of the records in the MSPathFinder result file
+                var searchResultsUnfiltered = new List<MSPathFinderSearchResult>();
+
+                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                var filteredSearchResults = new List<MSPathFinderSearchResult>();
+
+                // Parse the input file
+                while (!reader.EndOfStream && !AbortProcessing)
                 {
-                    var headerParsed = false;
-                    var rowNumber = 0;
+                    var lineIn = reader.ReadLine();
+                    rowNumber++;
 
-                    // Initialize the list that will hold all of the records in the MSPathFinder result file
-                    var searchResultsUnfiltered = new List<MSPathFinderSearchResult>();
-
-                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<MSPathFinderSearchResult>();
-
-                    // Parse the input file
-                    while (!reader.EndOfStream && !AbortProcessing)
+                    if (string.IsNullOrWhiteSpace(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
-                        rowNumber++;
+                        continue;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(lineIn))
+                    if (!headerParsed)
+                    {
+                        // Parse the header line
+                        var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
+                        if (!success)
                         {
-                            continue;
-                        }
-
-                        if (!headerParsed)
-                        {
-                            // Parse the header line
-                            var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
-                            if (!success)
+                            if (string.IsNullOrEmpty(mErrorMessage))
                             {
-                                if (string.IsNullOrEmpty(mErrorMessage))
-                                {
-                                    SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
-                                }
-
-                                return false;
+                                SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
                             }
 
-                            // Write the header line to the output file
-                            WriteSynFHTFileHeader(writer, ref errorLog);
-
-                            headerParsed = true;
-                            continue;
+                            return false;
                         }
 
-                        var udtSearchResult = new MSPathFinderSearchResult();
+                        // Write the header line to the output file
+                        WriteSynFHTFileHeader(writer, ref errorLog);
 
-                        var validSearchResult =
-                            ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modInfo, rowNumber);
-
-                        if (validSearchResult)
-                        {
-                            searchResultsUnfiltered.Add(udtSearchResult);
-                        }
-
-                        // Update the progress
-                        UpdateSynopsisFileCreationProgress(reader);
+                        headerParsed = true;
+                        continue;
                     }
 
-                    // Sort the SearchResults by scan, ascending SpecEValue, and peptide
-                    searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanScorePeptide());
+                    var udtSearchResult = new MSPathFinderSearchResult();
 
-                    // Now filter the data
+                    var validSearchResult =
+                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modList, rowNumber);
 
-                    // Initialize variables
-                    var startIndex = 0;
-
-                    while (startIndex < searchResultsUnfiltered.Count)
+                    if (validSearchResult)
                     {
-                        var endIndex = startIndex;
-                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                        {
-                            endIndex++;
-                        }
-
-                        // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                        startIndex = endIndex + 1;
+                        searchResultsUnfiltered.Add(udtSearchResult);
                     }
 
-                    // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                    // Update the progress
+                    UpdateSynopsisFileCreationProgress(reader);
                 }
+
+                // Sort the SearchResults by scan, ascending SpecEValue, and peptide
+                searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanScorePeptide());
+
+                // Now filter the data
+
+                // Initialize variables
+                var startIndex = 0;
+
+                while (startIndex < searchResultsUnfiltered.Count)
+                {
+                    var endIndex = startIndex;
+                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                    startIndex = endIndex + 1;
+                }
+
+                // Sort the data in filteredSearchResults then write out to disk
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
 
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
@@ -690,124 +689,123 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                    var resultsProcessed = 0;
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var resultsProcessed = 0;
-                        var headerParsed = false;
+                        var lineIn = reader.ReadLine();
 
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
+                            continue;
+                        }
 
-                            if (string.IsNullOrWhiteSpace(lineIn))
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseMSPathFinderSynFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
                             {
-                                continue;
+                                // Error parsing header
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                                return false;
                             }
+                            headerParsed = true;
+                            continue;
+                        }
 
-                            if (!headerParsed)
+                        var validSearchResult = ParseMSPathFinderSynFileEntry(lineIn, searchResult, ref errorLog,
+                            resultsProcessed, columnMapping,
+                            out _);
+
+                        resultsProcessed++;
+                        if (!validSearchResult)
+                        {
+                            continue;
+                        }
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+
+                        var newValue = true;
+
+                        if (string.IsNullOrEmpty(searchResult.SpecEValue))
+                        {
+                            if (searchResult.QValue == previousQValue)
                             {
-                                var validHeader = ParseMSPathFinderSynFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-                                continue;
-                            }
+                                // New result has the same QValue as the previous result
+                                // See if peptidesFoundForQValue contains the peptide, scan and charge
 
-                            var validSearchResult = ParseMSPathFinderSynFileEntry(lineIn, searchResult, ref errorLog,
-                                                                                     resultsProcessed, columnMapping,
-                                                                                     out _);
-
-                            resultsProcessed++;
-                            if (!validSearchResult)
-                            {
-                                continue;
-                            }
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-
-                            var newValue = true;
-
-                            if (string.IsNullOrEmpty(searchResult.SpecEValue))
-                            {
-                                if (searchResult.QValue == previousQValue)
-                                {
-                                    // New result has the same QValue as the previous result
-                                    // See if peptidesFoundForQValue contains the peptide, scan and charge
-
-                                    if (peptidesFoundForQValue.Contains(key))
-                                    {
-                                        firstMatchForGroup = false;
-                                    }
-                                    else
-                                    {
-                                        peptidesFoundForQValue.Add(key);
-                                        firstMatchForGroup = true;
-                                    }
-
-                                    newValue = false;
-                                }
-                            }
-                            else if (searchResult.SpecEValue == previousSpecEValue)
-                            {
-                                // New result has the same SpecEValue as the previous result
-                                // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
-
-                                if (peptidesFoundForSpecEValue.Contains(key))
+                                if (peptidesFoundForQValue.Contains(key))
                                 {
                                     firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    peptidesFoundForSpecEValue.Add(key);
+                                    peptidesFoundForQValue.Add(key);
                                     firstMatchForGroup = true;
                                 }
 
                                 newValue = false;
                             }
+                        }
+                        else if (searchResult.SpecEValue == previousSpecEValue)
+                        {
+                            // New result has the same SpecEValue as the previous result
+                            // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
 
-                            if (newValue)
+                            if (peptidesFoundForSpecEValue.Contains(key))
                             {
-                                // New SpecEValue or new QValue
-                                // Reset the SortedSets
-                                peptidesFoundForSpecEValue.Clear();
-                                peptidesFoundForQValue.Clear();
-
-                                // Update the cached values
-                                previousSpecEValue = searchResult.SpecEValue;
-                                previousQValue = searchResult.QValue;
-
-                                // Append a new entry to the SortedSets
+                                firstMatchForGroup = false;
+                            }
+                            else
+                            {
                                 peptidesFoundForSpecEValue.Add(key);
-                                peptidesFoundForQValue.Add(key);
-
                                 firstMatchForGroup = true;
                             }
 
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modInfo);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
+                            newValue = false;
                         }
+
+                        if (newValue)
+                        {
+                            // New SpecEValue or new QValue
+                            // Reset the SortedSets
+                            peptidesFoundForSpecEValue.Clear();
+                            peptidesFoundForQValue.Clear();
+
+                            // Update the cached values
+                            previousSpecEValue = searchResult.SpecEValue;
+                            previousQValue = searchResult.QValue;
+
+                            // Append a new entry to the SortedSets
+                            peptidesFoundForSpecEValue.Add(key);
+                            peptidesFoundForQValue.Add(key);
+
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)

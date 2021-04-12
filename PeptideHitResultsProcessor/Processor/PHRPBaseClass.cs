@@ -304,27 +304,26 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var proteinNumber = 0;
 
-                using (var reader = new StreamReader(new FileStream(Options.FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(Options.FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                            continue;
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
 
-                        var reMatch = reExtractProteinName.Match(lineIn);
+                    var reMatch = reExtractProteinName.Match(lineIn);
 
-                        if (!reMatch.Success)
-                            continue;
-                        var proteinName = reMatch.Groups[1].Value;
+                    if (!reMatch.Success)
+                        continue;
+                    var proteinName = reMatch.Groups[1].Value;
 
-                        if (mProteinNameOrder.ContainsKey(proteinName))
-                            continue;
+                    if (mProteinNameOrder.ContainsKey(proteinName))
+                        continue;
 
-                        proteinNumber++;
+                    proteinNumber++;
 
-                        mProteinNameOrder.Add(proteinName, proteinNumber);
-                    }
+                    mProteinNameOrder.Add(proteinName, proteinNumber);
                 }
 
                 ReportMessage(string.Format("Cached {0:N0} proteins", mProteinNameOrder.Count));
@@ -566,7 +565,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 return ResultsFileFormat.MaxQuantTXTFile;
             }
-            
+
             if (extensionLCase == ".tsv")
             {
                 // Assume this is an MS-GF+ TSV file
@@ -1596,8 +1595,6 @@ namespace PeptideHitResultsProcessor.Processor
         {
             headerLine = string.Empty;
 
-            bool success;
-
             try
             {
                 // Initialize the output parameters
@@ -1619,59 +1616,56 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Open the peptide to protein map file for reading
-                using (var reader = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var linesRead = 0;
+                while (!reader.EndOfStream)
                 {
-                    var linesRead = 0;
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
+
+                    var dataLine = lineIn.Trim();
+                    if (dataLine.Length == 0)
+                        continue;
+
+                    linesRead++;
+
+                    // Split the line on tabs
+                    var splitLine = dataLine.TrimEnd().Split('\t');
+
+                    if (splitLine.Length >= 4)
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                            continue;
-
-                        var dataLine = lineIn.Trim();
-                        if (dataLine.Length == 0)
-                            continue;
-
-                        linesRead++;
-
-                        // Split the line on tabs
-                        var splitLine = dataLine.TrimEnd().Split('\t');
-
-                        if (splitLine.Length >= 4)
+                        if (linesRead == 1 && !int.TryParse(splitLine[2], out _))
                         {
-                            if (linesRead == 1 && !int.TryParse(splitLine[2], out _))
+                            // Header line; cache it
+                            headerLine = string.Copy(dataLine);
+                        }
+                        else
+                        {
+                            var pepToProteinMappingEntry = new PepToProteinMapping
                             {
-                                // Header line; cache it
-                                headerLine = string.Copy(dataLine);
-                            }
-                            else
-                            {
-                                var pepToProteinMappingEntry = new PepToProteinMapping
-                                {
-                                    Peptide = string.Copy(splitLine[0]),
-                                    Protein = string.Copy(splitLine[1])
-                                };
-                                int.TryParse(splitLine[2], out pepToProteinMappingEntry.ResidueStart);
-                                int.TryParse(splitLine[3], out pepToProteinMappingEntry.ResidueEnd);
+                                Peptide = string.Copy(splitLine[0]),
+                                Protein = string.Copy(splitLine[1])
+                            };
+                            int.TryParse(splitLine[2], out pepToProteinMappingEntry.ResidueStart);
+                            int.TryParse(splitLine[3], out pepToProteinMappingEntry.ResidueEnd);
 
-                                ExpandListIfRequired(pepToProteinMapping, 1);
+                            ExpandListIfRequired(pepToProteinMapping, 1);
 
-                                pepToProteinMapping.Add(pepToProteinMappingEntry);
-                            }
+                            pepToProteinMapping.Add(pepToProteinMappingEntry);
                         }
                     }
                 }
 
-                success = true;
+                return true;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(pepToProteinMapFilePath) + "): " + ex.Message, ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         protected string MassErrorToString(double massErrorDa)

@@ -879,127 +879,126 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                    var resultsProcessed = 0;
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var resultsProcessed = 0;
-                        var headerParsed = false;
+                        var lineIn = reader.ReadLine();
 
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
-
-                            if (!headerParsed)
-                            {
-                                var validHeader = ParseMaxQuantSynFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-                                continue;
-                            }
-
-                            var validSearchResult = ParseMaxQuantSynFileEntry(lineIn, searchResult, ref errorLog,
-                                                                                     resultsProcessed, columnMapping,
-                                                                                     out _);
-
-                            resultsProcessed++;
-                            if (!validSearchResult)
-                            {
-                                continue;
-                            }
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-
-                            var newValue = true;
-
-                            // ToDo:
-                            //if (string.IsNullOrEmpty(searchResult.SpecEValue))
-                            //{
-                            //    if (searchResult.QValue == previousQValue)
-                            //    {
-                            //        // New result has the same QValue as the previous result
-                            //        // See if peptidesFoundForQValue contains the peptide, scan and charge
-
-                            //        if (peptidesFoundForQValue.Contains(key))
-                            //        {
-                            //            firstMatchForGroup = false;
-                            //        }
-                            //        else
-                            //        {
-                            //            peptidesFoundForQValue.Add(key);
-                            //            firstMatchForGroup = true;
-                            //        }
-
-                            //        newValue = false;
-                            //    }
-                            //}
-                            //else if (searchResult.SpecEValue == previousSpecEValue)
-                            //{
-                            //    // New result has the same SpecEValue as the previous result
-                            //    // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
-
-                            //    if (peptidesFoundForSpecEValue.Contains(key))
-                            //    {
-                            //        firstMatchForGroup = false;
-                            //    }
-                            //    else
-                            //    {
-                            //        peptidesFoundForSpecEValue.Add(key);
-                            //        firstMatchForGroup = true;
-                            //    }
-
-                            //    newValue = false;
-                            //}
-
-                            if (newValue)
-                            {
-                                // New SpecEValue or new QValue
-                                // Reset the SortedSets
-                                peptidesFoundForSpecEValue.Clear();
-                                peptidesFoundForQValue.Clear();
-
-                                // ToDo: Customize
-
-                                // Update the cached values
-                                //previousSpecEValue = searchResult.SpecEValue;
-                                //previousQValue = searchResult.QValue;
-
-                                // Append a new entry to the SortedSets
-                                peptidesFoundForSpecEValue.Add(key);
-                                peptidesFoundForQValue.Add(key);
-
-                                firstMatchForGroup = true;
-                            }
-
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modInfo);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
+                            continue;
                         }
+
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseMaxQuantSynFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
+                            {
+                                // Error parsing header
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                                return false;
+                            }
+                            headerParsed = true;
+                            continue;
+                        }
+
+                        var validSearchResult = ParseMaxQuantSynFileEntry(lineIn, searchResult, ref errorLog,
+                            resultsProcessed, columnMapping,
+                            out _);
+
+                        resultsProcessed++;
+                        if (!validSearchResult)
+                        {
+                            continue;
+                        }
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+
+                        var newValue = true;
+
+                        // ToDo:
+                        //if (string.IsNullOrEmpty(searchResult.SpecEValue))
+                        //{
+                        //    if (searchResult.QValue == previousQValue)
+                        //    {
+                        //        // New result has the same QValue as the previous result
+                        //        // See if peptidesFoundForQValue contains the peptide, scan and charge
+
+                        //        if (peptidesFoundForQValue.Contains(key))
+                        //        {
+                        //            firstMatchForGroup = false;
+                        //        }
+                        //        else
+                        //        {
+                        //            peptidesFoundForQValue.Add(key);
+                        //            firstMatchForGroup = true;
+                        //        }
+
+                        //        newValue = false;
+                        //    }
+                        //}
+                        //else if (searchResult.SpecEValue == previousSpecEValue)
+                        //{
+                        //    // New result has the same SpecEValue as the previous result
+                        //    // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
+
+                        //    if (peptidesFoundForSpecEValue.Contains(key))
+                        //    {
+                        //        firstMatchForGroup = false;
+                        //    }
+                        //    else
+                        //    {
+                        //        peptidesFoundForSpecEValue.Add(key);
+                        //        firstMatchForGroup = true;
+                        //    }
+
+                        //    newValue = false;
+                        //}
+
+                        if (newValue)
+                        {
+                            // New SpecEValue or new QValue
+                            // Reset the SortedSets
+                            peptidesFoundForSpecEValue.Clear();
+                            peptidesFoundForQValue.Clear();
+
+                            // ToDo: Customize
+
+                            // Update the cached values
+                            //previousSpecEValue = searchResult.SpecEValue;
+                            //previousQValue = searchResult.QValue;
+
+                            // Append a new entry to the SortedSets
+                            peptidesFoundForSpecEValue.Add(key);
+                            peptidesFoundForQValue.Add(key);
+
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)

@@ -322,57 +322,56 @@ namespace PHRPReader.Reader
             try
             {
                 // Read the data from the PepToProtMap file
-                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    linesRead++;
+
+                    if (!string.IsNullOrEmpty(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
-                        linesRead++;
+                        var splitLine = lineIn.Split('\t');
 
-                        if (!string.IsNullOrEmpty(lineIn))
+                        if (splitLine.Length >= 4)
                         {
-                            var splitLine = lineIn.Split('\t');
-
-                            if (splitLine.Length >= 4)
+                            // Parse out the numbers from the last two columns
+                            // (the first line of the file is the header line, and it will get skipped)
+                            if (int.TryParse(splitLine[2], out var residueStart))
                             {
-                                // Parse out the numbers from the last two columns
-                                // (the first line of the file is the header line, and it will get skipped)
-                                if (int.TryParse(splitLine[2], out var residueStart))
+                                if (int.TryParse(splitLine[3], out var residueEnd))
                                 {
-                                    if (int.TryParse(splitLine[3], out var residueEnd))
+                                    var peptide = PeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(splitLine[0], true);
+
+                                    if (pepToProteinMap.TryGetValue(peptide, out var pepToProtMapInfo))
                                     {
-                                        var peptide = PeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(splitLine[0], true);
-
-                                        if (pepToProteinMap.TryGetValue(peptide, out var pepToProtMapInfo))
+                                        if (MaxProteinsPerSeqID == 0 || pepToProtMapInfo.ProteinCount < MaxProteinsPerSeqID)
                                         {
-                                            if (MaxProteinsPerSeqID == 0 || pepToProtMapInfo.ProteinCount < MaxProteinsPerSeqID)
-                                            {
-                                                pepToProtMapInfo.AddProtein(splitLine[1], residueStart, residueEnd);
-                                            }
+                                            pepToProtMapInfo.AddProtein(splitLine[1], residueStart, residueEnd);
                                         }
-                                        else
-                                        {
-                                            pepToProtMapInfo = new PepToProteinMapInfo(splitLine[1], residueStart, residueEnd);
+                                    }
+                                    else
+                                    {
+                                        pepToProtMapInfo = new PepToProteinMapInfo(splitLine[1], residueStart, residueEnd);
 
-                                            pepToProteinMap.Add(peptide, pepToProtMapInfo);
-                                        }
+                                        pepToProteinMap.Add(peptide, pepToProtMapInfo);
                                     }
                                 }
                             }
-
-                            if (linesRead % 100 != 0)
-                                continue;
-
-                            if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds < 5)
-                            {
-                                continue;
-                            }
-
-                            var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
-                            Console.WriteLine(" ... caching PepToProtMapData: {0:0.0}% complete", percentComplete);
-                            lastProgress = DateTime.UtcNow;
-                            notifyComplete = true;
                         }
+
+                        if (linesRead % 100 != 0)
+                            continue;
+
+                        if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds < 5)
+                        {
+                            continue;
+                        }
+
+                        var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
+                        Console.WriteLine(" ... caching PepToProtMapData: {0:0.0}% complete", percentComplete);
+                        lastProgress = DateTime.UtcNow;
+                        notifyComplete = true;
                     }
                 }
 

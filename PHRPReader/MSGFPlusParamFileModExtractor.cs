@@ -305,142 +305,136 @@ namespace PHRPReader
                 }
 
                 // Read the contents of the parameter (or mods) file
-                using (var reader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var trimmedLine = dataLine.Trim();
+
+                    var modSpec = string.Empty;
+
+                    if (trimmedLine.StartsWith(MSGFPLUS_COMMENT_CHAR))
                     {
-                        var dataLine = reader.ReadLine();
+                        // Comment line (starts with #)
+                        // Skip it
+                        continue;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(dataLine))
-                            continue;
+                    var modType = MSGFPlusModType.Unknown;
 
-                        var trimmedLine = dataLine.Trim();
-
-                        var modSpec = string.Empty;
-
-                        if (trimmedLine.StartsWith(MSGFPLUS_COMMENT_CHAR))
-                        {
-                            // Comment line (starts with #)
-                            // Skip it
-                            continue;
-                        }
-
-                        var modType = MSGFPlusModType.Unknown;
-
-                        foreach (var tagName in tagNamesToFind)
-                        {
-                            // Check whether the line starts with StaticMod, DynamicMod, or CustomAA
-                            modSpec = ValidateIsValidModSpec(trimmedLine, tagName);
-                            if (!string.IsNullOrEmpty(modSpec))
-                            {
-                                // Known tag found; lineIn was something like this:
-                                //   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
-                                //   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
-                                //   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
-                                //
-                                // And modSpec will now be something like this:
-                                //   C2H3N1O1,C,fix,any,Carbamidomethylation
-                                //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
-                                //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
-
-                                switch (tagName)
-                                {
-                                    case PARAM_TAG_MOD_STATIC:
-                                        modType = MSGFPlusModType.StaticMod;
-                                        break;
-                                    case PARAM_TAG_MOD_DYNAMIC:
-                                        modType = MSGFPlusModType.DynamicMod;
-                                        break;
-                                    case PARAM_TAG_CUSTOM_AA:
-                                        modType = MSGFPlusModType.CustomAA;
-                                        break;
-                                }
-
-                                break;
-                            }
-                        }
-
+                    foreach (var tagName in tagNamesToFind)
+                    {
+                        // Check whether the line starts with StaticMod, DynamicMod, or CustomAA
+                        modSpec = ValidateIsValidModSpec(trimmedLine, tagName);
                         if (string.IsNullOrEmpty(modSpec))
-                        {
-                            // The line does not start with StaticMod, DynamicMod, or CustomAA
-                            // This method also supports MSGFPlus_Mods.txt files, which specify mods with ,opt, or ,fix,
-                            var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
-                            if (lineInNoSpaces.Contains(",opt,"))
-                            {
-                                modType = MSGFPlusModType.DynamicMod;
-                                modSpec = lineInNoSpaces;
-                            }
-                            else if (lineInNoSpaces.Contains(",fix,"))
-                            {
-                                modType = MSGFPlusModType.StaticMod;
-                                modSpec = lineInNoSpaces;
-                            }
-                            else if (lineInNoSpaces.Contains(",custom,"))
-                            {
-                                modType = MSGFPlusModType.CustomAA;
-                                modSpec = lineInNoSpaces;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(modSpec))
-                        {
                             continue;
-                        }
 
-                        if (modSpec.Contains("="))
+                        // Known tag found; lineIn was something like this:
+                        //   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
+                        //   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                        //   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+                        //
+                        // And modSpec will now be something like this:
+                        //   C2H3N1O1,C,fix,any,Carbamidomethylation
+                        //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                        //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+
+                        modType = tagName switch
                         {
-                            // Unrecognized tag name
-                            ReportError(string.Format(
-                                            "Mod spec '{0}' contains an unknown keyword before the equals sign; see parameter file {1}",
-                                            modSpec, Path.GetFileName(paramFilePath)));
+                            PARAM_TAG_MOD_STATIC => MSGFPlusModType.StaticMod,
+                            PARAM_TAG_MOD_DYNAMIC => MSGFPlusModType.DynamicMod,
+                            PARAM_TAG_CUSTOM_AA => MSGFPlusModType.CustomAA,
+                            _ => MSGFPlusModType.Unknown
+                        };
+
+                        break;
+                    }
+
+                    if (string.IsNullOrEmpty(modSpec))
+                    {
+                        // The line does not start with StaticMod, DynamicMod, or CustomAA
+                        // This method also supports MSGFPlus_Mods.txt files, which specify mods with ,opt, or ,fix,
+                        var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
+                        if (lineInNoSpaces.Contains(",opt,"))
+                        {
+                            modType = MSGFPlusModType.DynamicMod;
+                            modSpec = lineInNoSpaces;
+                        }
+                        else if (lineInNoSpaces.Contains(",fix,"))
+                        {
+                            modType = MSGFPlusModType.StaticMod;
+                            modSpec = lineInNoSpaces;
+                        }
+                        else if (lineInNoSpaces.Contains(",custom,"))
+                        {
+                            modType = MSGFPlusModType.CustomAA;
+                            modSpec = lineInNoSpaces;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(modSpec))
+                    {
+                        continue;
+                    }
+
+                    if (modSpec.Contains("="))
+                    {
+                        // Unrecognized tag name
+                        ReportError(string.Format(
+                            "Mod spec '{0}' contains an unknown keyword before the equals sign; see parameter file {1}",
+                            modSpec, Path.GetFileName(paramFilePath)));
+                        return false;
+                    }
+
+                    // Modification definition line found
+                    // Split the line on commas
+                    var splitLine = modSpec.Split(',');
+
+                    // Define the minimum number of parts in the mod spec
+                    int minimumModDefParts;
+
+                    switch (modSpecFormat)
+                    {
+                        case ModSpecFormats.MSGFPlusAndMSPathFinder:
+                            minimumModDefParts = 5;
+                            break;
+
+                        case ModSpecFormats.TopPIC:
+                            minimumModDefParts = 5;
+                            break;
+
+                        default:
+                            // Unrecognized format
+                            ReportError(string.Format("Mod spec format {0} not recognized; unable to extract mods from {1}",
+                                modSpecFormat.ToString(), Path.GetFileName(paramFilePath)));
                             return false;
-                        }
+                    }
 
-                        // Modification definition line found
-                        // Split the line on commas
-                        var splitLine = modSpec.Split(',');
+                    if (splitLine.Length < minimumModDefParts)
+                    {
+                        continue;
+                    }
 
-                        // Define the minimum number of parts in the mod spec
-                        int minimumModDefParts;
+                    switch (modSpecFormat)
+                    {
+                        case ModSpecFormats.MSGFPlusAndMSPathFinder:
+                            if (ParseModSpecMSGFPlus(paramFilePath, splitLine, ref unnamedModID, out var udtMSGFPlusModInfo))
+                            {
+                                modList.Add(udtMSGFPlusModInfo);
+                            }
+                            break;
 
-                        switch (modSpecFormat)
-                        {
-                            case ModSpecFormats.MSGFPlusAndMSPathFinder:
-                                minimumModDefParts = 5;
-                                break;
-
-                            case ModSpecFormats.TopPIC:
-                                minimumModDefParts = 5;
-                                break;
-
-                            default:
-                                // Unrecognized format
-                                ReportError(string.Format("Mod spec format {0} not recognized; unable to extract mods from {1}",
-                                                          modSpecFormat.ToString(), Path.GetFileName(paramFilePath)));
-                                return false;
-                        }
-
-                        if (splitLine.Length < minimumModDefParts)
-                        {
-                            continue;
-                        }
-
-                        switch (modSpecFormat)
-                        {
-                            case ModSpecFormats.MSGFPlusAndMSPathFinder:
-                                if (ParseModSpecMSGFPlus(paramFilePath, splitLine, ref unnamedModID, out var udtMSGFPlusModInfo))
-                                {
-                                    modInfo.Add(udtMSGFPlusModInfo);
-                                }
-                                break;
-
-                            case ModSpecFormats.TopPIC:
-                                if (ParseModSpecTopPIC(paramFilePath, splitLine, modType, ref unnamedModID, out var udtTopPICModInfo))
-                                {
-                                    modInfo.Add(udtTopPICModInfo);
-                                }
-                                break;
-                        }
+                        case ModSpecFormats.TopPIC:
+                            if (ParseModSpecTopPIC(paramFilePath, splitLine, modType, ref unnamedModID, out var udtTopPICModInfo))
+                            {
+                                modList.Add(udtTopPICModInfo);
+                            }
+                            break;
                     }
                 }
 

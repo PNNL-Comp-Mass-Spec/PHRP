@@ -466,89 +466,88 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var headerParsed = false;
+                mDeltaMassWarningCount = 0;
+
+                // Initialize the list that will hold all of the records in the MODPlus result file
+                var searchResultsUnfiltered = new List<MODPlusSearchResult>();
+
+                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                var filteredSearchResults = new List<MODPlusSearchResult>();
+
+                // Parse the input file
+                while (!reader.EndOfStream && !AbortProcessing)
                 {
-                    var headerParsed = false;
-                    mDeltaMassWarningCount = 0;
+                    var lineIn = reader.ReadLine();
 
-                    // Initialize the list that will hold all of the records in the MODPlus result file
-                    var searchResultsUnfiltered = new List<MODPlusSearchResult>();
-
-                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<MODPlusSearchResult>();
-
-                    // Parse the input file
-                    while (!reader.EndOfStream && !AbortProcessing)
+                    if (string.IsNullOrWhiteSpace(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
+                        continue;
+                    }
 
-                        if (string.IsNullOrWhiteSpace(lineIn))
+                    if (!headerParsed)
+                    {
+                        // Parse the header line
+
+                        var success = ParseMODPlusResultsFileHeaderLine(lineIn, columnMapping);
+                        if (!success)
                         {
-                            continue;
-                        }
-
-                        if (!headerParsed)
-                        {
-                            // Parse the header line
-
-                            var success = ParseMODPlusResultsFileHeaderLine(lineIn, columnMapping);
-                            if (!success)
+                            if (string.IsNullOrEmpty(mErrorMessage))
                             {
-                                if (string.IsNullOrEmpty(mErrorMessage))
-                                {
-                                    SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
-                                }
-
-                                return false;
+                                SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
                             }
 
-                            // Write the header line to the output file
-                            WriteSynFHTFileHeader(writer, ref errorLog);
-
-                            headerParsed = true;
-                            continue;
+                            return false;
                         }
 
-                        var udtSearchResult = new MODPlusSearchResult();
+                        // Write the header line to the output file
+                        WriteSynFHTFileHeader(writer, ref errorLog);
 
-                        var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
-
-                        if (validSearchResult)
-                        {
-                            searchResultsUnfiltered.Add(udtSearchResult);
-                        }
-
-                        // Update the progress
-                        UpdateSynopsisFileCreationProgress(reader);
+                        headerParsed = true;
+                        continue;
                     }
 
-                    // Sort the SearchResults by scan, charge, and descending score
-                    searchResultsUnfiltered.Sort(new MODPlusSearchResultsComparerScanChargeScorePeptide());
+                    var udtSearchResult = new MODPlusSearchResult();
 
-                    // Now filter the data
+                    var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
-                    // Initialize variables
-                    var startIndex = 0;
-
-                    while (startIndex < searchResultsUnfiltered.Count)
+                    if (validSearchResult)
                     {
-                        var endIndex = startIndex;
-                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                        {
-                            endIndex++;
-                        }
-
-                        // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                        startIndex = endIndex + 1;
+                        searchResultsUnfiltered.Add(udtSearchResult);
                     }
 
-                    // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                    // Update the progress
+                    UpdateSynopsisFileCreationProgress(reader);
                 }
+
+                // Sort the SearchResults by scan, charge, and descending score
+                searchResultsUnfiltered.Sort(new MODPlusSearchResultsComparerScanChargeScorePeptide());
+
+                // Now filter the data
+
+                // Initialize variables
+                var startIndex = 0;
+
+                while (startIndex < searchResultsUnfiltered.Count)
+                {
+                    var endIndex = startIndex;
+                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                    startIndex = endIndex + 1;
+                }
+
+                // Sort the data in filteredSearchResults then write out to disk
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
 
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
@@ -696,96 +695,95 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                    var resultsProcessed = 0;
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var resultsProcessed = 0;
-                        var headerParsed = false;
+                        var lineIn = reader.ReadLine();
 
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
+                            continue;
+                        }
 
-                            if (string.IsNullOrWhiteSpace(lineIn))
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseMODPlusSynFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
                             {
-                                continue;
+                                // Error parsing header
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                                return false;
                             }
+                            headerParsed = true;
+                            continue;
+                        }
 
-                            if (!headerParsed)
+                        var validSearchResult = ParseMODPlusSynFileEntry(
+                            lineIn, searchResult, ref errorLog, resultsProcessed, columnMapping, out _);
+
+                        resultsProcessed++;
+                        if (!validSearchResult)
+                        {
+                            continue;
+                        }
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+
+                        bool firstMatchForGroup;
+                        if (searchResult.Probability == previousProbability)
+                        {
+                            // New result has the same Probability as the previous result
+                            // See if peptidesFoundForProbabilityLevel contains the peptide, scan and charge
+
+                            if (peptidesFoundForProbabilityLevel.Contains(key))
                             {
-                                var validHeader = ParseMODPlusSynFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-                                continue;
-                            }
-
-                            var validSearchResult = ParseMODPlusSynFileEntry(
-                                lineIn, searchResult, ref errorLog, resultsProcessed, columnMapping, out _);
-
-                            resultsProcessed++;
-                            if (!validSearchResult)
-                            {
-                                continue;
-                            }
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-
-                            bool firstMatchForGroup;
-                            if (searchResult.Probability == previousProbability)
-                            {
-                                // New result has the same Probability as the previous result
-                                // See if peptidesFoundForProbabilityLevel contains the peptide, scan and charge
-
-                                if (peptidesFoundForProbabilityLevel.Contains(key))
-                                {
-                                    firstMatchForGroup = false;
-                                }
-                                else
-                                {
-                                    peptidesFoundForProbabilityLevel.Add(key);
-                                    firstMatchForGroup = true;
-                                }
+                                firstMatchForGroup = false;
                             }
                             else
                             {
-                                // New Probability
-                                // Reset peptidesFoundForProbabilityLevel
-                                peptidesFoundForProbabilityLevel.Clear();
-
-                                // Update previousProbability
-                                previousProbability = searchResult.Probability;
-
-                                // Append a new entry to peptidesFoundForProbabilityLevel
                                 peptidesFoundForProbabilityLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
-
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" +
-                                                   "\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
                         }
+                        else
+                        {
+                            // New Probability
+                            // Reset peptidesFoundForProbabilityLevel
+                            peptidesFoundForProbabilityLevel.Clear();
+
+                            // Update previousProbability
+                            previousProbability = searchResult.Probability;
+
+                            // Append a new entry to peptidesFoundForProbabilityLevel
+                            peptidesFoundForProbabilityLevel.Add(key);
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" +
+                                            "\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)

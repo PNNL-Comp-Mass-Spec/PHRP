@@ -383,8 +383,6 @@ namespace PHRPReader.Reader
         {
             var reEnzymeSpecificity = new Regex(@"^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            var success = false;
-
             try
             {
                 var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
@@ -392,170 +390,167 @@ namespace PHRPReader.Reader
                 if (!File.Exists(paramFilePath))
                 {
                     ReportError("Sequest param file not found: " + paramFilePath);
+                    return false;
                 }
-                else
+
+                using var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    using (var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
+
+                    var dataLine = lineIn.TrimStart();
+
+                    if (dataLine.StartsWith(";") || dataLine.StartsWith("[") || !dataLine.Contains("="))
+                        continue;
+
+                    // Split the line on the equals sign
+                    var kvSetting = ParseKeyValueSetting(dataLine, '=');
+
+                    if (string.IsNullOrEmpty(kvSetting.Key))
+                        continue;
+
+                    // Trim off any text that occurs after a semicolon in kvSetting.Value
+                    var settingValue = kvSetting.Value;
+                    var charIndex = settingValue.IndexOf(';');
+                    if (charIndex > 0)
                     {
-                        while (!reader.EndOfStream)
-                        {
-                            var lineIn = reader.ReadLine();
-                            if (String.IsNullOrWhiteSpace(lineIn))
-                                continue;
-
-                            var dataLine = lineIn.TrimStart();
-
-                            if (dataLine.StartsWith(";") || dataLine.StartsWith("[") || !dataLine.Contains("="))
-                                continue;
-
-                            // Split the line on the equals sign
-                            var kvSetting = ParseKeyValueSetting(dataLine, '=');
-
-                            if (String.IsNullOrEmpty(kvSetting.Key))
-                                continue;
-
-                            // Trim off any text that occurs after a semicolon in kvSetting.Value
-                            var settingValue = kvSetting.Value;
-                            var charIndex = settingValue.IndexOf(';');
-                            if (charIndex > 0)
-                            {
-                                settingValue = settingValue.Substring(charIndex).Trim();
-                            }
-
-                            searchEngineParams.AddUpdateParameter(kvSetting.Key, settingValue);
-
-                            int value;
-                            switch (kvSetting.Key.ToLower())
-                            {
-                                case "first_database_name":
-                                case "database_name":
-                                    string fastaFilePath;
-                                    try
-                                    {
-                                        fastaFilePath = Path.Combine(@"C:\Database", Path.GetFileName(settingValue));
-                                    }
-                                    catch (Exception)
-                                    {
-                                        fastaFilePath = settingValue;
-                                    }
-                                    searchEngineParams.FastaFilePath = fastaFilePath;
-
-                                    break;
-                                case "mass_type_parent":
-                                    if (settingValue == "0")
-                                    {
-                                        // Average mass
-                                        searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_AVERAGE;
-                                    }
-                                    else
-                                    {
-                                        // Monoisotopic mass
-                                        searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_MONOISOTOPIC;
-                                    }
-
-                                    break;
-                                case "mass_type_fragment":
-                                    if (settingValue == "0")
-                                    {
-                                        // Average mass
-                                        searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_AVERAGE;
-                                    }
-                                    else
-                                    {
-                                        // Monoisotopic mass
-                                        searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_MONOISOTOPIC;
-                                    }
-
-                                    break;
-                                case "max_num_internal_cleavage_sites":
-                                    if (int.TryParse(settingValue, out value))
-                                    {
-                                        searchEngineParams.MaxNumberInternalCleavages = value;
-                                    }
-
-                                    break;
-                                case "enzyme_info":
-                                    // Used in new-style sequest parameter files
-
-                                    // Examples include:
-                                    // Fully-tryptic:     Trypsin(KR) 1 1 KR -
-                                    // Partially-tryptic: Trypsin(KR) 2 1 KR -
-                                    // No-enzyme:         No_Enzyme(-) 0 0 - -
-                                    //
-                                    searchEngineParams.Enzyme = "trypsin";
-
-                                    if (settingValue.StartsWith("no_enzyme", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        searchEngineParams.MinNumberTermini = 0;
-                                    }
-                                    else
-                                    {
-                                        // Parse out the cleavage specificity number
-                                        // This is the first number after the closing parenthesis in the above examples
-                                        var reMatch = reEnzymeSpecificity.Match(settingValue);
-                                        if (reMatch.Success)
-                                        {
-                                            if (int.TryParse(reMatch.Groups[1].Value, out value))
-                                            {
-                                                searchEngineParams.MinNumberTermini = value;
-                                            }
-                                        }
-                                    }
-
-                                    break;
-                                case "enzyme_number":
-                                    // Used in old-style sequest parameter files
-                                    if (int.TryParse(settingValue, out value))
-                                    {
-                                        if (value == 0)
-                                        {
-                                            // No-enzyme
-                                            searchEngineParams.Enzyme = "trypsin";
-                                            searchEngineParams.MinNumberTermini = 0;
-                                        }
-                                        else
-                                        {
-                                            searchEngineParams.Enzyme = value switch
-                                            {
-                                                1 => "trypsin",
-                                                2 => "trypsin_modified",
-                                                3 => "Chymotrypsin",
-                                                4 => "Chymotrypsin_modified",
-                                                5 => "Clostripain",
-                                                6 => "Cyanogen_Bromide",
-                                                7 => "IodosoBenzoate",
-                                                8 => "Proline_Endopept",
-                                                9 => "Staph_Protease",
-                                                10 => "Trypsin_K",
-                                                11 => "Trypsin_R",
-                                                12 => "GluC",
-                                                13 => "LysC",
-                                                14 => "AspN",
-                                                15 => "Elastase",
-                                                16 => "Elastase/Tryp/Chymo",
-                                                _ => "Unknown"
-                                            };
-                                            searchEngineParams.MinNumberTermini = 2;
-                                        }
-                                    }
-                                    break;
-                            }
-                        }
+                        settingValue = settingValue.Substring(charIndex).Trim();
                     }
 
-                    // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                    searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM);
-                    searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
+                    searchEngineParams.AddUpdateParameter(kvSetting.Key, settingValue);
 
-                    success = true;
+                    int value;
+                    switch (kvSetting.Key.ToLower())
+                    {
+                        case "first_database_name":
+                        case "database_name":
+                            string fastaFilePath;
+                            try
+                            {
+                                fastaFilePath = Path.Combine(@"C:\Database", Path.GetFileName(settingValue));
+                            }
+                            catch (Exception)
+                            {
+                                fastaFilePath = settingValue;
+                            }
+                            searchEngineParams.FastaFilePath = fastaFilePath;
+
+                            break;
+                        case "mass_type_parent":
+                            if (settingValue == "0")
+                            {
+                                // Average mass
+                                searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_AVERAGE;
+                            }
+                            else
+                            {
+                                // Monoisotopic mass
+                                searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_MONOISOTOPIC;
+                            }
+
+                            break;
+                        case "mass_type_fragment":
+                            if (settingValue == "0")
+                            {
+                                // Average mass
+                                searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_AVERAGE;
+                            }
+                            else
+                            {
+                                // Monoisotopic mass
+                                searchEngineParams.PrecursorMassType = SearchEngineParameters.MASS_TYPE_MONOISOTOPIC;
+                            }
+
+                            break;
+                        case "max_num_internal_cleavage_sites":
+                            if (int.TryParse(settingValue, out value))
+                            {
+                                searchEngineParams.MaxNumberInternalCleavages = value;
+                            }
+
+                            break;
+                        case "enzyme_info":
+                            // Used in new-style sequest parameter files
+
+                            // Examples include:
+                            // Fully-tryptic:     Trypsin(KR) 1 1 KR -
+                            // Partially-tryptic: Trypsin(KR) 2 1 KR -
+                            // No-enzyme:         No_Enzyme(-) 0 0 - -
+                            //
+                            searchEngineParams.Enzyme = "trypsin";
+
+                            if (settingValue.StartsWith("no_enzyme", StringComparison.OrdinalIgnoreCase))
+                            {
+                                searchEngineParams.MinNumberTermini = 0;
+                            }
+                            else
+                            {
+                                // Parse out the cleavage specificity number
+                                // This is the first number after the closing parenthesis in the above examples
+                                var reMatch = reEnzymeSpecificity.Match(settingValue);
+                                if (reMatch.Success)
+                                {
+                                    if (int.TryParse(reMatch.Groups[1].Value, out value))
+                                    {
+                                        searchEngineParams.MinNumberTermini = value;
+                                    }
+                                }
+                            }
+
+                            break;
+                        case "enzyme_number":
+                            // Used in old-style sequest parameter files
+                            if (int.TryParse(settingValue, out value))
+                            {
+                                if (value == 0)
+                                {
+                                    // No-enzyme
+                                    searchEngineParams.Enzyme = "trypsin";
+                                    searchEngineParams.MinNumberTermini = 0;
+                                }
+                                else
+                                {
+                                    searchEngineParams.Enzyme = value switch
+                                    {
+                                        1 => "trypsin",
+                                        2 => "trypsin_modified",
+                                        3 => "Chymotrypsin",
+                                        4 => "Chymotrypsin_modified",
+                                        5 => "Clostripain",
+                                        6 => "Cyanogen_Bromide",
+                                        7 => "IodosoBenzoate",
+                                        8 => "Proline_Endopept",
+                                        9 => "Staph_Protease",
+                                        10 => "Trypsin_K",
+                                        11 => "Trypsin_R",
+                                        12 => "GluC",
+                                        13 => "LysC",
+                                        14 => "AspN",
+                                        15 => "Elastase",
+                                        16 => "Elastase/Tryp/Chymo",
+                                        _ => "Unknown"
+                                    };
+                                    searchEngineParams.MinNumberTermini = 2;
+                                }
+                            }
+                            break;
+                    }
                 }
+
+                // Determine the precursor mass tolerance (will store 0 if a problem or not found)
+                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM);
+                searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error in ReadSearchEngineParamFile: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
 
         /// <summary>

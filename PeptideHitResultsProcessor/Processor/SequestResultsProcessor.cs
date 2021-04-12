@@ -220,112 +220,111 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var reader = new StreamReader(inputFilePath))
+                    using var reader = new StreamReader(inputFilePath);
+
+                    var headerParsed = false;
+
+                    // Create the output files
+                    var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+                    var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
-                        var headerParsed = false;
-
-                        // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
-                        if (!filesInitialized)
-                            return false;
-
-                        // Parse the input file
-                        while (!reader.EndOfStream && !AbortProcessing)
+                        var lineIn = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
+                            continue;
+                        }
 
-                            var dataLine = true;
+                        var dataLine = true;
 
-                            if (!headerParsed)
+                        if (!headerParsed)
+                        {
+                            var validHeader = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
+                            if (validHeader)
                             {
-                                var validHeader = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
-                                if (validHeader)
-                                {
-                                    dataLine = false;
-                                }
-                                else
-                                {
-                                    // Error parsing header; assume this is a data line
-                                    dataLine = true;
-                                }
-                                headerParsed = true;
-                            }
-
-                            bool validSearchResult;
-                            if (dataLine)
-                            {
-                                validSearchResult = ParseSequestResultsFileEntry(lineIn, columnMapping, searchResult, ref errorLog);
+                                dataLine = false;
                             }
                             else
                             {
-                                validSearchResult = false;
+                                // Error parsing header; assume this is a data line
+                                dataLine = true;
                             }
+                            headerParsed = true;
+                        }
 
-                            if (!validSearchResult)
+                        bool validSearchResult;
+                        if (dataLine)
+                        {
+                            validSearchResult = ParseSequestResultsFileEntry(lineIn, columnMapping, searchResult, ref errorLog);
+                        }
+                        else
+                        {
+                            validSearchResult = false;
+                        }
+
+                        if (!validSearchResult)
+                        {
+                            continue;
+                        }
+
+                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.NumScans + "_" +
+                                  searchResult.Charge + "_" + searchResult.PeptideMH;
+
+                        bool firstMatchForGroup;
+
+                        if (searchResult.PeptideXCorr == previousXCorr)
+                        {
+                            // New result has the same XCorr as the previous results
+                            // See if peptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
+
+                            if (peptidesFoundForXCorrLevel.Contains(key))
                             {
-                                continue;
-                            }
-
-                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.NumScans + "_" +
-                                      searchResult.Charge + "_" + searchResult.PeptideMH;
-
-                            bool firstMatchForGroup;
-
-                            if (searchResult.PeptideXCorr == previousXCorr)
-                            {
-                                // New result has the same XCorr as the previous results
-                                // See if peptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
-
-                                if (peptidesFoundForXCorrLevel.Contains(key))
-                                {
-                                    firstMatchForGroup = false;
-                                }
-                                else
-                                {
-                                    peptidesFoundForXCorrLevel.Add(key);
-                                    firstMatchForGroup = true;
-                                }
+                                firstMatchForGroup = false;
                             }
                             else
                             {
-                                // New XCorr
-                                // Reset peptidesFoundForXCorrLevel
-                                peptidesFoundForXCorrLevel.Clear();
-
-                                // Update previousXCorr
-                                previousXCorr = searchResult.PeptideXCorr;
-
-                                // Append a new entry to peptidesFoundForXCorrLevel
                                 peptidesFoundForXCorrLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
-
-                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!modsAdded)
-                            {
-                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                {
-                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'";
-                                    if (!string.IsNullOrEmpty(mErrorMessage))
-                                    {
-                                        errorLog += ": " + mErrorMessage;
-                                        mErrorMessage = string.Empty;
-                                    }
-
-                                    errorLog += "\n";
-                                }
-                            }
-
-                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
-
-                            // Update the progress
-                            UpdateSynopsisFileCreationProgress(reader);
                         }
+                        else
+                        {
+                            // New XCorr
+                            // Reset peptidesFoundForXCorrLevel
+                            peptidesFoundForXCorrLevel.Clear();
+
+                            // Update previousXCorr
+                            previousXCorr = searchResult.PeptideXCorr;
+
+                            // Append a new entry to peptidesFoundForXCorrLevel
+                            peptidesFoundForXCorrLevel.Add(key);
+                            firstMatchForGroup = true;
+                        }
+
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                        if (!modsAdded)
+                        {
+                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            {
+                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'";
+                                if (!string.IsNullOrEmpty(mErrorMessage))
+                                {
+                                    errorLog += ": " + mErrorMessage;
+                                    mErrorMessage = string.Empty;
+                                }
+
+                                errorLog += "\n";
+                            }
+                        }
+
+                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                        // Update the progress
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     if (Options.CreateModificationSummaryFile)
