@@ -12,14 +12,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM;
+using static PHRPReader.MSGFPlusParamFileModExtractor;
 
 namespace PeptideHitResultsProcessor.Processor
 {
@@ -91,6 +94,7 @@ namespace PeptideHitResultsProcessor.Processor
             mNTermModMatcher = new Regex(@"Nter\d+[NC]*$", RegexOptions.Compiled);
 
             // ReSharper restore CommentTypo
+            MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
         }
 
         public const string TOOL_NAME = "MaxQuant";
@@ -320,6 +324,7 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly Regex mModCountMatcher;
 
         private readonly Regex mNTermModMatcher;
+        private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
         /// <summary>
         /// Step through the Modifications and associate each modification with the residues
@@ -332,7 +337,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void AddModificationsToResidues(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(searchResult.Modifications) || searchResult.Modifications.Equals("Unmodified"))
             {
@@ -414,7 +419,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool AddModificationsAndComputeMass(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<ModInfo> modList)
         {
             bool success;
 
@@ -465,7 +470,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modList"></param>
         private double ComputeTotalModMass(
             string modificationList,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -587,10 +592,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modList"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
-            Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
+            IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<ModInfo> modList)
         {
             try
             {
@@ -721,7 +726,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string maxQuantParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            out List<ModInfo> modList)
         {
             var success = false;
 
@@ -748,14 +753,308 @@ namespace PeptideHitResultsProcessor.Processor
                 return false;
             }
 
-            var modFileProcessor = new MSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);
+        private ModInfo GetModDetails(MSGFPlusModType modType, string maxQuantModName)
+        {
+            var modDef = new ModInfo
+            {
+                ModType = modType
+            };
 
-            RegisterEvents(modFileProcessor);
-            modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
+            if (!MaxQuantMods.TryGetValue(maxQuantModName, out var modInfo))
+            {
+                OnWarningEvent(string.Format(
+                    "The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file",
+                    maxQuantModName));
 
-            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
+                return modDef;
+            }
 
-            return true;
+            modDef.ModName = modInfo.Title;
+            modDef.ModMass = modInfo.MonoisotopicMass.ToString(CultureInfo.InvariantCulture);
+            modDef.ModMassVal = modInfo.MonoisotopicMass;
+            modDef.Residues = modInfo.Residues;
+            modDef.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
+
+            switch (modInfo.Position)
+            {
+                case MaxQuantModPosition.Anywhere:
+                case MaxQuantModPosition.NotCterm:
+                    // Leave .ModType unchanged; this is a static or dynamic mod
+                    break;
+
+                case MaxQuantModPosition.AnyNterm:
+                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    {
+                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                    }
+                    modDef.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusModType.DynNTermPeptide;
+
+                    break;
+
+                case MaxQuantModPosition.AnyCterm:
+                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    {
+                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                    }
+                    modDef.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusModType.DynCTermPeptide;
+
+                    break;
+
+                case MaxQuantModPosition.ProteinNterm:
+                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    {
+                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                    }
+                    modDef.Residues = AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusModType.DynNTermProtein;
+
+                    break;
+
+                case MaxQuantModPosition.ProteinCterm:
+                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    {
+                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                    }
+                    modDef.Residues = AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusModType.DynCTermProtein;
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return modDef;
+        }
+
+        /// <summary>
+        /// Look for the MaxQuant modifications.xml file, both in the input directory and in other predefined paths
+        /// </summary>
+        /// <param name="inputDirectory"></param>
+        /// <returns>True if no error (including file not found; which is a warning); false if an exception</returns>
+        private bool LoadMaxQuantModificationDefinitions(DirectoryInfo inputDirectory)
+        {
+            const string DEFAULT_MODIFICATION_FILE_PATH = @"C:\MaxQuant\bin\conf\modifications.xml";
+            const string DEFAULT_MODIFICATION_FILE_PATH_DMS = @"C:\DMS_Programs\MaxQuant\bin\conf\modifications.xml";
+
+            try
+            {
+                FileInfo modificationDefinitionFile;
+                var candidateFiles = inputDirectory.GetFiles("modifications.xml").ToList();
+                if (candidateFiles.Count > 0)
+                {
+                    modificationDefinitionFile = candidateFiles[0];
+                }
+                else
+                {
+                    var candidateFile1 = new FileInfo(DEFAULT_MODIFICATION_FILE_PATH);
+                    var candidateFile2 = new FileInfo(DEFAULT_MODIFICATION_FILE_PATH_DMS);
+
+                    if (candidateFile1.Exists)
+                    {
+                        modificationDefinitionFile = candidateFile1;
+                    }
+                    else if (candidateFile2.Exists)
+                    {
+                        modificationDefinitionFile = candidateFile2;
+                    }
+                    else
+                    {
+                        OnWarningEvent(string.Format(
+                            "MaxQuant modifications file not found; cannot add modification symbols to peptides in the synopsis file. " +
+                            "File modifications.xml should either be in the input directory or in the default MaxQuant directory: \n" +
+                            "{0} or\n{1} or \n{2}",
+                            inputDirectory.FullName, candidateFile1.FullName, candidateFile2.FullName));
+
+                        return true;
+                    }
+                }
+
+                MaxQuantMods.Clear();
+
+                using var reader = new StreamReader(new FileStream(modificationDefinitionFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                // Note that XDocument supersedes XmlDocument and XPathDocument
+                // XDocument can often be easier to use since XDocument is LINQ-based
+
+                var doc = XDocument.Parse(reader.ReadToEnd());
+
+                // ReSharper disable CommentTypo
+                //   <modification title="Carbamidomethyl (C)" description="Iodoacetamide derivative" create_date="2010-01-19T15:54:02.1976309+01:00" last_modified_date="2010-01-19T15:55:13.1353165+01:00" user="neuhause" reporterCorrectionM2="0" reporterCorrectionM1="0" reporterCorrectionP1="0" reporterCorrectionP2="0" reporterCorrectionType="false" composition="C(2) H(3) N O">
+                //      <position>anywhere</position>
+                //      <modification_site site="C">
+                //         <neutralloss_collection />
+                //         <diagnostic_collection />
+                //      </modification_site>
+                //      <type>Standard</type>
+                //      <terminus_type>none</terminus_type>
+                //   </modification>
+
+                //  <modification title="Acetyl (K)" description="Acetylation" create_date="2010-01-19T13:25:24.82357+01:00" last_modified_date="2010-01-19T14:15:40.2445414+01:00" user="neuhause" reporterCorrectionM2="0" reporterCorrectionM1="0" reporterCorrectionP1="0" reporterCorrectionP2="0" reporterCorrectionType="false" composition="C(2) H(2) O">
+                //     <position>notCterm</position>
+                //     <modification_site site="K">
+                //        <neutralloss_collection />
+                //        <diagnostic_collection>
+                //           <diagnostic name="acK*" shortname="acK*" composition="C(7) H(11) O N" />
+                //           <diagnostic name="acK" shortname="acK" composition="C(7) H(14) O N(2)" />
+                //        </diagnostic_collection>
+                //     </modification_site>
+                //     <type>Standard</type>
+                //     <terminus_type>none</terminus_type>
+                //  </modification>
+
+                // ReSharper restore CommentTypo
+
+                foreach (var modificationNode in doc.Elements("modifications").Elements("modification"))
+                {
+                    if (!TryGetAttribute(modificationNode, "title", out var modTitle))
+                    {
+                        OnWarningEvent("Modification node in the MaxQuant modifications file is missing the title attribute");
+                        continue;
+                    }
+
+                    if (!TryGetAttribute(modificationNode, "composition", out var composition))
+                    {
+                        OnWarningEvent("Modification node in the MaxQuant modifications file is missing the composition attribute");
+                        continue;
+                    }
+
+                    TryGetAttribute(modificationNode, "description", out var modDescription);
+
+                    if (MaxQuantMods.ContainsKey(modTitle))
+                    {
+                        OnWarningEvent(string.Format(
+                            "MaxQuant modifications file has a duplicate definition for the modification titled '{0}'",
+                            modTitle));
+
+                        continue;
+                    }
+
+                    var maxQuantMod = new MaxQuantModInfo(modTitle, composition)
+                    {
+                        Description = modDescription
+                    };
+
+                    MaxQuantMods.Add(modTitle, maxQuantMod);
+
+                    if (TryGetElementValue(modificationNode, "position", out var positionText))
+                    {
+                        maxQuantMod.Position = positionText switch
+                        {
+                            "anywhere" => MaxQuantModPosition.Anywhere,
+                            "anyNterm" => MaxQuantModPosition.AnyNterm,
+                            "anyCterm" => MaxQuantModPosition.AnyCterm,
+                            "notCterm" => MaxQuantModPosition.NotCterm,
+                            "proteinNterm" => MaxQuantModPosition.ProteinNterm,
+                            "proteinCterm" => MaxQuantModPosition.ProteinCterm,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        OnWarningEvent(string.Format(
+                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'position' element",
+                            maxQuantMod.Title));
+                    }
+
+                    if (TryGetElementValue(modificationNode, "type", out var modTypeText))
+                    {
+                        maxQuantMod.ModType = modTypeText switch
+                        {
+                            "Standard" => MaxQuantModType.Standard,
+                            "IsobaricLabel" => MaxQuantModType.IsobaricLabel,
+                            "Label" => MaxQuantModType.Label,
+                            "NeuCodeLabel" => MaxQuantModType.NeuCodeLabel,
+                            "Glycan" => MaxQuantModType.Glycan,
+                            "AaSubstitution" => MaxQuantModType.AaSubstitution,
+                            "CleavedCrosslink" => MaxQuantModType.CleavedCrosslink,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        OnWarningEvent(string.Format(
+                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element",
+                            maxQuantMod.Title));
+                    }
+
+                    if (TryGetElementValue(modificationNode, "terminus_type", out var terminusTypeText))
+                    {
+                        maxQuantMod.TerminusType = terminusTypeText switch
+                        {
+                            "none" => MaxQuantTerminusType.None,
+                            "nterm" => MaxQuantTerminusType.NTerminus,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        OnWarningEvent(string.Format(
+                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'terminus_type' element",
+                            maxQuantMod.Title));
+                    }
+
+                    var modificationSiteNodes = modificationNode.Elements("modification_site").ToList();
+                    if (modificationSiteNodes.Count == 0)
+                    {
+                        OnWarningEvent(string.Format(
+                            "Modification node '{0}' in the MaxQuant modifications file 'modification_site' elements",
+                            maxQuantMod.Title));
+
+                        continue;
+                    }
+
+                    foreach (var modificationSiteNode in modificationSiteNodes)
+                    {
+                        if (TryGetAttribute(modificationSiteNode, "site", out var modificationSite))
+                        {
+                            if (string.IsNullOrWhiteSpace(modificationSite))
+                            {
+                                OnWarningEvent(string.Format(
+                                    "Modification node '{0}' in the MaxQuant modifications file has a modification_site element with an empty string for the 'site' attribute",
+                                    maxQuantMod.Title));
+                            }
+                            else
+                            {
+                                var residue = modificationSite[0];
+                                if (maxQuantMod.Residues.Contains(residue))
+                                {
+                                    OnWarningEvent(string.Format(
+                                        "Modification node '{0}' in the MaxQuant modifications file has multiple modification_site elements with the same 'site' attribute value",
+                                        maxQuantMod.Title));
+                                    continue;
+                                }
+
+                                maxQuantMod.Residues += residue;
+                            }
+                        }
+                        else
+                        {
+                            OnWarningEvent(string.Format(
+                                "Modification node '{0}' in the MaxQuant modifications file is missing the 'site' attribute for the modification_site element",
+                                maxQuantMod.Title));
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in LoadMaxQuantModificationDefinitions: " + ex.Message);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                return false;
+            }
         }
 
         /// <summary>
@@ -838,7 +1137,7 @@ namespace PeptideHitResultsProcessor.Processor
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<ModInfo> modList)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -1065,7 +1364,7 @@ namespace PeptideHitResultsProcessor.Processor
             out List<string> proteinNames,
             ref string errorLog,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            IReadOnlyCollection<ModInfo> modList,
             int rowNumber)
         {
             proteinNames = new List<string>();
@@ -1606,11 +1905,27 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    // Load the MaxQuant Parameter File so that we can determine the modification names
-                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modInfo);
-                    if (!modInfoExtracted)
+                    List<ModInfo> modList;
+                    if (string.IsNullOrWhiteSpace(Options.SearchToolParameterFilePath))
                     {
-                        return false;
+                        OnWarningEvent(
+                            "MaxQuant parameter file not defined; cannot add modification symbols to peptides in the synopsis file. " +
+                            "To define, use /N at the command line or SearchToolParameterFilePath in a parameter file");
+
+                        modList = new List<ModInfo>();
+                    }
+                    else
+                    {
+                        var modificationDefinitionSuccess = LoadMaxQuantModificationDefinitions(inputFile.Directory);
+                        if (!modificationDefinitionSuccess)
+                            return false;
+
+                        // Load the MaxQuant Parameter File so that we can determine the modification names
+                        var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out modList);
+                        if (!modInfoExtracted)
+                        {
+                            return false;
+                        }
                     }
 
                     LoadPeptideInfo(inputFile.Directory, out var maxQuantPeptides);

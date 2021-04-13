@@ -19,6 +19,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Xml.Linq;
 using PeptideHitResultsProcessor.Data;
 using PeptideToProteinMapEngine;
 using PHRPReader;
@@ -2027,6 +2028,46 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return proteinNameAndDescription;
+        }
+
+        /// <summary>
+        /// Get the named attribute from the given element
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="attributeName"></param>
+        /// <param name="attributeValue"></param>
+        /// <returns>True if found, otherwise false</returns>
+        protected bool TryGetAttribute(XElement item, string attributeName, out string attributeValue)
+        {
+            if (!item.HasAttributes)
+            {
+                attributeValue = string.Empty;
+                return false;
+            }
+
+            var attribute = item.Attribute(attributeName);
+
+            if (attribute == null)
+            {
+                attributeValue = string.Empty;
+                return false;
+            }
+
+            attributeValue = attribute.Value;
+            return true;
+        }
+
+        protected bool TryGetElementValue(XElement parentItem, string elementName, out string elementValue)
+        {
+            var node = parentItem.Element(elementName);
+            if (node == null)
+            {
+                elementValue = string.Empty;
+                return false;
+            }
+
+            elementValue = node.Value;
+            return true;
         }
 
         protected void UpdatePepToProteinMapPeptide(List<PepToProteinMapping> pepToProteinMapping, int index, string peptide)

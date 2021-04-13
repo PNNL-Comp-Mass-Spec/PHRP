@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisManagerPeptideHitResultsProcessor.cs" />
+    <Compile Include="Data\MaxQuantModInfo.cs" />
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
     <Compile Include="Enums.cs" />

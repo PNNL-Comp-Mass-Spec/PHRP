@@ -2,6 +2,33 @@
 {
     // Ignore Spelling: MaxQuant, MODa
 
+    internal enum MaxQuantModPosition
+    {
+        Anywhere = 0,
+        AnyNterm = 1,
+        AnyCterm = 2,
+        NotCterm = 3,
+        ProteinNterm = 4,
+        ProteinCterm = 5
+    }
+
+    internal enum MaxQuantModType
+    {
+        Standard = 0,
+        IsobaricLabel = 1,
+        Label = 2,
+        NeuCodeLabel = 3,
+        Glycan = 4,
+        AaSubstitution = 5,
+        CleavedCrosslink = 6,
+    }
+
+    internal enum MaxQuantTerminusType
+    {
+        None = 0,
+        NTerminus = 1
+    }
+
     public enum PHRPErrorCode
     {
         /// <summary>
