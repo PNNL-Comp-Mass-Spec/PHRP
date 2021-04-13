@@ -34,6 +34,9 @@
     <DocumentationFile>bin\Release\PeptideHitResultsProcessor.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MolecularWeightCalculator">
+      <HintPath>Lib\MolecularWeightCalculator.dll</HintPath>
+    </Reference>
     <Reference Include="PeptideToProteinMapEngine">
       <HintPath>Lib\PeptideToProteinMapEngine.dll</HintPath>
     </Reference>
