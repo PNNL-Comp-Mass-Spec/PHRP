@@ -728,30 +728,82 @@ namespace PeptideHitResultsProcessor.Processor
             string maxQuantParamFilePath,
             out List<ModInfo> modList)
         {
-            var success = false;
+            modList = new List<ModInfo>();
 
-            // ToDo: open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
-
-            // <fixedModifications>
-            //    <string>Carbamidomethyl (C)</string>
-            // </fixedModifications>
-
-            // <variableModifications>
-            //    <string>Oxidation (M)</string>
-            //    <string>Acetyl (Protein N-term)</string>
-            // </variableModifications>
-
-            modInfo = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-
-            if (!success || mErrorCode != PHRPErrorCode.NoError)
+            try
             {
-                if (mErrorCode == PHRPErrorCode.NoError)
+                var sourceFile = new FileInfo(maxQuantParamFilePath);
+                if (!sourceFile.Exists)
                 {
-                    SetErrorMessage("Unknown error extracting the modification definitions from the MaxQuant parameter file");
-                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                    SetErrorMessage("MaxQuant parameter file not found: " + maxQuantParamFilePath);
+                    SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
+                    return false;
                 }
+
+                // Open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
+
+                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                // Note that XDocument supersedes XmlDocument and XPathDocument
+                // XDocument can often be easier to use since XDocument is LINQ-based
+
+                var doc = XDocument.Parse(reader.ReadToEnd());
+
+                // <fixedModifications>
+                //    <string>Carbamidomethyl (C)</string>
+                // </fixedModifications>
+
+                // <variableModifications>
+                //    <string>Oxidation (M)</string>
+                //    <string>Acetyl (Protein N-term)</string>
+                // </variableModifications>
+
+                var parameterGroupNodes = doc.Elements("MaxQuantParams").Elements("parameterGroups").Elements("parameterGroup").ToList();
+
+                if (parameterGroupNodes.Count == 0)
+                {
+                    OnWarningEvent("MaxQuant parameter file is missing the <parameterGroup> element; cannot add modification symbols to peptides in the synopsis file");
+                    return false;
+                }
+
+                if (parameterGroupNodes.Count > 1)
+                {
+                    OnWarningEvent("MaxQuant parameter file has more than one <parameterGroup> element; this is unexpected");
+                }
+
+                var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
+                var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
+
+                foreach (var fixedMod in fixedModNodes)
+                {
+                    var maxQuantModName = fixedMod.Value;
+                    var modDef = GetModDetails(MSGFPlusModType.StaticMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                foreach (var dynamicMod in dynamicModNodes)
+                {
+                    var maxQuantModName = dynamicMod.Value;
+                    var modDef = GetModDetails(MSGFPlusModType.DynamicMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                var modFileProcessor = new MSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);
+
+                RegisterEvents(modFileProcessor);
+                modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
+
+                modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromParamFile:  " + ex.Message, ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
+        }
 
         private ModInfo GetModDetails(MSGFPlusModType modType, string maxQuantModName)
         {
