@@ -75,25 +75,6 @@ namespace PeptideHitResultsProcessor.Processor
 
             mModCountMatcher = new Regex(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
-            // ReSharper disable CommentTypo
-
-            // The following RegEx matches mod names like these:
-            // DimethNter0
-            // DimethNter4
-            // DimethNter8
-            // ICPL-Nter10
-            // mTRAQ-Nter8
-            // DimethNter2
-            // DimethNter6
-            // iTRAQ4plex-Nter114
-            // iTRAQ8plex-Nter121
-            // TMT2plex-Nter126
-            // TMT8plex-Nter129N
-            // TMT8plex-Nter129C
-            // TMT11plex-Nter131C
-            mNTermModMatcher = new Regex(@"Nter\d+[NC]*$", RegexOptions.Compiled);
-
-            // ReSharper restore CommentTypo
             MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -323,7 +304,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly Regex mModCountMatcher;
 
-        private readonly Regex mNTermModMatcher;
         private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
         /// <summary>
@@ -391,13 +371,9 @@ namespace PeptideHitResultsProcessor.Processor
                     break;
                 }
 
-                // ToDo: possibly get this info from modifications.xml
-                //       Look for any mod with <position>anyNterm</position> or <position>proteinNterm</position>
-
-                var nTerminalMod = firstModName.EndsWith("N-term)") ||
-                                   firstModName.Equals("Glu-&gt;pyro-Glu") ||
-                                   firstModName.Equals("Gln-&gt;pyro-Glu") ||
-                                   mNTermModMatcher.IsMatch(firstModName);
+                // Examine this modification's position to see if it is an N-terminal mod
+                var nTerminalMod = MaxQuantMods.TryGetValue(firstModName, out var modInfo) &&
+                                   modInfo.Position is MaxQuantModPosition.AnyNterm or MaxQuantModPosition.ProteinNterm;
 
                 if (nTerminalMod)
                 {
