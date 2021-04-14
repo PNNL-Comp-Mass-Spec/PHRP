@@ -1396,7 +1396,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             return msgfPlusSearchResultType.EValueNum <= Options.MSGFPlusSynopsisFileEValueThreshold ||
                    msgfPlusSearchResultType.SpecEValueNum <= Options.MSGFPlusSynopsisFileSpecEValueThreshold ||
-                   msgfPlusSearchResultType.QValueNum > 0 && msgfPlusSearchResultType.QValueNum < 0.01;
+                   msgfPlusSearchResultType.QValueNum is > 0 and < 0.01;
         }
 
         private bool ParseMSGFPlusSynopsisFile(
