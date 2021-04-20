@@ -585,7 +585,7 @@ namespace PeptideHitResultsProcessor.Processor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var headerParsed = false;
-                    var rowNumber = 0;
+                    var lineNumber = 0;
 
                     // Initialize the list that will hold all of the records in the MaxQuant result file
                     var searchResultsUnfiltered = new List<MaxQuantSearchResult>();
@@ -597,7 +597,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
-                        rowNumber++;
+                        lineNumber++;
 
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
@@ -628,7 +628,7 @@ namespace PeptideHitResultsProcessor.Processor
                         var udtSearchResult = new MaxQuantSearchResult();
 
                         var validSearchResult =
-                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, rowNumber);
+                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, lineNumber);
 
                         if (validSearchResult)
                         {
@@ -1385,7 +1385,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modList"></param>
-        /// <param name="rowNumber">Row number (used for error reporting)</param>
+        /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantResultsFileEntry(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
@@ -1395,7 +1395,7 @@ namespace PeptideHitResultsProcessor.Processor
             ref string errorLog,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<ModInfo> modList,
-            int rowNumber)
+            int lineNumber)
         {
             proteinNames = new List<string>();
 
@@ -1413,12 +1413,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
-                    ReportError("Scan column is missing or invalid in row " + rowNumber, true);
+                    ReportError("Scan column is missing or invalid on line " + lineNumber, true);
                 }
 
                 if (!int.TryParse(udtSearchResult.Scan, out udtSearchResult.ScanNum))
                 {
-                    ReportError("Scan column is not numeric in row " + rowNumber, true);
+                    ReportError("Scan column is not numeric on line " + lineNumber, true);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out udtSearchResult.ScanIndex);
@@ -1436,7 +1436,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Sequence], out udtSearchResult.Sequence))
                 {
-                    ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
+                    ReportError("Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out udtSearchResult.Length);
@@ -1523,7 +1523,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Error parsing this row from the MassMaxQuant results file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error parsing MassMaxQuant Results in ParseMaxQuantResultsFileEntry for Row " + rowNumber + "\n";
+                    errorLog += "Error parsing MaxQuant Results in ParseMaxQuantResultsFileEntry for line " + lineNumber + "\n";
                 }
 
                 return false;

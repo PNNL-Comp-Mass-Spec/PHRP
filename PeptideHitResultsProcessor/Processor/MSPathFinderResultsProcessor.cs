@@ -466,7 +466,7 @@ namespace PeptideHitResultsProcessor.Processor
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
                 var headerParsed = false;
-                var rowNumber = 0;
+                var lineNumber = 0;
 
                 // Initialize the list that will hold all of the records in the MSPathFinder result file
                 var searchResultsUnfiltered = new List<MSPathFinderSearchResult>();
@@ -478,7 +478,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream && !AbortProcessing)
                 {
                     var lineIn = reader.ReadLine();
-                    rowNumber++;
+                    lineNumber++;
 
                     if (string.IsNullOrWhiteSpace(lineIn))
                     {
@@ -509,7 +509,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var udtSearchResult = new MSPathFinderSearchResult();
 
                     var validSearchResult =
-                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modList, rowNumber);
+                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -861,7 +861,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modList"></param>
-        /// <param name="rowNumber">Row number (used for error reporting)</param>
+        /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
             string lineIn,
@@ -869,7 +869,7 @@ namespace PeptideHitResultsProcessor.Processor
             ref string errorLog,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
-            int rowNumber)
+            int lineNumber)
         {
             try
             {
@@ -883,12 +883,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
-                    ReportError("Scan column is missing or invalid in row " + rowNumber, true);
+                    ReportError("Scan column is missing or invalid on line " + lineNumber, true);
                 }
 
                 if (!int.TryParse(udtSearchResult.Scan, out udtSearchResult.ScanNum))
                 {
-                    ReportError("Scan column is not numeric in row " + rowNumber, true);
+                    ReportError("Scan column is not numeric on line " + lineNumber, true);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
@@ -903,7 +903,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.Sequence], out udtSearchResult.Sequence))
                 {
-                    ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
+                    ReportError("Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
@@ -946,7 +946,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Error parsing this row from the MassMSPathFinder results file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error parsing MassMSPathFinder Results in ParseMSPathFinderResultsFileEntry for Row " + rowNumber + "\n";
+                    errorLog += "Error parsing MassMSPathFinder Results in ParseMSPathFinderResultsFileEntry for line " + lineNumber + "\n";
                 }
 
                 return false;
