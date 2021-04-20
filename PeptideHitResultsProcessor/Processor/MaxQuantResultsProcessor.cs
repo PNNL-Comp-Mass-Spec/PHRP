@@ -1106,6 +1106,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 OnStatusEvent("Reading peptides from file " + inputFile.FullName);
+
                 using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var headerParsed = false;
@@ -1114,10 +1115,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Keys are column indices, values are experiment names
                 var intensityByExperimentColumns = new Dictionary<int, string>();
+                var lineNumber = 0;
 
                 while (!reader.EndOfStream && !AbortProcessing)
                 {
                     var lineIn = reader.ReadLine();
+                    lineNumber++;
 
                     if (string.IsNullOrWhiteSpace(lineIn))
                     {
@@ -1133,6 +1136,45 @@ namespace PeptideHitResultsProcessor.Processor
                         headerParsed = true;
                         continue;
                     }
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (splitLine.Length < 30)
+                        continue;
+
+                    var peptideInfo = new MaxQuantPeptideInfo();
+
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Sequence], out peptideInfo.Sequence);
+
+                    if (string.IsNullOrWhiteSpace(peptideInfo.Sequence))
+                    {
+                        OnWarningEvent(string.Format(
+                            "Line {0} in file {1} does not have a peptide in the Sequence column", lineNumber, inputFile.Name));
+                        continue;
+                    }
+
+                    maxQuantPeptides.Add(peptideInfo.Sequence, peptideInfo);
+
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Prefix], out peptideInfo.Prefix);
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Suffix], out peptideInfo.Suffix);
+
+                    if (GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Proteins], out string proteinList))
+                    {
+                        foreach (var protein in proteinList.Split(';'))
+                        {
+                            peptideInfo.Proteins.Add(protein);
+                        }
+                    }
+
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.LeadingRazorProtein], out peptideInfo.LeadingRazorProtein);
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Intensity], out peptideInfo.Intensity);
+
+                    foreach (var item in intensityByExperimentColumns)
+                    {
+                        GetColumnValue(splitLine, item.Key, out string experimentIntensity);
+                        peptideInfo.IntensityByExperiment.Add(item.Value, experimentIntensity);
+                    }
+
                 }
             }
             catch (Exception ex)
