@@ -850,105 +850,104 @@ namespace PeptideHitResultsProcessor.Processor
                 peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                 peptideToProteinMapper.SkipConsoleWriteIfNoProgressListener = true;
 
-                using (var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                foreach (var inputFilePath in sourcePHRPDataFiles)
                 {
-                    foreach (var inputFilePath in sourcePHRPDataFiles)
+                    var resultsFilePath = Path.GetFileNameWithoutExtension(inputFilePath) +
+                                          clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
+
+                    resultsFilePath = Path.Combine(outputDirectoryPath, resultsFilePath);
+
+                    // Make sure the results file doesn't already exist
+                    DeleteFileIgnoreErrors(resultsFilePath);
+
+                    peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
+                    mNextPeptideToProteinMapperLevel = 25;
+
+                    success = peptideToProteinMapper.ProcessFile(inputFilePath, outputDirectoryPath, string.Empty, true);
+
+                    peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
+
+                    if (success)
                     {
-                        var resultsFilePath = Path.GetFileNameWithoutExtension(inputFilePath) +
-                            clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
-
-                        resultsFilePath = Path.Combine(outputDirectoryPath, resultsFilePath);
-
-                        // Make sure the results file doesn't already exist
-                        DeleteFileIgnoreErrors(resultsFilePath);
-
-                        peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
-                        mNextPeptideToProteinMapperLevel = 25;
-
-                        success = peptideToProteinMapper.ProcessFile(inputFilePath, outputDirectoryPath, string.Empty, true);
-
-                        peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
-
-                        if (success)
+                        if (!File.Exists(resultsFilePath))
                         {
-                            if (!File.Exists(resultsFilePath))
-                            {
-                                SetErrorMessage("Peptide to protein mapping file was not created for " + inputFilePath);
-                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                                success = false;
-                                break;
-                            }
-                            success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
+                            SetErrorMessage("Peptide to protein mapping file was not created for " + inputFilePath);
+                            SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                            success = false;
+                            break;
+                        }
+                        success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
+                    }
+                    else
+                    {
+                        if (string.IsNullOrWhiteSpace(peptideToProteinMapper.GetErrorMessage()) && peptideToProteinMapper.StatusMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.StatusMessage);
                         }
                         else
                         {
-                            if (string.IsNullOrWhiteSpace(peptideToProteinMapper.GetErrorMessage()) && peptideToProteinMapper.StatusMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
+                            if (peptideToProteinMapper.StatusMessage.Length > 0)
                             {
-                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.StatusMessage);
+                                SetErrorMessage("clsPeptideToProteinMapEngine status: " + peptideToProteinMapper.StatusMessage);
+                            }
+                            SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.GetErrorMessage());
+                        }
+
+                        if (Options.IgnorePeptideToProteinMapperErrors)
+                        {
+                            OnWarningEvent("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True");
+
+                            if (File.Exists(resultsFilePath))
+                            {
+                                success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
                             }
                             else
                             {
-                                if (peptideToProteinMapper.StatusMessage.Length > 0)
-                                {
-                                    SetErrorMessage("clsPeptideToProteinMapEngine status: " + peptideToProteinMapper.StatusMessage);
-                                }
-                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.GetErrorMessage());
-                            }
-
-                            if (Options.IgnorePeptideToProteinMapperErrors)
-                            {
-                                OnWarningEvent("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True");
-
-                                if (File.Exists(resultsFilePath))
-                                {
-                                    success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
-                                }
-                                else
-                                {
-                                    mErrorMessage = string.Empty;
-                                    mErrorCode = PHRPErrorCode.NoError;
-                                    success = true;
-                                }
-                            }
-                            else
-                            {
-                                SetErrorMessage("Error in CreatePepToProteinMapFile");
-                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                                mErrorMessage = string.Empty;
+                                mErrorCode = PHRPErrorCode.NoError;
+                                success = true;
                             }
                         }
-
-                        if (!File.Exists(resultsFilePath))
+                        else
                         {
-                            continue;
+                            SetErrorMessage("Error in CreatePepToProteinMapFile");
+                            SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                         }
-
-                        // Read the newly created file and append new entries to mtsPepToProteinMapFilePath
-                        using (var reader = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                        {
-                            while (!reader.EndOfStream)
-                            {
-                                var lineIn = reader.ReadLine();
-
-                                if (string.IsNullOrWhiteSpace(lineIn))
-                                    continue;
-
-                                var splitLine = lineIn.Split(new[] { '\t' }, 2);
-                                if (splitLine.Length < 2)
-                                    continue;
-
-                                var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
-
-                                if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
-                                {
-                                    peptideToProteinMapResults.Add(peptideAndProteinKey);
-                                    writer.WriteLine(lineIn);
-                                }
-                            }
-                        }
-
-                        // Delete the interim results file
-                        DeleteFileIgnoreErrors(resultsFilePath);
                     }
+
+                    if (!File.Exists(resultsFilePath))
+                    {
+                        continue;
+                    }
+
+                    // Read the newly created file and append new entries to mtsPepToProteinMapFilePath
+                    using (var reader = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    {
+                        while (!reader.EndOfStream)
+                        {
+                            var lineIn = reader.ReadLine();
+
+                            if (string.IsNullOrWhiteSpace(lineIn))
+                                continue;
+
+                            var splitLine = lineIn.Split(new[] { '\t' }, 2);
+                            if (splitLine.Length < 2)
+                                continue;
+
+                            var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
+
+                            if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
+                            {
+                                peptideToProteinMapResults.Add(peptideAndProteinKey);
+                                writer.WriteLine(lineIn);
+                            }
+                        }
+                    }
+
+                    // Delete the interim results file
+                    DeleteFileIgnoreErrors(resultsFilePath);
                 }
 
                 peptideToProteinMapper.CloseLogFileNow();

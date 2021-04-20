@@ -114,7 +114,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public XTandemResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "July 10, 2019";
+            FileDate = "April 20, 2021";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();
@@ -195,6 +195,32 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return logEValue.ToString("0.000");
+        }
+
+        private void CreateModificationSummaryFile(string inputFilePath, string outputFilePath)
+        {
+            // Create the modification summary file
+            var inputFile = new FileInfo(inputFilePath);
+            var outputFile = new FileInfo(outputFilePath);
+
+            if (outputFile.Directory == null)
+            {
+                OnWarningEvent("ParseXTandemResultsFile: Could not determine the parent directory of the output file, " + outputFile.FullName);
+            }
+            else
+            {
+                var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
+
+                if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
+                {
+                    OnWarningEvent("ParseXTandemResultsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                }
+                else
+                {
+                    SaveModificationSummaryFile(Path.Combine(outputFile.Directory.FullName, modificationSummaryFilePath));
+                }
+            }
+
         }
 
         private void InitializeLocalVariables()
@@ -444,107 +470,81 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Open the input file and parse it
 
-                    // Initialize the stream reader and the XML Text Reader
-                    CurrentXMLDataFileSectionConstants currentXMLDataFileSection;
+                    using var reader = new StreamReader(inputFilePath);
+                    using var xmlReader = new XmlTextReader(reader);
+                    using var writer = new StreamWriter(outputFilePath, false);
 
-                    using (var reader = new StreamReader(inputFilePath))
-                    using (var xmlReader = new XmlTextReader(reader))
-                    using (var writer = new StreamWriter(outputFilePath, false))
+                    // Write the header line
+                    WriteSynFHTFileHeader(writer, errorMessages);
+
+                    // Create the additional output files
+                    var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
+                    if (!filesInitialized)
+                        return false;
+
+                    // Parse the input file
+                    var currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.UnknownFile;
+
+                    while (xmlReader.Read() && !AbortProcessing)
                     {
-                        // Write the header line
-                        WriteSynFHTFileHeader(writer, ref errorLog);
+                        XMLTextReaderSkipWhitespace(xmlReader);
+                        if (xmlReader.ReadState != ReadState.Interactive)
+                            break;
 
-                        // Create the additional output files
-                        var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
-                        if (!filesInitialized)
-                            return false;
+                        if (xmlReader.Depth >= 2)
+                            continue;
 
-                        // Parse the input file
-                        currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.UnknownFile;
+                        if (xmlReader.NodeType != XmlNodeType.Element)
+                            continue;
 
-                        while (xmlReader.Read() && !AbortProcessing)
+                        switch (xmlReader.Name.ToLower())
                         {
-                            XMLTextReaderSkipWhitespace(xmlReader);
-                            if (xmlReader.ReadState != ReadState.Interactive)
+                            case XTANDEM_XML_ELEMENT_NAME_GROUP:
+                                if (xmlReader.HasAttributes)
+                                {
+                                    // Cache the XML reader depth before reading any of the element's attributes
+                                    var groupElementReaderDepth = xmlReader.Depth;
+
+                                    // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
+                                    var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+                                    if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
+                                    {
+                                        currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.SearchResults;
+
+                                        ParseXTandemResultsFileEntry(xmlReader, writer, searchResults, errorMessages, groupElementReaderDepth);
+
+                                        // Update the progress
+                                        UpdateSynopsisFileCreationProgress(reader);
+                                    }
+                                }
+                                else
+                                {
+                                    // Group doesn't have any attributes; ignore it
+                                    xmlReader.Skip();
+                                }
+
                                 break;
-
-                            if (xmlReader.Depth >= 2)
-                                continue;
-
-                            if (xmlReader.NodeType != XmlNodeType.Element)
-                                continue;
-
-                            switch (xmlReader.Name.ToLower())
-                            {
-                                case XTANDEM_XML_ELEMENT_NAME_GROUP:
-                                    if (xmlReader.HasAttributes)
-                                    {
-                                        // Cache the XML reader depth before reading any of the element's attributes
-                                        var groupElementReaderDepth = xmlReader.Depth;
-
-                                        // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
-                                        var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
-                                        if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
-                                        {
-                                            currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.SearchResults;
-
-                                            ParseXTandemResultsFileEntry(xmlReader, writer, searchResults,
-                                                                         ref errorLog, groupElementReaderDepth);
-
-                                            // Update the progress
-                                            UpdateSynopsisFileCreationProgress(reader);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Group doesn't have any attributes; ignore it
-                                        xmlReader.Skip();
-                                    }
-
-                                    break;
-                                case XTANDEM_XML_ROOT_ELEMENT:
-                                    currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.Start;
-                                    break;
-                            }
+                            case XTANDEM_XML_ROOT_ELEMENT:
+                                currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.Start;
+                                break;
                         }
                     }
 
                     if (currentXMLDataFileSection == CurrentXMLDataFileSectionConstants.UnknownFile)
                     {
                         mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: \n" + inputFilePath;
+                        return false;
                     }
-                    else
+
+                    if (Options.CreateModificationSummaryFile)
                     {
-                        if (Options.CreateModificationSummaryFile)
-                        {
-                            // Create the modification summary file
-                            var inputFile = new FileInfo(inputFilePath);
-                            var outputFile = new FileInfo(outputFilePath);
+                        CreateModificationSummaryFile(inputFilePath, outputFilePath);
+                    }
 
-                            if (outputFile.Directory == null)
-                            {
-                                OnWarningEvent("ParseXTandemResultsFile: Could not determine the parent directory of the output file, " + outputFile.FullName);
-                            }
-                            else
-                            {
-                                var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-
-                                if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
-                                {
-                                    OnWarningEvent("ParseXTandemResultsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
-                                }
-                                else
-                                {
-                                    SaveModificationSummaryFile(Path.Combine(outputFile.Directory.FullName, modificationSummaryFilePath));
-                                }
-                            }
-                        }
-
-                        // Inform the user if any errors occurred
-                        if (errorLog.Length > 0)
-                        {
-                            SetErrorMessage("Invalid Lines: \n" + errorLog);
-                        }
+                    // Inform the user if any errors occurred
+                    if (errorMessages.Count > 0)
+                    {
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;

@@ -581,103 +581,102 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var headerParsed = false;
+                var lineNumber = 0;
+
+                // Initialize the list that will hold all of the records in the MaxQuant result file
+                var searchResultsUnfiltered = new List<MaxQuantSearchResult>();
+
+                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                var filteredSearchResults = new List<MaxQuantSearchResult>();
+
+                // Parse the input file
+                while (!reader.EndOfStream && !AbortProcessing)
                 {
-                    var headerParsed = false;
-                    var lineNumber = 0;
+                    var lineIn = reader.ReadLine();
+                    lineNumber++;
 
-                    // Initialize the list that will hold all of the records in the MaxQuant result file
-                    var searchResultsUnfiltered = new List<MaxQuantSearchResult>();
-
-                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<MaxQuantSearchResult>();
-
-                    // Parse the input file
-                    while (!reader.EndOfStream && !AbortProcessing)
+                    if (string.IsNullOrWhiteSpace(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
-                        lineNumber++;
-
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                        {
-                            continue;
-                        }
-
-                        if (!headerParsed)
-                        {
-                            // Parse the header line
-                            var success = ParseMaxQuantResultsFileHeaderLine(lineIn, columnMapping);
-                            if (!success)
-                            {
-                                if (string.IsNullOrEmpty(mErrorMessage))
-                                {
-                                    SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
-                                }
-
-                                return false;
-                            }
-
-                            // Write the header line to the output file
-                            WriteSynFHTFileHeader(writer, ref errorLog);
-
-                            headerParsed = true;
-                            continue;
-                        }
-
-                        var udtSearchResult = new MaxQuantSearchResult();
-
-                        var validSearchResult =
-                            ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, lineNumber);
-
-                        if (validSearchResult)
-                        {
-                            if (proteinNames.Count == 0)
-                            {
-                                udtSearchResult.Protein = string.Empty;
-                                searchResultsUnfiltered.Add(udtSearchResult);
-                            }
-                            else
-                            {
-                                foreach (var protein in proteinNames)
-                                {
-                                    var resultToAdd = CloneSearchResult(udtSearchResult, protein);
-
-                                    searchResultsUnfiltered.Add(resultToAdd);
-                                }
-                            }
-                        }
-
-                        // Update the progress
-                        UpdateSynopsisFileCreationProgress(reader);
+                        continue;
                     }
 
-                    // Sort the SearchResults by scan, charge, and descending Andromeda score
-                    searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerScanChargeScorePeptide());
-
-                    // Now filter the data
-
-                    // Initialize variables
-                    var startIndex = 0;
-
-                    while (startIndex < searchResultsUnfiltered.Count)
+                    if (!headerParsed)
                     {
-                        var endIndex = startIndex;
-                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        // Parse the header line
+                        var success = ParseMaxQuantResultsFileHeaderLine(lineIn, columnMapping);
+                        if (!success)
                         {
-                            endIndex++;
+                            if (string.IsNullOrEmpty(mErrorMessage))
+                            {
+                                SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
+                            }
+
+                            return false;
                         }
 
-                        // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+                        // Write the header line to the output file
+                        WriteSynFHTFileHeader(writer, ref errorLog);
 
-                        startIndex = endIndex + 1;
+                        headerParsed = true;
+                        continue;
                     }
 
-                    // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                    var udtSearchResult = new MaxQuantSearchResult();
+
+                    var validSearchResult =
+                        ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, lineNumber);
+
+                    if (validSearchResult)
+                    {
+                        if (proteinNames.Count == 0)
+                        {
+                            udtSearchResult.Protein = string.Empty;
+                            searchResultsUnfiltered.Add(udtSearchResult);
+                        }
+                        else
+                        {
+                            foreach (var protein in proteinNames)
+                            {
+                                var resultToAdd = CloneSearchResult(udtSearchResult, protein);
+
+                                searchResultsUnfiltered.Add(resultToAdd);
+                            }
+                        }
+                    }
+
+                    // Update the progress
+                    UpdateSynopsisFileCreationProgress(reader);
                 }
+
+                // Sort the SearchResults by scan, charge, and descending Andromeda score
+                searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerScanChargeScorePeptide());
+
+                // Now filter the data
+
+                // Initialize variables
+                var startIndex = 0;
+
+                while (startIndex < searchResultsUnfiltered.Count)
+                {
+                    var endIndex = startIndex;
+                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                    startIndex = endIndex + 1;
+                }
+
+                // Sort the data in filteredSearchResults then write out to disk
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
 
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
