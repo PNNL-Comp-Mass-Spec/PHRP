@@ -121,9 +121,7 @@ namespace PeptideHitResultsProcessor.Processor
             Suffix = 2,
             Proteins = 3,
             LeadingRazorProtein = 4,
-            Intensity = 5,
-            IntensityByExperimentStart = 6,
-            IntensityByExperimentEnd = 7
+            Intensity = 5
         }
 
         /// <summary>
@@ -1114,7 +1112,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var columnMapping = new Dictionary<MaxQuantPeptidesFileColumns, int>();
 
-                // Keys are column indices, values are column names
+                // Keys are column indices, values are experiment names
                 var intensityByExperimentColumns = new Dictionary<int, string>();
 
                 while (!reader.EndOfStream && !AbortProcessing)
@@ -1588,23 +1586,28 @@ namespace PeptideHitResultsProcessor.Processor
                     return true;
                 }
 
+                // The columns after the "Intensity" column list peptide intensity, by experiment
+                // If only a single dataset was searched, there will be only one column
+                // For more info, see http://www.coxdocs.org/doku.php?id=maxquant:table:peptidetable
+
                 for (var index = intensityColumnIndex + 1; index < splitLine.Length; index++)
                 {
-                    if (!splitLine[index].StartsWith("Experiment "))
+                    if (splitLine[index].StartsWith("Intensity L ") ||
+                        splitLine[index].StartsWith("Intensity M ") ||
+                        splitLine[index].StartsWith("Intensity H "))
                     {
-                        if (columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentStart] > 0)
-                        {
-                            columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentEnd] = index - 1;
-                        }
+                        // These represent intensity from a light, medium, or heavy label partner
+                        // Ignore theme
+                        continue;
+                    }
+
+                    if (!splitLine[index].StartsWith("Intensity "))
+                    {
                         break;
                     }
 
-                    if (index == intensityColumnIndex + 1)
-                    {
-                        columnMapping[MaxQuantPeptidesFileColumns.IntensityByExperimentStart] = index;
-                    }
-
-                    intensityByExperimentColumns.Add(index, splitLine[index]);
+                    var experimentName = splitLine[index].Substring("Intensity ".Length);
+                    intensityByExperimentColumns.Add(index, experimentName);
                 }
 
                 return true;
