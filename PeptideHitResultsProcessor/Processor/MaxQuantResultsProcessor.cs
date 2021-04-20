@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 13, 2021";
+            FileDate = "April 20, 2021";
 
             mModCountMatcher = new Regex(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
@@ -577,6 +577,8 @@ namespace PeptideHitResultsProcessor.Processor
                 var columnMapping = new Dictionary<MaxQuantResultsFileColumns, int>();
                 var errorLog = string.Empty;
 
+                OnStatusEvent("Reading MaxQuant results file, " + inputFilePath);
+
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
                 using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
@@ -716,6 +718,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
+                OnStatusEvent("Reading the MaxQuant parameter file, " + sourceFile.Name);
 
                 using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -762,13 +765,6 @@ namespace PeptideHitResultsProcessor.Processor
                     var modDef = GetModDetails(MSGFPlusModType.DynamicMod, maxQuantModName);
                     modList.Add(modDef);
                 }
-
-                var modFileProcessor = new MSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);
-
-                RegisterEvents(modFileProcessor);
-                modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
-
-                modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
 
                 return true;
             }
@@ -906,6 +902,8 @@ namespace PeptideHitResultsProcessor.Processor
                         return true;
                     }
                 }
+
+                OnStatusEvent("Loading MaxQuant modifications from " + modificationDefinitionFile.FullName);
 
                 MaxQuantMods.Clear();
 
