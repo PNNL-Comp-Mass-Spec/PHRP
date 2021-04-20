@@ -1208,7 +1208,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in TopPIC results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the TopPIC results file: " + ex.Message);
                 return false;
             }
 
@@ -1247,7 +1247,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in TopPIC synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the TopPIC synopsis file: " + ex.Message);
                 return false;
             }
 

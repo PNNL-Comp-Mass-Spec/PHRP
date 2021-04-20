@@ -1044,7 +1044,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSPathFinder results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MSPathFinder results file: " + ex.Message);
                 return false;
             }
         }
@@ -1081,7 +1081,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSPathFinder synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MSPathFinder synopsis file: " + ex.Message);
                 return false;
             }
 

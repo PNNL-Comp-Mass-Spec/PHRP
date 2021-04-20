@@ -648,7 +648,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in Sequest synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the Sequest synopsis file: " + ex.Message);
                 return false;
             }
 

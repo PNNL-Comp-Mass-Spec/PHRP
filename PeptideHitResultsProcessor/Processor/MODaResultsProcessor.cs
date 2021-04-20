@@ -1187,7 +1187,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MODa results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODa results file: " + ex.Message);
                 return false;
             }
         }
@@ -1224,7 +1224,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MODa synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODa synopsis file: " + ex.Message);
                 return false;
             }
 

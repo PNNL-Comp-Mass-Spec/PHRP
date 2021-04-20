@@ -2025,7 +2025,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSGFPlus results file: " + ex.Message, ex);
+                SetErrorMessage("Error parsing the header line in the MSGFPlus results file: " + ex.Message, ex);
                 return false;
             }
 
@@ -2064,7 +2064,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSGFPlus synopsis file: " + ex.Message, ex);
+                SetErrorMessage("Error parsing the header line in the MSGFPlus synopsis file: " + ex.Message, ex);
                 return false;
             }
 

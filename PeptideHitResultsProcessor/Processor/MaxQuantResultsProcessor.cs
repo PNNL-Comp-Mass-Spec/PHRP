@@ -1597,7 +1597,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MaxQuant peptides file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant peptides file: " + ex.Message);
                 return false;
             }
         }
@@ -1686,7 +1686,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MaxQuant results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant results file: " + ex.Message);
                 return false;
             }
         }
@@ -1723,7 +1723,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MaxQuant synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant synopsis file: " + ex.Message);
                 return false;
             }
 
