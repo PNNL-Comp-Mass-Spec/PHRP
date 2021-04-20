@@ -63,7 +63,7 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable CommentTypo
 
         // Ignore Spelling: AaSubstitution, acetyl, Carbamidomethyl, conf, Cterm, Crosslink, Da, Desc, diff, diffs, DimethNter
-        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, plex, pyro, struct
+        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, plex, pyro, struct, terminii
 
         // ReSharper restore CommentTypo
 

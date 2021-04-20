@@ -12,7 +12,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MaxQuantSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: maxq, MaxQuant
+        // Ignore Spelling: maxq, MaxQuant, PepToProtMap
 
         /// <summary>
         /// MaxQuant synopsis file suffix

@@ -8,7 +8,7 @@ namespace PeptideHitResultsProcessor.Data
 {
     internal class MaxQuantModInfo
     {
-        // Ignore Spelling: Cx, Da, Hx, Nx, UniMod
+        // Ignore Spelling: Cx, Da, Hx, Nx, MaxQuant, UniMod
 
         private static readonly MolecularWeightCalculator.MolecularWeightTool mMolecularWeightCalculator = new(ElementMassMode.Isotopic);
 
