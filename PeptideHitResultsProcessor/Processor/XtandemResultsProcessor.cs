@@ -220,7 +220,6 @@ namespace PeptideHitResultsProcessor.Processor
                     SaveModificationSummaryFile(Path.Combine(outputFile.Directory.FullName, modificationSummaryFilePath));
                 }
             }
-
         }
 
         private void InitializeLocalVariables()

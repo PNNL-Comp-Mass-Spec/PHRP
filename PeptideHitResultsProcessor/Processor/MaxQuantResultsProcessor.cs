@@ -109,7 +109,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private const string SEARCH_ENGINE_NAME = "MaxQuant";
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         /// <summary>
         /// These columns correspond to MaxQuant file peptides.txt
@@ -575,12 +575,12 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var columnMapping = new Dictionary<MaxQuantResultsFileColumns, int>();
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 OnStatusEvent("Reading MaxQuant results file, " + inputFilePath);
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream Text writer
+                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -619,16 +619,14 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         // Write the header line to the output file
-                        WriteSynFHTFileHeader(writer, ref errorLog);
+                        WriteSynFHTFileHeader(writer, errorMessages);
 
                         headerParsed = true;
                         continue;
                     }
 
-                    var udtSearchResult = new MaxQuantSearchResult();
-
                     var validSearchResult =
-                        ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, ref udtSearchResult, out var proteinNames, ref errorLog, columnMapping, modList, lineNumber);
+                        ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, out var udtSearchResult, errorMessages, columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -676,12 +674,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages);
 
                 // Inform the user if any errors occurred
-                if (errorLog.Length > 0)
+                if (errorMessages.Count > 0)
                 {
-                    SetErrorMessage("Invalid Lines: \n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
                 return true;
@@ -1240,7 +1238,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var previousSpecEValue = string.Empty;
                 var previousQValue = string.Empty;
 
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 try
                 {
@@ -1282,7 +1280,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMaxQuantSynFileEntry(lineIn, searchResult, ref errorLog,
+                        var validSearchResult = ParseMaxQuantSynFileEntry(lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out _);
 
@@ -1358,9 +1356,9 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
+                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -1389,9 +1387,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -1422,7 +1420,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="proteinNames"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modList"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
@@ -1436,7 +1434,7 @@ namespace PeptideHitResultsProcessor.Processor
             string lineIn,
             ref MaxQuantSearchResult udtSearchResult,
             out List<string> proteinNames,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<ModInfo> modList,
             int lineNumber)
@@ -1565,9 +1563,10 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the MassMaxQuant results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error parsing MaxQuant Results in ParseMaxQuantResultsFileEntry for line " + lineNumber + "\n";
+                    errorMessages.Add(string.Format(
+                        "Error parsing MaxQuant results in ParseMaxQuantResultsFileEntry, line {0}", lineNumber));
                 }
 
                 return false;
@@ -1792,7 +1791,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequence"></param>
@@ -1800,7 +1799,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMaxQuantSynFileEntry(
             string lineIn,
             MaxQuantResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<MaxQuantSynFileColumns, int> columnMapping,
             out string peptideSequence)
@@ -1822,10 +1821,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from MaxQuant Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value fromMaxQuant results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
@@ -1840,10 +1839,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 //if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Sequence], out peptideSequence))
                 //{
-                //    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                //    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 //    {
-                //        errorLog += "Error reading Peptide sequence value from MaxQuant Results line " +
-                //                    (resultsProcessed + 1) + "\n";
+                //        errorMessages.Add(string.Format(
+                //            "Error reading Peptide sequence value from MaxQuant results, line {0}", resultsProcessed + 1));
                 //    }
                 //    return false;
                 //}
@@ -1916,15 +1915,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MaxQuant Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MaxQuant results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MaxQuant Results in ParseMaxQuantSynFileEntry\n";
+                        errorMessages.Add("Error parsing MaxQuant Results in ParseMaxQuantSynFileEntry");
                     }
                 }
             }
@@ -2071,7 +2071,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Protein
             var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.Protein select item;
@@ -2079,7 +2079,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, errorMessages);
                 index++;
             }
         }
@@ -2121,10 +2121,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -2138,9 +2138,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -2151,12 +2151,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             MaxQuantSearchResult udtSearchResult,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -2190,9 +2190,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

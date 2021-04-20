@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.95f;
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         private const string MSALIGN_MOD_MASS_REGEX = @"\[([+-]*[0-9\.]+)\]";
 
@@ -476,11 +476,11 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
                 var includeSpeciesAndFragMethod = false;
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream Text writer
+                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -516,13 +516,13 @@ namespace PeptideHitResultsProcessor.Processor
                         headerParsed = true;
 
                         // Write the header line
-                        WriteSynFHTFileHeader(writer, columnMapping, out includeSpeciesAndFragMethod, ref errorLog);
+                        WriteSynFHTFileHeader(writer, columnMapping, out includeSpeciesAndFragMethod, errorMessages);
 
                         continue;
                     }
 
                     var udtSearchResult = new MSAlignSearchResult();
-                    var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+                    var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
@@ -557,12 +557,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, includeSpeciesAndFragMethod, ref errorLog);
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, includeSpeciesAndFragMethod, errorMessages);
 
                 // Inform the user if any errors occurred
-                if (errorLog.Length > 0)
+                if (errorMessages.Count > 0)
                 {
-                    SetErrorMessage("Invalid Lines: \n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
                 return true;
@@ -705,7 +705,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -742,7 +742,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSAlignSynFileEntry(lineIn, searchResult, ref errorLog,
+                        var validSearchResult = ParseMSAlignSynFileEntry(lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 
@@ -785,10 +785,10 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" +
-                                            "\n";
+                                errorMessages.Add(string.Format(
+                                    "Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -809,7 +809,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                     {
-                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        searchResult.ProteinName = pepToProteinMapping[pepToProteinMapIndex].Protein;
                                         SaveResultsFileEntrySeqInfo(searchResult, false);
                                     }
 
@@ -839,9 +839,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -868,7 +868,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSAlignResultsFileEntry(
             string lineIn,
             ref MSAlignSearchResult udtSearchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
             // Parses an entry from the MSAlign results file
@@ -1037,16 +1037,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the MSAlign results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry for RowIndex '" + splitLine[0] + "'" +
-                                       "\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MSAlign results in ParseMSAlignResultsFileEntry for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry\n";
+                        errorMessages.Add("Error parsing MSAlign results in ParseMSAlignResultsFileEntry");
                     }
                 }
 
@@ -1175,7 +1175,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSAlignSynFileEntry(
             string lineIn,
             MSAlignResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<MSAlignSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
@@ -1199,10 +1199,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from MSAlign Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value from MSAlign results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;
@@ -1218,10 +1218,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading Peptide sequence value from MSAlign Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from MSAlign results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;
@@ -1304,15 +1304,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MSAlign Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MSAlign results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MSAlign Results in ParseMSAlignSynFileEntry\n";
+                        errorMessages.Add("Error parsing MSAlign Results in ParseMSAlignSynFileEntry");
                     }
                 }
                 return false;
@@ -1555,7 +1556,7 @@ namespace PeptideHitResultsProcessor.Processor
             TextWriter writer,
             IEnumerable<MSAlignSearchResult> filteredSearchResults,
             bool includeSpeciesAndFragMethod,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
             var query = from item in filteredSearchResults orderby item.PValueNum, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
@@ -1563,7 +1564,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, includeSpeciesAndFragMethod, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, includeSpeciesAndFragMethod, errorMessages);
                 index++;
             }
         }
@@ -1594,12 +1595,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="writer"></param>
         /// <param name="columnMapping"></param>
         /// <param name="includeSpeciesAndFragMethod"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             IDictionary<MSAlignResultsFileColumns, int> columnMapping,
             out bool includeSpeciesAndFragMethod,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             includeSpeciesAndFragMethod = false;
 
@@ -1633,9 +1634,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -1647,13 +1648,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="includeSpeciesAndFragMethod"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             MSAlignSearchResult udtSearchResult,
             bool includeSpeciesAndFragMethod,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1696,9 +1697,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

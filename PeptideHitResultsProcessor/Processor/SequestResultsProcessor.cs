@@ -47,7 +47,7 @@ namespace PeptideHitResultsProcessor.Processor
         public const string FILENAME_SUFFIX_SYNOPSIS_FILE = "_syn";
 
         private const int SEQUEST_SYN_FILE_MIN_COL_COUNT = 5;
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         private bool AddDynamicAndStaticResidueMods(
             SearchResultsBaseClass searchResult,
@@ -216,7 +216,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -259,7 +259,7 @@ namespace PeptideHitResultsProcessor.Processor
                         bool validSearchResult;
                         if (dataLine)
                         {
-                            validSearchResult = ParseSequestResultsFileEntry(lineIn, columnMapping, searchResult, ref errorLog);
+                            validSearchResult = ParseSequestResultsFileEntry(lineIn, columnMapping, searchResult, errorMessages);
                         }
                         else
                         {
@@ -308,16 +308,16 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'";
+                                errorMessages.Add(string.Format(
+                                    "Error adding modifications to sequence for ResultID '{0}'{1}",
+                                    searchResult.ResultID, string.IsNullOrEmpty(mErrorMessage) ? string.Empty : ": " + mErrorMessage));
+
                                 if (!string.IsNullOrEmpty(mErrorMessage))
                                 {
-                                    errorLog += ": " + mErrorMessage;
                                     mErrorMessage = string.Empty;
                                 }
-
-                                errorLog += "\n";
                             }
                         }
 
@@ -344,9 +344,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                         return false;
                     }
 
@@ -375,7 +375,7 @@ namespace PeptideHitResultsProcessor.Processor
             string lineIn,
             IDictionary<SequestSynopsisFileColumns, int> columnMapping,
             SequestResults searchResult,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             string[] splitLine = null;
 
@@ -464,15 +464,15 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing Sequest Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format("Error parsing Sequest Results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing Sequest Results in ParseSequestResultsFileEntry\n";
+                        errorMessages.Add("Error parsing Sequest Results in ParseSequestResultsFileEntry");
                     }
                 }
                 return false;

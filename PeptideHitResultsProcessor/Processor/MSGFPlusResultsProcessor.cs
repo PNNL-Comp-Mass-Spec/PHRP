@@ -101,7 +101,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private const string SEARCH_ENGINE_NAME = "MS-GF+";
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         // Match mod masses (positive or negative) at start, e.g.
         // ReSharper disable CommentTypo
@@ -746,7 +746,7 @@ namespace PeptideHitResultsProcessor.Processor
                             bestMatchIndex = index;
                             bestMassDiff = candidateMassDiff;
                             symbolBestMatch = msgfPlusModInfo[index].ModSymbol;
-                            residuesBestBatch = string.Copy(msgfPlusModInfo[index].Residues);
+                            residuesBestBatch = msgfPlusModInfo[index].Residues;
                             matchFound = true;
                         }
                     }
@@ -859,7 +859,7 @@ namespace PeptideHitResultsProcessor.Processor
                     using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                     using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
                     var headerParsed = false;
                     var includeFDRandPepFDR = false;
                     var includeEFDR = false;
@@ -921,13 +921,13 @@ namespace PeptideHitResultsProcessor.Processor
                             }
 
                             // Write the header line
-                            WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                            WriteSynFHTFileHeader(writer, errorMessages, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
 
                             continue;
                         }
 
                         var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
-                            searchResultsCurrentScan, ref errorLog,
+                            searchResultsCurrentScan, errorMessages,
                             columnMapping, ref nextScanGroupID, scanGroupDetails,
                             scanGroupCombo, specIdToIndex);
 
@@ -1059,7 +1059,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog,
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages,
                         includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
 
                     // Write out the scan group info
@@ -1069,9 +1069,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -1445,7 +1445,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -1486,7 +1486,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSGFPlusSynFileEntry(lineIn, searchResult, ref errorLog,
+                        var validSearchResult = ParseMSGFPlusSynFileEntry(lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 
@@ -1532,10 +1532,9 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!modsAdded)
                         {
                             successOverall = false;
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" +
-                                            "\n";
+                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -1556,7 +1555,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                     {
-                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        searchResult.ProteinName = pepToProteinMapping[pepToProteinMapIndex].Protein;
                                         SaveResultsFileEntrySeqInfo(searchResult, false);
                                     }
 
@@ -1589,9 +1588,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return successOverall;
@@ -1620,7 +1619,7 @@ namespace PeptideHitResultsProcessor.Processor
             bool isMsgfPlus,
             IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
             ICollection<MSGFPlusSearchResult> searchResultsCurrentScan,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<MSGFPlusResultsFileColumns, int> columnMapping,
             ref int nextScanGroupID,
             ICollection<ScanGroupInfo> scanGroupDetails,
@@ -1931,16 +1930,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the MS-GF+ results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry for RowIndex '" + rowIndex + "'" +
-                                       "\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MS-GF+ results in ParseMSGFPlusResultsFileEntry for RowIndex '{0}'", rowIndex));
                     }
                     else
                     {
-                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry\n";
+                        errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry");
                     }
                 }
                 return false;
@@ -2076,7 +2075,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequenceWithMods"></param>
@@ -2084,7 +2083,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
             MSGFPlusResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<MSGFPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
@@ -2106,10 +2105,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from MS-GF+ results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value from MS-GF+ results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;
@@ -2125,10 +2124,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading Peptide sequence value from MS-GF+ Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from MS-GF+ results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;
@@ -2232,15 +2231,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MS-GF+ Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MS-GF+ results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry\n";
+                        errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry");
                     }
                 }
                 return false;
@@ -2848,7 +2848,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<MSGFPlusSearchResult> filteredSearchResults,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             bool includeFDRandPepFDR,
             bool includeEFDR,
             bool includeIMSFields,
@@ -2860,7 +2860,7 @@ namespace PeptideHitResultsProcessor.Processor
             var resultID = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(resultID, writer, result, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                WriteSearchResultToFile(resultID, writer, result, errorMessages, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
                 resultID++;
             }
         }
@@ -3019,14 +3019,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="includeFDRandPepFDR"></param>
         /// <param name="includeEFDR"></param>
         /// <param name="includeIMSFields"></param>
         /// <param name="isMsgfPlus"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             bool includeFDRandPepFDR,
             bool includeEFDR,
             bool includeIMSFields,
@@ -3104,7 +3104,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (!knownHeaderColumns.ContainsKey(headerName))
                     {
-                        errorLog += "Unrecognized header name for the synopsis / first hits file: " + headerName + "\n";
+                        errorMessages.Add(string.Format(
+                            "Unrecognized header name for the synopsis / first hits file: {0}", headerName));
                     }
                 }
 
@@ -3112,9 +3113,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -3125,7 +3126,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="includeFDRandPepFDR"></param>
         /// <param name="includeEFDR"></param>
         /// <param name="includeIMSFields"></param>
@@ -3134,7 +3135,7 @@ namespace PeptideHitResultsProcessor.Processor
             int resultID,
             TextWriter writer,
             MSGFPlusSearchResult udtSearchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             bool includeFDRandPepFDR,
             bool includeEFDR,
             bool includeIMSFields,
@@ -3197,9 +3198,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

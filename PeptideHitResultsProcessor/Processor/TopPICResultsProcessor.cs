@@ -48,7 +48,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         public const string C_TERMINUS_SYMBOL_TopPIC = ".";
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         /// <summary>
         /// RegEx to match mods in square brackets, examples:
@@ -543,10 +543,10 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream Text writer
+                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -585,13 +585,13 @@ namespace PeptideHitResultsProcessor.Processor
                         dataHasPValues = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
 
                         // Write the header line
-                        WriteSynFHTFileHeader(writer, dataHasPValues, ref errorLog);
+                        WriteSynFHTFileHeader(writer, dataHasPValues, errorMessages);
 
                         continue;
                     }
 
                     var udtSearchResult = new TopPICSearchResult();
-                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
@@ -626,12 +626,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, dataHasPValues);
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages, dataHasPValues);
 
                 // Inform the user if any errors occurred
-                if (errorLog.Length > 0)
+                if (errorMessages.Count > 0)
                 {
-                    SetErrorMessage("Invalid Lines: \n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
                 return true;
@@ -765,7 +765,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -802,7 +802,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseTopPICSynFileEntry(lineIn, searchResult, ref errorLog,
+                        var validSearchResult = ParseTopPICSynFileEntry(lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 
@@ -845,10 +845,9 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" +
-                                            searchResult.ResultID + "'\n";
+                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -869,7 +868,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                     {
-                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        searchResult.ProteinName = pepToProteinMapping[pepToProteinMapIndex].Protein;
                                         SaveResultsFileEntrySeqInfo(searchResult, false);
                                     }
 
@@ -899,9 +898,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -930,13 +929,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
             ref TopPICSearchResult udtSearchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
             string[] splitLine = null;
@@ -1112,16 +1111,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the TopPIC results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry for RowIndex '" + splitLine[0] + "'" +
-                                       "\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing TopPIC Results in ParseTopPICResultsFileEntry for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry\n";
+                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICResultsFileEntry");
                     }
                 }
                 return false;
@@ -1259,7 +1258,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequenceWithMods"></param>
@@ -1267,7 +1266,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseTopPICSynFileEntry(
             string lineIn,
             TopPICResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<TopPICSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
@@ -1289,10 +1288,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from TopPIC Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value from TopPIC results line '{0}'", resultsProcessed + 1));
                     }
 
                     return false;
@@ -1308,10 +1307,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading Peptide sequence value from TopPIC Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from TopPIC results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;
@@ -1402,15 +1401,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing TopPIC Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing TopPIC results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing TopPIC Results in ParseTopPICSynFileEntry\n";
+                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICSynFileEntry");
                     }
                 }
                 return false;
@@ -1592,10 +1592,10 @@ namespace PeptideHitResultsProcessor.Processor
             if (!success)
             {
                 // Do not treat this as a fatal error
-                success = true;
+                return true;
             }
 
-            return success;
+            return true;
         }
 
         private string ReplaceTerminus(string peptide)
@@ -1616,7 +1616,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<TopPICSearchResult> filteredSearchResults,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             bool dataHasPValues)
         {
             IOrderedEnumerable<TopPICSearchResult> query;
@@ -1635,7 +1635,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, dataHasPValues, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, dataHasPValues, errorMessages);
                 index++;
             }
         }
@@ -1667,11 +1667,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="dataHasPValues"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             bool dataHasPValues,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1691,9 +1691,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -1705,13 +1705,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="dataHasPValues"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             TopPICSearchResult udtSearchResult,
             bool dataHasPValues,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1760,9 +1760,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

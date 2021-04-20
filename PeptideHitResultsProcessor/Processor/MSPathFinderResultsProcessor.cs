@@ -80,7 +80,7 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MSPATHFINDER = "-";
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         /// <summary>
         /// These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
@@ -458,10 +458,10 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var columnMapping = new Dictionary<MSPathFinderResultsFileColumns, int>();
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream Text writer
+                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -500,7 +500,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         // Write the header line to the output file
-                        WriteSynFHTFileHeader(writer, ref errorLog);
+                        WriteSynFHTFileHeader(writer, errorMessages);
 
                         headerParsed = true;
                         continue;
@@ -509,7 +509,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var udtSearchResult = new MSPathFinderSearchResult();
 
                     var validSearchResult =
-                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modList, lineNumber);
+                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -544,12 +544,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages);
 
                 // Inform the user if any errors occurred
-                if (errorLog.Length > 0)
+                if (errorMessages.Count > 0)
                 {
-                    SetErrorMessage("Invalid Lines: \n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
                 return true;
@@ -681,7 +681,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var previousSpecEValue = string.Empty;
                 var previousQValue = string.Empty;
 
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 try
                 {
@@ -723,7 +723,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSPathFinderSynFileEntry(lineIn, searchResult, ref errorLog,
+                        var validSearchResult = ParseMSPathFinderSynFileEntry(lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out _);
 
@@ -796,9 +796,9 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'\n";
+                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -827,9 +827,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -858,7 +858,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modList"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
@@ -866,7 +866,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSPathFinderResultsFileEntry(
             string lineIn,
             ref MSPathFinderSearchResult udtSearchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int lineNumber)
@@ -943,10 +943,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                // Error parsing this row from the MassMSPathFinder results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                // Error parsing this row from the MSPathFinder results file
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error parsing MassMSPathFinder Results in ParseMSPathFinderResultsFileEntry for line " + lineNumber + "\n";
+                    errorMessages.Add(string.Format(
+                        "Error parsing MSPathFinder results in ParseMSPathFinderResultsFileEntry, line {0}", lineNumber));
                 }
 
                 return false;
@@ -1093,7 +1094,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequence"></param>
@@ -1101,7 +1102,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
             MSPathFinderResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<MSPathFinderSynFileColumns, int> columnMapping,
             out string peptideSequence)
@@ -1123,10 +1124,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from MSPathFinder Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value from MSPathFinder results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
@@ -1141,10 +1142,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileColumns.Sequence], out peptideSequence))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading Peptide sequence value from MSPathFinder Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from MSPathFinder results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
@@ -1217,15 +1218,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MSPathFinder Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MSPathFinder results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MSPathFinder Results in ParseMSPathFinderSynFileEntry\n";
+                        errorMessages.Add("Error parsing MSPathFinder Results in ParseMSPathFinderSynFileEntry");
                     }
                 }
             }
@@ -1359,7 +1361,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<MSPathFinderSearchResult> filteredSearchResults,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             // Sort filteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
             var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.QValueNum, item.ScanNum, item.Sequence, item.Protein select item;
@@ -1367,7 +1369,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, errorMessages);
                 index++;
             }
         }
@@ -1408,10 +1410,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1425,9 +1427,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -1438,12 +1440,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             MSPathFinderSearchResult udtSearchResult,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1473,9 +1475,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

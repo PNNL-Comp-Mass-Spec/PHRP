@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable once UnusedMember.Global
         public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         // Note that as of April 2014, all mod masses reported by MODa are simply integers, meaning matching a trailing period is not necessary
         private const string MODA_MOD_MASS_REGEX = "([+-][0-9.]+)";
@@ -450,10 +450,10 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var columnMapping = new Dictionary<MODaResultsFileColumns, int>();
-                var errorLog = string.Empty;
+                var errorMessages = new List<string>();
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream Text writer
+                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
@@ -485,14 +485,14 @@ namespace PeptideHitResultsProcessor.Processor
                         skipLine = ParseMODaResultsFileHeaderLine(lineIn, columnMapping);
 
                         // Write the header line to the output file
-                        WriteSynFHTFileHeader(writer, ref errorLog);
+                        WriteSynFHTFileHeader(writer, errorMessages);
                     }
 
                     if (!skipLine)
                     {
                         var udtSearchResult = new MODaSearchResult();
 
-                        var validSearchResult = ParseMODaResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+                        var validSearchResult = ParseMODaResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
 
                         if (validSearchResult)
                         {
@@ -530,12 +530,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages);
 
                 // Inform the user if any errors occurred
-                if (errorLog.Length > 0)
+                if (errorMessages.Count > 0)
                 {
-                    SetErrorMessage("Invalid Lines: \n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
                 return true;
@@ -799,7 +799,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -838,7 +838,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var validSearchResult = ParseMODaSynFileEntry(lineIn,
                             searchResult,
-                            ref errorLog,
+                            errorMessages,
                             resultsProcessed,
                             columnMapping,
                             out var currentPeptideWithMods);
@@ -884,10 +884,9 @@ namespace PeptideHitResultsProcessor.Processor
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
                         if (!modsAdded)
                         {
-                            if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                             {
-                                errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" +
-                                            "\n";
+                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                             }
                         }
 
@@ -908,7 +907,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                     {
-                                        searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        searchResult.ProteinName = pepToProteinMapping[pepToProteinMapIndex].Protein;
                                         SaveResultsFileEntrySeqInfo(searchResult, false);
                                     }
 
@@ -937,9 +936,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Inform the user if any errors occurred
-                    if (errorLog.Length > 0)
+                    if (errorMessages.Count > 0)
                     {
-                        SetErrorMessage("Invalid Lines: \n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
                     return true;
@@ -968,13 +967,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
             ref MODaSearchResult udtSearchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
             var rowIndex = "?";
@@ -1092,15 +1091,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the MODa results file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry for RowIndex '" + rowIndex + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MODa results in ParseMODaResultsFileEntry for RowIndex '{0}'", rowIndex));
                     }
                     else
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry\n";
+                        errorMessages.Add("Error parsing MODa Results in ParseMODaResultsFileEntry");
                     }
                 }
                 return false;
@@ -1236,7 +1236,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequenceWithMods"></param>
@@ -1244,7 +1244,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMODaSynFileEntry(
             string lineIn,
             MODaResults searchResult,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int resultsProcessed,
             IDictionary<MODaSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
@@ -1266,10 +1266,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.ResultID], out string value))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading ResultID value from MODa Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading ResultID value from MODa results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
@@ -1284,10 +1284,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
-                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
-                        errorLog += "Error reading Peptide sequence value from MODa Results line " +
-                                    (resultsProcessed + 1) + "\n";
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from MODa results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
@@ -1349,15 +1349,16 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MODa Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorMessages.Add(string.Format(
+                            "Error parsing MODa results for RowIndex '{0}'", splitLine[0]));
                     }
                     else
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaSynFileEntry\n";
+                        errorMessages.Add("Error parsing MODa Results in ParseMODaSynFileEntry");
                     }
                 }
             }
@@ -1585,7 +1586,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<MODaSearchResult> filteredSearchResults,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             // Sort filteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
             var query = from item in filteredSearchResults orderby item.ProbabilityNum descending, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
@@ -1593,7 +1594,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, errorMessages);
                 index++;
             }
         }
@@ -1622,10 +1623,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1639,9 +1640,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
@@ -1652,12 +1653,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             MODaSearchResult udtSearchResult,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1689,9 +1690,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits record\n";
+                    errorMessages.Add("Error writing synopsis / first hits record");
                 }
             }
         }

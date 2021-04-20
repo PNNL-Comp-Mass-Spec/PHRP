@@ -1272,7 +1272,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to 0
         /// </summary>
-        /// <returns>True if columnIndex >= 0</returns>
+        /// <returns>True if columnIndex >= 0 and an integer value is present</returns>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value)
         {
             return GetColumnValue(splitLine, columnIndex, out value, 0);
@@ -1287,7 +1287,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             if (columnIndex >= 0 && columnIndex < splitLine.Length)
             {
-                value = string.Copy(splitLine[columnIndex]);
+                value = splitLine[columnIndex];
                 return true;
             }
 
@@ -1299,7 +1299,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to valueIfMissing
         /// </summary>
-        /// <returns>True if columnIndex >= 0</returns>
+        /// <returns>True if columnIndex >= 0 and an integer value is present</returns>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value, int valueIfMissing)
         {
             if (GetColumnValue(splitLine, columnIndex, out var valueText, valueIfMissing.ToString()))
@@ -1643,8 +1643,8 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             var pepToProteinMappingEntry = new PepToProteinMapping
                             {
-                                Peptide = string.Copy(splitLine[0]),
-                                Protein = string.Copy(splitLine[1])
+                                Peptide = splitLine[0],
+                                Protein = splitLine[1]
                             };
                             int.TryParse(splitLine[2], out pepToProteinMappingEntry.ResidueStart);
                             int.TryParse(splitLine[3], out pepToProteinMappingEntry.ResidueEnd);
@@ -2323,7 +2323,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (splitLine[0] != lastPeptide)
                 {
                     peptideCount++;
-                    lastPeptide = string.Copy(splitLine[0]);
+                    lastPeptide = splitLine[0];
                 }
 
                 if (lineIn.Contains(PROTEIN_NAME_NO_MATCH))
