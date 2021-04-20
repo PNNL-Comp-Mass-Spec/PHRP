@@ -73,7 +73,9 @@ namespace PeptideHitResultsProcessor.Data
                     formulaToSubtract.AppendFormat("{0}{1}", item.Groups["Element"].Value, Math.Abs(elementCount));
                 }
 
-                massToSubtract = mMolecularWeightCalculator.ComputeMass(formulaToSubtract.ToString());
+                var updatedFormulaToSubtract = ConvertFormulaNotation(formulaToSubtract.ToString());
+
+                massToSubtract = mMolecularWeightCalculator.ComputeMass(updatedFormulaToSubtract);
 
                 if (massToSubtract == 0)
                 {
@@ -82,7 +84,7 @@ namespace PeptideHitResultsProcessor.Data
                         title, composition, formulaToSubtract, mMolecularWeightCalculator.ErrorDescription));
                 }
 
-                updatedFormula1 = mNegativeCountMatcher.Replace(composition, string.Empty);
+                updatedFormula1 = mNegativeCountMatcher.Replace(composition, string.Empty).Trim();
 
                 if (string.IsNullOrWhiteSpace(updatedFormula1))
                 {
