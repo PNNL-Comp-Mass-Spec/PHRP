@@ -184,17 +184,98 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         private struct MaxQuantSearchResult
         {
+            /// <summary>
+            /// .raw file name (without the extension)
+            /// </summary>
+            /// <remarks>
+            /// Dataset name
+            /// </remarks>
             public string RawFile;
+
+            /// <summary>
+            /// MS/MS scan number in the dataset
+            /// </summary>
             public string Scan;
+
+            /// <summary>
+            /// Integer value of Scan
+            /// </summary>
             public int ScanNum;
+
+            /// <summary>
+            /// Index of the spectrum in the dataset (1-based, consecutive integer)
+            /// </summary>
             public string ScanIndex;
+
+            /// <summary>
+            /// Identified peptide
+            /// </summary>
             public string Sequence;
-            public string PrefixResidue;            // This is read from the peptides.txt file, column "Amino acid before"
-            public string SuffixResidue;            // This is read from the peptides.txt file, column "Amino acid after"
-            public int NumberOfTrypticTerminii;     // Computed by this class
+
+            /// <summary>
+            /// Residue in the protein before this peptide
+            /// </summary>
+            /// <remarks>
+            /// From the peptides.txt file, column "Amino acid before"
+            /// </remarks>
+            public string PrefixResidue;
+
+            /// <summary>
+            /// Residue in the protein after this peptide
+            /// </summary>
+            /// <remarks>
+            /// From the peptides.txt file, column "Amino acid after"
+            /// </remarks>
+            public string SuffixResidue;
+
+            /// <summary>
+            /// Number of tryptic terminii
+            /// </summary>
+            /// <remarks>
+            /// Computed by this class
+            /// </remarks>
+            public int NumberOfTrypticTerminii;
+
+            /// <summary>
+            /// Number of residues in the peptide
+            /// </summary>
             public string Length;
+
+            /// <summary>
+            /// Number of missed enzymatic cleavages
+            /// </summary>
             public string MissedCleavages;
+
+            /// <summary>
+            /// Post-translational modifications contained within the identified peptide
+            /// </summary>
+            /// <remarks>
+            /// Examples
+            /// <para>
+            /// One modified residue:
+            /// Oxidation (M)
+            /// </para>
+            /// <para>
+            /// Two residues with the same modification
+            /// 2 Oxidation (M)
+            /// </para>
+            /// <para>
+            /// Two separate modifications (comma-separated list)
+            /// Acetyl (Protein N-term),Oxidation (M)
+            /// </para>
+            /// </remarks>
             public string Modifications;
+
+            /// <summary>
+            /// Peptide sequence with embedded modifications
+            /// </summary>
+            /// <remarks>
+            /// Examples:
+            /// _YAEGYPGKR_
+            /// _M(Oxidation (M))TSVGSQDTTGPMTR_
+            /// _M(Oxidation (M))TSVGSQDTTGPM(Oxidation (M))TR_
+            /// _(Acetyl (Protein N-term))M(Oxidation (M))GSHVAPTALTCAR_
+            /// </remarks>
             public string ModifiedSequence;
 
             /// <summary>
@@ -205,48 +286,287 @@ namespace PeptideHitResultsProcessor.Processor
             /// </remarks>
             public string Proteins;
 
+            /// <summary>
+            /// Name of the best scoring protein this peptide is associated with
+            /// </summary>
+            /// <remarks>
+            /// Typically there is only one protein name here
+            /// However, in cases of a tied score, will be a semicolon separated list
+            /// </remarks>
             public string LeadingRazorProtein;
+
+            /// <summary>
+            /// Charge state of the precursor ion.
+            /// </summary>
             public string Charge;
+
+            /// <summary>
+            /// Numeric value of Charge
+            /// </summary>
             public short ChargeNum;
+
+            /// <summary>
+            /// Type of fragmentation used to create the MS/MS spectrum
+            /// </summary>
+            /// <remarks>
+            /// Types:
+            ///   CID - Collision Induced Dissociation
+            ///   HCD - High energy Collision induced Dissociation
+            ///   ETD - Electron Transfer Dissociation
+            /// </remarks>
             public string Fragmentation;
+
+            /// <summary>
+            /// Mass Analyzer of the instrument
+            /// </summary>
+            /// <remarks>
+            /// Types:
+            ///   ITMS - Ion trap
+            ///   FTMS - Fourier transform ICR or Orbitrap
+            ///   TOF - Time of flight
+            /// </remarks>
             public string MassAnalyzer;
-            public string Type;                     // Identification type, e.g. MULTI-MSMS, MULTI-SECPEP, or MSMS
+
+            /// <summary>
+            /// Type of precursor ion as identified by MaxQuant
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Prefixes:
+            ///   ISO - isotopic cluster.
+            ///   PEAK - single peak.
+            ///   MULTI - labeling cluster.
+            /// </para>
+            /// <para>
+            /// Examples:
+            /// MULTI-MSMS
+            /// MULTI-SECPEP
+            /// MSMS
+            /// </para>
+            /// </remarks>
+            public string Type;
+
+            /// <summary>
+            /// Scan event number
+            /// </summary>
+            /// <remarks>
+            /// The first MS2 spectrum after a MS1 spectrum has event number 1
+            /// The second MS2 spectrum has event number 2
+            /// etc.
+            /// Once the next MS1 spectrum is reached, scan event number resets to 1 for the next MS2 spectrum
+            /// </remarks>
             public string ScanEventNumber;
+
+            /// <summary>
+            /// Isotope index
+            /// </summary>
             public string IsotopeIndex;
+
+            /// <summary>
+            /// Precursor ion m/z
+            /// </summary>
             public string PrecursorMZ;
-            public string MH;                       // Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
-            public string CalculatedMonoMass;       // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
-            public double CalculatedMonoMassValue;  // Parsed from CalculatedMonoMass
-            public double CalculatedMonoMassPHRP;   // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
+
+            /// <summary>
+            /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+            /// </summary>
+            public string MH;
+
+            /// <summary>
+            /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
+            /// </summary>
+            public string CalculatedMonoMass;
+
+            /// <summary>
+            /// Numeric value of CalculatedMonoMass
+            /// </summary>
+            public double CalculatedMonoMassValue;
+
+            /// <summary>
+            /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
+            /// </summary>
+            public double CalculatedMonoMassPHRP;
+
+            /// <summary>
+            /// Mass error of the precursor ion equivalent monoisotopic mass value
+            /// vs. the predicted monoisotopic mass of the identified peptide sequence
+            /// </summary>
             public string MassErrorPPM;
+
+            /// <summary>
+            /// Mass error, in Da
+            /// </summary>
             public string MassErrorDa;
+
+            /// <summary>
+            /// Simple mass error (ppm)
+            /// </summary>
+            /// <remarks>
+            /// Definition not known
+            /// </remarks>
             public string SimpleMassErrorPPM;
+
+            /// <summary>
+            /// Elution time of the MS/MS spectrum
+            /// </summary>
             public string RetentionTime;
-            public string PEP;                      // Posterior error probability; lower is better
+
+            /// <summary>
+            /// Posterior error probability
+            /// </summary>
+            /// <remarks>
+            /// Similar to p-value
+            /// Smaller values (closer to zero) are higher confidence
+            /// </remarks>
+            public string PEP;
+
+            /// <summary>
+            /// Numeric value of PEP
+            /// </summary>
             public double PEPValue;
-            public string Score;                    // Confidence score; higher is better
+
+            /// <summary>
+            /// Andromeda score for the best MS/MS spectrum with this peptide
+            /// </summary>
+            /// <remarks>
+            /// Higher scores are better
+            /// </remarks>
+            public string Score;
+
+            /// <summary>
+            /// Numeric value of Score
+            /// </summary>
             public double ScoreValue;
+
+            /// <summary>
+            /// Score difference to the second best identified peptide with a different amino acid sequence
+            /// </summary>
             public string DeltaScore;
+
+            /// <summary>
+            /// Score difference to the second best positioning of modifications identified peptide with the same amino acid sequence
+            /// </summary>
             public string ScoreDiff;
+
+            /// <summary>
+            /// PTM localization score
+            /// </summary>
             public string LocalizationProb;
+
+            /// <summary>
+            /// Number of possible distributions of the modifications over the peptide sequence
+            /// </summary>
             public string Combinatorics;
+
+            /// <summary>
+            /// Parent Ion Fraction: the fraction of the target peak that makes up of the total intensity in the inclusion window
+            /// </summary>
             public string PIF;
+
+            /// <summary>
+            /// Percentage the parent ion intensity makes up of the total intensity of the whole spectrum.
+            /// </summary>
             public string FractionOfTotalSpectrum;
+
+            /// <summary>
+            /// Percentage the parent ion intensity in comparison to the highest peak in he MS spectrum
+            /// </summary>
             public string BasePeakFraction;
+
+            /// <summary>
+            /// Scan number where the precursor ion was observed
+            /// </summary>
             public string PrecursorFullScanNumber;
+
+            /// <summary>
+            /// Intensity of the precursor ion in the scan that it was observed
+            /// </summary>
             public string PrecursorIntensity;
+
+            /// <summary>
+            /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
+            /// </summary>
+            /// <remarks>
+            /// From the peptides.txt file, column "Intensity"
+            /// </remarks>
             public string PeptideIntensity;
+
+            /// <summary>
+            /// Fraction the intensity of the precursor ion makes up of the peak (apex) intensity
+            /// </summary>
             public string PrecursorApexFraction;
+
+            /// <summary>
+            /// The number of scans the precursor ion is offset from the peak (apex) position
+            /// </summary>
+            /// <remarks>
+            /// For example, if the precursor scan is 3220 and the offset is -45, the peak apex is in scan 3265
+            /// </remarks>
             public string PrecursorApexOffset;
+
+            /// <summary>
+            /// How much time the precursor ion is offset from the peak (apex) position
+            /// </summary>
             public string PrecursorApexOffsetTime;
+
+            /// <summary>
+            /// Number of peaks (MS/MS ions) matching to the predicted fragmentation spectrum
+            /// </summary>
             public string NumberOfMatches;
+
+            /// <summary>
+            /// Fraction of intensity in the MS/MS spectrum that is annotated
+            /// </summary>
             public string IntensityCoverage;
+
+            /// <summary>
+            /// Fraction of peaks in the MS/MS spectrum that are annotated
+            /// </summary>
             public string PeakCoverage;
+
+            /// <summary>
+            /// This will have '+' for peptides that are associated with a decoy protein
+            /// </summary>
             public string Reverse;
+
+            /// <summary>
+            /// Unique (consecutive) identifier for each row in msms.txt
+            /// </summary>
+            /// <remarks>
+            /// Used to cross-link the information in msms.txt with information stored in other files
+            /// </remarks>
             public string ID;
+
+            /// <summary>
+            /// Identifier of the protein-group this redundant peptide sequence is associated with
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Typically a single number, but could be a semicolon separated list
+            /// if a peptide is associated with multiple protein groups
+            /// </para>
+            /// <para>
+            /// Can be used to look up the extended protein information in the proteinGroups.txt file
+            /// </para>
+            /// </remarks>
             public string ProteinGroupIDs;
+
+            /// <summary>
+            /// The identifier of the non-redundant peptide sequence
+            /// </summary>
+            /// <remarks>
+            /// Corresponds to the id column in the peptides.txt file
+            /// </remarks>
             public string PeptideID;
+
+            /// <summary>
+            /// Identifier referencing a row in the modificationSpecificPeptides.txt file
+            /// </summary>
             public string ModPeptideID;
+
+            /// <summary>
+            /// Identifier referencing a row in the evidence.txt file
+            /// </summary>
             public string EvidenceID;
 
             public void Clear()
