@@ -12,10 +12,6 @@ namespace PeptideHitResultsProcessor.Data
 
         private static readonly MolecularWeightCalculator.MolecularWeightTool mMolecularWeightCalculator = new(ElementMassMode.Isotopic);
 
-        private static readonly Regex mElementMatcher = new(@"(?<Element>[a-z]+)\((?<ElementCount>[0-9\-]+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private static readonly Regex mIsotopeMatcher = new(@"(^| )(?<IsotopeMass>\d+)(?<Element>[a-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         private static readonly Regex mNegativeCountMatcher = new(@"(?<Element>[a-z]+)\((?<ElementCount>-\d+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public string Composition { get; }
@@ -114,17 +110,16 @@ namespace PeptideHitResultsProcessor.Data
                 title, composition, mMolecularWeightCalculator.ErrorDescription));
         }
 
+        /// <summary>
+        /// The Molecular Weight Calculator can properly parse UniMod style formulas, e.g. H(25) C(8) 13C(7) N 15N(2) O(3)
+        /// However, MaxQuant uses Cx, Nx, Ox, and Hx for heavy isotopes of elements
+        /// This method replaces those symbols with the format support by the Molecular Weight Calculator
+        /// </summary>
+        /// <param name="formula"></param>
+        /// <returns></returns>
         private static string ConvertFormulaNotation(string formula)
         {
-            var updatedFormula1 = mElementMatcher.Match(formula).Success ?
-                                     mElementMatcher.Replace(formula, @"${Element}${ElementCount}") :
-                                     formula;
-
-            var updatedFormula2 = mIsotopeMatcher.Match(updatedFormula1).Success ?
-                                      mIsotopeMatcher.Replace(updatedFormula1, @"^${IsotopeMass}${Element}") :
-                                      updatedFormula1;
-
-            return updatedFormula2.Replace("Cx", "^13.003355C").Replace("Nx", "^15.000109N").Replace("Ox", "^17.999161O").Replace("Hx", "D");
+            return formula.Replace("Cx", "^13.003355C").Replace("Nx", "^15.000109N").Replace("Ox", "^17.999161O").Replace("Hx", "D");
         }
 
         public override string ToString()
