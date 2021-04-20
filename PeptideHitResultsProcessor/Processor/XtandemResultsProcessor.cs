@@ -60,7 +60,7 @@ namespace PeptideHitResultsProcessor.Processor
         private const string XTANDEM_XML_GROUP_TYPE_SUPPORT = "support";
         private const string XTANDEM_XML_GROUP_TYPE_PARAMETERS = "parameters";
 
-        private const int MAX_ERROR_LOG_LENGTH = 4096;
+        private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         private const string SCAN_NUMBER_EXTRACTION_REGEX_A = @"scan=(\d+)";
         private const string SCAN_NUMBER_EXTRACTION_REGEX_B = @"scan\s*(\d+)";
@@ -440,7 +440,7 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    var errorLog = string.Empty;
+                    var errorMessages = new List<string>();
 
                     // Open the input file and parse it
 
@@ -572,7 +572,7 @@ namespace PeptideHitResultsProcessor.Processor
             XmlReader xmlReader,
             StreamWriter writer,
             IList<XTandemResults> searchResults,
-            ref string errorLog,
+            ICollection<string> errorMessages,
             int groupElementReaderDepth)
         {
             // There is a separate entry in the searchResults list for each protein encountered
@@ -979,9 +979,11 @@ namespace PeptideHitResultsProcessor.Processor
                                     var modsAdded = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
                                     if (!modsAdded)
                                     {
-                                        if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                                        if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                                         {
-                                            errorLog += "Error adding modifications to sequence for Group ID '" + groupIDInXMLFile + "'\n";
+                                            errorMessages.Add(string.Format(
+                                                "Error adding modifications to sequence for Group ID '{0}'",
+                                                groupIDInXMLFile));
                                         }
                                     }
 
@@ -1070,9 +1072,9 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing values from this group ID in the XML file
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error parsing value for Group ID '" + groupIDInXMLFile + "'\n";
+                    errorMessages.Add(string.Format("Error parsing value for Group ID '{0}'", groupIDInXMLFile));
                 }
                 success = false;
             }
@@ -1661,10 +1663,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits file
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="errorLog"></param>
+        /// <param name="errorMessages"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            ref string errorLog)
+            ICollection<string> errorMessages)
         {
             try
             {
@@ -1678,9 +1680,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception)
             {
-                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
-                    errorLog += "Error writing synopsis / first hits header\n";
+                    errorMessages.Add("Error writing synopsis / first hits header");
                 }
             }
         }
