@@ -204,17 +204,7 @@ namespace PHRPReader.Data
         public string TargetResidues
         {
             get => mTargetResidues;
-            set
-            {
-                if (value == null)
-                {
-                    mTargetResidues = string.Empty;
-                }
-                else
-                {
-                    mTargetResidues = value;
-                }
-            }
+            set => mTargetResidues = value ?? string.Empty;
         }
 
         /// <summary>
@@ -229,17 +219,7 @@ namespace PHRPReader.Data
         public string MassCorrectionTag
         {
             get => mMassCorrectionTag;
-            set
-            {
-                if (value == null)
-                {
-                    mMassCorrectionTag = string.Empty;
-                }
-                else
-                {
-                    mMassCorrectionTag = value;
-                }
-            }
+            set => mMassCorrectionTag = value ?? string.Empty;
         }
 
         /// <summary>
