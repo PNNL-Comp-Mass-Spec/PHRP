@@ -55,7 +55,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </para>
     /// <para>
     /// 7) SortAndWriteFilteredSearchResults performs one more sort, then writes out to disk
-    ///    Sorts descending Andromeda score, Scan, Peptide, and Protein
+    ///    Sorts descending Andromeda score, Scan, Peptide, and Razor Protein
     /// </para>
     /// </remarks>
     public class MaxQuantResultsProcessor : PHRPBaseClass
@@ -196,7 +196,15 @@ namespace PeptideHitResultsProcessor.Processor
             public string MissedCleavages;
             public string Modifications;
             public string ModifiedSequence;
-            public string Protein;
+
+            /// <summary>
+            /// Protein associated with this peptide
+            /// </summary>
+            /// <remarks>
+            /// Semicolon separated list
+            /// </remarks>
+            public string Proteins;
+
             public string LeadingRazorProtein;
             public string Charge;
             public short ChargeNum;
@@ -255,7 +263,7 @@ namespace PeptideHitResultsProcessor.Processor
                 MissedCleavages = string.Empty;
                 Modifications = string.Empty;
                 ModifiedSequence = string.Empty;
-                Protein = string.Empty;
+                Proteins = string.Empty;
                 LeadingRazorProtein = string.Empty;
                 Charge = string.Empty;
                 ChargeNum = 0;
@@ -423,12 +431,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
-        }
-
-        private MaxQuantSearchResult CloneSearchResult(MaxQuantSearchResult result, string newProteinName)
-        {
-            result.Protein = newProteinName;
-            return result;
         }
 
         private double ComputePeptideMass(string cleanSequence, double totalModMass)
@@ -631,20 +633,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (validSearchResult)
                     {
-                        if (proteinNames.Count == 0)
-                        {
-                            udtSearchResult.Protein = string.Empty;
-                            searchResultsUnfiltered.Add(udtSearchResult);
-                        }
-                        else
-                        {
-                            foreach (var protein in proteinNames)
-                            {
-                                var resultToAdd = CloneSearchResult(udtSearchResult, protein);
-
-                                searchResultsUnfiltered.Add(resultToAdd);
-                            }
-                        }
+                        searchResultsUnfiltered.Add(udtSearchResult);
                     }
 
                     // Update the progress
@@ -1177,7 +1166,6 @@ namespace PeptideHitResultsProcessor.Processor
                         GetColumnValue(splitLine, item.Key, out string experimentIntensity);
                         peptideInfo.IntensityByExperiment.Add(item.Value, experimentIntensity);
                     }
-
                 }
             }
             catch (Exception ex)
@@ -1427,7 +1415,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="maxQuantPeptides"></param>
         /// <param name="lineIn"></param>
         /// <param name="udtSearchResult"></param>
-        /// <param name="proteinNames"></param>
         /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <param name="modList"></param>
@@ -1441,13 +1428,11 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
             ref MaxQuantSearchResult udtSearchResult,
-            out List<string> proteinNames,
             ICollection<string> errorMessages,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<ModInfo> modList,
             int lineNumber)
         {
-            proteinNames = new List<string>();
 
             try
             {
@@ -1493,10 +1478,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavages], out udtSearchResult.MissedCleavages);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out udtSearchResult.Modifications);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModifiedSequence], out udtSearchResult.ModifiedSequence);
-
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out string proteins);
-                proteinNames = proteins.Split(';').ToList();
-
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out udtSearchResult.Fragmentation);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassAnalyzer], out udtSearchResult.MassAnalyzer);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Type], out udtSearchResult.Type);
@@ -2081,8 +2063,8 @@ namespace PeptideHitResultsProcessor.Processor
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
-            // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Protein
-            var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.Protein select item;
+            // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
+            var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.LeadingRazorProtein select item;
 
             var index = 1;
             foreach (var result in query)
@@ -2180,7 +2162,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.MassErrorPPM,
                     udtSearchResult.MH,
                     udtSearchResult.PrefixResidue + "." + udtSearchResult.Sequence + udtSearchResult.SuffixResidue,
-                    udtSearchResult.Protein,
+                    udtSearchResult.Proteins,
                     udtSearchResult.NumberOfTrypticTerminii.ToString(),
                     udtSearchResult.PEP,
                     udtSearchResult.Score,
@@ -2249,7 +2231,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.CompareOrdinal(x.Protein, y.Protein);
+                    result = string.CompareOrdinal(x.LeadingRazorProtein, y.LeadingRazorProtein);
                 }
                 return result;
             }
