@@ -274,7 +274,7 @@ namespace PeptideHitResultsProcessor.Data
         public string AddSearchResultModificationsToCleanSequence()
         {
             // Initialize sequenceWithMods to the clean sequence; we'll insert the mod symbols below if mSearchResultModifications.Count > 0
-            var sequenceWithMods = string.Copy(mPeptideCleanSequence);
+            var sequenceWithMods = mPeptideCleanSequence;
 
             if (mSearchResultModifications.Count > 0)
             {
@@ -1017,7 +1017,7 @@ namespace PeptideHitResultsProcessor.Data
             {
                 if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out primarySequence, out var prefix, out var suffix))
                 {
-                    primarySequence = string.Copy(sequenceWithMods);
+                    primarySequence = sequenceWithMods;
                 }
                 else
                 {
@@ -1030,7 +1030,7 @@ namespace PeptideHitResultsProcessor.Data
             }
             else
             {
-                primarySequence = string.Copy(sequenceWithMods);
+                primarySequence = sequenceWithMods;
             }
 
             if (autoPopulateCleanSequence)
@@ -1039,7 +1039,7 @@ namespace PeptideHitResultsProcessor.Data
                 PeptideCleanSequence = PeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(primarySequence, false);
             }
 
-            PeptideSequenceWithMods = string.Copy(primarySequence);
+            PeptideSequenceWithMods = primarySequence;
         }
 
         /// <summary>

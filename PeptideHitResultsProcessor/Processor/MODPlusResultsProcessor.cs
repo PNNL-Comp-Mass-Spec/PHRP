@@ -917,7 +917,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!udtSearchResult.ProteinList.Contains('['))
                     {
                         // This is likely a reverse-hit protein
-                        udtSearchResult.ModificationAnnotation = string.Copy(udtSearchResult.ProteinList);
+                        udtSearchResult.ModificationAnnotation = udtSearchResult.ProteinList;
                         udtSearchResult.ProteinList = string.Empty;
                     }
                     else
@@ -1493,7 +1493,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        proteinName = string.Copy(proteinEntry);
+                        proteinName = proteinEntry;
                         peptidePosition = string.Empty;
                     }
 

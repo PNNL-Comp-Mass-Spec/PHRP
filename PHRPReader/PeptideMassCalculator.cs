@@ -409,12 +409,12 @@ namespace PHRPReader
                 if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
                 {
                     // Prefix and suffix residues not present; simply copy sequence to primarySequence
-                    primarySequence = string.Copy(sequence);
+                    primarySequence = sequence;
                 }
             }
             else
             {
-                primarySequence = string.Copy(sequence);
+                primarySequence = sequence;
             }
 
             var reMatch = RegexModMasses.Match(primarySequence);

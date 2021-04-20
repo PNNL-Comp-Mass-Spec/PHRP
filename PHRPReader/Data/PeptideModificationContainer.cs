@@ -1332,7 +1332,7 @@ namespace PHRPReader.Data
 
                         if (residuesClean.Length > 0)
                         {
-                            modificationDefinition.TargetResidues = string.Copy(residuesClean);
+                            modificationDefinition.TargetResidues = residuesClean;
                         }
 
                         if (splitLine.Length >= 4)

@@ -212,7 +212,7 @@ namespace PHRPReader.Data
                 }
                 else
                 {
-                    mTargetResidues = string.Copy(value);
+                    mTargetResidues = value;
                 }
             }
         }
@@ -237,7 +237,7 @@ namespace PHRPReader.Data
                 }
                 else
                 {
-                    mMassCorrectionTag = string.Copy(value);
+                    mMassCorrectionTag = value;
                 }
             }
         }

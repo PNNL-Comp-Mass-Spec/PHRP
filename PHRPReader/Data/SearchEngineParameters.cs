@@ -252,7 +252,7 @@ namespace PHRPReader.Data
         /// <param name="searchEngineVersion"></param>
         public void UpdateSearchEngineVersion(string searchEngineVersion)
         {
-            mSearchEngineVersion = string.Copy(searchEngineVersion);
+            mSearchEngineVersion = searchEngineVersion;
         }
 
         /// <summary>

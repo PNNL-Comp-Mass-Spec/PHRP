@@ -384,7 +384,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                peptideNew = string.Copy(peptide);
+                peptideNew = peptide;
             }
 
             if (peptideNew.Length >= 4)
@@ -1019,7 +1019,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 // Update the protein name
                                 var updatedSearchResult = searchResultsPrefiltered[index];
                                 updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext;
-                                updatedSearchResult.Protein = string.Copy(firstHitPeptide.ProteinName);
+                                updatedSearchResult.Protein = firstHitPeptide.ProteinName;
                                 searchResultsPrefiltered[index] = updatedSearchResult;
                             }
                             else
@@ -1551,7 +1551,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (pepToProteinMapIndex >= 0)
                             {
                                 // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                var currentProtein = string.Copy(searchResult.ProteinName);
+                                var currentProtein = searchResult.ProteinName;
                                 do
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
@@ -2738,7 +2738,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     peptideNew += peptide.Substring(indexFirstResidue + 1);
                 }
-                peptide = string.Copy(peptideNew);
+                peptide = peptideNew;
             }
 
             return prefix + peptide + suffix;

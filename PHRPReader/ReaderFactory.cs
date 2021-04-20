@@ -683,7 +683,7 @@ namespace PHRPReader
         private bool InitializeReader(PeptideHitResultTypes resultType)
         {
             var success = true;
-            var datasetName = string.Copy(DatasetName);
+            var datasetName = DatasetName;
 
             try
             {
@@ -1801,7 +1801,7 @@ namespace PHRPReader
             };
 
             mCachedReaderType = resultType;
-            mCachedDataset = string.Copy(datasetName);
+            mCachedDataset = datasetName;
 
             return mCachedReader;
         }
@@ -2345,7 +2345,7 @@ namespace PHRPReader
                 else
                 {
                     readNext = false;
-                    mCachedLine = string.Copy(lineIn);
+                    mCachedLine = lineIn;
                     mCachedLineAvailable = true;
                     mCachedPSM = newPSM;
                 }

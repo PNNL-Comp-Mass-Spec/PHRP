@@ -664,7 +664,7 @@ namespace PHRPReader
                 sequenceIn = sequenceIn.Substring(0, sequenceIn.Length - 2) + ".";
             }
 
-            primarySequence = string.Copy(sequenceIn);
+            primarySequence = sequenceIn;
 
             // See if sequenceIn contains two periods
             var periodLoc1 = sequenceIn.IndexOf('.');
@@ -704,7 +704,7 @@ namespace PHRPReader
                     else
                     {
                         // Leave the sequence unchanged
-                        primarySequence = string.Copy(sequenceIn);
+                        primarySequence = sequenceIn;
                         success = false;
                     }
                 }
@@ -736,7 +736,7 @@ namespace PHRPReader
                     else
                     {
                         // Leave the sequence unchanged
-                        primarySequence = string.Copy(sequenceIn);
+                        primarySequence = sequenceIn;
                     }
                 }
             }

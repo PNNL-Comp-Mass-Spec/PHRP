@@ -447,7 +447,7 @@ namespace PeptideHitResultsProcessor
 
         private void LogErrors(string source, string message, Exception ex)
         {
-            m_ErrMsg = string.Copy(message).Replace("\n", "; ");
+            m_ErrMsg = message.Replace("\n", "; ");
 
             if (ex?.Message != null && ex.Message.Length > 0)
             {

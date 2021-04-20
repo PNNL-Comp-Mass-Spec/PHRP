@@ -590,7 +590,7 @@ namespace PHRPReader.Reader
         {
             if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
             {
-                primarySequence = string.Copy(sequenceWithMods);
+                primarySequence = sequenceWithMods;
             }
 
             var ambiguousMods = new SortedList<int, AmbiguousModInfo>();
@@ -637,7 +637,7 @@ namespace PHRPReader.Reader
                             {
                                 // Valid ambiguous mod found; store it
                                 modMassString = modMassString.Substring(0, bracketIndex);
-                                udtCurrentMod.ModMassString = string.Copy(modMassString);
+                                udtCurrentMod.ModMassString = modMassString;
 
                                 ambiguousMods.Add(udtCurrentMod.ResidueStart, udtCurrentMod);
                             }
@@ -1086,11 +1086,11 @@ namespace PHRPReader.Reader
                         {
                             if (string.IsNullOrWhiteSpace(warningMessage))
                             {
-                                warningMessage = string.Copy(warningMessageAddon);
+                                warningMessage = warningMessageAddon;
                             }
                             else if (!warningMessage.Contains(warningMessageAddon))
                             {
-                                warningMessage += "; " + string.Copy(warningMessageAddon);
+                                warningMessage += "; " + warningMessageAddon;
                             }
                         }
                     }
@@ -1167,7 +1167,7 @@ namespace PHRPReader.Reader
                     {
                         if (!string.IsNullOrEmpty(kvSetting.Value))
                         {
-                            searchEngineVersion = string.Copy(kvSetting.Value);
+                            searchEngineVersion = kvSetting.Value;
                             validVersion = true;
                         }
                         else
@@ -1178,7 +1178,7 @@ namespace PHRPReader.Reader
                                 var searchEngineLine = reader.ReadLine();
                                 if (!string.IsNullOrEmpty(searchEngineLine))
                                 {
-                                    searchEngineVersion = string.Copy(searchEngineLine.Trim());
+                                    searchEngineVersion = searchEngineLine.Trim();
                                     validVersion = true;
                                 }
                             }

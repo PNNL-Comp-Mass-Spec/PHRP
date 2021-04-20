@@ -267,7 +267,7 @@ namespace PeptideHitResultsProcRunner
                 // Query parseCommandLine to see if various parameters are present
                 if (parseCommandLine.RetrieveValueForParameter("I", out var value))
                 {
-                    mInputFilePath = string.Copy(value);
+                    mInputFilePath = value;
                 }
                 else if (parseCommandLine.NonSwitchParameterCount > 0)
                 {
@@ -275,16 +275,16 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 if (parseCommandLine.RetrieveValueForParameter("O", out value))
-                    mOutputDirectoryPath = string.Copy(value);
+                    mOutputDirectoryPath = value;
 
                 if (parseCommandLine.RetrieveValueForParameter("P", out value))
-                    mParameterFilePath = string.Copy(value);
+                    mParameterFilePath = value;
                 if (parseCommandLine.RetrieveValueForParameter("M", out value))
-                    Options.ModificationDefinitionsFilePath = string.Copy(value);
+                    Options.ModificationDefinitionsFilePath = value;
                 if (parseCommandLine.RetrieveValueForParameter("T", out value))
-                    Options.MassCorrectionTagsFilePath = string.Copy(value);
+                    Options.MassCorrectionTagsFilePath = value;
                 if (parseCommandLine.RetrieveValueForParameter("N", out value))
-                    Options.SearchToolParameterFilePath = string.Copy(value);
+                    Options.SearchToolParameterFilePath = value;
 
                 if (parseCommandLine.IsParameterPresent("ProteinMods"))
                 {
@@ -297,10 +297,10 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 if (parseCommandLine.RetrieveValueForParameter("F", out value))
-                    Options.FastaFilePath = string.Copy(value);
+                    Options.FastaFilePath = value;
 
                 if (parseCommandLine.RetrieveValueForParameter("Fasta", out value))
-                    Options.FastaFilePath = string.Copy(value);
+                    Options.FastaFilePath = value;
 
                 if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
                     Options.IgnorePeptideToProteinMapperErrors = true;
@@ -403,7 +403,7 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
                 if (parseCommandLine.RetrieveValueForParameter("A", out value))
-                    mOutputDirectoryAlternatePath = string.Copy(value);
+                    mOutputDirectoryAlternatePath = value;
                 if (parseCommandLine.IsParameterPresent("R"))
                     mRecreateDirectoryHierarchyInAlternatePath = true;
 
@@ -413,7 +413,7 @@ namespace PeptideHitResultsProcRunner
 
                     if (!string.IsNullOrEmpty(value))
                     {
-                        mLogFilePath = string.Copy(value).Trim('"');
+                        mLogFilePath = value.Trim('"');
                     }
                 }
 
@@ -422,7 +422,7 @@ namespace PeptideHitResultsProcRunner
                     mLogMessagesToFile = true;
                     if (!string.IsNullOrEmpty(value))
                     {
-                        mLogDirectoryPath = string.Copy(value);
+                        mLogDirectoryPath = value;
                     }
                 }
 

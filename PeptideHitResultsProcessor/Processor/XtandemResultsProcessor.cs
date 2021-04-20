@@ -794,7 +794,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 var value = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
                                 if (value.Length > 0)
                                 {
-                                    currentGroupType = string.Copy(value);
+                                    currentGroupType = value;
                                     currentGroupLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
                                 }
                                 else
@@ -1692,7 +1692,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 return xmlReader.Value;
             }
-            return string.Copy(valueIfMissing);
+            return valueIfMissing;
         }
 
         private int XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, int valueIfMissing)

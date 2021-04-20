@@ -362,7 +362,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (modPositions[modName] >= 0 && modPositions[modName] < minIndex)
                     {
                         minIndex = modPositions[modName];
-                        firstModName = string.Copy(modName);
+                        firstModName = modName;
                     }
                 }
 

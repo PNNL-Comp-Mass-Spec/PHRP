@@ -1063,7 +1063,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (pepToProteinMapIndex >= 0)
                             {
                                 // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                var currentProtein = string.Copy(searchResult.ProteinName);
+                                var currentProtein = searchResult.ProteinName;
                                 do
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
@@ -1704,7 +1704,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 peptideNew += peptide.Substring(reMatch.Groups[0].Index + reMatch.Groups[0].Length);
                             }
 
-                            peptide = string.Copy(peptideNew);
+                            peptide = peptideNew;
                         }
                     }
                     catch (Exception ex)

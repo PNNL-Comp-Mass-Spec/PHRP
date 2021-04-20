@@ -469,7 +469,7 @@ namespace PHRPReader.Reader
             {
                 if (kvSetting.Key == "list path, default parameters")
                 {
-                    defaultParamsFilename = string.Copy(kvSetting.Value);
+                    defaultParamsFilename = kvSetting.Value;
                     break;
                 }
             }
@@ -783,7 +783,7 @@ namespace PHRPReader.Reader
                 return xmlReader.Value;
             }
 
-            return string.Copy(valueIfMissing);
+            return valueIfMissing;
         }
 
         private static string XMLTextReaderGetInnerText(XmlReader xmlReader)

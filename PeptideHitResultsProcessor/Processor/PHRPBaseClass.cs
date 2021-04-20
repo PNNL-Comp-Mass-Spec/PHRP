@@ -1292,7 +1292,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return true;
             }
 
-            value = string.Copy(valueIfMissing);
+            value = valueIfMissing;
             return false;
         }
 
@@ -1552,8 +1552,8 @@ namespace PeptideHitResultsProcessor.Processor
                     Options.ProteinModsFileIncludesReversedProteins = settingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", Options.ProteinModsFileIncludesReversedProteins);
                     Options.UseExistingMTSPepToProteinMapFile = settingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", Options.UseExistingMTSPepToProteinMapFile);
 
-                    var leftResidueRegEx = string.Copy(Options.EnzymeMatchSpec.LeftResidueRegEx);
-                    var rightResidueRegEx = string.Copy(Options.EnzymeMatchSpec.RightResidueRegEx);
+                    var leftResidueRegEx = Options.EnzymeMatchSpec.LeftResidueRegEx;
+                    var rightResidueRegEx = Options.EnzymeMatchSpec.RightResidueRegEx;
 
                     leftResidueRegEx = settingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", leftResidueRegEx, out var valueNotPresent);
                     if (!valueNotPresent)
@@ -1638,7 +1638,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (linesRead == 1 && !int.TryParse(splitLine[2], out _))
                         {
                             // Header line; cache it
-                            headerLine = string.Copy(dataLine);
+                            headerLine = dataLine;
                         }
                         else
                         {
@@ -1810,7 +1810,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void ResetProgress(string progressStepDescription, bool echoToConsole = false)
         {
-            mProgressStepDescription = string.Copy(progressStepDescription);
+            mProgressStepDescription = progressStepDescription;
             mProgressPercentComplete = 0;
             ProgressReset?.Invoke();
 
@@ -2089,7 +2089,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void UpdateProgress(string progressStepDescription, float percentComplete)
         {
-            mProgressStepDescription = string.Copy(progressStepDescription);
+            mProgressStepDescription = progressStepDescription;
             if (percentComplete < 0)
             {
                 percentComplete = 0;

@@ -698,7 +698,7 @@ namespace PeptideHitResultsProcessor.Processor
             else
             {
                 // Sequence does not have prefix or suffix letters; use sequenceWithMods
-                primarySequenceWithMods = string.Copy(sequenceWithMods);
+                primarySequenceWithMods = sequenceWithMods;
                 primarySequence = ModMatcher.Replace(sequenceWithMods, string.Empty);
             }
 
@@ -864,7 +864,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (pepToProteinMapIndex >= 0)
                             {
                                 // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                var currentProtein = string.Copy(searchResult.ProteinName);
+                                var currentProtein = searchResult.ProteinName;
                                 do
                                 {
                                     if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
