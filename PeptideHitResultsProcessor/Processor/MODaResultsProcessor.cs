@@ -490,9 +490,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (!skipLine)
                     {
-                        var udtSearchResult = new MODaSearchResult();
-
-                        var validSearchResult = ParseMODaResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
+                        var validSearchResult = ParseMODaResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping);
 
                         if (validSearchResult)
                         {
@@ -972,10 +970,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
-            ref MODaSearchResult udtSearchResult,
+            out MODaSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
+            udtSearchResult = new MODaSearchResult();
+
             var rowIndex = "?";
 
             try

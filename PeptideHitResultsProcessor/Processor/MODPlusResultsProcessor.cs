@@ -510,9 +510,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var udtSearchResult = new MODPlusSearchResult();
-
-                    var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
+                    var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
@@ -832,11 +830,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusResultsFileEntry(
             string lineIn,
-            ref MODPlusSearchResult udtSearchResult,
+            out MODPlusSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
-            // Parses an entry from the MODPlus results file
+            udtSearchResult = new MODPlusSearchResult();
 
             var spectrumIndex = "?";
 

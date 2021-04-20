@@ -1747,12 +1747,13 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMaxQuantResultsFileEntry(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
-            ref MaxQuantSearchResult udtSearchResult,
+            out MaxQuantSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<ModInfo> modList,
             int lineNumber)
         {
+            udtSearchResult = new MaxQuantSearchResult();
 
             try
             {

@@ -590,8 +590,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var udtSearchResult = new TopPICSearchResult();
-                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
+                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
@@ -934,17 +933,16 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
-            ref TopPICSearchResult udtSearchResult,
+            out TopPICSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
-            string[] splitLine = null;
+            udtSearchResult = new TopPICSearchResult();
 
-            double precursorMZ = 0;
+            string[] splitLine = null;
 
             try
             {
-                udtSearchResult.Clear();
                 splitLine = lineIn.TrimEnd().Split('\t');
 
                 // The file should have over 20 columns, but we'll only require 15
@@ -993,6 +991,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Monoisotopic mass value of the observed precursor_mz
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+
+                var precursorMZ = 0.0;
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))

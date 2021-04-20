@@ -506,10 +506,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var udtSearchResult = new MSPathFinderSearchResult();
-
-                    var validSearchResult =
-                        ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping, modList, lineNumber);
+                    var validSearchResult = ParseMSPathFinderResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -865,12 +862,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
             string lineIn,
-            ref MSPathFinderSearchResult udtSearchResult,
+            out MSPathFinderSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int lineNumber)
         {
+            udtSearchResult = new MSPathFinderSearchResult();
+
             try
             {
                 udtSearchResult.Clear();

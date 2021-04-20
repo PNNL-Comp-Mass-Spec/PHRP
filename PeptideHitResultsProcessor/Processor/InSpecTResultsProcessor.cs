@@ -415,8 +415,6 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyList<ModInfo> inspectModInfo,
             FilteredOutputFileTypeConstants filteredOutputFileType)
         {
-            var udtSearchResult = new InspectSearchResult();
-
             var resultID = 0;
 
             bool success;
@@ -472,10 +470,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        // Initialize searchResult
-                        udtSearchResult.Clear();
-
-                        var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, errorMessages, resultsProcessed);
+                        var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, out var udtSearchResult, errorMessages, resultsProcessed);
 
                         resultsProcessed++;
                         if (!validSearchResult)
@@ -1136,13 +1131,15 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseInspectResultsFileEntry(
             string lineIn,
             IReadOnlyList<ModInfo> inspectModInfo,
-            ref InspectSearchResult udtSearchResult,
+            out InspectSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             int resultsProcessed)
         {
             // Parses an entry from the Inspect results file
             // The expected header line is:
             // #SpectrumFile	Scan#	Annotation	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	p-value	F-Score	DeltaScore	DeltaScoreOther	RecordNumber	DBFilePos	SpecFilePos PrecursorMZ	PrecursorError DelM_PPM
+
+            udtSearchResult = new InspectSearchResult();
 
             string[] splitLine = null;
 

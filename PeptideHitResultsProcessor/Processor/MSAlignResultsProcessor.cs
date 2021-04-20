@@ -521,8 +521,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var udtSearchResult = new MSAlignSearchResult();
-                    var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, errorMessages, columnMapping);
+                    var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
@@ -865,17 +864,23 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Parse an entry from the MSAlign results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="udtSearchResult"></param>
+        /// <param name="errorMessages"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSAlignResultsFileEntry(
             string lineIn,
-            ref MSAlignSearchResult udtSearchResult,
+            out MSAlignSearchResult udtSearchResult,
             ICollection<string> errorMessages,
             IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
-            // Parses an entry from the MSAlign results file
+            udtSearchResult = new MSAlignSearchResult();
 
             string[] splitLine = null;
-
-            double precursorMZ = 0;
 
             try
             {
@@ -926,6 +931,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Monoisotopic mass value of the observed precursor_mz
                 GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+
+                var precursorMZ = 0.0;
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
