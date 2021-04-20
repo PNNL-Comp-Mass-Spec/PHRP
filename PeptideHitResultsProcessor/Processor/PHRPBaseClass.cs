@@ -297,7 +297,7 @@ namespace PeptideHitResultsProcessor.Processor
             mProteinNameOrder.Clear();
             var reExtractProteinName = new Regex("^>([^ ]+)", RegexOptions.Compiled);
 
-            ReportMessage("Caching protein names from the FASTA file");
+            OnStatusEvent("Caching protein names from the FASTA file");
 
             try
             {
@@ -325,7 +325,7 @@ namespace PeptideHitResultsProcessor.Processor
                     mProteinNameOrder.Add(proteinName, proteinNumber);
                 }
 
-                ReportMessage(string.Format("Cached {0:N0} proteins", mProteinNameOrder.Count));
+                OnStatusEvent(string.Format("Cached {0:N0} proteins", mProteinNameOrder.Count));
 
                 return true;
             }
@@ -427,7 +427,7 @@ namespace PeptideHitResultsProcessor.Processor
                     SetErrorMessage("Input file not found: " + inputFilePath);
                     if (inputFilePath.Contains(".."))
                     {
-                        ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                        OnWarningEvent("Absolute path: " + inputFile.DirectoryName);
                     }
                     SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
@@ -897,7 +897,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (Options.IgnorePeptideToProteinMapperErrors)
                             {
-                                ReportWarning("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True");
+                                OnWarningEvent("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True");
 
                                 if (File.Exists(resultsFilePath))
                                 {
@@ -990,7 +990,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                ReportWarning("Error in CreateProteinModDetailsFile: " + ex.Message);
+                OnWarningEvent("Error in CreateProteinModDetailsFile: " + ex.Message);
             }
 
             return success;
@@ -1103,7 +1103,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
                     }
-                    ReportWarning(msg);
+                    OnWarningEvent(msg);
                 }
 
                 reader.ClearErrors();
@@ -1162,7 +1162,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (psmCountSkippedSinceReversedOrScrambledProtein == psmCount)
                     {
                         Console.WriteLine();
-                        ReportWarning("All PSMs map to reversed or scrambled proteins; the _ProteinMods.txt file is empty");
+                        OnWarningEvent("All PSMs map to reversed or scrambled proteins; the _ProteinMods.txt file is empty");
                     }
                     else if (psmCountSkippedSinceReversedOrScrambledProtein > 0)
                     {
@@ -1756,16 +1756,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected void ReportMessage(string message)
-        {
-            OnStatusEvent(message);
-        }
-
-        protected void ReportWarning(string message)
-        {
-            OnWarningEvent(message);
-        }
-
         public bool ResetMassCorrectionTagsAndModificationDefinitions()
         {
             var fileNotFound = false;
@@ -1792,7 +1782,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (fileNotFound)
                 {
                     SetErrorCode(PHRPErrorCode.ModificationDefinitionFileNotFound);
-                    ReportWarning("File not found: " + Options.ModificationDefinitionsFilePath);
+                    OnWarningEvent("File not found: " + Options.ModificationDefinitionsFilePath);
                 }
                 else
                 {
@@ -1989,7 +1979,7 @@ namespace PeptideHitResultsProcessor.Processor
                 warningCount < 100000 && warningCount % 10000 == 0 ||
                 warningCount < 1000000 && warningCount % 100000 == 0)
             {
-                ReportWarning(warningMessage);
+                OnWarningEvent(warningMessage);
             }
         }
 
@@ -2287,7 +2277,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (ignorePeptideToProteinMapperErrors || errorPercent < 0.1)
                     {
-                        ReportWarning(message);
+                        OnWarningEvent(message);
                         success = true;
                     }
                     else
@@ -2380,7 +2370,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                ReportWarning("Error in ValidatePHRPReaderSupportFiles: " + ex.Message);
+                OnWarningEvent("Error in ValidatePHRPReaderSupportFiles: " + ex.Message);
             }
         }
 
@@ -2390,7 +2380,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!success)
             {
-                ReportWarning(warningMessage);
+                OnWarningEvent(warningMessage);
             }
 
             return success;

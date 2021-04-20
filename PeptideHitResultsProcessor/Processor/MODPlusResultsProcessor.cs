@@ -1357,7 +1357,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (inputFile.Directory == null)
             {
-                ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 return false;
             }
 
@@ -1393,7 +1393,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
-                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                        OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                     }
                 }
             }
@@ -1402,7 +1402,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {

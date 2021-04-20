@@ -710,7 +710,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 modDef.ModType = InspectModType.DynCTermPeptide;
                                 break;
                             default:
-                                ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
+                                OnWarningEvent("Unrecognized Mod Type in the Inspect parameter file");
                                 modDef.ModType = InspectModType.DynamicMod;
                                 break;
                         }
@@ -816,14 +816,14 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(pepToProteinMapFilePath))
                 {
                     Console.WriteLine();
-                    ReportWarning("PepToProteinMap file is not defined");
+                    OnWarningEvent("PepToProteinMap file is not defined");
                     return false;
                 }
 
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
                     Console.WriteLine();
-                    ReportWarning("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
+                    OnWarningEvent("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
                     return false;
                 }
 
@@ -1079,7 +1079,7 @@ namespace PeptideHitResultsProcessor.Processor
                             else
                             {
                                 // Match not found; this is unexpected
-                                ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                                OnWarningEvent("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                             }
                         }
 
@@ -1461,7 +1461,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (inputFile.Directory == null)
                     {
-                        ReportWarning("InSpecTResultsProcessor.ProcessFile: Could not determine the parent directory of " + inputFile.FullName);
+                        OnWarningEvent("InSpecTResultsProcessor.ProcessFile: Could not determine the parent directory of " + inputFile.FullName);
                         return false;
                     }
 
@@ -1538,7 +1538,7 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             if (string.IsNullOrWhiteSpace(synOutputFilePath))
                             {
-                                ReportWarning("InSpecTResultsProcessor.ProcessFile: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                                OnWarningEvent("InSpecTResultsProcessor.ProcessFile: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                             }
                             else
                             {

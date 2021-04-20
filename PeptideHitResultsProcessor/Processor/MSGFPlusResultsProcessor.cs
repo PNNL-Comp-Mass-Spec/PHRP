@@ -1143,7 +1143,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
                     {
-                        ReportWarning(string.Format(
+                        OnWarningEvent(string.Format(
                                           "Could not find parameter {0} or {1} in parameter file {2}; " +
                                           "cannot determine the precursor mass tolerance",
                                           MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME,
@@ -1262,7 +1262,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(pepToProteinMapFilePath))
                 {
                     Console.WriteLine();
-                    ReportWarning("PepToProteinMap file is not defined");
+                    OnWarningEvent("PepToProteinMap file is not defined");
                     return false;
                 }
 
@@ -1278,8 +1278,8 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
                     Console.WriteLine();
-                    ReportWarning("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
-                    ReportMessage(
+                    OnWarningEvent("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
+                    OnStatusEvent(
                         "The PepToProteinMap file is created by Protein Coverage Summarizer. " +
                         "Proteins associated with each peptide will be based on data in the input file");
                     return false;
@@ -1347,7 +1347,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             if (string.IsNullOrWhiteSpace(msgfPlusParamFilePath))
             {
-                ReportWarning("MS-GF+ parameter file is not defined. Unable to extract parent mass tolerance info or custom charge carrier masses");
+                OnWarningEvent("MS-GF+ parameter file is not defined. Unable to extract parent mass tolerance info or custom charge carrier masses");
                 return true;
             }
 
@@ -1364,7 +1364,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!string.IsNullOrWhiteSpace(localWarningMessage))
             {
-                ReportWarning(localWarningMessage);
+                OnWarningEvent(localWarningMessage);
             }
 
             if (searchEngineParams.Parameters.Count == 0)
@@ -1380,7 +1380,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Parse the ChargeCarrierMass setting
             if (MSGFPlusSynFileReader.GetCustomChargeCarrierMass(searchEngineParams, out var customChargeCarrierMass))
             {
-                ReportMessage(string.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass));
+                OnStatusEvent(string.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass));
                 mPeptideSeqMassCalculator.ChargeCarrierMass = customChargeCarrierMass;
             }
 
@@ -2322,7 +2322,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var inputFile = new FileInfo(inputFilePath);
                     if (inputFile.DirectoryName == null)
                     {
-                        ReportWarning("Unable to determine the parent directory of the input file: " + inputFile.FullName);
+                        OnWarningEvent("Unable to determine the parent directory of the input file: " + inputFile.FullName);
                         return false;
                     }
 
@@ -2509,7 +2509,7 @@ namespace PeptideHitResultsProcessor.Processor
                         success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                         if (!success)
                         {
-                            ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                            OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                         }
                     }
                 }
@@ -2519,11 +2519,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (inputFile.Directory == null)
                 {
-                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 }
                 else if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {

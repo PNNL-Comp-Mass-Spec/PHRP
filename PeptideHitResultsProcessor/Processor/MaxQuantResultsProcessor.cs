@@ -524,7 +524,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
-                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                        OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                     }
                 }
             }
@@ -533,11 +533,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (inputFile.Directory == null)
                 {
-                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 }
                 else if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {
@@ -1100,10 +1100,11 @@ namespace PeptideHitResultsProcessor.Processor
                 var inputFile = new FileInfo(Path.Combine(inputDirectory.FullName, PEPTIDES_FILE_NAME));
                 if (!inputFile.Exists)
                 {
-                    ReportWarning("MaxQuant peptides.txt file not found: " + inputFile.FullName);
+                    OnWarningEvent("MaxQuant peptides.txt file not found: " + inputFile.FullName);
                     return;
                 }
 
+                OnStatusEvent("Reading peptides from file " + inputFile.FullName);
                 using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var headerParsed = false;
@@ -1147,7 +1148,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             if (!maxQuantPeptides.TryGetValue(sequence, out peptideInfo))
             {
-                ReportWarning("Peptide from msms.txt file was not present in the peptides.txt file: " + sequence);
+                OnWarningEvent("Peptide from msms.txt file was not present in the peptides.txt file: " + sequence);
                 return false;
             }
 
@@ -1337,7 +1338,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
                         {
-                            ReportWarning("ParseMaxQuantSynopsisFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                            OnWarningEvent("ParseMaxQuantSynopsisFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
                         }
                         else
                         {
@@ -1569,7 +1570,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var intensityColumnIndex = columnMapping[MaxQuantPeptidesFileColumns.Intensity];
                 if (intensityColumnIndex < 0)
                 {
-                    ReportWarning("Intensity column not found in the MaxQuant peptides.txt file");
+                    OnWarningEvent("Intensity column not found in the MaxQuant peptides.txt file");
                     return true;
                 }
 
@@ -1982,7 +1983,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // Check for an empty synopsis file
                         if (!ValidateFileHasData(synOutputFilePath, "Synopsis file", out var errorMessage))
                         {
-                            ReportWarning(errorMessage);
+                            OnWarningEvent(errorMessage);
                         }
                         else
                         {

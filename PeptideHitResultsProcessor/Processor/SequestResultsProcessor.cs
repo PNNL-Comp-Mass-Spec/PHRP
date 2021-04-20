@@ -335,7 +335,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
                         {
-                            ReportWarning("ParseSynopsisOrFirstHitsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                            OnWarningEvent("ParseSynopsisOrFirstHitsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
                         }
                         else
                         {
@@ -596,7 +596,7 @@ namespace PeptideHitResultsProcessor.Processor
                 success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                 if (!success)
                 {
-                    ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                    OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                 }
             }
 

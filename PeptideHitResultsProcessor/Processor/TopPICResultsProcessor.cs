@@ -880,7 +880,7 @@ namespace PeptideHitResultsProcessor.Processor
                             else
                             {
                                 // Match not found; this is unexpected
-                                ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                                OnWarningEvent("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                             }
                         }
 
@@ -982,7 +982,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (!int.TryParse(scanNumberDigits, out udtSearchResult.ScanNum))
                     {
-                        ReportWarning("Error parsing out the scan number from the scan list; could not find an integer: " +
+                        OnWarningEvent("Error parsing out the scan number from the scan list; could not find an integer: " +
                                       udtSearchResult.Scans);
                         udtSearchResult.ScanNum = 0;
                     }
@@ -1563,7 +1563,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
-                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                        OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                     }
                 }
             }
@@ -1572,11 +1572,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (inputFile.Directory == null)
                 {
-                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 }
                 else if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {

@@ -407,7 +407,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
-                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                        OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                     }
                 }
             }
@@ -416,11 +416,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (inputFile.Directory == null)
                 {
-                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 }
                 else if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {
@@ -816,7 +816,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
                         {
-                            ReportWarning("ParseMSPathfinderSynopsisFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                            OnWarningEvent("ParseMSPathfinderSynopsisFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
                         }
                         else
                         {
@@ -1328,7 +1328,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // Check for an empty synopsis file
                         if (!ValidateFileHasData(synOutputFilePath, "Synopsis file", out var errorMessage))
                         {
-                            ReportWarning(errorMessage);
+                            OnWarningEvent(errorMessage);
                         }
                         else
                         {

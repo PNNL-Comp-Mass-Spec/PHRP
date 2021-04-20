@@ -657,7 +657,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (inputFile.Directory == null)
             {
-                ReportWarning("LoadMGFIndexToScanMapFile: Could not determine the parent directory of " + inputFile.FullName);
+                OnWarningEvent("LoadMGFIndexToScanMapFile: Could not determine the parent directory of " + inputFile.FullName);
                 return false;
             }
 
@@ -690,12 +690,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else if (scanMapFiles.Count == 0)
                 {
-                    ReportWarning("Did not find a mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + "; scan numbers will be 0 in the synopsis file");
+                    OnWarningEvent("Did not find a mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + "; scan numbers will be 0 in the synopsis file");
                     return false;
                 }
                 else
                 {
-                    ReportWarning("Found more than one potential mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + " scan numbers will be 0 in the synopsis file");
+                    OnWarningEvent("Found more than one potential mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + " scan numbers will be 0 in the synopsis file");
                     return false;
                 }
 
@@ -703,7 +703,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!sourceFile.Exists)
                 {
-                    ReportWarning("MGF Index to Scan Map file not found; scan numbers will be 0 in the synopsis file: " + indexToScanMapFilePath);
+                    OnWarningEvent("MGF Index to Scan Map file not found; scan numbers will be 0 in the synopsis file: " + indexToScanMapFilePath);
                     return false;
                 }
 
@@ -918,7 +918,7 @@ namespace PeptideHitResultsProcessor.Processor
                             else
                             {
                                 // Match not found; this is unexpected
-                                ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                                OnWarningEvent("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                             }
                         }
 
@@ -1008,7 +1008,7 @@ namespace PeptideHitResultsProcessor.Processor
                 udtSearchResult.ScanNum = LookupScanBySpectrumIndex(spectrumIndex);
                 if (udtSearchResult.ScanNum == 0)
                 {
-                    ReportWarning("Error, could not resolve spectrumIndex to Scan Number: " + spectrumIndex);
+                    OnWarningEvent("Error, could not resolve spectrumIndex to Scan Number: " + spectrumIndex);
                 }
 
                 // Monoisotopic mass value of the observed precursor_mz
@@ -1492,7 +1492,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (inputFile.Directory == null)
             {
-                ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
                 return false;
             }
 
@@ -1528,7 +1528,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
                     {
-                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                        OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                     }
                 }
             }
@@ -1537,7 +1537,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (string.IsNullOrWhiteSpace(synOutputFilePath))
                 {
-                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                 }
                 else
                 {
