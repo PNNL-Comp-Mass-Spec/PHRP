@@ -33,9 +33,9 @@ namespace PeptideHitResultsProcessor.Data
         public string Suffix;
 
         /// <summary>
-        /// Protein names that have this peptide sequence (semicolon separated list)
+        /// Protein names that have this peptide sequence
         /// </summary>
-        public readonly List<string> Proteins = new();
+        public List<string> Proteins { get; } = new();
 
         /// <summary>
         /// Name of the best scoring protein this peptide is associated with
@@ -55,7 +55,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide, by experiment
         /// </summary>
         /// <remarks>Keys are intensity name, values are the intensity value (an integer)</remarks>
-        public readonly Dictionary<string, string> IntensityByExperiment = new();
+        public Dictionary<string, string> IntensityByExperiment { get; } = new();
 
         /// <summary>
         /// Constructor
