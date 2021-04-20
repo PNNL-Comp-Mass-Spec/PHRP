@@ -27,7 +27,7 @@ using static PHRPReader.MSGFPlusParamFileModExtractor;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in MaxQuant results file msms.txt and creates
+    /// This class reads in MaxQuant results files msms.txt and peptides.txt and creates
     /// a tab-delimited text file with the data.
     /// </summary>
     /// <remarks>
@@ -46,7 +46,7 @@ namespace PeptideHitResultsProcessor.Processor
     ///    The data is stored in a list
     ///      searchResultsUnfiltered = new List of MaxQuantSearchResult
     /// </para>
-    /// <para>d
+    /// <para>
     /// 5) Once the entire .tsv has been read, searchResultsUnfiltered is sorted by scan, charge, and descending Andromeda score
     /// </para>
     /// <para>
@@ -560,7 +560,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This routine creates a synopsis file from the output from MaxQuant
+        /// This routine creates a synopsis file from the output from MaxQuant (file msms.txt)
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="maxQuantPeptides"></param>
@@ -1091,6 +1091,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="inputDirectory"></param>
         /// <param name="maxQuantPeptides">Keys are peptide sequence, values are the metadata for the peptide</param>
+        /// <remarks>
+        /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:peptidetable
+        /// </remarks>
         private void LoadPeptideInfo(FileSystemInfo inputDirectory, out Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides)
         {
             maxQuantPeptides = new Dictionary<string, MaxQuantPeptideInfo>();
@@ -1387,6 +1390,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modList"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
+        /// <remarks>
+        /// This method is called while reading the msms.txt file
+        /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:msmstable
+        /// </remarks>
         private bool ParseMaxQuantResultsFileEntry(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
@@ -1530,6 +1537,13 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Parse the header line in the MaxQuant peptides.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="intensityByExperimentColumns">Keys are column index, values are experiment name</param>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantPeptidesFileHeaderLine(
             string lineIn,
             IDictionary<MaxQuantPeptidesFileColumns, int> columnMapping,
@@ -1603,7 +1617,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse the MaxQuant results file header line, populating columnMapping
+        /// Parse the MaxQuant results file header line (file msms.txt), populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -1712,6 +1726,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
