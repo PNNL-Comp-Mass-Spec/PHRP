@@ -2195,11 +2195,6 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        private void ModExtractorErrorHandler(string message, Exception ex)
-        {
-            SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
-        }
-
         private class MaxQuantSearchResultsComparerScanChargeScorePeptide : IComparer<MaxQuantSearchResult>
         {
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
