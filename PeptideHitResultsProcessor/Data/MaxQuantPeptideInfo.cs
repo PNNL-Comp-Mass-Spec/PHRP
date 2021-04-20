@@ -9,6 +9,8 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: MaxQuant
 
+        public int Id { get; }
+
         /// <summary>
         /// Amino acid sequence
         /// </summary>
@@ -60,8 +62,10 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        public MaxQuantPeptideInfo()
+        /// <param name="peptideId">Peptide ID</param>
+        public MaxQuantPeptideInfo(int peptideId)
         {
+            Id = peptideId;
             Clear();
         }
 

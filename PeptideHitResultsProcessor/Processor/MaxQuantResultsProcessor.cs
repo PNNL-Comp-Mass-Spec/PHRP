@@ -121,7 +121,8 @@ namespace PeptideHitResultsProcessor.Processor
             Suffix = 2,
             Proteins = 3,
             LeadingRazorProtein = 4,
-            Intensity = 5
+            Intensity = 5,
+            Id = 6
         }
 
         /// <summary>
@@ -1137,7 +1138,14 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine.Length < 30)
                         continue;
 
-                    var peptideInfo = new MaxQuantPeptideInfo();
+                    if (!GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Id], out var peptideId, -1))
+                    {
+                        OnWarningEvent(string.Format(
+                            "Line {0} in file {1} does not have an integer in the id column", lineNumber, inputFile.Name));
+                        continue;
+                    }
+
+                    var peptideInfo = new MaxQuantPeptideInfo(peptideId);
 
                     GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Sequence], out peptideInfo.Sequence);
 
