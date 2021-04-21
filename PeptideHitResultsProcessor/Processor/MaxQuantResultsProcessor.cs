@@ -1904,6 +1904,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Proteins", MaxQuantPeptidesFileColumns.Proteins},
                 {"Leading razor protein", MaxQuantPeptidesFileColumns.LeadingRazorProtein},
                 {"Intensity", MaxQuantPeptidesFileColumns.Intensity},
+                {"id", MaxQuantPeptidesFileColumns.Id}
             };
 
             columnMapping.Clear();
