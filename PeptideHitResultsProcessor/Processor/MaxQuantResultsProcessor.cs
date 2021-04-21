@@ -77,6 +77,8 @@ namespace PeptideHitResultsProcessor.Processor
             mModCountMatcher = new Regex(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
             MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
+
+            mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
 
         public const string TOOL_NAME = "MaxQuant";
@@ -634,6 +636,8 @@ namespace PeptideHitResultsProcessor.Processor
 
         private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
+        private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+
         /// <summary>
         /// Step through the Modifications and associate each modification with the residues
         /// For each residue, check if a static mod is defined that affects that residue
@@ -1165,6 +1169,14 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return modDef;
+        }
+
+        private string GetPeptideSequence(MaxQuantSearchResult peptideInfo, bool includePrefixAndSuffix = true)
+        {
+            if (!includePrefixAndSuffix)
+                return peptideInfo.Sequence;
+
+            return peptideInfo.PrefixResidue + "." + peptideInfo.Sequence + "." + peptideInfo.SuffixResidue;
         }
 
         /// <summary>
@@ -1862,6 +1874,17 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.SuffixResidue = peptideInfo.Suffix;
                     udtSearchResult.LeadingRazorProtein = peptideInfo.LeadingRazorProtein;
                     udtSearchResult.PeptideIntensity = peptideInfo.Intensity;
+
+                    var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(GetPeptideSequence(udtSearchResult));
+
+                    udtSearchResult.NumberOfTrypticTerminii = cleavageState switch
+                    {
+                        PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
+                        PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
+                        PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific => 0,
+                        PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
+                        _ => 0
+                    };
                 }
                 else
                 {
