@@ -456,6 +456,14 @@ namespace PeptideHitResultsProcessor.Processor
             public string Combinatorics;
 
             /// <summary>
+            ///Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
+            /// </summary>
+            /// <remarks>
+            /// From the peptides.txt file, column "Intensity"
+            /// </remarks>
+            public string PeptideIntensity;
+
+            /// <summary>
             /// Parent Ion Fraction: the fraction of the target peak that makes up of the total intensity in the inclusion window
             /// </summary>
             public string PIF;
@@ -479,14 +487,6 @@ namespace PeptideHitResultsProcessor.Processor
             /// Intensity of the precursor ion in the scan that it was observed
             /// </summary>
             public string PrecursorIntensity;
-
-            /// <summary>
-            /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
-            /// </summary>
-            /// <remarks>
-            /// From the peptides.txt file, column "Intensity"
-            /// </remarks>
-            public string PeptideIntensity;
 
             /// <summary>
             /// Fraction the intensity of the precursor ion makes up of the peak (apex) intensity
@@ -566,6 +566,9 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public string EvidenceID;
 
+            /// <summary>
+            /// Reset all fields to default
+            /// </summary>
             public void Clear()
             {
                 DatasetName = string.Empty;
@@ -606,6 +609,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ScoreDiff = string.Empty;
                 LocalizationProb = string.Empty;
                 Combinatorics = string.Empty;
+                PeptideIntensity = string.Empty;
                 PIF = string.Empty;
                 FractionOfTotalSpectrum = string.Empty;
                 BasePeakFraction = string.Empty;
