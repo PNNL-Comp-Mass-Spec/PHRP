@@ -281,7 +281,7 @@ namespace PHRPReader
 
                 try
                 {
-                    if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+                    if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                     {
                         mErrorMessage = "Unknown symbol " + chChar + " in sequence " + primarySequence;
                         validResidueCount = 0;
@@ -353,7 +353,7 @@ namespace PHRPReader
             {
                 // Note: do not use string.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
 
-                if (modifiedResidue.AffectedAtom == default(char) || modifiedResidue.AffectedAtom == NO_AFFECTED_ATOM_SYMBOL)
+                if (modifiedResidue.AffectedAtom is default(char) or NO_AFFECTED_ATOM_SYMBOL)
                 {
                     // Positional modification (static or dynamic mod)
                     // Simply add the modification mass to mass
@@ -561,7 +561,7 @@ namespace PHRPReader
 
                 try
                 {
-                    if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+                    if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                     {
                         mErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + sequence;
                         break;
@@ -589,7 +589,7 @@ namespace PHRPReader
             if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
-                if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+                if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                 {
                     // Invalid Index
                     return 0;
@@ -615,7 +615,7 @@ namespace PHRPReader
             }
 
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
-            if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+            if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
                 return new EmpiricalFormula();
@@ -965,7 +965,7 @@ namespace PHRPReader
         public void ResetAminoAcidToDefault(char aminoAcidSymbol)
         {
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(aminoAcidSymbol);
-            if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+            if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
                 return;
@@ -1012,7 +1012,7 @@ namespace PHRPReader
             }
 
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
-            if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+            if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
                 return false;
@@ -1033,7 +1033,7 @@ namespace PHRPReader
             if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
-                if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
+                if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                 {
                     // Invalid Index
                     return false;

@@ -754,7 +754,7 @@ namespace PHRPReader
         {
             if (mUsingStandardTrypsinRules)
             {
-                if (chLeftChar == 'K' || chLeftChar == 'R')
+                if (chLeftChar is 'K' or 'R')
                 {
                     if (chRightChar != 'P')
                     {

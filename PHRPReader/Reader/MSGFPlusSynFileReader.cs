@@ -228,8 +228,7 @@ namespace PHRPReader.Reader
                     continue;
 
                 Match reMatch;
-                if (resultType == PeptideHitResultTypes.MSPathFinder ||
-                    resultType == PeptideHitResultTypes.TopPIC)
+                if (resultType is PeptideHitResultTypes.MSPathFinder or PeptideHitResultTypes.TopPIC)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(item);
                 }
@@ -244,8 +243,7 @@ namespace PHRPReader.Reader
                 if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
-                if (resultType == PeptideHitResultTypes.MSPathFinder ||
-                    resultType == PeptideHitResultTypes.TopPIC)
+                if (resultType is PeptideHitResultTypes.MSPathFinder or PeptideHitResultTypes.TopPIC)
                 {
                     // Units are always ppm
                     tolerancePPM = toleranceCurrent;

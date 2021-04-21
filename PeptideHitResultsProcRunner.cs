@@ -120,8 +120,7 @@ namespace PeptideHitResultsProcRunner
         /// </summary>
         public override string GetErrorMessage()
         {
-            if (ErrorCode == ProcessFilesErrorCodes.LocalizedError ||
-                ErrorCode == ProcessFilesErrorCodes.NoError)
+            if (ErrorCode is ProcessFilesErrorCodes.LocalizedError or ProcessFilesErrorCodes.NoError)
             {
                 return mLocalErrorCode switch
                 {

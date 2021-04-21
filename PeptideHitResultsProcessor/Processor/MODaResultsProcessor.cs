@@ -187,7 +187,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    var isNumberChar = chChar == '+' || chChar == '-' || char.IsDigit(chChar);
+                    var isNumberChar = chChar is '+' or '-' || char.IsDigit(chChar);
 
                     if (parsingModMass)
                     {

@@ -2271,7 +2271,7 @@ namespace PHRPReader
 
             if (!mFastReadMode)
             {
-                if (SynFileReader.PeptideHitResultType == PeptideHitResultTypes.Sequest || SynFileReader.PeptideHitResultType == PeptideHitResultTypes.XTandem)
+                if (SynFileReader.PeptideHitResultType is PeptideHitResultTypes.Sequest or PeptideHitResultTypes.XTandem)
                 {
                     ComputePrecursorNeutralMass();
                 }

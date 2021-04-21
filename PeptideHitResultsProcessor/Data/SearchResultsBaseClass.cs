@@ -290,8 +290,7 @@ namespace PeptideHitResultsProcessor.Data
                 for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
                 {
                     var resultMod = mSearchResultModifications[index];
-                    if (resultMod.ModDefinition.ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                        resultMod.ModDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
+                    if (resultMod.ModDefinition.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.UnknownType)
                     {
                         sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
                     }
@@ -775,8 +774,7 @@ namespace PeptideHitResultsProcessor.Data
                     if (modificationDefinition.TargetResidues == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         residueLocInPeptide = 1;
-                        if (mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNTerminus ||
-                            mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState is PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNTerminus or PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
                         {
                             residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus;
                         }
@@ -789,8 +787,7 @@ namespace PeptideHitResultsProcessor.Data
                     else if (modificationDefinition.TargetResidues == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         residueLocInPeptide = mPeptideCleanSequence.Length;
-                        if (mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinCTerminus ||
-                            mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState is PeptideCleavageStateCalculator.PeptideTerminusState.ProteinCTerminus or PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
                         {
                             residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus;
                         }
@@ -810,8 +807,7 @@ namespace PeptideHitResultsProcessor.Data
                     modificationDefinition = mPeptideMods.GetModificationByIndex(modificationIndex);
                     if (modificationDefinition.TargetResidues == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
                     {
-                        if (mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNTerminus ||
-                            mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState is PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNTerminus or PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
                         {
                             residueLocInPeptide = 1;
                             residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus;
@@ -820,8 +816,7 @@ namespace PeptideHitResultsProcessor.Data
                     }
                     else if (modificationDefinition.TargetResidues == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
                     {
-                        if (mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinCTerminus ||
-                            mPeptideTerminusState == PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState is PeptideCleavageStateCalculator.PeptideTerminusState.ProteinCTerminus or PeptideCleavageStateCalculator.PeptideTerminusState.ProteinNandCCTerminus)
                         {
                             residueLocInPeptide = mPeptideCleanSequence.Length;
                             residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus;

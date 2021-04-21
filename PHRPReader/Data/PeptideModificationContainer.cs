@@ -148,7 +148,7 @@ namespace PHRPReader.Data
                     if (matchFound)
                     {
                         var mod = Modifications[modificationIndex];
-                        if (mod.ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod || mod.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
+                        if (mod.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod)
                         {
                             // Matching dynamic or static modification definitions
                             // Merge the two modifications by making sure each of the residues in modificationDefinition.TargetResidues is present in .TargetResidues
@@ -684,7 +684,7 @@ namespace PHRPReader.Data
                             }
                         }
 
-                        if (!existingModFound && (residueTerminusState == AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus || residueTerminusState == AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
+                        if (!existingModFound && (residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
                         {
                             // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -693,7 +693,7 @@ namespace PHRPReader.Data
                             }
                         }
 
-                        if (!existingModFound && (residueTerminusState == AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus || residueTerminusState == AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
+                        if (!existingModFound && (residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
                         {
                             // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -854,9 +854,7 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 // ReSharper disable once InvertIf
-                if ((Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
+                if ((Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     // Absolute value of the mass difference
@@ -914,8 +912,7 @@ namespace PHRPReader.Data
             // Compare against dynamic and unknown-type modifications, but ignore .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                    Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
+                if (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.UnknownType)
                 {
                     var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
 
@@ -1042,11 +1039,7 @@ namespace PHRPReader.Data
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
                     if (Modifications[index].ModificationType == modType &&
-                        (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
-                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
-                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod ||
-                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
+                        (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
                         Modifications[index].TargetResidues.Length > 0)
                     {
                         if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) > float.Epsilon)
@@ -1096,11 +1089,7 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 if (Modifications[index].ModificationType == modType &&
-                    (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod ||
-                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
+                    (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) < float.Epsilon)
@@ -1321,10 +1310,7 @@ namespace PHRPReader.Data
                             {
                                 residuesClean += chChar;
                             }
-                            else if (chChar == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
-                                     chChar == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS ||
-                                     chChar == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
-                                     chChar == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+                            else if (chChar is AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
                             {
                                 residuesClean += chChar;
                             }

@@ -694,8 +694,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (nTerminalMod)
                         {
                             // Only test N-terminal mods
-                            if (!(msgfPlusModInfo[index].ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermPeptide ||
-                                  msgfPlusModInfo[index].ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermProtein))
+                            if (!(msgfPlusModInfo[index].ModType is MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermPeptide or MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermProtein))
                             {
                                 testMod = false;
                             }
@@ -703,8 +702,7 @@ namespace PeptideHitResultsProcessor.Processor
                         else if (!possibleCTerminalMod)
                         {
                             // Skip C-terminal mods since we're not at the C-terminus
-                            if (msgfPlusModInfo[index].ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermPeptide ||
-                                msgfPlusModInfo[index].ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermProtein)
+                            if (msgfPlusModInfo[index].ModType is MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermPeptide or MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermProtein)
                             {
                                 testMod = false;
                             }

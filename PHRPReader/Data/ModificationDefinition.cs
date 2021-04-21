@@ -409,8 +409,7 @@ namespace PHRPReader.Data
                 }
                 else if (a.TargetResidues != null && b.TargetResidues != null)
                 {
-                    if (a.ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
-                        a.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
+                    if (a.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod)
                     {
                         // Matching dynamic or static modification definitions
                         // Make sure each of the residues in b.TargetResidues is present in .TargetResidues
@@ -497,7 +496,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod || ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
+            if (ModificationType is ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return true;
             }
@@ -519,7 +518,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod || ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
+            if (ModificationType is ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return false;
             }

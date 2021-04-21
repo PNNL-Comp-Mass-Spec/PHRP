@@ -1476,8 +1476,7 @@ namespace PHRPReader.Reader
                         // Look for an entry in matchedDefs that is a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (mod.ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
-                                mod.ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod)
+                            if (mod.ModificationType is ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod)
                             {
                                 if (residueTerminusState == AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus &&
                                     (mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)))
@@ -1502,8 +1501,7 @@ namespace PHRPReader.Reader
                         // Look for an entry in matchedDefs that is not a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (!(mod.ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
-                                  mod.ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod))
+                            if (!(mod.ModificationType is ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod))
                             {
                                 matchFound = true;
                                 matchedModDef = mod;
