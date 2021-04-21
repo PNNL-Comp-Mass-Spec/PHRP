@@ -142,7 +142,7 @@ namespace PeptideHitResultsProcessor.Processor
             Charge = 9,
             Fragmentation = 10,
             MassAnalyzer = 11,
-            Type = 12,
+            PrecursorType = 12,
             ScanEventNumber = 13,
             IsotopeIndex = 14,
             MZ = 15,
@@ -160,7 +160,7 @@ namespace PeptideHitResultsProcessor.Processor
             PIF = 27,
             FractionOfTotalSpectrum = 28,
             BasePeakFraction = 29,
-            PrecursorFullScanNumber = 30,
+            PrecursorScanNumber = 30,
             PrecursorIntensity = 31,
             PrecursorApexFraction = 32,
             PrecursorApexOffset = 33,
@@ -185,12 +185,9 @@ namespace PeptideHitResultsProcessor.Processor
         private struct MaxQuantSearchResult
         {
             /// <summary>
-            /// .raw file name (without the extension)
+            /// Dataset name (typically the .raw file name, without the extension)
             /// </summary>
-            /// <remarks>
-            /// Dataset name
-            /// </remarks>
-            public string RawFile;
+            public string DatasetName;
 
             /// <summary>
             /// MS/MS scan number in the dataset
@@ -344,7 +341,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// MSMS
             /// </para>
             /// </remarks>
-            public string Type;
+            public string PrecursorType;
 
             /// <summary>
             /// Scan event number
@@ -476,7 +473,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Scan number where the precursor ion was observed
             /// </summary>
-            public string PrecursorFullScanNumber;
+            public string PrecursorScanNumber;
 
             /// <summary>
             /// Intensity of the precursor ion in the scan that it was observed
@@ -535,7 +532,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// Used to cross-link the information in msms.txt with information stored in other files
             /// </remarks>
-            public string ID;
+            public string MsMsID;
 
             /// <summary>
             /// Identifier of the protein-group this redundant peptide sequence is associated with
@@ -571,7 +568,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             public void Clear()
             {
-                RawFile = string.Empty;
+                DatasetName = string.Empty;
                 Scan = string.Empty;
                 ScanNum = 0;
                 ScanIndex = string.Empty;
@@ -589,7 +586,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ChargeNum = 0;
                 Fragmentation = string.Empty;
                 MassAnalyzer = string.Empty;
-                Type = string.Empty;
+                PrecursorType = string.Empty;
                 ScanEventNumber = string.Empty;
                 IsotopeIndex = string.Empty;
                 PrecursorMZ = string.Empty;
@@ -612,9 +609,8 @@ namespace PeptideHitResultsProcessor.Processor
                 PIF = string.Empty;
                 FractionOfTotalSpectrum = string.Empty;
                 BasePeakFraction = string.Empty;
-                PrecursorFullScanNumber = string.Empty;
+                PrecursorScanNumber = string.Empty;
                 PrecursorIntensity = string.Empty;
-                PeptideIntensity = string.Empty;
                 PrecursorApexFraction = string.Empty;
                 PrecursorApexOffset = string.Empty;
                 PrecursorApexOffsetTime = string.Empty;
@@ -622,7 +618,7 @@ namespace PeptideHitResultsProcessor.Processor
                 IntensityCoverage = string.Empty;
                 PeakCoverage = string.Empty;
                 Reverse = string.Empty;
-                ID = string.Empty;
+                MsMsID = string.Empty;
                 ProteinGroupIDs = string.Empty;
                 PeptideID = string.Empty;
                 ModPeptideID = string.Empty;
@@ -1765,7 +1761,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RawFile], out udtSearchResult.RawFile);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RawFile], out udtSearchResult.DatasetName);
 
                 if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
@@ -1802,7 +1798,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out string proteins);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out udtSearchResult.Fragmentation);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassAnalyzer], out udtSearchResult.MassAnalyzer);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Type], out udtSearchResult.Type);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorType], out udtSearchResult.PrecursorType);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out udtSearchResult.ScanEventNumber);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out udtSearchResult.IsotopeIndex);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MZ], out udtSearchResult.PrecursorMZ);
@@ -1833,7 +1829,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PIF], out udtSearchResult.PIF);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.FractionOfTotalSpectrum], out udtSearchResult.FractionOfTotalSpectrum);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.BasePeakFraction], out udtSearchResult.BasePeakFraction);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorFullScanNumber], out udtSearchResult.PrecursorFullScanNumber);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorScanNumber], out udtSearchResult.PrecursorScanNumber);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out udtSearchResult.PrecursorIntensity);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexFraction], out udtSearchResult.PrecursorApexFraction);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffset], out udtSearchResult.PrecursorApexOffset);
@@ -1842,7 +1838,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out udtSearchResult.IntensityCoverage);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out udtSearchResult.PeakCoverage);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out udtSearchResult.Reverse);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out udtSearchResult.ID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out udtSearchResult.MsMsID);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinGroupIDs], out udtSearchResult.ProteinGroupIDs);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeptideID], out udtSearchResult.PeptideID);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModPeptideID], out udtSearchResult.ModPeptideID);
@@ -1993,7 +1989,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Charge", MaxQuantResultsFileColumns.Charge},
                 {"Fragmentation", MaxQuantResultsFileColumns.Fragmentation},
                 {"Mass analyzer", MaxQuantResultsFileColumns.MassAnalyzer},
-                {"Type", MaxQuantResultsFileColumns.Type},
+                {"Type", MaxQuantResultsFileColumns.PrecursorType},
                 {"Scan event number", MaxQuantResultsFileColumns.ScanEventNumber},
                 {"Isotope index", MaxQuantResultsFileColumns.IsotopeIndex},
                 {"m/z", MaxQuantResultsFileColumns.MZ},
@@ -2011,7 +2007,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"PIF", MaxQuantResultsFileColumns.PIF},
                 {"Fraction of total spectrum", MaxQuantResultsFileColumns.FractionOfTotalSpectrum},
                 {"Base peak fraction", MaxQuantResultsFileColumns.BasePeakFraction},
-                {"Precursor full scan number", MaxQuantResultsFileColumns.PrecursorFullScanNumber},
+                {"Precursor full scan number", MaxQuantResultsFileColumns.PrecursorScanNumber},
                 {"Precursor Intensity", MaxQuantResultsFileColumns.PrecursorIntensity},
                 {"Precursor apex fraction", MaxQuantResultsFileColumns.PrecursorApexFraction},
                 {"Precursor apex offset", MaxQuantResultsFileColumns.PrecursorApexOffset},

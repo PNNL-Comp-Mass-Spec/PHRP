@@ -9,7 +9,10 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: MaxQuant
 
-        public int Id { get; }
+        /// <summary>
+        /// Id number for a given row in the peptides.txt file
+        /// </summary>
+        public int PeptideId { get; }
 
         /// <summary>
         /// Amino acid sequence
@@ -65,7 +68,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <param name="peptideId">Peptide ID</param>
         public MaxQuantPeptideInfo(int peptideId)
         {
-            Id = peptideId;
+            PeptideId = peptideId;
             Clear();
         }
 
