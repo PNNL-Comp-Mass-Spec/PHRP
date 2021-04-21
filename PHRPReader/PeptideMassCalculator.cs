@@ -25,10 +25,12 @@ namespace PHRPReader
     /// must consist of only capital letters, though if RemovePrefixAndSuffixIfPresent = True,
     /// characters up to the first . and after the last . in the sequence will be removed.
     /// Residue modification information can be supplied by passing an array of modifications
-    /// using the structure udtPeptideSequenceModInfoType
+    /// using the structure PeptideSequenceModInfo
     /// </summary>
     public class PeptideMassCalculator
     {
+        // Ignore Spelling: Asn, Da, Gln, Glu, Ile, Leu, Selenocysteine
+
         /// <summary>
         /// Symbol used when the modification is not an isotopic modification
         /// </summary>
@@ -51,7 +53,7 @@ namespace PHRPReader
         public const double MASS_PROTON = 1.00727649;
 
         /// <summary>
-        /// Monoisotopic mass of hydrogen
+        /// Monoisotopic mass of an electron
         /// </summary>
         public const double MASS_ELECTRON = 0.00054811;
 
@@ -307,15 +309,15 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compute the mass of the peptide sequence; uses the information in udtResidueModificationInfo() to determine modification masses
+        /// Compute the mass of the peptide sequence; uses the information in residueModificationInfo() to determine modification masses
         /// </summary>
         /// <param name="sequence"></param>
         /// <param name="modCount"></param>
-        /// <param name="udtResidueModificationInfo">Array of modified residues; index 0 to modCount-1</param>
+        /// <param name="residueModificationInfo">Array of modified residues; index 0 to modCount-1</param>
         /// <returns>The computed mass, or -1 if an error</returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         [Obsolete("This version uses an array for modified residues; use the version that takes a list")]
-        public double ComputeSequenceMass(string sequence, int modCount, ref PeptideSequenceModInfo[] udtResidueModificationInfo)
+        public double ComputeSequenceMass(string sequence, int modCount, ref PeptideSequenceModInfo[] residueModificationInfo)
         {
             var modifiedResidues = new List<PeptideSequenceModInfo>();
 
@@ -323,7 +325,7 @@ namespace PHRPReader
             {
                 for (var index = 0; index <= modCount - 1; index++)
                 {
-                    modifiedResidues.Add(udtResidueModificationInfo[index]);
+                    modifiedResidues.Add(residueModificationInfo[index]);
                 }
             }
 
@@ -1052,7 +1054,7 @@ namespace PHRPReader
         /// <param name="aminoAcidIndex"></param>
         private void UpdateAminoAcidStatEntry(byte aminoAcidIndex)
         {
-            // Use Convert.ToChar to convert from Ascii code to the letter
+            // Use Convert.ToChar to convert from ASCII code to the letter
             var aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
 
             var monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, out var empiricalFormula);
