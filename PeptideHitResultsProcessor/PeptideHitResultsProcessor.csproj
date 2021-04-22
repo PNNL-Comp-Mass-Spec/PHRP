@@ -52,13 +52,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalysisManagerPeptideHitResultsProcessor.cs" />
     <Compile Include="Data\MaxQuantModInfo.cs" />
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IPeptideHitResultsProcessor.cs" />
     <Compile Include="Data\FirstHitInfo.cs" />
     <Compile Include="Data\InSpecTResults.cs" />
     <Compile Include="Data\MODaResults.cs" />
@@ -71,7 +69,6 @@
     <Compile Include="Data\TopPICResults.cs" />
     <Compile Include="Data\XTandemResults.cs" />
     <Compile Include="Data\UniqueSequencesContainer.cs" />
-    <Compile Include="clsPHRPBaseClass.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Processor\InSpecTResultsProcessor.cs" />
     <Compile Include="Processor\MaxQuantResultsProcessor.cs" />
