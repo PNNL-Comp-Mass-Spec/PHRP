@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa
 
-        public const string PROGRAM_DATE = "April 6, 2021";
+        public const string PROGRAM_DATE = "April 23, 2021";
 
         private static readonly PHRPOptions Options = new();
 
@@ -251,7 +251,7 @@ namespace PeptideHitResultsProcRunner
             var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
                 "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn",
-                "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP",
+                "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP", "DB",
                 "S", "A", "R", "L" };
 
             try
@@ -476,6 +476,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
                 Console.WriteLine(" [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
                 Console.WriteLine(" [/SynProb:0.05] [/MaxQScore:50] [/MaxQPEP:0.01]");
+                Console.WriteLine(" [/DB:DatabaseConnectionString]");
                 Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
@@ -595,6 +596,11 @@ namespace PeptideHitResultsProcRunner
                     "When processing a MaxQuant results file, use /MaxQPEP to customize " +
                     "the Posterior Error Probability (PEP) score threshold used to determine which peptides are written to the synopsis file. " +
                     "The default is /MaxQPEP:0.01"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
+                    "When processing MaxQuant results, the DMS database is contacted to lookup dataset IDs by dataset name, " +
+                    "where dataset name comes from the 'Raw file' column in the msms.txt file. " +
+                    "The default is /DB:\"{0}\"", PHRPOptions.DMS_CONNECTION_STRING)));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /S to process all valid files in the input directory and subdirectories. " +

@@ -7,6 +7,11 @@ namespace PeptideHitResultsProcessor
     {
         // Ignore Spelling: MaxQuant, MODa
 
+        /// <summary>
+        /// Default database connection string
+        /// </summary>
+        public const string DMS_CONNECTION_STRING = "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun";
+
         public bool CreateModificationSummaryFile { get; set; }
 
         public bool CreateFirstHitsFile { get; set; }
@@ -19,6 +24,10 @@ namespace PeptideHitResultsProcessor
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
+        /// <summary>
+        /// DMS database connection string
+        /// </summary>
+        public string DMSConnectionString { get; set; }
         public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
 
         public string FastaFilePath { get; set; }
@@ -126,6 +135,8 @@ namespace PeptideHitResultsProcessor
 
             CreateFirstHitsFile = true;
             CreateSynopsisFile = true;
+
+            DMSConnectionString = DMS_CONNECTION_STRING;
 
             FastaFilePath = string.Empty;
             IgnorePeptideToProteinMapperErrors = false;
