@@ -404,7 +404,7 @@ namespace PeptideHitResultsProcRunner
                     "Output directory:", PathUtils.CompactPathString(outputDirectoryPath, 110)));
             }
 
-            if(!string.IsNullOrWhiteSpace(parameterFilePath))
+            if (!string.IsNullOrWhiteSpace(parameterFilePath))
             {
                 LogMessage(string.Format("{0,-45} {1}",
                     "Parameter file:", PathUtils.CompactPathString(parameterFilePath, 110)));
@@ -455,14 +455,33 @@ namespace PeptideHitResultsProcRunner
             }
 
             Console.WriteLine();
-            LogMessage(string.Format("{0,-49} {1:E2}",
-                "MODa/MODPlus Synopsis File Probability Threshold:", resultsProcessor.Options.MODaMODPlusSynopsisFileProbabilityThreshold));
 
-            LogMessage(string.Format("{0,-49} {1:E2}",
-                "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileEValueThreshold));
+            if (resultsProcessor is MODaResultsProcessor or MODPlusResultsProcessor)
+            {
+                LogMessage(string.Format("{0,-49} {1:F2}",
+                    "MODa/MODPlus Synopsis File Probability Threshold:", resultsProcessor.Options.MODaMODPlusSynopsisFileProbabilityThreshold));
+            }
 
-            LogMessage(string.Format("{0,-49} {1:E2}",
-                "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileSpecEValueThreshold));
+            if (resultsProcessor is MSGFPlusResultsProcessor)
+            {
+                LogMessage(string.Format("{0,-49} {1:F2}",
+                    "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileEValueThreshold));
+            }
+
+            if (resultsProcessor is MSGFPlusResultsProcessor or MSPathFinderResultsProcessor)
+            {
+                LogMessage(string.Format("{0,-49} {1:E2}",
+                    "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileSpecEValueThreshold));
+            }
+
+            if (resultsProcessor is MaxQuantResultsProcessor)
+            {
+                LogMessage(string.Format("{0,-49} {1:N0}",
+                    "MaxQuant Synopsis File Andromeda Score Threshold:", resultsProcessor.Options.MaxQuantAndromedaScoreThreshold));
+
+                LogMessage(string.Format("{0,-49} {1:F3}",
+                    "MaxQuant Synopsis File PEP Threshold:", resultsProcessor.Options.MaxQuantPosteriorErrorProbabilityThreshold));
+            }
 
             Console.WriteLine();
         }
