@@ -72,9 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 20, 2021";
-
-            mModCountMatcher = new Regex(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
+            FileDate = "April 23, 2021";
 
             MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -632,7 +630,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private readonly Regex mModCountMatcher;
+        private readonly Regex mModCountMatcher = new(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
         private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
