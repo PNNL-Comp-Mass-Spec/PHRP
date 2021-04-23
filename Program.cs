@@ -475,7 +475,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]");
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
                 Console.WriteLine(" [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
-                Console.WriteLine(" [/SynProb:0.05]");
+                Console.WriteLine(" [/SynProb:0.05] [/MaxQScore:50] [/MaxQPEP:0.01]");
                 Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
@@ -583,6 +583,18 @@ namespace PeptideHitResultsProcRunner
                                       "When processing a MODPlus or MODa results file, use /SynProb to customize " +
                                       "the Probability threshold used to determine which peptides are written to the synopsis file. " +
                                       "The default is /SynProb:0.05"));
+
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                    "When processing a MaxQuant results file, use /MaxQScore to customize " +
+                    "the Andromeda score threshold used to determine which peptides are written to the synopsis file. " +
+                    "A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold. " +
+                    "The default is /MaxQScore:50"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                    "When processing a MaxQuant results file, use /MaxQPEP to customize " +
+                    "the Posterior Error Probability (PEP) score threshold used to determine which peptides are written to the synopsis file. " +
+                    "The default is /MaxQPEP:0.01"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /S to process all valid files in the input directory and subdirectories. " +
