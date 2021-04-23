@@ -954,15 +954,22 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="maxQuantPeptides"></param>
         /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="modList"></param>
+        /// <param name="baseName">Output: base synopsis file name</param>
+        /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
-            string outputFilePath,
-            IReadOnlyCollection<ModInfo> modList)
+            string outputDirectoryPath,
+            IReadOnlyCollection<ModInfo> modList,
+            out string baseName,
+            out string synOutputFilePath)
         {
+            baseName = string.Empty;
+            synOutputFilePath = string.Empty;
+
             try
             {
                 var columnMapping = new Dictionary<MaxQuantResultsFileColumns, int>();
@@ -971,9 +978,7 @@ namespace PeptideHitResultsProcessor.Processor
                 OnStatusEvent("Reading MaxQuant results file, " + inputFilePath);
 
                 // Open the input file and parse it
-                // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
                 var headerParsed = false;
                 var lineNumber = 0;
@@ -1008,9 +1013,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                             return false;
                         }
-
-                        // Write the header line to the output file
-                        WriteSynFHTFileHeader(writer, errorMessages);
 
                         headerParsed = true;
                         continue;
@@ -1065,6 +1067,12 @@ namespace PeptideHitResultsProcessor.Processor
                     _ => longestCommonBaseName + "_maxq"
                 };
 
+                synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
+
+                using var writer = new StreamWriter(new FileStream(synOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                // Write the header line to the output file
+                WriteSynFHTFileHeader(writer, errorMessages);
                 // Sort the data in filteredSearchResults then write out to disk
                 SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages);
 
@@ -2583,17 +2591,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                     LoadPeptideInfo(inputFile.Directory, out var maxQuantPeptides);
 
-                    var baseName = "Dataset_maxq";
-
                     // Do not create a first-hits file for MaxQuant results
 
                     // Create the synopsis output file
                     ResetProgress("Creating the SYN file", true);
 
-                    // The synopsis file name will be of the form Dataset_maxq_syn.txt
-                    var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
-
-                    success = CreateSynResultsFile(maxQuantPeptides, inputFilePath, synOutputFilePath, modList);
+                    success = CreateSynResultsFile(maxQuantPeptides, inputFilePath, outputDirectoryPath, modList, out var baseName, out var synOutputFilePath);
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
