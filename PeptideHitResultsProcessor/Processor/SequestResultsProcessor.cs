@@ -68,7 +68,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = sequenceWithMods[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(chChar))
                 {
                     mostRecentLetter = chChar;
                     residueLocInPeptide++;
@@ -99,7 +99,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
                 }
-                else if (IsLetterAtoZ(mostRecentLetter))
+                else if (StringUtilities.IsLetterAtoZ(mostRecentLetter))
                 {
                     success = searchResult.SearchResultAddDynamicModification(chChar, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
 

@@ -1792,7 +1792,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out udtSearchResult.ScanIndex);
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MaxQuant
                 if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass))
@@ -2471,7 +2471,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
-                writer.WriteLine(CollapseList(headerNames));
+                writer.WriteLine(StringUtilities.CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -2526,7 +2526,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.EvidenceID
                 };
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {

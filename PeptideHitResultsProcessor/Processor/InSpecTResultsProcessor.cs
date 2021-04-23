@@ -236,7 +236,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = sequence[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(chChar))
                 {
                     mostRecentLetter = chChar;
                     residueLocInPeptide++;
@@ -259,7 +259,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
                 }
-                else if (IsLetterAtoZ(mostRecentLetter))
+                else if (StringUtilities.IsLetterAtoZ(mostRecentLetter))
                 {
                     searchResult.SearchResultAddDynamicModification(chChar, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                 }
@@ -601,7 +601,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             else
             {
-                var charge = CIntSafe(chargeText, -1);
+                var charge = StringUtilities.CIntSafe(chargeText, -1);
 
                 if (charge >= 1)
                 {
@@ -1173,7 +1173,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         udtSearchResult.Scan = splitLine[(int)InspectResultsFileColumns.Scan];
                     }
-                    udtSearchResult.ScanNum = CIntSafe(udtSearchResult.Scan, 0);
+                    udtSearchResult.ScanNum = StringUtilities.CIntSafe(udtSearchResult.Scan, 0);
 
                     // Replace any mod text names in the peptide sequence with the appropriate mod symbols
                     // In addition, replace the * terminus symbols with dashes
@@ -1181,27 +1181,27 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.Protein = TruncateProteinName(splitLine[(int)InspectResultsFileColumns.Protein]);
 
                     udtSearchResult.Charge = splitLine[(int)InspectResultsFileColumns.Charge];
-                    udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+                    udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                     udtSearchResult.MQScore = splitLine[(int)InspectResultsFileColumns.MQScore];
-                    udtSearchResult.MQScoreNum = CSngSafe(udtSearchResult.MQScore, 0);
+                    udtSearchResult.MQScoreNum = StringUtilities.CSngSafe(udtSearchResult.MQScore, 0);
 
-                    udtSearchResult.Length = CIntSafe(splitLine[(int)InspectResultsFileColumns.Length], 0);
+                    udtSearchResult.Length = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.Length], 0);
 
                     udtSearchResult.TotalPRMScore = splitLine[(int)InspectResultsFileColumns.TotalPRMScore];
-                    udtSearchResult.TotalPRMScoreNum = CSngSafe(udtSearchResult.TotalPRMScore, 0);
+                    udtSearchResult.TotalPRMScoreNum = StringUtilities.CSngSafe(udtSearchResult.TotalPRMScore, 0);
 
                     udtSearchResult.MedianPRMScore = splitLine[(int)InspectResultsFileColumns.MedianPRMScore];
                     udtSearchResult.FractionY = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionY]);
                     udtSearchResult.FractionB = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionB]);
                     udtSearchResult.Intensity = splitLine[(int)InspectResultsFileColumns.Intensity];
-                    udtSearchResult.NTT = CIntSafe(splitLine[(int)InspectResultsFileColumns.NTT], 0);
+                    udtSearchResult.NTT = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.NTT], 0);
 
                     udtSearchResult.pValue = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.PValue]);
-                    udtSearchResult.PValueNum = CSngSafe(udtSearchResult.pValue, 0);
+                    udtSearchResult.PValueNum = StringUtilities.CSngSafe(udtSearchResult.pValue, 0);
 
                     udtSearchResult.FScore = splitLine[(int)InspectResultsFileColumns.FScore];
-                    udtSearchResult.FScoreNum = CSngSafe(udtSearchResult.FScore, 0);
+                    udtSearchResult.FScoreNum = StringUtilities.CSngSafe(udtSearchResult.FScore, 0);
 
                     udtSearchResult.DeltaScore = splitLine[(int)InspectResultsFileColumns.DeltaScore];
                     udtSearchResult.DeltaScoreOther = splitLine[(int)InspectResultsFileColumns.DeltaScoreOther];
@@ -1906,7 +1906,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
-                writer.WriteLine(CollapseList(headerNames));
+                writer.WriteLine(StringUtilities.CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -1964,7 +1964,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.DelMPPM
                 };
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {

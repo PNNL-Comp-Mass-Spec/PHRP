@@ -306,7 +306,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = sequence[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(chChar))
                 {
                     chMostRecentLetter = chChar;
                     residueLocInPeptide++;
@@ -329,7 +329,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
                 }
-                else if (IsLetterAtoZ(chMostRecentLetter))
+                else if (StringUtilities.IsLetterAtoZ(chMostRecentLetter))
                 {
                     var success = searchResult.SearchResultAddDynamicModification(chChar, chMostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                     if (!success)
@@ -1710,7 +1710,7 @@ namespace PeptideHitResultsProcessor.Processor
                         udtMergedScanInfo[index] = new MSGFPlusSearchResult();
                         udtMergedScanInfo[index].Clear();
                         udtMergedScanInfo[index].Scan = splitResult[index];
-                        udtMergedScanInfo[index].ScanNum = CIntSafe(splitResult[index], 0);
+                        udtMergedScanInfo[index].ScanNum = StringUtilities.CIntSafe(splitResult[index], 0);
                     }
 
                     // Now split SpecIndex and store in udtMergedScanInfo
@@ -1741,14 +1741,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    udtSearchResult.ScanNum = CIntSafe(udtSearchResult.Scan, 0);
+                    udtSearchResult.ScanNum = StringUtilities.CIntSafe(udtSearchResult.Scan, 0);
                     scanCount = 1;
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
 
                 GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Precursor mass error could be in PPM or Da
                 //   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
@@ -1762,7 +1762,7 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
-                    precursorErrorDa = CDblSafe(udtSearchResult.PMErrorDa, 0);
+                    precursorErrorDa = StringUtilities.CDblSafe(udtSearchResult.PMErrorDa, 0);
                     udtSearchResult.PMErrorPPM = string.Empty; // We'll populate this column later in this function
                 }
 
@@ -1830,7 +1830,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 precursorErrorDa = PeptideMassCalculator.PPMToMass(pMErrorPPM, peptideMonoisotopicMass);
 
                                 // Note that this will be a C13-corrected precursor error; not the true precursor error
-                                udtSearchResult.PMErrorDa = MassErrorToString(precursorErrorDa);
+                                udtSearchResult.PMErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
                             }
                         }
                     }
@@ -1851,7 +1851,7 @@ namespace PeptideHitResultsProcessor.Processor
                             precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, peptideMonoisotopicMass);
 
                             // Note that this will be a C13-corrected precursor error; not the true precursor error
-                            udtSearchResult.PMErrorDa = MassErrorToString(precursorErrorDa);
+                            udtSearchResult.PMErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
                         }
                     }
                 }
@@ -2617,7 +2617,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Find the index of the last residue
             var index = peptide.Length - 1;
-            while (index > 0 && !IsLetterAtoZ(peptide[index]))
+            while (index > 0 && !StringUtilities.IsLetterAtoZ(peptide[index]))
             {
                 index--;
             }
@@ -2625,7 +2625,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Find the index of the first residue
             index = 0;
-            while (index < peptide.Length && !IsLetterAtoZ(peptide[index]))
+            while (index < peptide.Length && !StringUtilities.IsLetterAtoZ(peptide[index]))
             {
                 index++;
             }
@@ -2635,7 +2635,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             while (index < peptide.Length)
             {
-                if (IsLetterAtoZ(peptide[index]))
+                if (StringUtilities.IsLetterAtoZ(peptide[index]))
                 {
                     currentResidue = peptide[index].ToString();
 
@@ -2724,7 +2724,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Update indexFirstResidue
             indexFirstResidue = 0;
-            while (indexFirstResidue < peptide.Length && !IsLetterAtoZ(peptide[indexFirstResidue]))
+            while (indexFirstResidue < peptide.Length && !StringUtilities.IsLetterAtoZ(peptide[indexFirstResidue]))
             {
                 indexFirstResidue++;
             }
@@ -3107,7 +3107,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {
@@ -3172,12 +3172,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (includeFDRandPepFDR)
                 {
-                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
-                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.PepQValue));
+                    data.Add(StringUtilities.TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
+                    data.Add(StringUtilities.TrimZeroIfNotFirstID(resultID, udtSearchResult.PepQValue));
                 }
                 else if (includeEFDR)
                 {
-                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
+                    data.Add(StringUtilities.TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
                     data.Add("1");
                 }
 
@@ -3192,7 +3192,7 @@ namespace PeptideHitResultsProcessor.Processor
                     data.Add(udtSearchResult.IMSDriftTime);
                 }
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {

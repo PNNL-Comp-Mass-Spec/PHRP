@@ -1628,16 +1628,16 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.MultipleProteinCount,
                 searchResult.SequenceWithPrefixAndSuffix(true),
                 Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture),
-                TrimZeroIfNotFirstID(searchResult.ResultID, searchResult.PeptideYScore),
+                StringUtilities.TrimZeroIfNotFirstID(searchResult.ResultID, searchResult.PeptideYScore),
                 searchResult.PeptideYIons,
-                TrimZeroIfNotFirstID(searchResult.ResultID, searchResult.PeptideBScore),
+                StringUtilities.TrimZeroIfNotFirstID(searchResult.ResultID, searchResult.PeptideBScore),
                 searchResult.PeptideBIons,
                 searchResult.PeptideDeltaMass,
                 searchResult.PeptideIntensity,
                 PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005)
             };
 
-            writer.WriteLine(CollapseList(data));
+            writer.WriteLine(StringUtilities.CollapseList(data));
         }
 
         protected override string TruncateProteinName(string proteinNameAndDescription)
@@ -1675,7 +1675,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
-                writer.WriteLine(CollapseList(headerNames));
+                writer.WriteLine(StringUtilities.CollapseList(headerNames));
             }
             catch (Exception)
             {

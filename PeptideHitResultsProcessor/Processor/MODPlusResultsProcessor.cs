@@ -166,7 +166,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = sequence[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(chChar))
                 {
                     if (parsingModMass)
                     {
@@ -394,7 +394,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             for (var index = primarySequence.Length - 1; index >= 0; index += -1)
             {
-                if (IsLetterAtoZ(primarySequence[index]))
+                if (StringUtilities.IsLetterAtoZ(primarySequence[index]))
                 {
                     indexLastChar = index;
                     break;
@@ -405,7 +405,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = primarySequence[index];
 
-                if (!IsLetterAtoZ(chChar))
+                if (!StringUtilities.IsLetterAtoZ(chChar))
                     continue;
 
                 // Look for static mods to associate with this residue
@@ -869,7 +869,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Monoisotopic mass value of the observed precursor_mz
                 GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
                 GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
@@ -947,7 +947,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Compute DelM and DelM_PPM
                     var delM = precursorMonoMass - peptideMonoMassMODPlus;
-                    udtSearchResult.DelM = MassErrorToString(delM);
+                    udtSearchResult.DelM = StringUtilities.MassErrorToString(delM);
 
                     var peptideDeltaMassCorrectedPpm =
                         SearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODPlus);
@@ -1633,7 +1633,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
-                writer.WriteLine(CollapseList(headerNames));
+                writer.WriteLine(StringUtilities.CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -1689,7 +1689,7 @@ namespace PeptideHitResultsProcessor.Processor
                     PRISM.StringUtilities.DblToString(udtSearchResult.QValue, 5, 0.00005)
                 };
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {

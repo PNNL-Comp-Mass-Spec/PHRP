@@ -37,7 +37,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : PRISM.EventNotifier
     {
-        // Ignore Spelling: Da, A-Za-z, Fscore, MaxQuant, prot, mts, MSFragger, xxx
+        // Ignore Spelling: Da, Fscore, MaxQuant, prot, mts, MSFragger, xxx
 
         /// <summary>
         /// Constructor
@@ -370,47 +370,6 @@ namespace PeptideHitResultsProcessor.Processor
             return existingMapFound;
         }
 
-        protected int CIntSafe(string value, int defaultValue)
-        {
-            try
-            {
-                // Note: Integer.Parse() fails if value contains a decimal point, even if it is "8.000"
-                // Thus, we're converting to a double first, and then rounding
-                return (int)Math.Round(Convert.ToDouble(value));
-            }
-            catch (Exception)
-            {
-                // Error converting value to a number; return the default
-                return defaultValue;
-            }
-        }
-
-        protected double CDblSafe(string value, double defaultValue)
-        {
-            try
-            {
-                return double.Parse(value);
-            }
-            catch (Exception)
-            {
-                // Error converting value to a number; return the default
-                return defaultValue;
-            }
-        }
-
-        protected float CSngSafe(string value, float defaultValue)
-        {
-            try
-            {
-                return float.Parse(value);
-            }
-            catch (Exception)
-            {
-                // Error converting value to a number; return the default
-                return defaultValue;
-            }
-        }
-
         /// <summary>
         /// Validate the input file and output directory paths
         /// </summary>
@@ -482,15 +441,6 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.FilePathError);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Collapses a list of strings to a tab-delimited line of text
-        /// </summary>
-        /// <param name="fields"></param>
-        protected string CollapseList(List<string> fields)
-        {
-            return string.Join("\t", fields);
         }
 
         /// <summary>
@@ -1424,36 +1374,21 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Initialize the ResultToSeqMap file
             mResultToSeqMapFile = new StreamWriter(resultToSeqMapFilePath);
-            mResultToSeqMapFile.WriteLine(CollapseList(resultToSeqMapHeaders));
+            mResultToSeqMapFile.WriteLine(StringUtilities.CollapseList(resultToSeqMapHeaders));
 
             // Initialize the SeqInfo file
             mSeqInfoFile = new StreamWriter(seqInfoFilePath, false);
-            mSeqInfoFile.WriteLine(CollapseList(seqInfoHeaders));
+            mSeqInfoFile.WriteLine(StringUtilities.CollapseList(seqInfoHeaders));
 
             // Initialize the ModDetails file
             mModDetailsFile = new StreamWriter(modDetailsFilePath);
-            mModDetailsFile.WriteLine(CollapseList(modDetailsHeaders));
+            mModDetailsFile.WriteLine(StringUtilities.CollapseList(modDetailsHeaders));
 
             // Initialize the SeqToProtein map file
             mSeqToProteinMapFile = new StreamWriter(seqToProteinMapFilePath, false);
-            mSeqToProteinMapFile.WriteLine(CollapseList(seqToProteinMapHeaders));
+            mSeqToProteinMapFile.WriteLine(StringUtilities.CollapseList(seqToProteinMapHeaders));
 
             return true;
-        }
-
-        private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
-
-        /// <summary>
-        /// Returns true if the character is a letter between A and Z or a and z
-        /// </summary>
-        /// <param name="chChar">Character to examine</param>
-        /// <remarks>
-        /// Note that the Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters
-        /// In contrast, this method only returns True for normal letters between A and Z (case insensitive)
-        /// </remarks>
-        public static bool IsLetterAtoZ(char chChar)
-        {
-            return RegexIsLetter.IsMatch(chChar.ToString());
         }
 
         protected bool IsReversedProtein(string proteinName)
@@ -1668,7 +1603,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected string MassErrorToString(double massErrorDa)
         /// <summary>
         /// Contact the database to lookup dataset IDs by dataset name
         /// </summary>
@@ -1676,8 +1610,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>Dictionary where keys are dataset names and values are dataset IDs</returns>
         protected Dictionary<string, int> LookupDatasetIDs(IEnumerable<string> datasetNames)
         {
-            if (Math.Abs(massErrorDa) < 0.000001)
-                return "0";
             var datasetIDs = new Dictionary<string, int>();
 
             try
@@ -1717,9 +1649,6 @@ namespace PeptideHitResultsProcessor.Processor
                 OnWarningEvent("Error looking up dataset IDs by dataset name: " + ex.Message);
             }
 
-            return Math.Abs(massErrorDa) < 0.0001 ?
-                PRISM.StringUtilities.DblToString(massErrorDa, 6, 0.0000001) :
-                PRISM.StringUtilities.DblToString(massErrorDa, 5, 0.000001);
             return datasetIDs;
         }
 
@@ -1873,7 +1802,7 @@ namespace PeptideHitResultsProcessor.Processor
                 PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
             };
 
-            writer.WriteLine(CollapseList(headerNames));
+            writer.WriteLine(StringUtilities.CollapseList(headerNames));
 
             for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
             {
@@ -1890,7 +1819,7 @@ namespace PeptideHitResultsProcessor.Processor
                     modDef.MassCorrectionTag,
                     modDef.OccurrenceCount.ToString()
                 };
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
         }
 
@@ -1913,7 +1842,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.ResultID.ToString(),
                     uniqueSeqID.ToString()
                 };
-                mResultToSeqMapFile.WriteLine(CollapseList(seqMapData));
+                mResultToSeqMapFile.WriteLine(StringUtilities.CollapseList(seqMapData));
 
                 // Only write this entry to the SeqInfo and ModDetails files if existingSequenceFound is False
 
@@ -1927,7 +1856,7 @@ namespace PeptideHitResultsProcessor.Processor
                         searchResult.PeptideModDescription,
                         PRISM.StringUtilities.DblToString(searchResult.PeptideMonoisotopicMass, 5, 0.000001)
                     };
-                    mSeqInfoFile.WriteLine(CollapseList(seqInfoData));
+                    mSeqInfoFile.WriteLine(StringUtilities.CollapseList(seqInfoData));
 
                     if (searchResult.SearchResultModificationCount > 0)
                     {
@@ -1965,7 +1894,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 resultModDetails.ResidueLocInPeptide.ToString()
                             };
 
-                            mModDetailsFile.WriteLine(CollapseList(modDetailsData));
+                            mModDetailsFile.WriteLine(StringUtilities.CollapseList(modDetailsData));
                         }
                     }
                 }
@@ -1984,7 +1913,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.ProteinIntensity
                 };
 
-                mSeqToProteinMapFile.WriteLine(CollapseList(seqToProteinData));
+                mSeqToProteinMapFile.WriteLine(StringUtilities.CollapseList(seqToProteinData));
             }
         }
 
@@ -2027,28 +1956,6 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 OnWarningEvent(warningMessage);
             }
-        }
-
-        /// <summary>
-        /// If resultID is 0 or 1, returns valueText
-        /// Otherwise, if valueText is 0.0, returns 0
-        /// Otherwise, returns valueText
-        /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="valueText"></param>
-        protected string TrimZeroIfNotFirstID(int resultID, string valueText)
-        {
-            return resultID > 1 ? TrimZero(valueText) : valueText;
-        }
-
-        /// <summary>
-        /// If valueText is 0.0, returns 0
-        /// Otherwise, returns valueText
-        /// </summary>
-        /// <param name="valueText"></param>
-        private string TrimZero(string valueText)
-        {
-            return valueText.Equals("0.0") ? "0" : valueText;
         }
 
         /// <summary>
@@ -2523,7 +2430,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var residueLocInProtein = pepToProteinMapping[pepToProteinMapIndex].ResidueStart + mod.ResidueLocInPeptide - 1;
                 string residue;
 
-                if (IsLetterAtoZ(mod.Residue))
+                if (StringUtilities.IsLetterAtoZ(mod.Residue))
                 {
                     residue = mod.Residue.ToString();
                 }

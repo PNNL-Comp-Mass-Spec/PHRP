@@ -212,7 +212,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var chChar = sequence[index];
 
-                if (!parsingModInfo && IsLetterAtoZ(chChar))
+                if (!parsingModInfo && StringUtilities.IsLetterAtoZ(chChar))
                 {
                     chMostRecentResidue = chChar;
                     residueLocInPeptide++;
@@ -987,7 +987,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Monoisotopic mass value of the observed precursor_mz
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
@@ -1057,7 +1057,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Compute DelM and DelM_PPM
                     var delM = precursorMonoMass - peptideMonoMassTopPIC;
-                    udtSearchResult.DelM = MassErrorToString(delM);
+                    udtSearchResult.DelM = StringUtilities.MassErrorToString(delM);
 
                     if (precursorMZ > 0)
                     {
@@ -1687,7 +1687,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
-                writer.WriteLine(CollapseList(headerNames));
+                writer.WriteLine(StringUtilities.CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -1756,7 +1756,7 @@ namespace PeptideHitResultsProcessor.Processor
                 data.Add(udtSearchResult.Proteoform_QValue);
                 data.Add(udtSearchResult.VariablePTMs);
 
-                writer.WriteLine(CollapseList(data));
+                writer.WriteLine(StringUtilities.CollapseList(data));
             }
             catch (Exception)
             {
