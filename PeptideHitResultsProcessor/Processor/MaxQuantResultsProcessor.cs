@@ -2408,6 +2408,8 @@ namespace PeptideHitResultsProcessor.Processor
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
+            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
+
             // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
             var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.LeadingRazorProtein select item;
 
@@ -2484,11 +2486,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
         /// <param name="resultID"></param>
+        /// <param name="datasetID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
+            int datasetID,
             TextWriter writer,
             MaxQuantSearchResult udtSearchResult,
             ICollection<string> errorMessages)
@@ -2498,6 +2502,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var data = new List<string>
                 {
                     resultID.ToString(),
+                    datasetID.ToString(),
                     udtSearchResult.Scan,
                     udtSearchResult.Fragmentation,
                     udtSearchResult.ScanIndex,

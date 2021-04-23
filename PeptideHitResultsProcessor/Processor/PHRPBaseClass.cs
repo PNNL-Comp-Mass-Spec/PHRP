@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
@@ -26,6 +27,7 @@ using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM.FileProcessor;
+using PRISMDatabaseUtils;
 using ProteinCoverageSummarizer;
 
 namespace PeptideHitResultsProcessor.Processor
@@ -1667,13 +1669,58 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         protected string MassErrorToString(double massErrorDa)
+        /// <summary>
+        /// Contact the database to lookup dataset IDs by dataset name
+        /// </summary>
+        /// <param name="datasetNames"></param>
+        /// <returns>Dictionary where keys are dataset names and values are dataset IDs</returns>
+        protected Dictionary<string, int> LookupDatasetIDs(IEnumerable<string> datasetNames)
         {
             if (Math.Abs(massErrorDa) < 0.000001)
                 return "0";
+            var datasetIDs = new Dictionary<string, int>();
+
+            try
+            {
+                var quotedDatasetNames = new StringBuilder();
+                foreach (var item in datasetNames)
+                {
+                    var optionalComma = quotedDatasetNames.Length == 0 ? string.Empty : ", ";
+                    quotedDatasetNames.AppendFormat("{0}'{1}'", optionalComma, item);
+                }
+
+                var sqlQuery = string.Format(
+                    "SELECT Dataset, ID " +
+                    "FROM V_Dataset_Export " +
+                    "WHERE dataset in ({0})", quotedDatasetNames);
+
+                var dbTools = DbToolsFactory.GetDBTools(Options.DMSConnectionString);
+
+                var success = dbTools.GetQueryResults(sqlQuery, out var results);
+
+                if (!success)
+                {
+                    OnWarningEvent("DbTools returned false querying V_Dataset_Export to look up dataset IDs by dataset name");
+                    return datasetIDs;
+                }
+
+                foreach (var result in results)
+                {
+                    var dataset = result[0];
+                    var datasetId = result[1];
+
+                    datasetIDs.Add(dataset, int.Parse(datasetId));
+                }
+            }
+            catch (Exception ex)
+            {
+                OnWarningEvent("Error looking up dataset IDs by dataset name: " + ex.Message);
+            }
 
             return Math.Abs(massErrorDa) < 0.0001 ?
                 PRISM.StringUtilities.DblToString(massErrorDa, 6, 0.0000001) :
                 PRISM.StringUtilities.DblToString(massErrorDa, 5, 0.000001);
+            return datasetIDs;
         }
 
         protected void OperationComplete()
