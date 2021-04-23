@@ -1512,7 +1512,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Define the synopsis output file name based on inputFilePath
                         var synOutputFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-                        synOutputFilePath = Path.Combine(outputDirectoryPath, synOutputFilePath + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                        synOutputFilePath = Path.Combine(outputDirectoryPath, synOutputFilePath + SYNOPSIS_FILE_SUFFIX);
 
                         success = CreateFHTorSYNResultsFile(inputFilePath, synOutputFilePath, inspectModInfo, FilteredOutputFileTypeConstants.SynFile);
 

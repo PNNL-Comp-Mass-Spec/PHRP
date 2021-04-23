@@ -2381,7 +2381,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // Create the first hits output file
                         ResetProgress("Creating the FHT file", true);
 
-                        fhtOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
+                        fhtOutputFilePath = Path.Combine(outputDirectoryPath, baseName + FIRST_HITS_FILE_SUFFIX);
 
                         var scanGroupFilePath = string.Empty;
 
@@ -2400,7 +2400,7 @@ namespace PeptideHitResultsProcessor.Processor
                         ResetProgress("Creating the SYN file", true);
 
                         // The synopsis file name will be of the form BasePath_msgfplus_syn.txt
-                        var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                        var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                         var scanGroupFilePath = Path.Combine(outputDirectoryPath, baseName + "_ScanGroupInfo.txt");
 

@@ -81,8 +81,8 @@ namespace PeptideHitResultsProcessor.Processor
         private const string COLUMN_NAME_MSGF_SPECPROB = "MSGF_SpecProb";
 
         public const string XTANDEM_RESULTS_FILE_SUFFIX = "_xt.xml";
-        public const string SEQUEST_SYNOPSIS_FILE_SUFFIX = "_syn.txt";
-        public const string SEQUEST_FIRST_HITS_FILE_SUFFIX = "_fht.txt";
+        public const string SYNOPSIS_FILE_SUFFIX = "_syn.txt";
+        public const string FIRST_HITS_FILE_SUFFIX = "_fht.txt";
 
         public const string INSPECT_RESULTS_FILE_SUFFIX = "_inspect.txt";
         public const string INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX = "_fht.txt";
@@ -236,8 +236,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             return peptideHitResultFileFormat switch
             {
-                ResultsFileFormat.SequestFirstHitsFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX),
-                ResultsFileFormat.SequestSynopsisFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX),
+                ResultsFileFormat.SequestFirstHitsFile => Path.Combine(sourceDirectoryPath, baseName + FIRST_HITS_FILE_SUFFIX),
+                ResultsFileFormat.SequestSynopsisFile => Path.Combine(sourceDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX),
                 ResultsFileFormat.XTandemXMLFile => Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX),
                 ResultsFileFormat.InspectTXTFile => Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX),
                 ResultsFileFormat.MSGFPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX),
@@ -264,8 +264,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     matchSpec = index switch
                     {
-                        0 => "*" + SEQUEST_SYNOPSIS_FILE_SUFFIX,
-                        1 => "*" + SEQUEST_FIRST_HITS_FILE_SUFFIX,
+                        0 => "*" + SYNOPSIS_FILE_SUFFIX,
+                        1 => "*" + FIRST_HITS_FILE_SUFFIX,
                         2 => "*" + XTANDEM_RESULTS_FILE_SUFFIX,
                         3 => "*" + INSPECT_RESULTS_FILE_SUFFIX,
                         _ => matchSpec

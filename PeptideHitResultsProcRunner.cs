@@ -106,8 +106,8 @@ namespace PeptideHitResultsProcRunner
 
             // Note: If mPeptideHitResultsFileFormat = .AutoDetermine
             //  then this class will only parse .txt files if they match
-            // PeptideHitResultsProcessor.SequestResultsProcessor.SEQUEST_FIRST_HITS_FILE_SUFFIX or
-            // PeptideHitResultsProcessor.SequestResultsProcessor.SEQUEST_SYNOPSIS_FILE_SUFFIX
+            // PeptideHitResultsProcessor.SequestResultsProcessor.FIRST_HITS_FILE_SUFFIX or
+            // PeptideHitResultsProcessor.SequestResultsProcessor.SYNOPSIS_FILE_SUFFIX
 
             extensionsToParse[0] = ".txt";
             extensionsToParse[1] = ".xml";
