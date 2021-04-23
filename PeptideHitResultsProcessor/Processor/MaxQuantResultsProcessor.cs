@@ -1073,8 +1073,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Write the header line to the output file
                 WriteSynFHTFileHeader(writer, errorMessages);
+
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages);
+                SortAndWriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
 
                 // Inform the user if any errors occurred
                 if (errorMessages.Count > 0)
@@ -2637,7 +2638,15 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Sort filteredSearchResults and write to disk
+        /// </summary>
+        /// <param name="baseNameByDatasetName">Keys are dataset names, values are dataset ID (or 0 if undefined)</param>
+        /// <param name="writer"></param>
+        /// <param name="filteredSearchResults"></param>
+        /// <param name="errorMessages"></param>
         private void SortAndWriteFilteredSearchResults(
+            Dictionary<string, string> baseNameByDatasetName,
             TextWriter writer,
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
@@ -2650,7 +2659,10 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, errorMessages);
+                var baseDatasetName = baseNameByDatasetName[result.DatasetName];
+                var datasetID = datasetIDs[result.DatasetName];
+
+                WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
             }
         }
@@ -2720,12 +2732,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
         /// <param name="resultID"></param>
+        /// <param name="baseDatasetName"></param>
         /// <param name="datasetID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
+            string baseDatasetName,
             int datasetID,
             TextWriter writer,
             MaxQuantSearchResult udtSearchResult,
@@ -2736,6 +2750,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var data = new List<string>
                 {
                     resultID.ToString(),
+                    baseDatasetName,
                     datasetID.ToString(),
                     udtSearchResult.Scan,
                     udtSearchResult.Fragmentation,
