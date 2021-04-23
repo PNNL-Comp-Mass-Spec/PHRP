@@ -782,20 +782,36 @@ namespace PeptideHitResultsProcessor.Processor
 
             foreach (var modItem in mods)
             {
+                if (modItem.Equals("Unmodified"))
+                    continue;
+
                 // Convert the mod name to a mass value
                 var matchFound = false;
 
-                // Obtain the mod name, for example "Oxidation (M)" from "2 Oxidation (M)"
+                // Check whether the mod name is preceded by an integer,
+                // for example the 2 in "2 Oxidation (M)"
 
                 var match = mModCountMatcher.Match(modItem);
 
-                var modName = match.Success ? match.Groups["ModName"].Value : modItem;
+                string modName;
+                int modCount;
+
+                if (match.Success)
+                {
+                    modName = match.Groups["ModName"].Value;
+                    modCount = int.Parse(match.Groups["ModCount"].Value);
+                }
+                else
+                {
+                    modName = modItem;
+                    modCount = 1;
+                }
 
                 foreach (var modDef in modList)
                 {
                     if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
-                        totalModMass += modDef.ModMassVal;
+                        totalModMass += modCount * modDef.ModMassVal;
                         matchFound = true;
                         break;
                     }
