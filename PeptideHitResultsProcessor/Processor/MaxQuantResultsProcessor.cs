@@ -294,7 +294,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string LeadingRazorProtein;
 
             /// <summary>
-            /// Charge state of the precursor ion.
+            /// Charge state of the precursor ion
             /// </summary>
             public string Charge;
 
@@ -457,7 +457,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string Combinatorics;
 
             /// <summary>
-            ///Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
+            /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
             /// </summary>
             /// <remarks>
             /// From the peptides.txt file, column "Intensity"
@@ -2765,15 +2765,24 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.MassErrorDa,
                     udtSearchResult.MassErrorPPM,
                     udtSearchResult.MH,
-                    udtSearchResult.PrefixResidue + "." + udtSearchResult.Sequence + udtSearchResult.SuffixResidue,
+                    udtSearchResult.CalculatedMonoMass,
+                    GetPeptideSequence(udtSearchResult),
                     udtSearchResult.Proteins,
+                    udtSearchResult.LeadingRazorProtein,
                     udtSearchResult.NumberOfTrypticTerminii.ToString(),
                     udtSearchResult.PEP,
                     udtSearchResult.Score,
                     udtSearchResult.DeltaScore,
-                    udtSearchResult.PrecursorIntensity,
                     udtSearchResult.PeptideIntensity,
-                    udtSearchResult.LeadingRazorProtein,
+                    udtSearchResult.MassAnalyzer,
+                    udtSearchResult.PrecursorType,
+                    udtSearchResult.RetentionTime,
+                    udtSearchResult.PrecursorScanNumber,
+                    udtSearchResult.PrecursorIntensity,
+                    udtSearchResult.NumberOfMatches,
+                    udtSearchResult.IntensityCoverage,
+                    udtSearchResult.MissedCleavages,
+                    udtSearchResult.MsMsID,
                     udtSearchResult.ProteinGroupIDs,
                     udtSearchResult.PeptideID,
                     udtSearchResult.ModPeptideID,
