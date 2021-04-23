@@ -12,22 +12,35 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public const string DMS_CONNECTION_STRING = "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun";
 
+        /// <summary>
+        /// Create modification summary file
+        /// </summary>
         public bool CreateModificationSummaryFile { get; set; }
 
+        /// <summary>
+        /// Create first hits file
+        /// </summary>
         public bool CreateFirstHitsFile { get; set; }
 
+        /// <summary>
+        /// Create synopsis file
+        /// </summary>
         public bool CreateSynopsisFile { get; set; }
 
         /// <summary>
         /// Create protein mods file
         /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by FastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
         /// <summary>
         /// DMS database connection string
         /// </summary>
         public string DMSConnectionString { get; set; }
+
+        /// <summary>
+        /// Enzyme match specification
+        /// </summary>
         public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
 
         public string FastaFilePath { get; set; }
@@ -40,8 +53,14 @@ namespace PeptideHitResultsProcessor
         /// <remarks>Lower p-values are higher confidence results</remarks>
         public float InspectSynopsisFilePValueThreshold { get; set; }
 
+        /// <summary>
+        /// Mass correction tags file path
+        /// </summary>
         public string MassCorrectionTagsFilePath { get; set; }
 
+        /// <summary>
+        /// Modification definitions file path (DMS mod names)
+        /// </summary>
         public string ModificationDefinitionsFilePath { get; set; }
 
         /// <summary>
@@ -53,7 +72,7 @@ namespace PeptideHitResultsProcessor
         public int MaxQuantAndromedaScoreThreshold { get; set; }
 
         /// <summary>
-        /// MaxQuant PEP score threshold to use when creating the synopsis file
+        /// MaxQuant Posterior Error Probability (PEP) score threshold to use when creating the synopsis file
         /// </summary>
         /// <remarks>
         /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
@@ -73,7 +92,7 @@ namespace PeptideHitResultsProcessor
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
-        /// Used by MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
+        /// Used by MSGFPlusResultsProcessor
         /// </summary>
         /// <remarks>Lower E-values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
@@ -96,6 +115,9 @@ namespace PeptideHitResultsProcessor
         /// <remarks>Ignored if equal to 0</remarks>
         public double PeptideNTerminusMassChange { get; set; }
 
+        /// <summary>
+        /// True if the protein mods file includes reversed proteins
+        /// </summary>
         public bool ProteinModsFileIncludesReversedProteins { get; set; }
 
         /// <summary>
@@ -107,9 +129,12 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Use Existing MTS PepToProtein Map File
         /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by FastaFilePath</remarks>
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
+        /// <summary>
+        /// Warn if an expected section is missing from the parameter file
+        /// </summary>
         public bool WarnMissingParameterFileSection { get; set; }
 
         /// <summary>
