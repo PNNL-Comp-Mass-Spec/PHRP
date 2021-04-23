@@ -4,7 +4,7 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, MaxQuant, novo, tda
+    // Ignore Spelling: Da, MaxQuant, novo, tda, terminii
 
 #pragma warning disable 1591
 
@@ -54,14 +54,197 @@ namespace PHRPReader.Data
         ResultID = 0,
 
         /// <summary>
-        /// Scan
+        /// Dataset name (typically the .raw file name, without the extension)
         /// </summary>
-        DatasetID = 1,
+        Dataset = 1,
 
         /// <summary>
-        /// Scan
+        /// Dataset ID
         /// </summary>
-        Scan = 2
+        DatasetID = 2,
+
+        /// <summary>
+        /// MS/MS scan number in the dataset
+        /// </summary>
+        Scan = 3,
+
+        /// <summary>
+        /// Type of fragmentation used to create the MS/MS spectrum
+        /// </summary>
+        /// <remarks>
+        /// Types:
+        ///   CID - Collision Induced Dissociation
+        ///   HCD - High energy Collision induced Dissociation
+        ///   ETD - Electron Transfer Dissociation
+        /// </remarks>
+        FragMethod = 4,
+
+        /// <summary>
+        /// Index of the spectrum in the dataset (1-based, consecutive integer)
+        /// </summary>
+        SpecIndex = 5,
+
+        /// <summary>
+        /// Charge state of the precursor ion
+        /// </summary>
+        Charge = 6,
+
+        /// <summary>
+        /// Precursor ion m/z
+        /// </summary>
+        PrecursorMZ = 7,
+
+        /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence
+        /// </summary>
+        DelM = 8,
+
+        /// <summary>
+        /// Mass Error, in ppm
+        /// </summary>
+        DelM_PPM = 9,
+
+        /// <summary>
+        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+        /// </summary>
+        MH = 10,
+
+        /// <summary>
+        /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
+        /// </summary>
+        Mass = 11,
+
+        /// <summary>
+        /// Peptide sequence, including modification symbols
+        /// </summary>
+        Peptide = 12,
+
+        /// <summary>
+        /// Proteins
+        /// </summary>
+        /// <remarks>
+        /// Semicolon separated list
+        /// </remarks>
+        Proteins = 13,
+
+        /// <summary>
+        /// Name of the best scoring protein this peptide is associated with
+        /// </summary>
+        /// <remarks>
+        /// Typically there is only one protein name here
+        /// However, in cases of a tied score, will be a semicolon separated list
+        /// </remarks>
+        LeadingRazorProtein = 14,
+
+        /// <summary>
+        /// Number of tryptic terminii
+        /// </summary>
+        NTT = 15,
+
+        /// <summary>
+        /// Posterior error probability
+        /// </summary>
+        /// <remarks>
+        /// Similar to p-value
+        /// Smaller values (closer to zero) are higher confidence
+        /// </remarks>
+        PEP = 16,
+
+        /// <summary>
+        ///  Andromeda score for the best MS/MS spectrum with this peptide
+        /// </summary>
+        /// <remarks>
+        /// Higher scores are better
+        /// </remarks>
+        Score = 17,
+
+        /// <summary>
+        /// Score difference to the second best identified peptide with a different amino acid sequence
+        /// </summary>
+        DeltaScore = 18,
+
+        /// <summary>
+        /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
+        /// </summary>
+        Intensity = 19,
+
+        /// <summary>
+        /// Mass Analyzer of the instrument
+        /// </summary>
+        MassAnalyzer = 20,
+
+        /// <summary>
+        /// Type of precursor ion as identified by MaxQuant
+        /// </summary>
+        PrecursorType = 21,
+
+        /// <summary>
+        /// Elution time of the MS/MS spectrum
+        /// </summary>
+        RetentionTime = 22,
+
+        /// <summary>
+        /// Scan number where the precursor ion was observed
+        /// </summary>
+        PrecursorScan = 23,
+
+        /// <summary>
+        /// Intensity of the precursor ion in the scan that it was observed
+        /// </summary>
+        PrecursorIntensity = 24,
+
+        /// <summary>
+        /// Number of peaks (MS/MS ions) matching to the predicted fragmentation spectrum
+        /// </summary>
+        NumberOfMatches = 25,
+
+        /// <summary>
+        /// Fraction of intensity in the MS/MS spectrum that is annotated
+        /// </summary>
+        IntensityCoverage = 26,
+
+        /// <summary>
+        /// Number of missed enzymatic cleavages
+        /// </summary>
+        MissedCleavages = 27,
+
+        /// <summary>
+        /// Unique (consecutive) identifier for each row in msms.txt
+        /// </summary>
+        MsMsID = 28,
+
+        /// <summary>
+        /// Identifier of the protein-group this redundant peptide sequence is associated with
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Typically a single number, but could be a semicolon separated list
+        /// if a peptide is associated with multiple protein groups
+        /// </para>
+        /// <para>
+        /// Can be used to look up the extended protein information in the proteinGroups.txt file
+        /// </para>
+        /// </remarks>
+        ProteinGroupIDs = 29,
+
+        /// <summary>
+        /// The identifier of the non-redundant peptide sequence
+        /// </summary>
+        /// <remarks>
+        /// Corresponds to the id column in the peptides.txt file
+        /// </remarks>
+        PeptideID = 30,
+
+        /// <summary>
+        /// Identifier referencing a row in the modificationSpecificPeptides.txt file
+        /// </summary>
+        ModPeptideID = 31,
+
+        /// <summary>
+        /// Identifier referencing a row in the evidence.txt file
+        /// </summary>
+        EvidenceID = 32
     }
 
     /// <summary>
