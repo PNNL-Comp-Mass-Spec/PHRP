@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using PeptideHitResultsProcessor.Data;
@@ -632,6 +633,10 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly Regex mModCountMatcher = new(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Dictionary of MaxQuant modifications, loaded from modifications.xml
+        /// </summary>
+        /// <remarks>Keys are mod names, values are the details of each modification</remarks>
         private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
@@ -1034,12 +1039,12 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerScanChargeScorePeptide());
 
                 // Now filter the data
-
-                // Initialize variables
                 var startIndex = 0;
 
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
+                    // Find all of the matches for the current result's scan
+                    // MaxQuant will typically report just one match
                     var endIndex = startIndex;
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
