@@ -787,6 +787,11 @@ namespace PeptideHitResultsProcRunner
             {
                 LogMessage(message, MessageTypeConstants.ErrorMsg);
             }
+
+            if (ex != null)
+            {
+                Console.WriteLine(PRISM.StackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
+            }
         }
 
         private void PeptideHitResultsProcessor_MessageEvent(string message)
