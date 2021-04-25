@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -1611,6 +1612,18 @@ namespace PeptideHitResultsProcessor.Processor
         protected Dictionary<string, int> LookupDatasetIDs(IEnumerable<string> datasetNames)
         {
             var datasetIDs = new Dictionary<string, int>();
+
+            try
+            {
+                Domain domain = Domain.GetComputerDomain();
+                if (domain == null || !domain.Equals("pnl.gov"))
+                    return datasetIDs;
+            }
+            catch (Exception)
+            {
+                // Computer is not joined to a domain
+                return datasetIDs;
+            }
 
             try
             {
