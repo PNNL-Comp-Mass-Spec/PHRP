@@ -1092,7 +1092,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1463,6 +1463,7 @@ namespace PeptideHitResultsProcessor.Processor
                             "{0} or\n{1} or \n{2}",
                             inputDirectory.FullName, candidateFile1.FullName, candidateFile2.FullName));
 
+                        OnWarningEvent("Download the default modifications.xml file from ");
                         return true;
                     }
                 }
@@ -2665,7 +2666,11 @@ namespace PeptideHitResultsProcessor.Processor
             foreach (var result in query)
             {
                 var baseDatasetName = baseNameByDatasetName[result.DatasetName];
-                var datasetID = datasetIDs[result.DatasetName];
+
+                if (!datasetIDs.TryGetValue(result.DatasetName, out var datasetID))
+                {
+                    datasetID = 0;
+                }
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
