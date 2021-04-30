@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using PHRPReader.Data;
 
 namespace PHRPReader.Reader
@@ -18,24 +19,14 @@ namespace PHRPReader.Reader
     /// </summary>
     public class ScanStatsReader
     {
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_Dataset = "Dataset";
-        public const string DATA_COLUMN_ScanNumber = "ScanNumber";
-        public const string DATA_COLUMN_ScanTime = "ScanTime";
-        public const string DATA_COLUMN_ScanType = "ScanType";
-        public const string DATA_COLUMN_TotalIonIntensity = "TotalIonIntensity";
-        public const string DATA_COLUMN_BasePeakIntensity = "BasePeakIntensity";
-        public const string DATA_COLUMN_BasePeakMZ = "BasePeakMZ";
-        public const string DATA_COLUMN_BasePeakSignalToNoiseRatio = "BasePeakSignalToNoiseRatio";
-        public const string DATA_COLUMN_IonCount = "IonCount";
-        public const string DATA_COLUMN_IonCountRaw = "IonCountRaw";
-        public const string DATA_COLUMN_ScanTypeName = "ScanTypeName";
-
-#pragma warning restore 1591
-
         // Column headers
         private readonly SortedDictionary<string, int> mColumnHeaders;
+
+        /// <summary>
+        /// Mapping from enum to Scan Stats file column name
+        /// </summary>
+        private static readonly Dictionary<ScanStatsFileColumns, string> mScanStatsFileColumn = new();
+
         private string mErrorMessage = string.Empty;
 
         /// <summary>
@@ -62,27 +53,71 @@ namespace PHRPReader.Reader
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private void AddHeaderColumn(string columnName)
-        {
-            mColumnHeaders.Add(columnName, mColumnHeaders.Count);
-        }
-
+        /// <summary>
+        /// Define header names
+        /// </summary>
         private void DefineColumnHeaders()
         {
-            mColumnHeaders.Clear();
-
             // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_Dataset);
-            AddHeaderColumn(DATA_COLUMN_ScanNumber);
-            AddHeaderColumn(DATA_COLUMN_ScanTime);
-            AddHeaderColumn(DATA_COLUMN_ScanType);
-            AddHeaderColumn(DATA_COLUMN_TotalIonIntensity);
-            AddHeaderColumn(DATA_COLUMN_BasePeakIntensity);
-            AddHeaderColumn(DATA_COLUMN_BasePeakMZ);
-            AddHeaderColumn(DATA_COLUMN_BasePeakSignalToNoiseRatio);
-            AddHeaderColumn(DATA_COLUMN_IonCount);
-            AddHeaderColumn(DATA_COLUMN_IonCountRaw);
-            AddHeaderColumn(DATA_COLUMN_ScanTypeName);
+            var columnHeaders = GetColumnHeaderNamesAndIDs();
+
+            SynFileReaderBaseClass.DefineColumnHeaders(mColumnHeaders, columnHeaders.Keys.ToList());
+        }
+
+        /// <summary>
+        /// Header names and enums for the _ScanStats.txt file
+        /// </summary>
+        /// <returns>Dictionary of header names and enum values</returns>
+        public static SortedDictionary<string, ScanStatsFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            return new(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Dataset", ScanStatsFileColumns.DatasetId},
+                {"ScanNumber", ScanStatsFileColumns.ScanNumber},
+                {"ScanTime", ScanStatsFileColumns.ScanTime},
+                {"ScanType", ScanStatsFileColumns.ScanType},
+                {"TotalIonIntensity", ScanStatsFileColumns.TotalIonIntensity},
+                {"BasePeakIntensity", ScanStatsFileColumns.BasePeakIntensity},
+                {"BasePeakMZ", ScanStatsFileColumns.BasePeakMZ},
+                {"BasePeakSignalToNoiseRatio", ScanStatsFileColumns.BasePeakSignalToNoiseRatio},
+                {"IonCount", ScanStatsFileColumns.IonCount},
+                {"IonCountRaw", ScanStatsFileColumns.IonCountRaw},
+                {"ScanTypeName", ScanStatsFileColumns.ScanTypeName},
+
+            };
+        }
+
+        /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
+        /// Populates a dictionary mapping enum ScanStatsFileColumns to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames"></param>
+        /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static Dictionary<ScanStatsFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        {
+            var headerColumns = GetColumnHeaderNamesAndIDs();
+            return SynFileReaderBaseClass.GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(ScanStatsFileColumns column)
+        {
+            if (mScanStatsFileColumn.Count > 0)
+            {
+                return mScanStatsFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mScanStatsFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mScanStatsFileColumn[column];
         }
 
         /// <summary>
@@ -118,7 +153,6 @@ namespace PHRPReader.Reader
                     {
                         if (!ReaderFactory.IsNumber(splitLine[0]))
                         {
-                            // Parse the header line to confirm the column ordering
                             ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
                             skipLine = true;
                         }
@@ -129,22 +163,22 @@ namespace PHRPReader.Reader
                     if (skipLine || splitLine.Length < 4)
                         continue;
 
-                    var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
-                    var scanTimeMinutes = Convert.ToSingle(ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanTime, mColumnHeaders, 0.0));
-                    var scanType = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanType, mColumnHeaders, 0);
+                    var scanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.ScanNumber), mColumnHeaders, -1);
+                    var scanTimeMinutes = (float)ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.ScanTime), mColumnHeaders, 0.0);
+                    var scanType = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.ScanType), mColumnHeaders, 0);
 
                     if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
                         continue;
 
                     var scanStatsInfo = new ScanStatsInfo(scanNumber, scanTimeMinutes, scanType)
                     {
-                        TotalIonIntensity = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_TotalIonIntensity, mColumnHeaders, 0.0),
-                        BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakIntensity, mColumnHeaders, 0.0),
-                        BasePeakMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakMZ, mColumnHeaders, 0.0),
-                        BasePeakSignalToNoiseRatio = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakSignalToNoiseRatio, mColumnHeaders, 0.0),
-                        IonCount = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonCount, mColumnHeaders, 0),
-                        IonCountRaw = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonCountRaw, mColumnHeaders, 0),
-                        ScanTypeName = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanTypeName, mColumnHeaders)
+                        TotalIonIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.TotalIonIntensity), mColumnHeaders, 0.0),
+                        BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakIntensity), mColumnHeaders, 0.0),
+                        BasePeakMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakMZ), mColumnHeaders, 0.0),
+                        BasePeakSignalToNoiseRatio = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakSignalToNoiseRatio), mColumnHeaders, 0.0),
+                        IonCount = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.IonCount), mColumnHeaders, 0),
+                        IonCountRaw = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.IonCountRaw), mColumnHeaders, 0),
+                        ScanTypeName = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.ScanTypeName), mColumnHeaders)
                     };
 
                     scanStats.Add(scanNumber, scanStatsInfo);

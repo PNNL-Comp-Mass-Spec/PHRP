@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using PHRPReader.Data;
 
 namespace PHRPReader.Reader
@@ -20,35 +21,16 @@ namespace PHRPReader.Reader
     /// </summary>
     public class ExtendedScanStatsReader
     {
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_Dataset = "Dataset";
-        public const string DATA_COLUMN_ScanNumber = "ScanNumber";
-        public const string DATA_COLUMN_IonInjectionTime = "Ion Injection Time (ms)";
-        public const string DATA_COLUMN_ScanEvent = "Scan Event";
-        public const string DATA_COLUMN_MasterIndex = "Master Index";
-        public const string DATA_COLUMN_ElapsedScanTime = "Elapsed Scan Time (sec)";
-        public const string DATA_COLUMN_ChargeState = "Charge State";
-        public const string DATA_COLUMN_MonoisotopicMZ = "Monoisotopic M/Z";
-        public const string DATA_COLUMN_MS2IsolationWidth = "MS2 Isolation Width";
-        public const string DATA_COLUMN_FTAnalyzerSettings = "FT Analyzer Settings";
-        public const string DATA_COLUMN_FTAnalyzerMessage = "FT Analyzer Message";
-        public const string DATA_COLUMN_FTResolution = "FT Resolution";
-        public const string DATA_COLUMN_ConversionParameterB = "Conversion Parameter B";
-        public const string DATA_COLUMN_ConversionParameterC = "Conversion Parameter C";
-        public const string DATA_COLUMN_ConversionParameterD = "Conversion Parameter D";
-        public const string DATA_COLUMN_ConversionParameterE = "Conversion Parameter E";
-        public const string DATA_COLUMN_CollisionMode = "Collision Mode";
-        public const string DATA_COLUMN_ScanFilterText = "Scan Filter Text";
-        public const string DATA_COLUMN_SourceVoltage = "Source Voltage (kV)";
-        public const string DATA_COLUMN_Source_Current = "Source Current (uA)";
-
-#pragma warning restore 1591
 
         /// <summary>
         /// Column headers
         /// </summary>
         private readonly SortedDictionary<string, int> mColumnHeaders;
+
+        /// <summary>
+        /// Mapping from enum to Extended Scan Stats file column name
+        /// </summary>
+        private static readonly Dictionary<ExtendedScanStatsFileColumns, string> mExtendedScanStatsFileColumn = new();
 
         private string mErrorMessage = string.Empty;
 
@@ -76,36 +58,80 @@ namespace PHRPReader.Reader
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private void AddHeaderColumn(string columnName)
-        {
-            mColumnHeaders.Add(columnName, mColumnHeaders.Count);
-        }
 
+        /// <summary>
+        /// Define header names
+        /// </summary>
         private void DefineColumnHeaders()
         {
-            mColumnHeaders.Clear();
-
             // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_Dataset);
-            AddHeaderColumn(DATA_COLUMN_ScanNumber);
-            AddHeaderColumn(DATA_COLUMN_IonInjectionTime);
-            AddHeaderColumn(DATA_COLUMN_ScanEvent);
-            AddHeaderColumn(DATA_COLUMN_MasterIndex);
-            AddHeaderColumn(DATA_COLUMN_ElapsedScanTime);
-            AddHeaderColumn(DATA_COLUMN_ChargeState);
-            AddHeaderColumn(DATA_COLUMN_MonoisotopicMZ);
-            AddHeaderColumn(DATA_COLUMN_MS2IsolationWidth);
-            AddHeaderColumn(DATA_COLUMN_FTAnalyzerSettings);
-            AddHeaderColumn(DATA_COLUMN_FTAnalyzerMessage);
-            AddHeaderColumn(DATA_COLUMN_FTResolution);
-            AddHeaderColumn(DATA_COLUMN_ConversionParameterB);
-            AddHeaderColumn(DATA_COLUMN_ConversionParameterC);
-            AddHeaderColumn(DATA_COLUMN_ConversionParameterD);
-            AddHeaderColumn(DATA_COLUMN_ConversionParameterE);
-            AddHeaderColumn(DATA_COLUMN_CollisionMode);
-            AddHeaderColumn(DATA_COLUMN_ScanFilterText);
-            AddHeaderColumn(DATA_COLUMN_SourceVoltage);
-            AddHeaderColumn(DATA_COLUMN_Source_Current);
+            var columnHeaders = GetColumnHeaderNamesAndIDs();
+
+            SynFileReaderBaseClass.DefineColumnHeaders(mColumnHeaders, columnHeaders.Keys.ToList());
+        }
+
+        /// <summary>
+        /// Header names and enums for the _ScanStats.txt file
+        /// </summary>
+        /// <returns>Dictionary of header names and enum values</returns>
+        public static SortedDictionary<string, ExtendedScanStatsFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            return new(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Dataset", ExtendedScanStatsFileColumns.DatasetId },
+                { "ScanNumber", ExtendedScanStatsFileColumns.ScanNumber },
+                { "Ion Injection Time (ms)", ExtendedScanStatsFileColumns.IonInjectionTime },
+                { "Scan Event", ExtendedScanStatsFileColumns.ScanEvent },
+                { "Master Index", ExtendedScanStatsFileColumns.MasterIndex },
+                { "Elapsed Scan Time (sec)", ExtendedScanStatsFileColumns.ElapsedScanTime },
+                { "Charge State", ExtendedScanStatsFileColumns.ChargeState },
+                { "Monoisotopic M/Z", ExtendedScanStatsFileColumns.MonoisotopicMZ },
+                { "MS2 Isolation Width", ExtendedScanStatsFileColumns.MS2IsolationWidth },
+                { "FT Analyzer Settings", ExtendedScanStatsFileColumns.FTAnalyzerSettings },
+                { "FT Analyzer Message", ExtendedScanStatsFileColumns.FTAnalyzerMessage },
+                { "FT Resolution", ExtendedScanStatsFileColumns.FTResolution },
+                { "Conversion Parameter B", ExtendedScanStatsFileColumns.ConversionParameterB },
+                { "Conversion Parameter C", ExtendedScanStatsFileColumns.ConversionParameterC },
+                { "Conversion Parameter D", ExtendedScanStatsFileColumns.ConversionParameterD },
+                { "Conversion Parameter E", ExtendedScanStatsFileColumns.ConversionParameterE },
+                { "Collision Mode", ExtendedScanStatsFileColumns.CollisionMode },
+                { "Scan Filter Text", ExtendedScanStatsFileColumns.ScanFilterText },
+                { "Source Voltage (kV)", ExtendedScanStatsFileColumns.SourceVoltage },
+                { "Source Current (uA)", ExtendedScanStatsFileColumns.Source_Current }
+            };
+        }
+
+        /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
+        /// Populates a dictionary mapping enum ExtendedScanStatsFileColumns to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames"></param>
+        /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static Dictionary<ExtendedScanStatsFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        {
+            var headerColumns = GetColumnHeaderNamesAndIDs();
+            return SynFileReaderBaseClass.GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(ExtendedScanStatsFileColumns column)
+        {
+            if (mExtendedScanStatsFileColumn.Count > 0)
+            {
+                return mExtendedScanStatsFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mExtendedScanStatsFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mExtendedScanStatsFileColumn[column];
         }
 
         /// <summary>
@@ -120,6 +146,7 @@ namespace PHRPReader.Reader
             try
             {
                 DefineColumnHeaders();
+
                 mErrorMessage = string.Empty;
 
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -151,31 +178,31 @@ namespace PHRPReader.Reader
                     if (skipLine || splitLine.Length < 4)
                         continue;
 
-                    var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
+                    var scanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ScanNumber), mColumnHeaders, -1);
 
                     if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
                         continue;
 
                     var scanStatsInfo = new ScanStatsExInfo(scanNumber)
                     {
-                        IonInjectionTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
-                        ScanEvent = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
-                        MasterIndex = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
-                        ElapsedScanTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
-                        ChargeState = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
-                        MonoisotopicMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
-                        MS2IsolationWidth = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
-                        FTAnalyzerSettings = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
-                        FTAnalyzerMessage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
-                        FTResolution = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
-                        ConversionParameterB = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
-                        ConversionParameterC = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
-                        ConversionParameterD = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
-                        ConversionParameterE = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
-                        CollisionMode = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
-                        ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
-                        SourceVoltage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
-                        Source_Current = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
+                        IonInjectionTime = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.IonInjectionTime), mColumnHeaders, 0.0),
+                        ScanEvent = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ScanEvent), mColumnHeaders, 0),
+                        MasterIndex = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.MasterIndex), mColumnHeaders, 0),
+                        ElapsedScanTime = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ElapsedScanTime), mColumnHeaders, 0.0),
+                        ChargeState = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ChargeState), mColumnHeaders, 0),
+                        MonoisotopicMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.MonoisotopicMZ), mColumnHeaders, 0.0),
+                        MS2IsolationWidth = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.MS2IsolationWidth), mColumnHeaders, 0.0),
+                        FTAnalyzerSettings = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.FTAnalyzerSettings), mColumnHeaders),
+                        FTAnalyzerMessage = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.FTAnalyzerMessage), mColumnHeaders),
+                        FTResolution = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.FTResolution), mColumnHeaders, 0.0),
+                        ConversionParameterB = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ConversionParameterB), mColumnHeaders, 0.0),
+                        ConversionParameterC = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ConversionParameterC), mColumnHeaders, 0.0),
+                        ConversionParameterD = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ConversionParameterD), mColumnHeaders, 0.0),
+                        ConversionParameterE = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ConversionParameterE), mColumnHeaders, 0.0),
+                        CollisionMode = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.CollisionMode), mColumnHeaders),
+                        ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.ScanFilterText), mColumnHeaders),
+                        SourceVoltage = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.SourceVoltage), mColumnHeaders, 0.0),
+                        Source_Current = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ExtendedScanStatsFileColumns.Source_Current), mColumnHeaders, 0.0)
                     };
 
                     scanStats.Add(scanNumber, scanStatsInfo);

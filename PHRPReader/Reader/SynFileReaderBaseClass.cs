@@ -16,6 +16,8 @@ using System.Linq;
 using System.Text;
 using PHRPReader.Data;
 
+// ReSharper disable UnusedMember.Global
+
 namespace PHRPReader.Reader
 {
     /// <summary>
@@ -502,19 +504,6 @@ namespace PHRPReader.Reader
         public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams);
 
         /// <summary>
-        /// Add a PHRP synopsis or first hits header column to mColumnHeaders
-        /// </summary>
-        /// <param name="columnName"></param>
-        /// <remarks>
-        /// The column index will be set to mColumnHeaders.Count
-        /// That value will be updated by ParseColumnHeaders
-        /// </remarks>
-        protected void AddHeaderColumn(string columnName)
-        {
-            mColumnHeaders.Add(columnName, mColumnHeaders.Count);
-        }
-
-        /// <summary>
         /// Add a score to a PSM
         /// </summary>
         /// <param name="psm"></param>
@@ -677,7 +666,7 @@ namespace PHRPReader.Reader
         /// <param name="headerNames">List of column names from the header line of a data file</param>
         /// <param name="headerColumnInfo">Dictionary mapping standard header column names to a PHRPReader enum (e.g. MSGFPlusSynFileColumns)</param>
         /// <returns>Dictionary mapping the PHRPReader enum value to the column index in headerNames (0-based column index)</returns>
-        protected static Dictionary<T, int> GetColumnMapFromHeaderLine<T>(List<string> headerNames, SortedDictionary<string, T> headerColumnInfo)
+        internal static Dictionary<T, int> GetColumnMapFromHeaderLine<T>(List<string> headerNames, SortedDictionary<string, T> headerColumnInfo)
         {
             var columnNameToIndexMap = new Dictionary<T, int>();
 

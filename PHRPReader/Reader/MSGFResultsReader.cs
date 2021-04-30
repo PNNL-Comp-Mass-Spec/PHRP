@@ -9,6 +9,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using PHRPReader.Data;
 
 namespace PHRPReader.Reader
 {
@@ -17,22 +19,15 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSGFResultsReader
     {
-#pragma warning disable 1591
-
-        public const string DATA_COLUMN_ResultID = "Result_ID";
-        public const string DATA_COLUMN_Scan = "Scan";
-        public const string DATA_COLUMN_Charge = "Charge";
-        public const string DATA_COLUMN_Protein = "Protein";
-        public const string DATA_COLUMN_Peptide = "Peptide";
-        public const string DATA_COLUMN_SpecProb = "SpecProb";
-        public const string DATA_COLUMN_Notes = "Notes";
-
-#pragma warning restore 1591
-
         /// <summary>
         /// Column headers
         /// </summary>
         private readonly SortedDictionary<string, int> mColumnHeaders;
+
+        /// <summary>
+        /// Mapping from enum to MSGF file column name
+        /// </summary>
+        private static readonly Dictionary<MSGFFileColumns, string> mMSGFFileColumn = new();
 
         private string mErrorMessage = string.Empty;
 
@@ -60,26 +55,67 @@ namespace PHRPReader.Reader
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private void AddHeaderColumn(string columnName)
-        {
-            mColumnHeaders.Add(columnName, mColumnHeaders.Count);
-        }
 
         /// <summary>
-        /// Define header names for MSGF result files
+        /// Define header names
         /// </summary>
         private void DefineColumnHeaders()
         {
-            mColumnHeaders.Clear();
-
             // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_SpecProb);
-            AddHeaderColumn(DATA_COLUMN_Notes);
+            var columnHeaders = GetColumnHeaderNamesAndIDs();
+
+            SynFileReaderBaseClass.DefineColumnHeaders(mColumnHeaders, columnHeaders.Keys.ToList());
+        }
+
+        /// <summary>
+        /// Header names and enums for the _MSGF.txt file
+        /// </summary>
+        /// <returns>Dictionary of header names and enum values</returns>
+        public static SortedDictionary<string, MSGFFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            return new(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Result_ID", MSGFFileColumns.ResultID },
+                { "Scan", MSGFFileColumns.Scan },
+                { "Charge", MSGFFileColumns.Charge },
+                { "Protein", MSGFFileColumns.Protein },
+                { "Peptide", MSGFFileColumns.Peptide },
+                { "SpecProb", MSGFFileColumns.SpecProb },
+                { "Notes", MSGFFileColumns.Notes }
+            };
+        }
+
+        /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
+        /// Populates a dictionary mapping enum MSGFFileColumns to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames"></param>
+        /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static Dictionary<MSGFFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        {
+            var headerColumns = GetColumnHeaderNamesAndIDs();
+            return SynFileReaderBaseClass.GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
+        /// Get the column name associated with the given enum
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns>Column name</returns>
+        public static string GetColumnNameByID(MSGFFileColumns column)
+        {
+            if (mMSGFFileColumn.Count > 0)
+            {
+                return mMSGFFileColumn[column];
+            }
+
+            foreach (var item in GetColumnHeaderNamesAndIDs())
+            {
+                mMSGFFileColumn.Add(item.Value, item.Key);
+            }
+
+            return mMSGFFileColumn[column];
         }
 
         /// <summary>
@@ -123,19 +159,23 @@ namespace PHRPReader.Reader
                         headerLineParsed = true;
                     }
 
-                    if (!skipLine && splitLine.Length >= 4)
+                    if (skipLine || splitLine.Length < 4)
                     {
-                        var resultID = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                        continue;
+                    }
 
-                        if (resultID >= 0)
-                        {
-                            var msgfSpecProb = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
+                    var resultID = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(MSGFFileColumns.ResultID), mColumnHeaders, -1);
 
-                            if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
-                            {
-                                msgfData.Add(resultID, msgfSpecProb);
-                            }
-                        }
+                    if (resultID < 0)
+                    {
+                        continue;
+                    }
+
+                    var msgfSpecProb = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(MSGFFileColumns.SpecProb), mColumnHeaders);
+
+                    if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
+                    {
+                        msgfData.Add(resultID, msgfSpecProb);
                     }
                 }
             }

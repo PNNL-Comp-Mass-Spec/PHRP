@@ -9,6 +9,33 @@ namespace PHRPReader.Data
 #pragma warning disable 1591
 
     /// <summary>
+    /// These columns correspond to the tab-delimited _ScanStatsEx.txt file created by MASIC or MSFileInfoScanner
+    /// </summary>
+    public enum ExtendedScanStatsFileColumns
+    {
+        DatasetId = 0,
+        ScanNumber = 1,
+        IonInjectionTime = 2,
+        ScanEvent = 3,
+        MasterIndex = 4,
+        ElapsedScanTime = 5,
+        ChargeState = 6,
+        MonoisotopicMZ = 7,
+        MS2IsolationWidth = 8,
+        FTAnalyzerSettings = 9,
+        FTAnalyzerMessage = 10,
+        FTResolution = 11,
+        ConversionParameterB = 12,
+        ConversionParameterC = 13,
+        ConversionParameterD = 14,
+        ConversionParameterE = 15,
+        CollisionMode = 16,
+        ScanFilterText = 17,
+        SourceVoltage = 18,
+        Source_Current = 19
+    }
+
+    /// <summary>
     /// These columns correspond to the Synopsis file created by InSpecTResultsProcessor
     /// </summary>
     public enum InspectSynFileColumns
@@ -298,6 +325,20 @@ namespace PHRPReader.Data
         FDR = 19,
         Species_ID = 20,
         FragMethod = 21
+    }
+
+    /// <summary>
+    /// These columns correspond to the tab-delimited _MSGF.txt file created by the analysis manager
+    /// </summary>
+    public enum MSGFFileColumns
+    {
+        ResultID = 0,
+        Scan = 1,
+        Charge = 2,
+        Protein = 3,
+        Peptide = 4,
+        SpecProb = 5,
+        Notes = 6
     }
 
 #pragma warning restore 1591
@@ -620,6 +661,25 @@ namespace PHRPReader.Data
         Rank_Probability = 12,
         Peptide_Position = 13,
         QValue = 14
+    }
+
+
+    /// <summary>
+    /// These columns correspond to the tab-delimited _ScanStats.txt file created by MASIC or MSFileInfoScanner
+    /// </summary>
+    public enum ScanStatsFileColumns
+    {
+        DatasetId = 0,
+        ScanNumber = 1,
+        ScanTime = 2,
+        ScanType = 3,
+        TotalIonIntensity = 4,
+        BasePeakIntensity = 5,
+        BasePeakMZ = 6,
+        BasePeakSignalToNoiseRatio = 7,
+        IonCount = 8,
+        IonCountRaw = 9,
+        ScanTypeName = 10
     }
 
     /// <summary>
