@@ -21,7 +21,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSGFPlusSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: enzymeid, Da, Frag, novo, msgfdb, peptidomics, prot, nnet, ntt, tda, Za, Validator
+        // Ignore Spelling: enzymeid, Da, Daltons, Frag, novo, msgfdb, peptidomics, prot, nnet, ntt, tda, tryptic, Za, Validator
         // Ignore Spelling: Arg, Chymotrypsin, Glu, Lys
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// Get the headerAddHeaderColumn names in the PHRP synopsis or first hits file for this tool
         /// </summary>
         /// <returns>List of header names, including legacy columns</returns>
         protected override List<string> GetColumnHeaderNames()
@@ -388,7 +388,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Get the MSGFDB column name associated with the given num
+        /// Get the MSGFDB column name associated with the given column
         /// </summary>
         /// <param name="column"></param>
         /// <returns>Column name</returns>

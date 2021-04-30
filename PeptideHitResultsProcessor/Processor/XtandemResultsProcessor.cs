@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: bioml, aa, hyperscore, nextscore, mh, Seqs
+        // Ignore Spelling: aa, bioml, hyperscore, mh, nextscore, pre, Seqs
 
         /// <summary>
         /// This constant is used by AnalysisManagerPeptideHitResultsProcessor.InitSetup

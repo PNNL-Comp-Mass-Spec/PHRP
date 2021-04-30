@@ -22,7 +22,7 @@ namespace PHRPReader.Reader
     public class MODPlusSynFileReader : SynFileReaderBaseClass
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: da, massdiff, MODp, modp, prot, tol
+        // Ignore Spelling: da, Daltons, massdiff, msms, MODp, modp, prot, tol
 
         /// <summary>
         /// MODPlus synopsis file suffix
@@ -303,7 +303,7 @@ namespace PHRPReader.Reader
         {
             try
             {
-                // For MS-GF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                // For MS-GF+ or SEQUEST we load mod info from the _ModDefs.txt file for the parameter file
                 // But MODPlus does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide termini; check for these now
 

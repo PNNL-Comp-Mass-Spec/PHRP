@@ -4,7 +4,7 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, MaxQuant, novo, tda, terminii
+    // Ignore Spelling: Da, Daltons, MaxQuant, novo, tda, terminii, tryptic
 
 #pragma warning disable 1591
 

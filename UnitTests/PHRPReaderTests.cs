@@ -11,6 +11,8 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PHRPReaderTests
     {
+        // Ignore Spelling: gb, gi
+
         private struct MSGFPlusInfo
         {
             public string Peptide;

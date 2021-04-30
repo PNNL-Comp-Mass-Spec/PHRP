@@ -4,7 +4,7 @@
 //
 // Created 04/04/2012
 //
-// This class parses data lines from Sequest _syn.txt and _fht.txt files
+// This class parses data lines from SEQUEST _syn.txt and _fht.txt files
 //
 //*********************************************************************************************************
 
@@ -21,7 +21,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class SequestSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Chymotrypsin, Cn, Da, GluC, LysC, milli, mmu, PassFilt, Prot, Xc
+        // Ignore Spelling: Chymotrypsin, Cn, Da, Daltons, GluC, LysC, milli, mmu, PassFilt, Prot, tryptic, Xc
 
         /// <summary>
         /// SEQUEST synopsis file suffix
@@ -177,7 +177,7 @@ namespace PHRPReader.Reader
                     }
                     else
                     {
-                        // Tolerance is in daltons
+                        // Tolerance is in Daltons
                         toleranceDa = value;
 
                         // Convert from Dalton to PPM (assuming a mass of 2000 m/z)
@@ -360,7 +360,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Parses the specified Sequest parameter file
+        /// Parses the specified SEQUEST parameter file
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
@@ -389,7 +389,7 @@ namespace PHRPReader.Reader
 
                 if (!File.Exists(paramFilePath))
                 {
-                    ReportError("Sequest param file not found: " + paramFilePath);
+                    ReportError("SEQUEST param file not found: " + paramFilePath);
                     return false;
                 }
 
@@ -473,7 +473,7 @@ namespace PHRPReader.Reader
 
                             break;
                         case "enzyme_info":
-                            // Used in new-style sequest parameter files
+                            // Used in new-style SEQUEST parameter files
 
                             // Examples include:
                             // Fully-tryptic:     Trypsin(KR) 1 1 KR -
@@ -502,7 +502,7 @@ namespace PHRPReader.Reader
 
                             break;
                         case "enzyme_number":
-                            // Used in old-style sequest parameter files
+                            // Used in old-style SEQUEST parameter files
                             if (int.TryParse(settingValue, out value))
                             {
                                 if (value == 0)
@@ -601,7 +601,7 @@ namespace PHRPReader.Reader
                     var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.ProteinName), mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    // Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
+                    // Note that the MH value listed in SEQUEST files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
                     // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
                     var precursorMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.PeptideMH), mColumnHeaders, 0.0);
@@ -641,7 +641,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + linesRead + " in the Sequest data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the SEQUEST data file: " + ex.Message);
             }
 
             return success;

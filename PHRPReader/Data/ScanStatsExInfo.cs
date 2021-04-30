@@ -26,8 +26,9 @@
         public int MasterIndex { get; set; }
 
         /// <summary>
-        /// Elapsed scan time
+        /// Elapsed scan time (in seconds)
         /// </summary>
+        /// <remarks>This is the time required to acquire the mass spectrum</remarks>
         public double ElapsedScanTime { get; set; }
 
         /// <summary>

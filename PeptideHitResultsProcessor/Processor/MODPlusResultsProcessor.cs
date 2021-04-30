@@ -24,7 +24,7 @@ namespace PeptideHitResultsProcessor.Processor
 {
     public class MODPlusResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: MODa, tda, methylation, udt, fht, modp, ModDefs, massdiff
+        // Ignore Spelling: Da, fht, massdiff, methylation, MODa, ModDefs, modp, tda, tryptic, udt
 
         public MODPlusResultsProcessor(PHRPOptions options) : base(options)
         {

@@ -19,7 +19,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSAlignSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Da, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm
+        // Ignore Spelling: cysteine, Da, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm
 
         /// <summary>
         /// MSAlign synopsis file suffix
@@ -334,7 +334,7 @@ namespace PHRPReader.Reader
 
                 if (success)
                 {
-                    // For MS-GF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                    // For MS-GF+ or SEQUEST we load mod info from the _ModDefs.txt file for the parameter file
                     // But MSAlign does not have a _ModDefs.txt file because it performs a blind search
                     // The user can define static mods on cysteine; check for these now
 

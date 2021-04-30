@@ -62,7 +62,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSGFPlusResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, struct, structs, methylation, udt, frag, novo, Prefiltered
+        // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, pre, struct, structs, methylation, udt, frag, novo, Prefiltered
 
         /// <summary>
         /// Constructor

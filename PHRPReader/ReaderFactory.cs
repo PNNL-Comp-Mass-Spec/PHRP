@@ -32,7 +32,7 @@ namespace PHRPReader
     /// </summary>
     public class ReaderFactory : PRISM.EventNotifier, IDisposable
     {
-        // Ignore Spelling: xt, msx, fht, Ss, Za, msgfdb, MODa, moda, modp, kv, toppic, mspath, msa, modplus, msp, prot, tpc
+        // Ignore Spelling: DA, fht, kv, moda, MODa, modp, modplus, msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt, Za
 
         /// <summary>
         /// Symbol used by PHRP to indicate a protein terminus
@@ -249,7 +249,7 @@ namespace PHRPReader
         public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
-        /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
+        /// Peptide hit result type; SEQUEST, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
         public PeptideHitResultTypes PeptideHitResultType
         {
@@ -928,9 +928,9 @@ namespace PHRPReader
             filesToFind.Add(TopPICSynFileReader.FILENAME_SUFFIX_FHT);
 
             // *****************
-            // ** Important: Sequest needs to be added last since files simply end in _syn.txt or _fht.txt)
+            // ** Important: SEQUEST needs to be added last since files simply end in _syn.txt or _fht.txt)
             // *****************
-            // Sequest
+            // SEQUEST
             filesToFind.Add(SequestSynFileReader.FILENAME_SUFFIX_SYN);
             filesToFind.Add(SequestSynFileReader.FILENAME_SUFFIX_FHT);
 
@@ -1063,7 +1063,7 @@ namespace PHRPReader
                 AddFileToFind(filesToFind, PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPFirstHitsFileName, dataset);
 
-                // Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
+                // SEQUEST (needs to be added last since files simply end in _syn.txt or _fht.txt)
                 AddFileToFind(filesToFind, PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPFirstHitsFileName, dataset);
             }
@@ -1288,7 +1288,7 @@ namespace PHRPReader
                 return resultType;
             }
 
-            // Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
+            // Open the file and read the header line to determine if this is a SEQUEST file, Inspect file, MSGFDB, or something else
             if (!File.Exists(filePath))
             {
                 // File doesn't exist; assume MSGFPlus

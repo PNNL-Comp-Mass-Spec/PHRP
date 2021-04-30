@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSAlignResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: monoisotopic, enums, txt, histone, methylation, fht, Da, Prsm, IodoAcet, IodoAcid, Frag, pvalue, Defs
+        // Ignore Spelling: Cysteine, Da, Defs, enums, fht, Frag, histone, IodoAcet, IodoAcid, methylation, monoisotopic, Prsm, pvalue, txt
 
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {

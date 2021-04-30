@@ -33,7 +33,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// <remarks>The modification definition information is determined from the InSpecT parameter file</remarks>
     public class InSpecTResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: fht, txt, phos, methylation, nterminal, cterminal, Pos, ModDefs, Da
+        // Ignore Spelling: Daltons, fht, txt, phos, methylation, nterminal, cterminal, phosphorylation, Pos, ModDefs, Da
 
         public InSpecTResultsProcessor(PHRPOptions options) : base(options)
         {

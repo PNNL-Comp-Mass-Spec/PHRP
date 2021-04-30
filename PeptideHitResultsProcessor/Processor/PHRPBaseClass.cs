@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : PRISM.EventNotifier
     {
-        // Ignore Spelling: Da, Fscore, MaxQuant, prot, mts, MSFragger, xxx
+        // Ignore Spelling: A-Za-z, Da, Fscore, MaxQuant, pre, prot, mts, MSFragger, xxx
 
         /// <summary>
         /// Constructor
@@ -591,7 +591,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void ComputePseudoPeptideLocInProtein(SearchResultsBaseClass searchResult)
         {
-            // Set these to 1 and 10000 since MSGFDB, Sequest, and Inspect results files do not contain protein sequence information
+            // Set these to 1 and 10000 since MSGFDB, SEQUEST, and Inspect results files do not contain protein sequence information
             // If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
             searchResult.ProteinSeqResidueNumberStart = 1;
             searchResult.ProteinSeqResidueNumberEnd = 10000;

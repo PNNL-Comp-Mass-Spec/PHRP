@@ -54,7 +54,7 @@ namespace PeptideHitResultsProcessor.Processor
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /// <summary>
-        /// These columns correspond to the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
+        /// These columns correspond to the tab-delimited file (_moda.id.txt) created by Java file anal_moda.jar
         /// </summary>
         private enum MODaResultsFileColumns
         {
