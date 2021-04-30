@@ -361,8 +361,33 @@ namespace PeptideHitResultsProcessor.Processor
             public string IsotopeIndex;
 
             /// <summary>
-            /// Precursor ion m/z
+            /// Precursor ion m/z (theoretical value, not observed value)
             /// </summary>
+            /// <remarks>
+            /// <para>
+            /// This is the theoretical m/z of the first isotope of the isotopic distribution of the parent ion
+            /// </para>
+            /// <para>
+            /// For example, given a 3+ parent ion whose isotopic distribution in the MS1 spectrum
+            /// has ions at 827.769, 828.105, 828.438, and 828.772 m/z, the most intense ion is the 828.434 ion.
+            /// The instrument might then isolate that ion for fragmentation, giving a spectrum label for the MS2 spectrum of
+            /// "Full ms2 828.44@cid35.00"
+            /// </para>
+            /// <para>
+            /// MS-GF+ reports the precursor m/z as 827.76965, which is the observed m/z value
+            /// MaxQuant reports the PrecursorMZ as 827.76176, which is the theoretical value based on the identified peptide (TAHEVRPGNVIMFEGSPWVVQK)
+            /// </para>
+            /// <para>
+            /// Example 2: given a 3+ parent ion whose isotopic distribution in the MS1 spectrum
+            /// has ions at 755.402, 755.737, 756.071, and 756.407 m/z, the most intense ion is the 755.737 ion.
+            /// The instrument might then isolate that ion for fragmentation, giving a spectrum label for the MS2 spectrum of
+            /// "Full ms2 755.74@cid35.00"
+            /// </para>
+            /// <para>
+            /// MS-GF+ reports the precursor m/z as 755.40515, which is the observed m/z value
+            /// MaxQuant reports the PrecursorMZ as 755.39497, which is the theoretical value based on the identified peptide (IINIGSVVGTMGNAGQVNYSAAK)
+            /// </para>
+            /// </remarks>
             public string PrecursorMZ;
 
             /// <summary>
@@ -1152,6 +1177,15 @@ namespace PeptideHitResultsProcessor.Processor
                 // Keys in this dictionary are dataset names, values are abbreviated names
                 var baseNameByDatasetName = GetDatasetNameMap(filteredSearchResults, out var longestCommonBaseName);
 
+                // Load Precursor m/z masses (if an appropriate file can be found)
+                // If found, compute MassErrorPpm and MassErrorDa
+                var precursorsByDataset = LoadPrecursorIons(baseNameByDatasetName.Keys.ToList());
+
+                if (precursorsByDataset.Count > 0)
+                {
+                    ComputeObservedMassErrors(filteredSearchResults, precursorsByDataset);
+                }
+
                 // The synopsis file name will be of the form DatasetName_maxq_syn.txt
                 // If baseDatasetNames only has one item, will use the full dataset name
                 // If baseDatasetNames has multiple items, will use the longest string in common for the keys in baseDatasetNames
@@ -1844,6 +1878,41 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Look for data files that have information regarding the precursor m/z value for each scan, for each dataset
+        /// If found, populate a dictionary with the data
+        /// </summary>
+        /// <param name="datasetNames"></param>
+        /// <returns>Dictionary where keys are dataset names and values are dictionaries of precursor m/z by scan number</returns>
+        private Dictionary<string, Dictionary<int, double>> LoadPrecursorIons(List<string> datasetNames)
+        {
+            var precursorsByDataset = new Dictionary<string, Dictionary<int, double>>();
+
+            // ToDo: For each dataset, load the observed precursor m/z from another file
+
+            // Support:
+            // 1) File with columns:  Dataset   Scan   PrecursorMZ
+            // 2) File with columns:  Dataset   Scan   ScanFilter
+            // 3) MASIC Dataset_SICstats.txt file,    column MZ
+            // 4) MASIC Dataset_ScanStatsEx.txt file, column "Scan Filter Text"
+
+            foreach (var dataset in datasetNames)
+            {
+                var precursorInfoFilePath = string.Empty;
+
+                if (!string.IsNullOrWhiteSpace(precursorInfoFilePath))
+                {
+                    var reader = new PrecursorInfoFileReader();
+
+                    var precursorInfoDataDictionary = reader.ReadPrecursorInfoFile(precursorInfoFilePath);
+                }
+            }
+
+            throw new NotImplementedException();
+
+            return precursorsByDataset;
+        }
+
         private bool LookupMaxQuantPeptideInfo(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string sequence,
@@ -2202,6 +2271,15 @@ namespace PeptideHitResultsProcessor.Processor
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMass(searchResult.Sequence, totalModMass);
 
+                // We would ideally manually compute the mass error using the observed precursor ion m/z value
+                // However, that information is not available in the MaxQuant results
+
+                // Compare the mass computed by PHRP to the one reported by MaxQuant
+                var deltaMassVsMaxQuant = searchResult.CalculatedMonoMassValue - searchResult.CalculatedMonoMassPHRP;
+                if (Math.Abs(deltaMassVsMaxQuant) > 0.01)
+                {
+                    OnWarningEvent(string.Format(
+                        "Calculated monoisotopic mass differs from the value reported by MaxQuant; delta mass: {0:F3} Da", deltaMassVsMaxQuant));
                 }
 
                 // Lookup the Prefix and Suffix residues
