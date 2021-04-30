@@ -252,24 +252,12 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit result type; SEQUEST, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
-        public PeptideHitResultTypes PeptideHitResultType
-        {
-            get
-            {
-                return (SynFileReader?.PeptideHitResultType) ?? PeptideHitResultTypes.Unknown;
-            }
-        }
+        public PeptideHitResultTypes PeptideHitResultType => SynFileReader?.PeptideHitResultType ?? PeptideHitResultTypes.Unknown;
 
         /// <summary>
         /// Returns a number between 0 and 100 indicating the percentage of the source file that has been read
         /// </summary>
-        public float PercentComplete
-        {
-            get
-            {
-                return mSourceFileLineCount > 0 ? mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f : 0;
-            }
-        }
+        public float PercentComplete => mSourceFileLineCount > 0 ? mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f : 0;
 
         /// <summary>
         /// Returns the PHRP SynFileReader object
@@ -279,35 +267,17 @@ namespace PHRPReader
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
         /// </summary>
-        public SortedList<int, int> ResultToSeqMap
-        {
-            get
-            {
-                return SynFileReader == null ? new SortedList<int, int>() : SynFileReader.ResultToSeqMap;
-            }
-        }
+        public SortedList<int, int> ResultToSeqMap => SynFileReader == null ? new SortedList<int, int>() : SynFileReader.ResultToSeqMap;
 
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
         /// </summary>
-        public SortedList<int, SequenceInfo> SeqInfo
-        {
-            get
-            {
-                return SynFileReader == null ? new SortedList<int, SequenceInfo>() : SynFileReader.SeqInfo;
-            }
-        }
+        public SortedList<int, SequenceInfo> SeqInfo => SynFileReader == null ? new SortedList<int, SequenceInfo>() : SynFileReader.SeqInfo;
 
         /// <summary>
         /// Returns the cached sequence to protein map information
         /// </summary>
-        public SortedList<int, List<ProteinInfo>> SeqToProteinMap
-        {
-            get
-            {
-                return SynFileReader == null ? new SortedList<int, List<ProteinInfo>>() : SynFileReader.SeqToProteinMap;
-            }
-        }
+        public SortedList<int, List<ProteinInfo>> SeqToProteinMap => SynFileReader == null ? new SortedList<int, List<ProteinInfo>>() : SynFileReader.SeqToProteinMap;
 
         /// <summary>
         /// When True, skips near-duplicate lines in the PHRP data file (lines with the same peptide in the same scan, but different protein names)
