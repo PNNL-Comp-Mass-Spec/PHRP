@@ -2046,6 +2046,16 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize each entry in columnMapping to -1
                 foreach (MSGFPlusSynFileColumns resultColumn in Enum.GetValues(typeof(MSGFPlusSynFileColumns)))
                 {
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                    if (resultColumn is
+                        MSGFPlusSynFileColumns.SpecProb_EValue or MSGFPlusSynFileColumns.RankSpecProb or MSGFPlusSynFileColumns.PValue_EValue or
+                        MSGFPlusSynFileColumns.FDR_QValue or MSGFPlusSynFileColumns.PepFDR_PepQValue)
+                    {
+                        continue;
+                    }
+#pragma warning restore CS0618 // Type or member is obsolete
+
                     columnMapping.Add(resultColumn, -1);
                 }
 

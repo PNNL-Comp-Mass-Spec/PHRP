@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa
 
-        public const string PROGRAM_DATE = "April 23, 2021";
+        public const string PROGRAM_DATE = "April 30, 2021";
 
         private static readonly PHRPOptions Options = new();
 
