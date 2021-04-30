@@ -839,6 +839,68 @@ namespace PeptideHitResultsProcessor.Processor
             return combinedName.ToString();
         }
 
+        /// <summary>
+        /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
+        /// </summary>
+        /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
+        /// <param name="precursorMZ">Precursor m/z</param>
+        /// <param name="charge">Precursor charge</param>
+        /// <param name="peptideMonoisotopicMass"></param>
+        /// <param name="adjustPrecursorMassForC13">Peptide's monoisotopic mass</param>
+        /// <returns>DelM, in ppm</returns>
+        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
+        private double ComputeDelMCorrectedPPM(
+            double precursorErrorDa,
+            double precursorMZ,
+            int charge,
+            double peptideMonoisotopicMass,
+            bool adjustPrecursorMassForC13)
+        {
+            // Compute the original value for the precursor monoisotopic mass
+            var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
+
+            return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
+        }
+
+        /// <summary>
+        /// Compute observed DelM and DelM_PPM values
+        /// </summary>
+        /// <param name="filteredSearchResults">Search results</param>
+        /// <param name="precursorsByDataset">Keys are dataset names, values are dictionaries of precursor m/z by scan number</param>
+        private void ComputeObservedMassErrors(
+            IList<MaxQuantSearchResult> filteredSearchResults,
+            IReadOnlyDictionary<string, Dictionary<int, double>> precursorsByDataset)
+        {
+            for (var i = 0; i < filteredSearchResults.Count; i++)
+            {
+                var searchResult = filteredSearchResults[i];
+
+                if (!precursorsByDataset.TryGetValue(searchResult.DatasetName, out var precursorsByScan))
+                    continue;
+
+                if (!precursorsByScan.TryGetValue(searchResult.ScanNum, out var precursorMz))
+                    continue;
+
+                var observedPrecursorMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMz, searchResult.ChargeNum, 0);
+
+                var precursorErrorDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
+
+                var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(precursorErrorDa, precursorMz,
+                    searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP,
+                    true);
+
+                searchResult.MassErrorPpm = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
+
+                precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, searchResult.CalculatedMonoMassPHRP);
+
+                // Note that this will be a C13-corrected precursor error; not the true precursor error
+                searchResult.MassErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
+
+                // Update the value in the list
+                filteredSearchResults[i] = searchResult;
+            }
+        }
+
         private double ComputePeptideMass(string cleanSequence, double totalModMass)
         {
             var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
