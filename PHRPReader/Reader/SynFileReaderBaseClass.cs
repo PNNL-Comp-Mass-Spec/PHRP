@@ -461,12 +461,7 @@ namespace PHRPReader.Reader
             // Define the default column mapping
             var headerNames = GetColumnHeaderNames();
 
-            mColumnHeaders.Clear();
-
-            foreach (var headerName in headerNames)
-            {
-                AddHeaderColumn(headerName);
-            }
+            DefineColumnHeaders(mColumnHeaders, headerNames);
         }
 
         /// <summary>
@@ -578,6 +573,19 @@ namespace PHRPReader.Reader
             }
 
             return mNewPeptide.ToString();
+        }
+
+        /// <summary>
+        /// Define the default column mapping
+        /// </summary>
+        public static void DefineColumnHeaders(SortedDictionary<string, int> columnHeaders, List<string> headerNames)
+        {
+            columnHeaders.Clear();
+
+            foreach (var headerName in headerNames)
+            {
+                columnHeaders.Add(headerName, columnHeaders.Count);
+            }
         }
 
         /// <summary>
