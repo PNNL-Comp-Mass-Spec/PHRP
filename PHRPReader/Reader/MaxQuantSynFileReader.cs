@@ -24,6 +24,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Search engine name
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         private const string MAXQUANT_SEARCH_ENGINE_NAME = "MaxQuant";
 
         /// <summary>
@@ -137,6 +138,8 @@ namespace PHRPReader.Reader
                 { "PrecursorMZ", MaxQuantSynFileColumns.PrecursorMZ },
                 { "DelM", MaxQuantSynFileColumns.DelM },
                 { "DelM_PPM", MaxQuantSynFileColumns.DelM_PPM },
+                { "DelM_MaxQuant", MaxQuantSynFileColumns.DelM_MaxQuant },
+                { "DelM_PPM_MaxQuant", MaxQuantSynFileColumns.DelM_PPM_MaxQuant },
                 { "MH", MaxQuantSynFileColumns.MH },
                 { "Mass", MaxQuantSynFileColumns.Mass },
                 { "Peptide", MaxQuantSynFileColumns.Peptide },

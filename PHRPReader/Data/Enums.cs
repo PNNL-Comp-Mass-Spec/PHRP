@@ -117,8 +117,11 @@ namespace PHRPReader.Data
         Charge = 6,
 
         /// <summary>
-        /// Precursor ion m/z
+        /// Precursor ion m/z (theoretical value, not observed value)
         /// </summary>
+        /// <remarks>
+        /// This is the theoretical m/z of the first isotope of the isotopic distribution of the parent ion
+        /// </remarks>
         PrecursorMZ = 7,
 
         /// <summary>
@@ -133,19 +136,31 @@ namespace PHRPReader.Data
         DelM_PPM = 9,
 
         /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence,
+        /// as computed by MaxQuant
+        /// </summary>
+        DelM_MaxQuant = 10,
+
+        /// <summary>
+        /// Mass Error, in ppm, as computed by MaxQuant
+        /// </summary>
+        DelM_PPM_MaxQuant = 11,
+
+        /// <summary>
         /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
         /// </summary>
-        MH = 10,
+        MH = 12,
 
         /// <summary>
         /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
         /// </summary>
-        Mass = 11,
+        Mass = 13,
 
         /// <summary>
         /// Peptide sequence, including modification symbols
         /// </summary>
-        Peptide = 12,
+        Peptide = 14,
 
         /// <summary>
         /// Proteins
@@ -153,7 +168,7 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Semicolon separated list
         /// </remarks>
-        Proteins = 13,
+        Proteins = 15,
 
         /// <summary>
         /// Name of the best scoring protein this peptide is associated with
@@ -162,12 +177,12 @@ namespace PHRPReader.Data
         /// Typically there is only one protein name here
         /// However, in cases of a tied score, will be a semicolon separated list
         /// </remarks>
-        LeadingRazorProtein = 14,
+        LeadingRazorProtein = 16,
 
         /// <summary>
         /// Number of tryptic terminii
         /// </summary>
-        NTT = 15,
+        NTT = 17,
 
         /// <summary>
         /// Posterior error probability
@@ -176,7 +191,7 @@ namespace PHRPReader.Data
         /// Similar to p-value
         /// Smaller values (closer to zero) are higher confidence
         /// </remarks>
-        PEP = 16,
+        PEP = 18,
 
         /// <summary>
         ///  Andromeda score for the best MS/MS spectrum with this peptide
@@ -184,62 +199,62 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Higher scores are better
         /// </remarks>
-        Score = 17,
+        Score = 19,
 
         /// <summary>
         /// Score difference to the second best identified peptide with a different amino acid sequence
         /// </summary>
-        DeltaScore = 18,
+        DeltaScore = 20,
 
         /// <summary>
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
         /// </summary>
-        Intensity = 19,
+        Intensity = 21,
 
         /// <summary>
         /// Mass Analyzer of the instrument
         /// </summary>
-        MassAnalyzer = 20,
+        MassAnalyzer = 22,
 
         /// <summary>
         /// Type of precursor ion as identified by MaxQuant
         /// </summary>
-        PrecursorType = 21,
+        PrecursorType = 23,
 
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        RetentionTime = 22,
+        RetentionTime = 24,
 
         /// <summary>
         /// Scan number where the precursor ion was observed
         /// </summary>
-        PrecursorScan = 23,
+        PrecursorScan = 25,
 
         /// <summary>
         /// Intensity of the precursor ion in the scan that it was observed
         /// </summary>
-        PrecursorIntensity = 24,
+        PrecursorIntensity = 26,
 
         /// <summary>
         /// Number of peaks (MS/MS ions) matching to the predicted fragmentation spectrum
         /// </summary>
-        NumberOfMatches = 25,
+        NumberOfMatches = 27,
 
         /// <summary>
         /// Fraction of intensity in the MS/MS spectrum that is annotated
         /// </summary>
-        IntensityCoverage = 26,
+        IntensityCoverage = 28,
 
         /// <summary>
         /// Number of missed enzymatic cleavages
         /// </summary>
-        MissedCleavages = 27,
+        MissedCleavages = 29,
 
         /// <summary>
         /// Unique (consecutive) identifier for each row in msms.txt
         /// </summary>
-        MsMsID = 28,
+        MsMsID = 30,
 
         /// <summary>
         /// Identifier of the protein-group this redundant peptide sequence is associated with
@@ -253,7 +268,7 @@ namespace PHRPReader.Data
         /// Can be used to look up the extended protein information in the proteinGroups.txt file
         /// </para>
         /// </remarks>
-        ProteinGroupIDs = 29,
+        ProteinGroupIDs = 31,
 
         /// <summary>
         /// The identifier of the non-redundant peptide sequence
@@ -261,17 +276,17 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Corresponds to the id column in the peptides.txt file
         /// </remarks>
-        PeptideID = 30,
+        PeptideID = 32,
 
         /// <summary>
         /// Identifier referencing a row in the modificationSpecificPeptides.txt file
         /// </summary>
-        ModPeptideID = 31,
+        ModPeptideID = 33,
 
         /// <summary>
         /// Identifier referencing a row in the evidence.txt file
         /// </summary>
-        EvidenceID = 32
+        EvidenceID = 34
     }
 
     /// <summary>
