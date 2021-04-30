@@ -4,7 +4,7 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, Daltons, MaxQuant, novo, tda, terminii, tryptic
+    // Ignore Spelling: Da, Daltons, Hyperscore, MaxQuant, novo, tda, terminii, tryptic
 
 #pragma warning disable 1591
 
@@ -294,15 +294,40 @@ namespace PHRPReader.Data
     /// </summary>
     public enum MODPlusSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         Scan = 1,
+
         Spectrum_Index = 2,
         Charge = 3,
         PrecursorMZ = 4,
-        DelM = 5,                            // Precursor error, in Daltons
-        DelM_PPM = 6,                        // Precursor error, in ppm
-        MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-        Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+
+        /// <summary>
+        /// Precursor error, in Da
+        /// </summary>
+        DelM = 5,
+
+        /// <summary>
+        /// Precursor error, in ppm; corrected for isotope selection errors
+        /// </summary>
+        DelM_PPM = 6,
+
+        /// <summary>
+        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// </summary>
+        MH = 7,
+
+        /// <summary>
+        /// This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+        /// </summary>
+        Peptide = 8,
+
         NTT = 9,
         ModificationAnnotation = 10,
         Protein = 11,
@@ -324,11 +349,32 @@ namespace PHRPReader.Data
         Spectrum_ID = 3,
         Charge = 4,
         PrecursorMZ = 5,
-        DelM = 6,                            // Precursor error, in Da
-        DelMPPM = 7,                         // Precursor error, in ppm
-        MH = 8,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-        Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
-        Protein = 10,                        // Protein Name
+
+        /// <summary>
+        /// Precursor error, in Da
+        /// </summary>
+        DelM = 6,
+
+        /// <summary>
+        /// Precursor error, in ppm; corrected for isotope selection errors
+        /// </summary>
+        DelMPPM = 7,
+
+        /// <summary>
+        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// </summary>
+        MH = 8,
+
+        /// <summary>
+        /// This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+        /// </summary>
+        Peptide = 9,
+
+        /// <summary>
+        /// Protein Name
+        /// </summary>
+        Protein = 10,
+
         Protein_Mass = 11,
         Unexpected_Mod_Count = 12,
         Peak_Count = 13,
@@ -566,7 +612,7 @@ namespace PHRPReader.Data
         ResultID = 0,
 
         /// <summary>
-        /// Scan
+        /// Scan number
         /// </summary>
         Scan = 1,
 
@@ -661,16 +707,46 @@ namespace PHRPReader.Data
     /// </summary>
     public enum MODaSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         Scan = 1,
+
         Spectrum_Index = 2,
         Charge = 3,
         PrecursorMZ = 4,
-        DelM = 5,                            // Precursor error, in Da
-        DelM_PPM = 6,                        // Precursor error, in ppm
-        MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-        Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
-        Protein = 9,                         // Protein Name
+
+        /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence
+        /// </summary>
+        DelM = 5,
+
+        /// <summary>
+        /// Precursor error, in ppm; corrected for isotope selection errors
+        /// </summary>
+        DelM_PPM = 6,
+
+        /// <summary>
+        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// </summary>
+        MH = 7,
+
+        /// <summary>
+        /// This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+        /// </summary>
+        Peptide = 8,
+
+        /// <summary>
+        /// Protein Name
+        /// </summary>
+        Protein = 9,
+
         Score = 10,
         Probability = 11,
         Rank_Probability = 12,
@@ -782,22 +858,61 @@ namespace PHRPReader.Data
     /// </summary>
     public enum XTandemSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
         GroupID = 1,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         Scan = 2,
+
         Charge = 3,
+
+        /// <summary>
+        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+        /// </summary>
         MH = 4,
+
+        /// <summary>
+        /// Hyperscore
+        /// </summary>
         Hyperscore = 5,
-        EValue = 6,                 // Peptide_Expectation_Value_LogE
-        ProteinCount = 7,           // Multiple_Protein_Count
+
+        /// <summary>
+        /// Peptide_Expectation_Value_LogE
+        /// </summary>
+        EValue = 6,
+
+        /// <summary>
+        /// Multiple_Protein_Count
+        /// </summary>
+        ProteinCount = 7,
+
         Peptide = 8,
         DeltaCn2 = 9,
         YScore = 10,
         YIons = 11,
         BScore = 12,
         BIons = 13,
+
+        /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence
+        /// </summary>
         DelM = 14,
-        Intensity = 15,             // Peptide_Intensity_LogI
+
+        /// <summary>
+        /// Peptide_Intensity_LogI
+        /// </summary>
+        Intensity = 15,
+
+        /// <summary>
+        /// Precursor error, in ppm; corrected for isotope selection errors
+        /// </summary>
         DelMPPM = 16
     }
 
