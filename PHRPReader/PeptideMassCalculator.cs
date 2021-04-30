@@ -937,15 +937,15 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Converts from a ppm value to a mass value, using the specified m/z as a reference point
+        /// Converts from a ppm value to a mass value, using the specified mass value as a reference point
         /// </summary>
         /// <param name="ppmToConvert"></param>
-        /// <param name="currentMZ"></param>
-        public static double PPMToMass(double ppmToConvert, double currentMZ)
+        /// <param name="currentMass"></param>
+        public static double PPMToMass(double ppmToConvert, double currentMass)
         {
-            // Converts ppmToConvert to a mass value, which is dependent on currentMZ
+            // Converts ppmToConvert to a mass value, which is dependent on currentMass
 
-            return ppmToConvert / 1000000.0 * currentMZ;
+            return ppmToConvert / 1000000.0 * currentMass;
         }
 
         /// <summary>
