@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="clsPHRPReader.cs" />
     <Compile Include="Data\Enums.cs" />
+    <Compile Include="Data\PrecursorInfo.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MSGFPlusParamFileModExtractor.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="PeptideMassCalculator.cs" />
     <Compile Include="ReaderFactory.cs" />
     <Compile Include="Reader\MaxQuantSynFileReader.cs" />
+    <Compile Include="Reader\PrecursorInfoFileReader.cs" />
     <Compile Include="StartupOptions.cs" />
     <Compile Include="Data\AminoAcidModInfo.cs" />
     <Compile Include="Data\EmpiricalFormula.cs" />

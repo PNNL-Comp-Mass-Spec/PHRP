@@ -678,6 +678,18 @@ namespace PHRPReader.Data
         QValue = 14
     }
 
+    /// <summary>
+    /// These columns correspond to the tab-delimited _PrecursorInfo.txt file created by the Analysis Manager
+    /// </summary>
+    public enum PrecursorInfoFileColumns
+    {
+        ScanNumber = 0,
+        ScanTime = 1,
+        ScanType = 2,
+        ScanTypeName = 3,
+        PrecursorMz = 4,
+        ScanFilterText = 5
+    }
 
     /// <summary>
     /// These columns correspond to the tab-delimited _ScanStats.txt file created by MASIC or MSFileInfoScanner
