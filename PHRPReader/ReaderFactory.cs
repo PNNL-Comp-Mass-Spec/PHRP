@@ -2188,8 +2188,7 @@ namespace PHRPReader
 
                 success = SynFileReader.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
 
-                if (mPSMCurrent == null)
-                    mPSMCurrent = new PSM();
+                mPSMCurrent ??= new PSM();
 
                 mPSMCurrentFinalized = false;
                 mExtendedScanStatsValid = false;
@@ -2278,7 +2277,7 @@ namespace PHRPReader
 
                 // Check for duplicate lines
                 // If this line is a duplicate of the previous line, skip it
-                // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
+                // This happens in SEQUEST _syn.txt files where the line is repeated for all protein matches
                 // It can also happen in MS-GF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
 
                 var isDuplicate = false;
@@ -2309,7 +2308,9 @@ namespace PHRPReader
                     if (additionalProteins.Count > 0)
                     {
                         foreach (var item in additionalProteins)
+                        {
                             mPSMCurrent.AddProtein(item);
+                        }
                     }
                 }
                 else
