@@ -225,6 +225,47 @@ namespace PHRP_UnitTests
         }
 
         [Test]
+        [TestCase(@"MXQ202103181341_Auto1878805\QC_Shew_16_01-15f_08_4Nov16_Tiger_16-02-14_PrecursorInfo.txt",
+            7718,
+            "307.86; 522.80; 528.60; 388.71; 684.21; 323.19; 313.31; 343.93; 379.29; 339.96; 307.86")]
+        public void TestPrecursorInfoFileReader(string inputFilePath, int expectedResultCount, string initialPrecursorMzValues)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var reader = new PHRPReader.Reader.PrecursorInfoFileReader();
+
+            var precursorInfoData = reader.ReadPrecursorInfoFile(inputFile.FullName);
+
+            Console.WriteLine("Loaded Precursor m/z info for {0} MSn scans", precursorInfoData.Count);
+
+            if (expectedResultCount > 0)
+            {
+                Assert.AreEqual(expectedResultCount, precursorInfoData.Count);
+            }
+
+            var initialPrecursors = new List<double>();
+            foreach (var item in initialPrecursorMzValues.Split(';'))
+            {
+                initialPrecursors.Add(double.Parse(item));
+            }
+
+            var scansShown = 0;
+            foreach (var item in precursorInfoData)
+            {
+                Console.WriteLine("Scan {0,-2} has {1:F2} m/z precursor; {2}", item.Key, item.Value.PrecursorMz, item.Value.ScanFilterText);
+
+                if (scansShown < initialPrecursors.Count)
+                {
+                    Assert.AreEqual(initialPrecursors[scansShown], item.Value.PrecursorMz);
+                }
+
+                scansShown++;
+                if (scansShown > 10)
+                    break;
+            }
+        }
+
+        [Test]
         [TestCase(
             @"TPC201808171745_Auto1624200\MZ20170525_Mnx_PFA_toppic_syn.txt",
             0,
