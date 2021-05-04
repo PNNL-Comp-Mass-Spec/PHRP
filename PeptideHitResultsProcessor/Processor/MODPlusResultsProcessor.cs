@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         public MODPlusResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "July 10, 2019";
+            FileDate = "May 3, 2021";
         }
 
         public const string TOOL_NAME = "ModPlus";
@@ -1084,7 +1084,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusSynFileHeaderLine(string lineIn, IDictionary<MODPlusSynFileColumns, int> columnMapping)
         {
-            var columnNames = MODPlusSynFileReader.GetColumnHeaderNamesAndIDs();
+            var columnNames = MODPlusSynFileReader.GetColumnHeaderNamesAndIDs(true);
 
             columnMapping.Clear();
 
@@ -1629,7 +1629,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = MODPlusSynFileReader.GetColumnHeaderNamesAndIDs();
+                var headerColumns = MODPlusSynFileReader.GetColumnHeaderNamesAndIDs(false);
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 

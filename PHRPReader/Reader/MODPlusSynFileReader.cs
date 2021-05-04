@@ -128,7 +128,7 @@ namespace PHRPReader.Reader
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
-            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs(false).Keys);
             return headerNames;
         }
 
@@ -136,9 +136,9 @@ namespace PHRPReader.Reader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
-        public static SortedDictionary<string, MODPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, MODPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeLegacyNames)
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, MODPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "ResultID", MODPlusSynFileColumns.ResultID },
                 { "Scan", MODPlusSynFileColumns.Scan },
@@ -158,6 +158,13 @@ namespace PHRPReader.Reader
                 { "Rank_Score", MODPlusSynFileColumns.Rank_Score },
                 { "QValue", MODPlusSynFileColumns.QValue }
             };
+
+            if (includeLegacyNames)
+            {
+                headerColumns.Add("Modification_Annotation", MODPlusSynFileColumns.ModificationAnnotation);
+            }
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -169,7 +176,7 @@ namespace PHRPReader.Reader
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<MODPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
-            var headerColumns = GetColumnHeaderNamesAndIDs();
+            var headerColumns = GetColumnHeaderNamesAndIDs(true);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
@@ -185,7 +192,7 @@ namespace PHRPReader.Reader
                 return mSynopsisFileColumn[column];
             }
 
-            foreach (var item in GetColumnHeaderNamesAndIDs())
+            foreach (var item in GetColumnHeaderNamesAndIDs(false))
             {
                 mSynopsisFileColumn.Add(item.Value, item.Key);
             }
