@@ -54,6 +54,7 @@ namespace PHRPReader
         public const string MSGF_RESULT_FILENAME_SUFFIX = "_MSGF.txt";
         public const string SCAN_STATS_FILENAME_SUFFIX = "_ScanStats.txt";
         public const string EXTENDED_SCAN_STATS_FILENAME_SUFFIX = "_ScanStatsEx.txt";
+        public const string SIC_STATS_FILENAME_SUFFIX = "_SICStats.txt";
         public const string PRECURSOR_INFO_FILENAME_SUFFIX = "_PrecursorInfo.txt";
 
 #pragma warning restore 1591

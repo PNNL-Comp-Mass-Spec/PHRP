@@ -46,6 +46,10 @@
     <Compile Include="clsPHRPReader.cs" />
     <Compile Include="Data\Enums.cs" />
     <Compile Include="Data\PrecursorInfo.cs" />
+    <Compile Include="Data\ReporterIonColumnInfo.cs" />
+    <Compile Include="Data\ReporterIonInfo.cs" />
+    <Compile Include="Data\ReporterIonStats.cs" />
+    <Compile Include="Data\SICStatsInfo.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MSGFPlusParamFileModExtractor.cs" />
@@ -54,6 +58,8 @@
     <Compile Include="ReaderFactory.cs" />
     <Compile Include="Reader\MaxQuantSynFileReader.cs" />
     <Compile Include="Reader\PrecursorInfoFileReader.cs" />
+    <Compile Include="Reader\ReporterIonsFileReader.cs" />
+    <Compile Include="Reader\SICStatsReader.cs" />
     <Compile Include="StartupOptions.cs" />
     <Compile Include="Data\AminoAcidModInfo.cs" />
     <Compile Include="Data\EmpiricalFormula.cs" />

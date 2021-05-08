@@ -768,6 +768,24 @@ namespace PHRPReader.Data
     }
 
     /// <summary>
+    /// These columns correspond to the tab-delimited _ReporterIons.txt file (created by MASIC)
+    /// </summary>
+    /// <remarks>
+    /// Note that the reporter ion intensity columns appear between the ReporterIonIntensityMax column and the WeightedAvgPctIntensityCorrection column
+    /// </remarks>
+    public enum ReporterIonsFileColumns
+    {
+        Dataset = 0,
+        ScanNumber = 1,
+        CollisionMode = 2,
+        ParentIonMZ = 3,
+        BasePeakIntensity = 4,
+        BasePeakMZ = 5,
+        ReporterIonIntensityMax = 6,
+        WeightedAvgPctIntensityCorrection = 7
+    }
+
+    /// <summary>
     /// These columns correspond to the tab-delimited _ScanStats.txt file created by MASIC or MSFileInfoScanner
     /// </summary>
     public enum ScanStatsFileColumns
@@ -817,6 +835,38 @@ namespace PHRPReader.Data
         Mod_Count = 24,
         Mod_Description = 25,
         Monoisotopic_Mass = 26
+    }
+
+    /// <summary>
+    /// These columns correspond to the tab-delimited SICStats.txt file created by MASIC
+    /// </summary>
+    public enum SICStatsFileColumns
+    {
+        Dataset = 0,
+        ParentIonIndex = 1,
+        MZ = 2,
+        SurveyScanNumber = 3,
+        FragScanNumber = 4,
+        OptimalPeakApexScanNumber = 5,
+        PeakApexOverrideParentIonIndex = 6,
+        CustomSICPeak = 7,
+        PeakScanStart = 8,
+        PeakScanEnd = 9,
+        PeakScanMaxIntensity = 10,
+        PeakMaxIntensity = 11,
+        PeakSignalToNoiseRatio = 12,
+        FWHMInScans = 13,
+        PeakArea = 14,
+        ParentIonIntensity = 15,
+        PeakBaselineNoiseLevel = 16,
+        PeakBaselineNoiseStDev = 17,
+        PeakBaselinePointsUsed = 18,
+        StatMomentsArea = 19,
+        CenterOfMassScan = 20,
+        PeakStDev = 21,
+        PeakSkew = 22,
+        PeakKSStat = 23,
+        StatMomentsDataCountUsed = 24
     }
 
     /// <summary>
