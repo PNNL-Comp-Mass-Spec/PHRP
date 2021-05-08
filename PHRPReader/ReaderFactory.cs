@@ -898,6 +898,10 @@ namespace PHRPReader
             filesToFind.Add(TopPICSynFileReader.FILENAME_SUFFIX_SYN);
             filesToFind.Add(TopPICSynFileReader.FILENAME_SUFFIX_FHT);
 
+            // MaxQuant
+            filesToFind.Add(MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
+            filesToFind.Add(MaxQuantSynFileReader.FILENAME_SUFFIX_FHT);
+
             // *****************
             // ** Important: SEQUEST needs to be added last since files simply end in _syn.txt or _fht.txt)
             // *****************
@@ -1242,6 +1246,7 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
 
