@@ -303,6 +303,11 @@ namespace PHRPReader.Reader
                         WeightedAvgPctIntensityCorrection = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.WeightedAvgPctIntensityCorrection), mColumnHeaders, 0.0),
                     };
 
+                    var startingColumnIndex = ReaderFactory.LookupColumnIndex(GetColumnNameByID(ReporterIonsFileColumns.ReporterIonIntensityMax), mColumnHeaders);
+                    reporterIonInfo.ReporterIonColumnData = startingColumnIndex >= 0
+                        ? ReaderFactory.FlattenArray(splitLine, startingColumnIndex)
+                        : string.Empty;
+
                     foreach (var reporterIon in mReporterIonHeaders)
                     {
                         var reporterIonStats = new ReporterIonStats(reporterIon.Value.MZ);

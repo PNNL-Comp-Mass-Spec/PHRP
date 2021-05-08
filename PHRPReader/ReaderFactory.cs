@@ -1637,6 +1637,37 @@ namespace PHRPReader
         }
 
         /// <summary>
+        /// Join a series of string values together, separating by a tab
+        /// </summary>
+        /// <param name="dataValues"></param>
+        /// <param name="indexStart">Index of the first item to include</param>
+        /// <returns>Tab-separated list of values</returns>
+        public static string FlattenArray(IList<string> dataValues, int indexStart)
+        {
+            var combinedText = string.Empty;
+            if (dataValues == null || dataValues.Count == 0)
+            {
+                return combinedText;
+            }
+
+            for (var index = indexStart; index < dataValues.Count; index++)
+            {
+                var value = dataValues[index] ?? string.Empty;
+
+                if (index > indexStart)
+                {
+                    combinedText += '\t' + value;
+                }
+                else
+                {
+                    combinedText = value;
+                }
+            }
+
+            return combinedText;
+        }
+
+        /// <summary>
         /// Determines the collision mode using the Scan Type name
         /// </summary>
         /// <param name="scanTypeName"></param>

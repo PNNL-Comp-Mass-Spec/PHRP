@@ -48,6 +48,14 @@ namespace PHRPReader.Data
         public List<ReporterIonStats> ReporterIons { get; }
 
         /// <summary>
+        /// Tab-delimited list of all of the reporter-ion related columns, starting with the first ReporterIonIntensityMax column
+        /// </summary>
+        /// <remarks>
+        /// The MASICResultsMerger program uses this property
+        /// </remarks>
+        public string ReporterIonColumnData { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scanNumber"></param>
