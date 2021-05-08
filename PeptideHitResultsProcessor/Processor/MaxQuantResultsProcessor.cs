@@ -908,17 +908,17 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var observedPrecursorMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMz, searchResult.ChargeNum, 0);
 
-                var precursorErrorDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
+                var deltaMassDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
 
-                var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(precursorErrorDa, precursorMz,
+                var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(deltaMassDa, precursorMz,
                     searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP,
                     true);
 
                 searchResult.MassErrorPpm = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
 
-                precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, searchResult.CalculatedMonoMassPHRP);
+                var precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, searchResult.CalculatedMonoMassPHRP);
 
-                // Note that this will be a C13-corrected precursor error; not the true precursor error
+                // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                 searchResult.MassErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
 
                 // Update the value in the list
@@ -1074,7 +1074,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="maxQuantPeptides"></param>
-        /// <param name="inputFilePath"></param>
+        /// <param name="inputFilePath">MaxQuant results file (msms.txt)</param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="modList"></param>
         /// <param name="baseName">Output: base synopsis file name</param>
@@ -1096,10 +1096,18 @@ namespace PeptideHitResultsProcessor.Processor
                 var columnMapping = new Dictionary<MaxQuantResultsFileColumns, int>();
                 var errorMessages = new List<string>();
 
-                OnStatusEvent("Reading MaxQuant results file, " + inputFilePath);
+                var inputFile = new FileInfo(inputFilePath);
+                if (inputFile.Directory == null)
+                {
+                    SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                    return false;
+                }
+
+                OnStatusEvent("Reading MaxQuant results file, " + inputFile.FullName);
 
                 // Open the input file and parse it
-                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var headerParsed = false;
                 var lineNumber = 0;
@@ -1129,7 +1137,7 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             if (string.IsNullOrEmpty(mErrorMessage))
                             {
-                                SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
+                                SetErrorMessage("Invalid header line in " + inputFile.Name);
                             }
 
                             return false;
@@ -1139,8 +1147,9 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var validSearchResult =
-                        ParseMaxQuantResultsFileEntry(maxQuantPeptides, lineIn, out var searchResult, errorMessages, columnMapping, modList, lineNumber);
+                    var validSearchResult = ParseMaxQuantResultsFileEntry(
+                        maxQuantPeptides, lineIn, out var searchResult,
+                        errorMessages, columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -1179,7 +1188,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Load Precursor m/z masses (if an appropriate file can be found)
                 // If found, compute MassErrorPpm and MassErrorDa
-                var precursorsByDataset = LoadPrecursorIons(baseNameByDatasetName.Keys.ToList());
+                var precursorMzLoader = new ScanPrecursorMzLoader(inputFile.Directory.FullName);
+                RegisterEvents(precursorMzLoader);
+
+                var precursorsByDataset = precursorMzLoader.LoadPrecursorIons(baseNameByDatasetName.Keys.ToList());
 
                 if (precursorsByDataset.Count > 0)
                 {
@@ -1878,41 +1890,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        /// <summary>
-        /// Look for data files that have information regarding the precursor m/z value for each scan, for each dataset
-        /// If found, populate a dictionary with the data
-        /// </summary>
-        /// <param name="datasetNames"></param>
-        /// <returns>Dictionary where keys are dataset names and values are dictionaries of precursor m/z by scan number</returns>
-        private Dictionary<string, Dictionary<int, double>> LoadPrecursorIons(List<string> datasetNames)
-        {
-            var precursorsByDataset = new Dictionary<string, Dictionary<int, double>>();
-
-            // ToDo: For each dataset, load the observed precursor m/z from another file
-
-            // Support:
-            // 1) File with columns:  Dataset   Scan   PrecursorMZ
-            // 2) File with columns:  Dataset   Scan   ScanFilter
-            // 3) MASIC Dataset_SICstats.txt file,    column MZ
-            // 4) MASIC Dataset_ScanStatsEx.txt file, column "Scan Filter Text"
-
-            foreach (var dataset in datasetNames)
-            {
-                var precursorInfoFilePath = string.Empty;
-
-                if (!string.IsNullOrWhiteSpace(precursorInfoFilePath))
-                {
-                    var reader = new PrecursorInfoFileReader();
-
-                    var precursorInfoDataDictionary = reader.ReadPrecursorInfoFile(precursorInfoFilePath);
-                }
-            }
-
-            throw new NotImplementedException();
-
-            return precursorsByDataset;
-        }
-
         private bool LookupMaxQuantPeptideInfo(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string sequence,
@@ -2014,7 +1991,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMaxQuantSynFileEntry(lineIn, searchResult, errorMessages,
+                        var validSearchResult = ParseMaxQuantSynFileEntry(
+                            lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out _);
 
