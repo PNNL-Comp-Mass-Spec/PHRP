@@ -165,8 +165,8 @@ namespace PHRPReader.Reader
                         {
                             if (item.Key.Equals(ALTERNATE_SCAN_FILTER_COLUMN_NAME) && item.Value >= 0)
                             {
-                                // The file has ALTERNATE_SCAN_FILTER_COLUMN_NAME instead of "ScanFilterText"
-                                mPrecursorInfoFileColumn[PrecursorInfoFileColumns.ScanFilterText] = "Scan Filter Text";
+                                // The file has "Scan Filter Text" instead of "ScanFilterText"
+                                mPrecursorInfoFileColumn[PrecursorInfoFileColumns.ScanFilterText] = ALTERNATE_SCAN_FILTER_COLUMN_NAME;
                                 break;
                             }
                         }
