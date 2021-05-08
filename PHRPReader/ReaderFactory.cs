@@ -2368,8 +2368,8 @@ namespace PHRPReader
         /// <param name="filterText"></param>
         /// <param name="parentIonMz"></param>
         /// <returns>True if parsing successful</returns>
-        /// <remarks>The original version of this code is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
-        private bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
+        /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
+        public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
             Regex matcher;
 
