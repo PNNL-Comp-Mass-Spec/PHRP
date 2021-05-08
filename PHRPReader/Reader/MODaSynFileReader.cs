@@ -30,6 +30,14 @@ namespace PHRPReader.Reader
         /// <summary>
         /// MODa first hits file suffix
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This public constant is defined for compatibility with other classes
+        /// </para>
+        /// <para>
+        /// We don't actually create first-hits files for MaxQuant results
+        /// </para>
+        /// </remarks>
         public const string FILENAME_SUFFIX_FHT = "_moda_fht.txt";
 
         /// <summary>

@@ -22,6 +22,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Column headers
         /// </summary>
+        /// <remarks>Keys are column name, values are 0-based column index</remarks>
         private readonly SortedDictionary<string, int> mColumnHeaders;
 
         /// <summary>
@@ -54,7 +55,6 @@ namespace PHRPReader.Reader
         {
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
-
 
         /// <summary>
         /// Define header names

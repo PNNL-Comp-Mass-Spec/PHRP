@@ -19,7 +19,10 @@ namespace PHRPReader.Reader
     /// </summary>
     public class ScanStatsReader
     {
-        // Column headers
+        /// <summary>
+        /// Column headers
+        /// </summary>
+        /// <remarks>Keys are column name, values are 0-based column index</remarks>
         private readonly SortedDictionary<string, int> mColumnHeaders;
 
         /// <summary>
@@ -82,8 +85,7 @@ namespace PHRPReader.Reader
                 {"BasePeakSignalToNoiseRatio", ScanStatsFileColumns.BasePeakSignalToNoiseRatio},
                 {"IonCount", ScanStatsFileColumns.IonCount},
                 {"IonCountRaw", ScanStatsFileColumns.IonCountRaw},
-                {"ScanTypeName", ScanStatsFileColumns.ScanTypeName},
-
+                {"ScanTypeName", ScanStatsFileColumns.ScanTypeName}
             };
         }
 

@@ -129,6 +129,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return items.First();
 
             var shortestItem = items.First();
+
             foreach (var item in items.Skip(1))
             {
                 if (item.Length < shortestItem.Length)

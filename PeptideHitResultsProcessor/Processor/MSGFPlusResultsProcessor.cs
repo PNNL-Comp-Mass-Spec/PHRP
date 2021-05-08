@@ -924,7 +924,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
+                        var validSearchResult = ParseMSGFPlusResultsFileEntry(
+                            lineIn, isMsgfPlus, msgfPlusModInfo,
                             searchResultsCurrentScan, errorMessages,
                             columnMapping, ref nextScanGroupID, scanGroupDetails,
                             scanGroupCombo, specIdToIndex);
@@ -1484,7 +1485,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSGFPlusSynFileEntry(lineIn, searchResult, errorMessages,
+                        var validSearchResult = ParseMSGFPlusSynFileEntry(
+                            lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 
@@ -1829,7 +1831,7 @@ namespace PeptideHitResultsProcessor.Processor
                             {
                                 precursorErrorDa = PeptideMassCalculator.PPMToMass(pMErrorPPM, peptideMonoisotopicMass);
 
-                                // Note that this will be a C13-corrected precursor error; not the true precursor error
+                                // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                                 udtSearchResult.PMErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
                             }
                         }
@@ -1850,7 +1852,7 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, peptideMonoisotopicMass);
 
-                            // Note that this will be a C13-corrected precursor error; not the true precursor error
+                            // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                             udtSearchResult.PMErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
                         }
                     }
@@ -2046,7 +2048,6 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize each entry in columnMapping to -1
                 foreach (MSGFPlusSynFileColumns resultColumn in Enum.GetValues(typeof(MSGFPlusSynFileColumns)))
                 {
-
 #pragma warning disable CS0618 // Type or member is obsolete
                     if (resultColumn is
                         MSGFPlusSynFileColumns.SpecProb_EValue or MSGFPlusSynFileColumns.RankSpecProb or MSGFPlusSynFileColumns.PValue_EValue or

@@ -728,7 +728,8 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var validSearchResult = ParseMODPlusSynFileEntry(
-                            lineIn, searchResult, errorMessages, resultsProcessed, columnMapping, out _);
+                            lineIn, searchResult, errorMessages,
+                            resultsProcessed, columnMapping, out _);
 
                         resultsProcessed++;
                         if (!validSearchResult)

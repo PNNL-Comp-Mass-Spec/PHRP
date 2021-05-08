@@ -1,5 +1,8 @@
 ﻿namespace PHRPReader.Data
 {
+    /// <summary>
+    /// This class tracks data read from a _PrecursorInfo.txt file
+    /// </summary>
     public class PrecursorInfo
     {
         private string mScanTypeName;

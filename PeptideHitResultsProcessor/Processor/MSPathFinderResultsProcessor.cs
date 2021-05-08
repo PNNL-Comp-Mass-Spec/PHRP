@@ -506,7 +506,9 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var validSearchResult = ParseMSPathFinderResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping, modList, lineNumber);
+                    var validSearchResult = ParseMSPathFinderResultsFileEntry(
+                        lineIn, out var udtSearchResult, errorMessages,
+                        columnMapping, modList, lineNumber);
 
                     if (validSearchResult)
                     {
@@ -720,7 +722,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSPathFinderSynFileEntry(lineIn, searchResult, errorMessages,
+                        var validSearchResult = ParseMSPathFinderSynFileEntry(
+                            lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out _);
 

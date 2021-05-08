@@ -801,7 +801,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseTopPICSynFileEntry(lineIn, searchResult, errorMessages,
+                        var validSearchResult = ParseTopPICSynFileEntry(
+                            lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 

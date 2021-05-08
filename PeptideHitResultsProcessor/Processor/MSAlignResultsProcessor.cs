@@ -741,7 +741,8 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var validSearchResult = ParseMSAlignSynFileEntry(lineIn, searchResult, errorMessages,
+                        var validSearchResult = ParseMSAlignSynFileEntry(
+                            lineIn, searchResult, errorMessages,
                             resultsProcessed, columnMapping,
                             out var currentPeptideWithMods);
 
