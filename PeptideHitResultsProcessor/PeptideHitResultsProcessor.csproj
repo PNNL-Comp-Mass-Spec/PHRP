@@ -79,6 +79,7 @@
     <Compile Include="Processor\MSGFPlusResultsProcessor.cs" />
     <Compile Include="Processor\MSPathFinderResultsProcessor.cs" />
     <Compile Include="Processor\PHRPBaseClass.cs" />
+    <Compile Include="Processor\ScanPrecursorMzLoader.cs" />
     <Compile Include="Processor\SequestResultsProcessor.cs" />
     <Compile Include="Processor\TopPICResultsProcessor.cs" />
     <Compile Include="Processor\XtandemResultsProcessor.cs" />
