@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PHRPReader.Data;
+using PRISM;
 
 // ReSharper disable UnusedMember.Global
 
@@ -11,7 +12,7 @@ namespace PHRPReader.Reader
     /// <summary>
     /// This class reads a tab-delimited _PrecursorInfo.txt file (created by the Analysis Manager)
     /// </summary>
-    public class PrecursorInfoFileReader
+    public class PrecursorInfoFileReader : EventNotifier
     {
         private const string ALTERNATE_SCAN_FILTER_COLUMN_NAME = "Scan Filter Text";
 
@@ -137,6 +138,7 @@ namespace PHRPReader.Reader
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var headerLineParsed = false;
+                var warningCount = 0;
 
                 while (!reader.EndOfStream)
                 {
@@ -193,8 +195,25 @@ namespace PHRPReader.Reader
                         ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(PrecursorInfoFileColumns.ScanFilterText), mColumnHeaders, string.Empty)
                     };
 
-                    precursorInfoData.Add(scanNumber, precursorInfo);
+                    if (Math.Abs(precursorInfo.PrecursorMz) < float.Epsilon && !string.IsNullOrWhiteSpace(precursorInfo.ScanFilterText))
+                    {
+                        // Try to extract the precursor m/z from the scan filter
+                        if (ReaderFactory.ExtractParentIonMzFromFilterText(precursorInfo.ScanFilterText, out var parentIonMz))
+                        {
+                            precursorInfo.PrecursorMz = parentIonMz;
+                        }
+                        else
+                        {
+                            warningCount++;
 
+                            if (warningCount < 10 || warningCount % 100 == 0)
+                            {
+                                OnWarningEvent("Unable to determine the precursor m/z value for scan " + scanNumber);
+                            }
+                        }
+                    }
+
+                    precursorInfoData.Add(scanNumber, precursorInfo);
                 }
             }
             catch (Exception ex)
