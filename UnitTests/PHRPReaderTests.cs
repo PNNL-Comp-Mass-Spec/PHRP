@@ -397,11 +397,11 @@ namespace PHRP_UnitTests
 
                 var dataToShow = new List<string>
                 {
-                    string.Format("{0,-12}", "Ion"),
-                    string.Format("{0,-12}", "Intensity"),
-                    string.Format("{0,-12}", "Original Int"),
-                    string.Format("{0,-12}", "S/N"),
-                    string.Format("{0,-12}", "Resolution")
+                    string.Format("{0,-14}", "Ion"),
+                    string.Format("{0,-14}", "Intensity"),
+                    string.Format("{0,-14}", "Original Int."),
+                    string.Format("{0,-14}", "S/N"),
+                    string.Format("{0,-14}", "Resolution")
                 };
 
                 foreach (var reporterIon in item.Value.ReporterIons)
@@ -418,11 +418,11 @@ namespace PHRP_UnitTests
                         ? reporterIon.Resolution.Value.ToString(CultureInfo.InvariantCulture)
                         : string.Empty;
 
-                    dataToShow[0] += string.Format("\t{0,-7:F2}", reporterIon.MZ);
-                    dataToShow[1] += string.Format("\t{0,-7:F0}", reporterIon.Intensity);
-                    dataToShow[2] += string.Format("\t{0,-7}", originalIntensity);
-                    dataToShow[3] += string.Format("\t{0,-7}", signalToNoise);
-                    dataToShow[4] += string.Format("\t{0,-7}", resolution);
+                    dataToShow[0] += string.Format("{0,-7:F2}", reporterIon.MZ);
+                    dataToShow[1] += string.Format("{0,-7:F0}", reporterIon.Intensity);
+                    dataToShow[2] += string.Format("{0,-7}", originalIntensity);
+                    dataToShow[3] += string.Format("{0,-7}", signalToNoise);
+                    dataToShow[4] += string.Format("{0,-7}", resolution);
                 }
 
                 Console.WriteLine(dataToShow[0]);
