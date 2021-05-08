@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -262,6 +263,174 @@ namespace PHRP_UnitTests
                 scansShown++;
                 if (scansShown > 10)
                     break;
+            }
+        }
+
+        [Test]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStats.txt", 0)]
+        public void TestScanStatsFileReader(string inputFilePath, int expectedResultCount)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var reader = new PHRPReader.Reader.ScanStatsReader();
+
+            var scanStatsData = reader.ReadScanStatsData(inputFile.FullName);
+
+            Console.WriteLine("Loaded scan stats data for {0} scans", scanStatsData.Count);
+
+            if (expectedResultCount > 0)
+            {
+                Assert.AreEqual(expectedResultCount, scanStatsData.Count);
+            }
+
+            var scanCount = 0;
+            foreach (var item in scanStatsData)
+            {
+                scanCount++;
+                if (scanCount < 10 || scanCount % 100 == 0)
+                {
+                    Console.WriteLine("Scan {0,-4} at {1:F2} minutes: ScanType = {2}", item.Key, item.Value.ScanTimeMinutes, item.Value.ScanType);
+                }
+            }
+        }
+
+        [Test]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStatsEx.txt", 0)]
+        public void TestExtendedScanStatsFileReader(string inputFilePath, int expectedResultCount)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var reader = new PHRPReader.Reader.ExtendedScanStatsReader();
+
+            var extendedScanStatsData = reader.ReadExtendedScanStatsData(inputFile.FullName);
+
+            Console.WriteLine("Loaded extended scan stats data for {0} scans", extendedScanStatsData.Count);
+
+            if (expectedResultCount > 0)
+            {
+                Assert.AreEqual(expectedResultCount, extendedScanStatsData.Count);
+            }
+
+            var scanCount = 0;
+            foreach (var item in extendedScanStatsData)
+            {
+                scanCount++;
+                if (scanCount >= 10 && scanCount % 100 != 0)
+                {
+                    continue;
+                }
+
+                var scanDescription =
+                    string.IsNullOrWhiteSpace(item.Value.CollisionMode) ?
+                        "MS1 scan" :
+                        "Collision mode=" + item.Value.CollisionMode;
+
+                Console.WriteLine("Scan {0,-4}, {1,-19}: {2}", item.Key, scanDescription, item.Value.ScanFilterText);
+            }
+        }
+
+        [Test]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_SICStats.txt", 0)]
+        public void TestSICStatsFileReader(string inputFilePath, int expectedResultCount)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var reader = new PHRPReader.Reader.SICStatsReader();
+
+            var sicStatsData = reader.ReadSICStatsData(inputFile.FullName);
+
+            Console.WriteLine("Loaded SICStats data for {0} scans", sicStatsData.Count);
+
+            if (expectedResultCount > 0)
+            {
+                Assert.AreEqual(expectedResultCount, sicStatsData.Count);
+            }
+
+            var scanCount = 0;
+            foreach (var item in sicStatsData)
+            {
+                scanCount++;
+                if (scanCount < 10 || scanCount % 100 == 0)
+                {
+                    Console.WriteLine("Scan {0,-4}, precursor {1:F2} m/z, peak area {2}", item.Key, item.Value.MZ, item.Value.PeakArea);
+                }
+            }
+        }
+
+        [Test]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ReporterIons.txt", 0)]
+        public void TestReporterIonsFileReader(string inputFilePath, int expectedResultCount)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var reader = new PHRPReader.Reader.ReporterIonsFileReader();
+
+            var reporterIonData = reader.ReadReporterIonData(inputFile.FullName);
+
+            Console.WriteLine("Loaded reporter ion data for {0} scans", reporterIonData.Count);
+
+            if (expectedResultCount > 0)
+            {
+                Assert.AreEqual(expectedResultCount, reporterIonData.Count);
+            }
+
+            var scanCount = 0;
+            foreach (var item in reporterIonData)
+            {
+                scanCount++;
+                if (scanCount >= 10 && scanCount % 100 != 0)
+                    continue;
+
+                Console.WriteLine("Scan {0,-4}, collision mode {1}, max intensity {2:F2}", item.Key, item.Value.CollisionMode, item.Value.ReporterIonIntensityMax);
+
+                var observedIonCount = 0;
+                foreach (var reporterIon in item.Value.ReporterIons)
+                {
+                    if (reporterIon.Intensity > 0)
+                        observedIonCount++;
+                }
+
+                if (observedIonCount == 0)
+                {
+                    continue;
+                }
+
+                var dataToShow = new List<string>
+                {
+                    string.Format("{0,-12}", "Ion"),
+                    string.Format("{0,-12}", "Intensity"),
+                    string.Format("{0,-12}", "Original Int"),
+                    string.Format("{0,-12}", "S/N"),
+                    string.Format("{0,-12}", "Resolution")
+                };
+
+                foreach (var reporterIon in item.Value.ReporterIons)
+                {
+                    var originalIntensity = reporterIon.OriginalIntensity.HasValue
+                        ? reporterIon.OriginalIntensity.Value.ToString("0")
+                        : string.Empty;
+
+                    var signalToNoise = reporterIon.SignalToNoise.HasValue
+                        ? reporterIon.SignalToNoise.Value.ToString(CultureInfo.InvariantCulture)
+                        : string.Empty;
+
+                    var resolution = reporterIon.Resolution.HasValue
+                        ? reporterIon.Resolution.Value.ToString(CultureInfo.InvariantCulture)
+                        : string.Empty;
+
+                    dataToShow[0] += string.Format("\t{0,-7:F2}", reporterIon.MZ);
+                    dataToShow[1] += string.Format("\t{0,-7:F0}", reporterIon.Intensity);
+                    dataToShow[2] += string.Format("\t{0,-7}", originalIntensity);
+                    dataToShow[3] += string.Format("\t{0,-7}", signalToNoise);
+                    dataToShow[4] += string.Format("\t{0,-7}", resolution);
+                }
+
+                Console.WriteLine(dataToShow[0]);
+                Console.WriteLine(dataToShow[1]);
+                Console.WriteLine(dataToShow[2]);
+                Console.WriteLine(dataToShow[3]);
+                Console.WriteLine(dataToShow[4]);
+                Console.WriteLine();
             }
         }
 
