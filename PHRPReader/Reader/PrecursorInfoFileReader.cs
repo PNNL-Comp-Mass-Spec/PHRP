@@ -218,10 +218,16 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading the _PrecursorInfo.txt file: " + ex.Message;
+                ReportError("Error reading the _PrecursorInfo.txt file", ex);
             }
 
             return precursorInfoData;
+        }
+
+        private void ReportError(string message, Exception ex)
+        {
+            OnErrorEvent(message, ex);
+            mErrorMessage = string.Format("{0}{1}", message, ex == null ? string.Empty : ": " + ex.Message);
         }
     }
 }

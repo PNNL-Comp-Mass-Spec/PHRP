@@ -11,13 +11,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PHRPReader.Data;
+using PRISM;
 
 namespace PHRPReader.Reader
 {
     /// <summary>
     /// This class reads MASIC ScanStats data from a tab-delimited _ScanStats.txt file
     /// </summary>
-    public class ScanStatsReader
+    public class ScanStatsReader : EventNotifier
     {
         /// <summary>
         /// Column headers
@@ -194,10 +195,16 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading the ScanStats data: " + ex.Message;
+                ReportError("Error reading the ScanStats data", ex);
             }
 
             return scanStats;
+        }
+
+        private void ReportError(string message, Exception ex)
+        {
+            OnErrorEvent(message, ex);
+            mErrorMessage = string.Format("{0}{1}", message, ex == null ? string.Empty : ": " + ex.Message);
         }
     }
 }

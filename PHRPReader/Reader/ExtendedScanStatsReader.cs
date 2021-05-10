@@ -13,13 +13,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PHRPReader.Data;
+using PRISM;
 
 namespace PHRPReader.Reader
 {
     /// <summary>
     /// Extended scan stats reader
     /// </summary>
-    public class ExtendedScanStatsReader
+    public class ExtendedScanStatsReader : EventNotifier
     {
         /// <summary>
         /// Column headers
@@ -209,10 +210,16 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading the ScanStatsEx data: " + ex.Message;
+                ReportError("Error reading the Extended Scan Stats data", ex);
             }
 
             return scanStats;
+        }
+
+        private void ReportError(string message, Exception ex)
+        {
+            OnErrorEvent(message, ex);
+            mErrorMessage = string.Format("{0}{1}", message, ex == null ? string.Empty : ": " + ex.Message);
         }
     }
 }

@@ -13,13 +13,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PHRPReader.Data;
+using PRISM;
 
 namespace PHRPReader.Reader
 {
     /// <summary>
     /// This class reads MASIC SIC stats data from a tab-delimited _SICStats.txt file
     /// </summary>
-    public class SICStatsReader
+    public class SICStatsReader : EventNotifier
     {
         /// <summary>
         /// Column headers
@@ -231,10 +232,16 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading the SICStats data: " + ex.Message;
+                ReportError("Error reading the SICStats data", ex);
             }
 
             return sicStats;
+        }
+
+        private void ReportError(string message, Exception ex)
+        {
+            OnErrorEvent(message, ex);
+            mErrorMessage = string.Format("{0}{1}", message, ex == null ? string.Empty : ": " + ex.Message);
         }
     }
 }
