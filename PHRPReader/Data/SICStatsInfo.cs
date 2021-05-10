@@ -21,6 +21,11 @@
         public double MZ { get; set; }
 
         /// <summary>
+        /// Precursor m/z
+        /// </summary>
+        public string MzText { get; set; }
+
+        /// <summary>
         /// Survey Scan Number
         /// </summary>
         public int SurveyScanNumber { get; set; }
@@ -66,9 +71,19 @@
         public double PeakMaxIntensity { get; set; }
 
         /// <summary>
+        /// Peak Max Intensity
+        /// </summary>
+        public string PeakMaxIntensityText { get; set; }
+
+        /// <summary>
         /// Peak Signal To Noise Ratio
         /// </summary>
         public double PeakSignalToNoiseRatio { get; set; }
+
+        /// <summary>
+        /// Peak Signal To Noise Ratio
+        /// </summary>
+        public string PeakSignalToNoiseRatioText { get; set; }
 
         /// <summary>
         /// FWHM In Scans
@@ -81,9 +96,19 @@
         public double PeakArea { get; set; }
 
         /// <summary>
+        /// Peak Area
+        /// </summary>
+        public string PeakAreaText { get; set; }
+
+        /// <summary>
         /// Parent Ion Intensity
         /// </summary>
         public double ParentIonIntensity { get; set; }
+
+        /// <summary>
+        /// Parent Ion Intensity
+        /// </summary>
+        public string ParentIonIntensityText { get; set; }
 
         /// <summary>
         /// Peak Baseline Noise Level
@@ -91,9 +116,19 @@
         public double PeakBaselineNoiseLevel { get; set; }
 
         /// <summary>
+        /// Peak Baseline Noise Level
+        /// </summary>
+        public string PeakBaselineNoiseLevelText { get; set; }
+
+        /// <summary>
         /// Peak Baseline Noise StDev
         /// </summary>
         public double PeakBaselineNoiseStDev { get; set; }
+
+        /// <summary>
+        /// Peak Baseline Noise StDev
+        /// </summary>
+        public string PeakBaselineNoiseStDevText { get; set; }
 
         /// <summary>
         /// Peak Baseline Points Used
@@ -106,6 +141,11 @@
         public double StatMomentsArea { get; set; }
 
         /// <summary>
+        /// Stat Moments Area
+        /// </summary>
+        public string StatMomentsAreaText { get; set; }
+
+        /// <summary>
         /// Center Of Mass Scan
         /// </summary>
         public int CenterOfMassScan { get; set; }
@@ -116,14 +156,29 @@
         public double PeakStDev { get; set; }
 
         /// <summary>
+        /// Peak StDev
+        /// </summary>
+        public string PeakStDevText { get; set; }
+
+        /// <summary>
         /// Peak Skew
         /// </summary>
         public double PeakSkew { get; set; }
 
         /// <summary>
+        /// Peak Skew
+        /// </summary>
+        public string PeakSkewText { get; set; }
+
+        /// <summary>
         /// Peak KSStat
         /// </summary>
         public double PeakKSStat { get; set; }
+
+        /// <summary>
+        /// Peak KSStat
+        /// </summary>
+        public string PeakKSStatText { get; set; }
 
         /// <summary>
         /// Stat Moments Data Count Used

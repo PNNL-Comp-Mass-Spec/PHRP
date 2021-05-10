@@ -174,6 +174,12 @@ namespace PHRPReader.Reader
 
                     var scanStatsInfo = new ScanStatsInfo(scanNumber, scanTimeMinutes, scanType)
                     {
+                        ScanTimeMinutesText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.ScanTime), mColumnHeaders),
+                        TotalIonIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.TotalIonIntensity), mColumnHeaders),
+                        BasePeakIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakIntensity), mColumnHeaders),
+                        BasePeakMzText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakMZ), mColumnHeaders),
+                        BasePeakSignalToNoiseRatioText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakSignalToNoiseRatio), mColumnHeaders),
+
                         TotalIonIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.TotalIonIntensity), mColumnHeaders, 0.0),
                         BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakIntensity), mColumnHeaders, 0.0),
                         BasePeakMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ScanStatsFileColumns.BasePeakMZ), mColumnHeaders, 0.0),

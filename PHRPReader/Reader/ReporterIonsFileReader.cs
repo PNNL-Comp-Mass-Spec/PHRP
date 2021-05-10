@@ -295,6 +295,7 @@ namespace PHRPReader.Reader
 
                     var reporterIonInfo = new ReporterIonInfo(scanNumber)
                     {
+                        ParentIonMzText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.ParentIonMZ), mColumnHeaders),
                         CollisionMode = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.CollisionMode), mColumnHeaders, string.Empty),
                         ParentIonMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.ParentIonMZ), mColumnHeaders, 0.0),
                         BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.BasePeakIntensity), mColumnHeaders, 0.0),

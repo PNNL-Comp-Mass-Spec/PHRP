@@ -23,6 +23,11 @@ namespace PHRPReader.Data
         public double ParentIonMZ { get; set; }
 
         /// <summary>
+        /// Parent ion m/z
+        /// </summary>
+        public string ParentIonMzText { get; set; }
+
+        /// <summary>
         /// Base peak intensity
         /// </summary>
         public double BasePeakIntensity { get; set; }

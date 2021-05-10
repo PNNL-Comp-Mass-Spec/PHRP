@@ -188,6 +188,18 @@ namespace PHRPReader.Reader
 
                     var sicStatsInfo = new SICStatsInfo(parentIonIndex)
                     {
+                        MzText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.MZ), mColumnHeaders),
+                        PeakMaxIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakMaxIntensity), mColumnHeaders),
+                        PeakSignalToNoiseRatioText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakSignalToNoiseRatio), mColumnHeaders),
+                        PeakAreaText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakArea), mColumnHeaders),
+                        ParentIonIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.ParentIonIntensity), mColumnHeaders),
+                        PeakBaselineNoiseLevelText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakBaselineNoiseLevel), mColumnHeaders),
+                        PeakBaselineNoiseStDevText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakBaselineNoiseStDev), mColumnHeaders),
+                        StatMomentsAreaText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.StatMomentsArea), mColumnHeaders),
+                        PeakStDevText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakStDev), mColumnHeaders),
+                        PeakSkewText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakSkew), mColumnHeaders),
+                        PeakKSStatText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakKSStat), mColumnHeaders),
+
                         Dataset = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.Dataset), mColumnHeaders, 0),
                         MZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.MZ), mColumnHeaders, 0.0),
                         SurveyScanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.SurveyScanNumber), mColumnHeaders, 0),
