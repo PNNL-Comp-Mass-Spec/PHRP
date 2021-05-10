@@ -53,12 +53,21 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
+        /// Reporter ion header names, starting with the ReporterIonIntensityMax column
+        /// </summary>
+        /// <remarks>
+        /// The MASICResultsMerger program uses this property
+        /// </remarks>
+        public List<string> ReporterIonHeaderNames { get; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public ReporterIonsFileReader()
         {
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             mReporterIonHeaders = new Dictionary<int, ReporterIonColumnInfo>();
+            ReporterIonHeaderNames = new List<string>();
         }
 
         /// <summary>
@@ -69,9 +78,14 @@ namespace PHRPReader.Reader
         private void CacheReporterIonColumnInfo(IReadOnlyList<string> columnNames, IDictionary<string, int> reporterIonMapping)
         {
             // The reporter ion columns should start in the column just after the ReporterIonIntensityMax column
-            var reporterIonIntensityMaxColIndex = mColumnHeaders[GetColumnNameByID(ReporterIonsFileColumns.ReporterIonIntensityMax)];
+            var reporterIonIntensityMaxName = GetColumnNameByID(ReporterIonsFileColumns.ReporterIonIntensityMax);
+            var reporterIonIntensityMaxColIndex = mColumnHeaders[reporterIonIntensityMaxName];
 
             mReporterIonHeaders.Clear();
+            reporterIonMapping.Clear();
+
+            ReporterIonHeaderNames.Clear();
+            ReporterIonHeaderNames.Add(reporterIonIntensityMaxName);
 
             int startColumnIndex;
             if (reporterIonIntensityMaxColIndex > 0)
@@ -104,6 +118,8 @@ namespace PHRPReader.Reader
 
             for (var columnIndex = startColumnIndex; columnIndex < columnNames.Count; columnIndex++)
             {
+                ReporterIonHeaderNames.Add(columnNames[columnIndex]);
+
                 var match = mzMatcher.Match(columnNames[columnIndex]);
                 if (!match.Success)
                     continue;
