@@ -65,5 +65,13 @@ namespace PHRPReader.Data
 
             ReporterIons = new List<ReporterIonStats>();
         }
+
+        /// <summary>
+        /// Show the scan number
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("Scan {0}", ScanNumber);
+        }
     }
 }

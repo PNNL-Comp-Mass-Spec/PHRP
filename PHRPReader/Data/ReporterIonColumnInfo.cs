@@ -50,5 +50,13 @@
             IntensityColumnName = intensityColumnName;
             MZ = reporterIonMz;
         }
+
+        /// <summary>
+        /// Show the intensity column name
+        /// </summary>
+        public override string ToString()
+        {
+            return IntensityColumnName;
+        }
     }
 }
