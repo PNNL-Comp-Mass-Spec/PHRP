@@ -603,6 +603,7 @@ namespace PHRPReader
                 // Validate the input files, including updating resultType if it is PeptideHitResultTypes.Unknown
                 // Note that the following populates DatasetName
                 var success = ValidateInputFiles(inputFilePath, ref resultType, ref modSummaryFilePath);
+
                 if (!success)
                 {
                     SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound, true);
@@ -1137,6 +1138,7 @@ namespace PHRPReader
                 case PeptideHitResultTypes.MODPlus:
                 case PeptideHitResultTypes.MSPathFinder:
                 case PeptideHitResultTypes.TopPIC:
+                case PeptideHitResultTypes.MaxQuant:
 
                     if (inputFileName.EndsWith("_fht", StringComparison.OrdinalIgnoreCase) ||
                         inputFileName.EndsWith("_syn", StringComparison.OrdinalIgnoreCase))
@@ -1194,6 +1196,13 @@ namespace PHRPReader
                             if (datasetName.EndsWith("_toppic", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_toppic".Length);
+                            }
+                        }
+                        else if (resultType == PeptideHitResultTypes.MaxQuant)
+                        {
+                            if (datasetName.EndsWith("_maxq", StringComparison.OrdinalIgnoreCase))
+                            {
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_maxq".Length);
                             }
                         }
                     }
@@ -2842,6 +2851,7 @@ namespace PHRPReader
 
             // Extract the dataset name from the input file path
             DatasetName = AutoDetermineDatasetName(inputFilePath, resultType);
+
             if (string.IsNullOrEmpty(DatasetName))
             {
                 if (mStartupOptions.LoadModsAndSeqInfo || mStartupOptions.LoadMSGFResults || mStartupOptions.LoadScanStatsData)
@@ -2852,6 +2862,12 @@ namespace PHRPReader
                 }
 
                 ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " + inputFilePath);
+                ReportWarning("Standard input file suffixes include: \n" +
+                              "  _msgfplus_fht.txt\n" +
+                              "  _msgfplus_syn.txt\n" +
+                              "  _mspath_syn.txt\n" +
+                              "  _toppic_syn.txt\n" +
+                              "  _xt.txt");
             }
 
             if (mStartupOptions.LoadModsAndSeqInfo)
