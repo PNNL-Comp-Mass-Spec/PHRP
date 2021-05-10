@@ -45,7 +45,8 @@ namespace PHRPReader
     /// <remarks>See above for an example parameter file</remarks>
     public class MSGFPlusParamFileModExtractor : PRISM.EventNotifier
     {
-        // Ignore Spelling: Carbamidomethyl, Dehydro, Acetyl, Acetylation, Prot, UniMod, defs, Hydroxyproline, nterm, cterm
+        // Ignore Spelling: Acetyl, Acetylation, Acetylhexosamine, Carbamidomethyl, Carbamidomethylation, cterm, defs, Dehydro
+        // Ignore Spelling: Hexosam, Hydroxyproline, nterm, num, phospho, phosphorylation, Prot, protcterm, protnterm, UniMod
 
         /// <summary>
         /// Unknown MS-GF+ mod symbols

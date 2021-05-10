@@ -43,7 +43,7 @@ namespace PeptideHitResultsProcessor.Processor
     ///      columnMapping = new Dictionary of MaxQuantResultsFileColumns, int
     /// </para>
     /// <para>
-    /// 4) ParseMaxQuantResultsFileEntry reads each data line and stores in an instance of MaxQuantSearchResult, which is a private struct
+    /// 4) ParseMaxQuantResultsFileEntry reads each data line and stores in an instance of MaxQuantSearchResult, which is a private structure
     ///    The data is stored in a list
     ///      searchResultsUnfiltered = new List of MaxQuantSearchResult
     /// </para>
@@ -385,6 +385,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </para>
             /// <para>
             /// MS-GF+ reports the precursor m/z as 755.40515, which is the observed m/z value
+            /// MaxQuant reports the PrecursorMZ as 755.39497, which is the theoretical value based on the identified peptide (IINIGSVVGTMGNAGQVNYSAAK)
             /// MaxQuant reports the PrecursorMZ as 755.39497, which is the theoretical value based on the identified peptide (IINIGSVVGTMGNAGQVNYSAAK)
             /// </para>
             /// </remarks>

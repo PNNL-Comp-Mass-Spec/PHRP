@@ -142,7 +142,6 @@
         /// <summary>
         /// Show the scan number and scan filter
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("Parent Ion Index {0}, {1} m/z", ParentIonIndex, MZ);

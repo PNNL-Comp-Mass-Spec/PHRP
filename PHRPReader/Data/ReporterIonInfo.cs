@@ -48,7 +48,7 @@ namespace PHRPReader.Data
         public List<ReporterIonStats> ReporterIons { get; }
 
         /// <summary>
-        /// Tab-delimited list of all of the reporter-ion related columns, starting with the first ReporterIonIntensityMax column
+        /// Tab-delimited list of data in the reporter-ion related columns, starting with the ReporterIonIntensityMax column
         /// </summary>
         /// <remarks>
         /// The MASICResultsMerger program uses this property

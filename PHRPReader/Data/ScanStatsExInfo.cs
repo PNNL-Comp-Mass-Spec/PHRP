@@ -113,7 +113,6 @@
         /// <summary>
         /// Show the scan number and scan filter
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("Scan {0}, {1}", ScanNumber, ScanFilterText);

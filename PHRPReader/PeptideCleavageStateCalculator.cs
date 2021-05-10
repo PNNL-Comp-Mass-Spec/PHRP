@@ -46,7 +46,7 @@ namespace PHRPReader
     /// </remarks>
     public class PeptideCleavageStateCalculator
     {
-        // Ignore Spelling: A-Za-z, udt
+        // Ignore Spelling: A-Za-z, tryptic, udt
 
         /// <summary>
         /// Generic residue symbol
