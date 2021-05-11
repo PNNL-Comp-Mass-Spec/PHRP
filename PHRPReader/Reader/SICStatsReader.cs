@@ -143,7 +143,7 @@ namespace PHRPReader.Reader
         /// Open a tab-delimited _SICStats.txt file and read the data
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
-        /// <returns>A Dictionary where keys are ScanNumber and values are instances of SICStatsInfo</returns>
+        /// <returns>A Dictionary where keys are fragment scan number and values are instances of SICStatsInfo</returns>
         public Dictionary<int, SICStatsInfo> ReadSICStatsData(string inputFilePath)
         {
             var sicStats = new Dictionary<int, SICStatsInfo>();
@@ -184,10 +184,14 @@ namespace PHRPReader.Reader
 
                     var parentIonIndex = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.ParentIonIndex), mColumnHeaders, -1);
 
-                    if (parentIonIndex < 0 || sicStats.ContainsKey(parentIonIndex))
+                    if (parentIonIndex < 0)
                         continue;
 
-                    var sicStatsInfo = new SICStatsInfo(parentIonIndex)
+                    if (sicStats.ContainsKey(fragScanNumber))
+                    {
+                        OnWarningEvent("Skipping duplicate entry for fragmentation scan " + fragScanNumber);
+                        continue;
+                    }
                     {
                         MzText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.MZ), mColumnHeaders),
                         PeakMaxIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakMaxIntensity), mColumnHeaders),
@@ -227,7 +231,7 @@ namespace PHRPReader.Reader
                         StatMomentsDataCountUsed = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.StatMomentsDataCountUsed), mColumnHeaders, 0),
                     };
 
-                    sicStats.Add(parentIonIndex, sicStatsInfo);
+                    sicStats.Add(fragScanNumber, sicStatsInfo);
                 }
             }
             catch (Exception ex)
