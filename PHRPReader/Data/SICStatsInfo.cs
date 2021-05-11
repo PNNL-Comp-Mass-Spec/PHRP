@@ -197,11 +197,11 @@
         }
 
         /// <summary>
-        /// Show the scan number and scan filter
+        /// Show the fragmentation scan number and parent ion m/z
         /// </summary>
         public override string ToString()
         {
-            return string.Format("Parent Ion Index {0}, {1} m/z", ParentIonIndex, MZ);
+            return string.Format("Fragmentation scan {0}, {1} m/z", FragScanNumber, MZ);
         }
     }
 }
