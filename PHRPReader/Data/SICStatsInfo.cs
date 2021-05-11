@@ -13,7 +13,7 @@
         /// <summary>
         /// Parent Ion Index
         /// </summary>
-        public int ParentIonIndex { get; set; }
+        public int ParentIonIndex { get; }
 
         /// <summary>
         /// Precursor m/z
@@ -33,7 +33,7 @@
         /// <summary>
         /// Fragmentation Scan Number
         /// </summary>
-        public int FragScanNumber { get; set; }
+        public int FragScanNumber { get; }
 
         /// <summary>
         /// Optimal Peak Apex Scan Number
@@ -189,9 +189,11 @@
         /// Constructor
         /// </summary>
         /// <param name="parentIonIndex"></param>
-        public SICStatsInfo(int parentIonIndex)
+        /// <param name="fragScanNumber"></param>
+        public SICStatsInfo(int parentIonIndex, int fragScanNumber)
         {
             ParentIonIndex = parentIonIndex;
+            FragScanNumber = fragScanNumber;
         }
 
         /// <summary>

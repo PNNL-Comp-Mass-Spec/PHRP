@@ -183,6 +183,7 @@ namespace PHRPReader.Reader
                         continue;
 
                     var parentIonIndex = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.ParentIonIndex), mColumnHeaders, -1);
+                    var fragScanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.FragScanNumber), mColumnHeaders, 0);
 
                     if (parentIonIndex < 0)
                         continue;
@@ -192,6 +193,8 @@ namespace PHRPReader.Reader
                         OnWarningEvent("Skipping duplicate entry for fragmentation scan " + fragScanNumber);
                         continue;
                     }
+
+                    var sicStatsInfo = new SICStatsInfo(parentIonIndex, fragScanNumber)
                     {
                         MzText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.MZ), mColumnHeaders),
                         PeakMaxIntensityText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakMaxIntensity), mColumnHeaders),
@@ -204,11 +207,9 @@ namespace PHRPReader.Reader
                         PeakStDevText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakStDev), mColumnHeaders),
                         PeakSkewText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakSkew), mColumnHeaders),
                         PeakKSStatText = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakKSStat), mColumnHeaders),
-
                         Dataset = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.Dataset), mColumnHeaders, 0),
                         MZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.MZ), mColumnHeaders, 0.0),
                         SurveyScanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.SurveyScanNumber), mColumnHeaders, 0),
-                        FragScanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.FragScanNumber), mColumnHeaders, 0),
                         OptimalPeakApexScanNumber = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.OptimalPeakApexScanNumber), mColumnHeaders, 0),
                         PeakApexOverrideParentIonIndex = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.PeakApexOverrideParentIonIndex), mColumnHeaders, 0),
                         CustomSICPeak = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(SICStatsFileColumns.CustomSICPeak), mColumnHeaders, 0),
