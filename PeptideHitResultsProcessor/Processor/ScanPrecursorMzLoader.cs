@@ -97,6 +97,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             return precursorsByScan;
         }
+
         private Dictionary<int, double> LoadPrecursorsFromSICStatsFile(FileSystemInfo sicStatsFile)
         {
             var precursorsByScan = new Dictionary<int, double>();
