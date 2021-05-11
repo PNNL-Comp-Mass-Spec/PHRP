@@ -267,7 +267,7 @@ namespace PHRP_UnitTests
         }
 
         [Test]
-        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStats.txt", 0)]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStats.txt", 38790)]
         public void TestScanStatsFileReader(string inputFilePath, int expectedResultCount)
         {
             var inputFile = FindFile(inputFilePath);
@@ -295,7 +295,7 @@ namespace PHRP_UnitTests
         }
 
         [Test]
-        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStatsEx.txt", 0)]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ScanStatsEx.txt", 38790)]
         public void TestExtendedScanStatsFileReader(string inputFilePath, int expectedResultCount)
         {
             var inputFile = FindFile(inputFilePath);
@@ -330,7 +330,7 @@ namespace PHRP_UnitTests
         }
 
         [Test]
-        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_SICStats.txt", 0)]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_SICStats.txt", 29620)]
         public void TestSICStatsFileReader(string inputFilePath, int expectedResultCount)
         {
             var inputFile = FindFile(inputFilePath);
@@ -352,13 +352,13 @@ namespace PHRP_UnitTests
                 scanCount++;
                 if (scanCount < 10 || scanCount % 100 == 0)
                 {
-                    Console.WriteLine("Scan {0,-4}, precursor {1:F2} m/z, peak area {2}", item.Key, item.Value.MZ, item.Value.PeakArea);
+                    Console.WriteLine("Fragmentation scan {0,-4}, precursor {1:F2} m/z, peak area {2}", item.Key, item.Value.MZ, item.Value.PeakArea);
                 }
             }
         }
 
         [Test]
-        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ReporterIons.txt", 0)]
+        [TestCase(@"SIC202012190523_Auto1857747\Muscle_Mock_TMT16_PremixQC_Bane_16Dec20_20-09-10_ReporterIons.txt", 29620)]
         public void TestReporterIonsFileReader(string inputFilePath, int expectedResultCount)
         {
             var inputFile = FindFile(inputFilePath);
