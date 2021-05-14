@@ -168,9 +168,21 @@ namespace PHRPReader
             public string Residues;
 
             /// <summary>
-            /// Modification type
+            /// Modification type, as tracked internally by PHRP
             /// </summary>
+            /// <remarks>
+            /// PHRP does not support static mods at the N or C terminus that only apply to specific residues
+            /// When these are found, the ModType tracked in-memory is changed to DynamicMod, DynNTermPeptide, DynCTermPeptide, DynNTermProtein, or DynCTermProtein
+            /// </remarks>
             public MSGFPlusModType ModType;
+
+            /// <summary>
+            /// Modification type, as defined in the parameter file
+            /// </summary>
+            /// <remarks>
+            /// As explained in <see cref="ModType"/>, this modification type could differ from ModType
+            /// </remarks>
+            public MSGFPlusModType ModTypeInParameterFile;
 
             /// <summary>
             /// Modification symbol: *, #, @, ... ; dash if a static mod
@@ -522,6 +534,8 @@ namespace PHRPReader
                         break;
                 }
 
+                udtModInfo.ModTypeInParameterFile = udtModInfo.ModType;
+
                 if (udtModInfo.ModType != MSGFPlusModType.CustomAA)
                 {
                     switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
@@ -642,6 +656,7 @@ namespace PHRPReader
                 udtModInfo.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
 
                 udtModInfo.ModType = modType;
+                udtModInfo.ModTypeInParameterFile = udtModInfo.ModType;
 
                 switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
                 {
