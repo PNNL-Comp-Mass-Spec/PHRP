@@ -190,8 +190,8 @@ namespace PHRPReader.Reader
             out double tolerancePPM,
             PeptideHitResultTypes resultType)
         {
-            var reExtraToleranceWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var reExtraToleranceNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var extraToleranceMatcherWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var extraToleranceMatcherNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             string tolerance;
             double toleranceDa = 0;
@@ -227,20 +227,20 @@ namespace PHRPReader.Reader
                 if (item.Trim().StartsWith("#"))
                     continue;
 
-                Match reMatch;
+                Match match;
                 if (resultType is PeptideHitResultTypes.MSPathFinder or PeptideHitResultTypes.TopPIC)
                 {
-                    reMatch = reExtraToleranceNoUnits.Match(item);
+                    match = extraToleranceMatcherNoUnits.Match(item);
                 }
                 else
                 {
-                    reMatch = reExtraToleranceWithUnits.Match(item);
+                    match = extraToleranceMatcherWithUnits.Match(item);
                 }
 
-                if (!reMatch.Success)
+                if (!match.Success)
                     continue;
 
-                if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
+                if (!double.TryParse(match.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
                 if (resultType is PeptideHitResultTypes.MSPathFinder or PeptideHitResultTypes.TopPIC)
@@ -249,7 +249,7 @@ namespace PHRPReader.Reader
                     tolerancePPM = toleranceCurrent;
                     toleranceCurrent = PeptideMassCalculator.PPMToMass(toleranceCurrent, 2000);
                 }
-                else if (reMatch.Groups.Count > 1 && reMatch.Groups[2].Value.IndexOf("ppm", StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (match.Groups.Count > 1 && match.Groups[2].Value.IndexOf("ppm", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     // Ppm
                     // Convert from PPM to Daltons (assuming a mass of 2000 m/z)

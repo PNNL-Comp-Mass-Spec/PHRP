@@ -502,15 +502,15 @@ namespace PeptideHitResultsProcessor.Processor
         {
             double totalModMass = 0;
 
-            foreach (Match reMatch in ModMatcher.Matches(peptide))
+            foreach (Match match in ModMatcher.Matches(peptide))
             {
-                if (double.TryParse(reMatch.Groups["ModMass"].Value, out var modMassFound))
+                if (double.TryParse(match.Groups["ModMass"].Value, out var modMassFound))
                 {
                     totalModMass += modMassFound;
                 }
                 else
                 {
-                    if (LookupModificationMassByName(reMatch.Groups["NamedMod"].Value, out var modMass))
+                    if (LookupModificationMassByName(match.Groups["NamedMod"].Value, out var modMass))
                         totalModMass += modMass;
                 }
             }

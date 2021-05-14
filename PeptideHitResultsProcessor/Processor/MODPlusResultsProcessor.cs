@@ -379,10 +379,10 @@ namespace PeptideHitResultsProcessor.Processor
             PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptide, out var primarySequence, out var _, out var _);
 
             // Parse the dynamic mods reported by MODPlus
-            foreach (Match reMatch in ModMassMatcher.Matches(primarySequence))
+            foreach (Match match in ModMassMatcher.Matches(primarySequence))
             {
                 // We use .TrimEnd() because the matched mod mass will end in a period if this mod applies to the final residue in a peptide
-                if (double.TryParse(reMatch.Groups[1].Value.TrimEnd('.'), out var modMassFound))
+                if (double.TryParse(match.Groups[1].Value.TrimEnd('.'), out var modMassFound))
                 {
                     totalModMass += modMassFound;
                 }
@@ -1486,11 +1486,11 @@ namespace PeptideHitResultsProcessor.Processor
                     string proteinName;
                     string peptidePosition;
 
-                    var reMatch = mProteinNamePositionSplit.Match(proteinEntry);
-                    if (reMatch.Success)
+                    var match = mProteinNamePositionSplit.Match(proteinEntry);
+                    if (match.Success)
                     {
-                        proteinName = reMatch.Groups[1].Value;
-                        peptidePosition = reMatch.Groups[2].Value;
+                        proteinName = match.Groups[1].Value;
+                        peptidePosition = match.Groups[2].Value;
                     }
                     else
                     {

@@ -1586,20 +1586,20 @@ namespace PeptideHitResultsProcessor.Processor
                 return string.Empty;
             }
 
-            var reMatch = RegexAllZeroes.Match(value);
-            if (reMatch.Success && reMatch.Index > 0)
+            var match = RegexAllZeroes.Match(value);
+            if (match.Success && match.Index > 0)
             {
-                value = value.Substring(0, reMatch.Index);
+                value = value.Substring(0, match.Index);
             }
             else
             {
-                reMatch = RegexNumPlusZeroes.Match(value);
-                if (reMatch.Success && reMatch.Index > 0)
+                match = RegexNumPlusZeroes.Match(value);
+                if (match.Success && match.Index > 0)
                 {
-                    if (reMatch.Groups.Count > 1)
+                    if (match.Groups.Count > 1)
                     {
                         // Number is of the form 1.0030 or 1.300 or 1.030
-                        value = value.Substring(0, reMatch.Index) + reMatch.Groups[1].Value;
+                        value = value.Substring(0, match.Index) + match.Groups[1].Value;
                     }
                 }
             }
@@ -1647,36 +1647,36 @@ namespace PeptideHitResultsProcessor.Processor
                     continue;
                 }
 
-                Match reMatch;
+                Match match;
                 if (inspectModInfo[index].ModType == InspectModType.DynNTermPeptide)
                 {
                     // Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
-                    // Look for this using reNTerminalModMassRegEx
-                    reMatch = NTerminalModMassMatcher.Match(peptide);
+                    // Look for this using a RegEx
+                    match = NTerminalModMassMatcher.Match(peptide);
                 }
                 else if (inspectModInfo[index].ModType == InspectModType.DynCTermPeptide)
                 {
                     // Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
-                    // Look for this using reCTerminalModMassRegEx
-                    reMatch = CTerminalModMassMatcher.Match(peptide);
+                    // Look for this using a RegEx
+                    match = CTerminalModMassMatcher.Match(peptide);
                 }
                 else
                 {
                     // This code should never be reached
-                    reMatch = null;
+                    match = null;
                 }
 
-                if (reMatch == null)
+                if (match == null)
                 {
                     continue;
                 }
 
-                if (reMatch.Success && reMatch.Groups.Count > 1)
+                if (match.Success && match.Groups.Count > 1)
                 {
                     // Match found
                     try
                     {
-                        var modMass = Convert.ToInt32(reMatch.Groups[1].Value);
+                        var modMass = Convert.ToInt32(match.Groups[1].Value);
 
                         // Compare the mod mass in the specification to this Mod's mod mass
                         // If they are less than 0.5 Da apart, assume we have a match; yes, this assumption is a bit flaky
@@ -1687,9 +1687,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                             string peptideNew;
 
-                            if (reMatch.Groups[0].Index > 0)
+                            if (match.Groups[0].Index > 0)
                             {
-                                peptideNew = peptide.Substring(0, reMatch.Groups[0].Index);
+                                peptideNew = peptide.Substring(0, match.Groups[0].Index);
                             }
                             else
                             {
@@ -1698,9 +1698,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                             peptideNew += inspectModInfo[index].ModSymbol;
 
-                            if (reMatch.Groups[0].Index + reMatch.Groups[0].Length < peptide.Length)
+                            if (match.Groups[0].Index + match.Groups[0].Length < peptide.Length)
                             {
-                                peptideNew += peptide.Substring(reMatch.Groups[0].Index + reMatch.Groups[0].Length);
+                                peptideNew += peptide.Substring(match.Groups[0].Index + match.Groups[0].Length);
                             }
 
                             peptide = peptideNew;

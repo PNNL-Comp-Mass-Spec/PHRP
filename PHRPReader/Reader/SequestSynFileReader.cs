@@ -381,7 +381,7 @@ namespace PHRPReader.Reader
 
         private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)
         {
-            var reEnzymeSpecificity = new Regex(@"^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var enzymeSpecificityMatcher = new Regex(@"^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             try
             {
@@ -490,10 +490,10 @@ namespace PHRPReader.Reader
                             {
                                 // Parse out the cleavage specificity number
                                 // This is the first number after the closing parenthesis in the above examples
-                                var reMatch = reEnzymeSpecificity.Match(settingValue);
-                                if (reMatch.Success)
+                                var match = enzymeSpecificityMatcher.Match(settingValue);
+                                if (match.Success)
                                 {
-                                    if (int.TryParse(reMatch.Groups[1].Value, out value))
+                                    if (int.TryParse(match.Groups[1].Value, out value))
                                     {
                                         searchEngineParams.MinNumberTermini = value;
                                     }

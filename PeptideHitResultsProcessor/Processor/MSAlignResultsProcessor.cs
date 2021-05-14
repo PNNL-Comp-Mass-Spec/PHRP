@@ -439,9 +439,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             double totalModMass = 0;
 
-            foreach (Match reMatch in RegexModMassRegEx.Matches(peptide))
+            foreach (Match match in RegexModMassRegEx.Matches(peptide))
             {
-                if (double.TryParse(reMatch.Groups[1].Value, out var modMassFound))
+                if (double.TryParse(match.Groups[1].Value, out var modMassFound))
                 {
                     totalModMass += modMassFound;
                 }

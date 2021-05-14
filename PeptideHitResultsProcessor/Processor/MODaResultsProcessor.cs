@@ -367,10 +367,10 @@ namespace PeptideHitResultsProcessor.Processor
             PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptide, out var primarySequence, out _, out _);
 
             // Parse the dynamic mods reported by MODa
-            foreach (Match reMatch in RegexModMassRegEx.Matches(primarySequence))
+            foreach (Match match in RegexModMassRegEx.Matches(primarySequence))
             {
                 // We use .TrimEnd() because the matched mod mass will end in a period if this mod applies to the final residue in a peptide
-                if (double.TryParse(reMatch.Groups[1].Value.TrimEnd('.'), out var modMassFound))
+                if (double.TryParse(match.Groups[1].Value.TrimEnd('.'), out var modMassFound))
                 {
                     totalModMass += modMassFound;
                 }

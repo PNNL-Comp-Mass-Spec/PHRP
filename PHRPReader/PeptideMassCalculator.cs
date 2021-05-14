@@ -419,27 +419,27 @@ namespace PHRPReader
                 primarySequence = sequence;
             }
 
-            var reMatch = RegexModMasses.Match(primarySequence);
+            var match = RegexModMasses.Match(primarySequence);
 
             var sequenceWithoutMods = new StringBuilder();
             var startIndex = 0;
             double modMassTotal = 0;
 
-            while (reMatch.Success)
+            while (match.Success)
             {
-                if (reMatch.Index > startIndex)
+                if (match.Index > startIndex)
                 {
-                    sequenceWithoutMods.Append(primarySequence, startIndex, reMatch.Index - startIndex);
+                    sequenceWithoutMods.Append(primarySequence, startIndex, match.Index - startIndex);
                 }
 
-                var modMassText = reMatch.ToString();
+                var modMassText = match.ToString();
                 if (double.TryParse(modMassText, out var modMass))
                 {
                     modMassTotal += modMass;
                 }
 
-                startIndex = reMatch.Index + modMassText.Length;
-                reMatch = reMatch.NextMatch();
+                startIndex = match.Index + modMassText.Length;
+                match = match.NextMatch();
             }
 
             if (startIndex < primarySequence.Length)
@@ -675,9 +675,7 @@ namespace PHRPReader
             regExSpec.Append(")");
 
             // RegEx will be of the form: (?<ElementSymbol>H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al)(?<ElementCount>[+-]?\d*)
-            var reAtomicFormulaRegEx = new Regex(regExSpec + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
-
-            return reAtomicFormulaRegEx;
+            return new Regex(regExSpec + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
         }
 
         private double GetDefaultAminoAcidMass(char aminoAcidSymbol, out EmpiricalFormula empiricalFormula)
@@ -865,16 +863,16 @@ namespace PHRPReader
             // Originally MS-GF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
-            var reMatches = mAtomicFormulaRegEx.Matches(empiricalFormula);
+            var matches = mAtomicFormulaRegEx.Matches(empiricalFormula);
 
             var empiricalFormulaInstance = new EmpiricalFormula();
 
-            if (reMatches.Count > 0)
+            if (matches.Count > 0)
             {
-                foreach (Match reMatch in reMatches)
+                foreach (Match match in matches)
                 {
-                    var elementSymbol = reMatch.Groups["ElementSymbol"].ToString();
-                    var elementCountText = reMatch.Groups["ElementCount"].ToString();
+                    var elementSymbol = match.Groups["ElementSymbol"].ToString();
+                    var elementCountText = match.Groups["ElementCount"].ToString();
 
                     var elementCount = 1;
                     if (!string.IsNullOrEmpty(elementCountText) && elementCountText.Length > 0)

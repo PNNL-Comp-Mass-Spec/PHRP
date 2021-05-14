@@ -298,7 +298,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             mProteinNameOrder.Clear();
-            var reExtractProteinName = new Regex("^>([^ ]+)", RegexOptions.Compiled);
+            var proteinNameMatcher = new Regex("^>([^ ]+)", RegexOptions.Compiled);
 
             OnStatusEvent("Caching protein names from the FASTA file");
 
@@ -314,11 +314,12 @@ namespace PeptideHitResultsProcessor.Processor
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
-                    var reMatch = reExtractProteinName.Match(lineIn);
+                    var match = proteinNameMatcher.Match(lineIn);
 
-                    if (!reMatch.Success)
+                    if (!match.Success)
                         continue;
-                    var proteinName = reMatch.Groups[1].Value;
+
+                    var proteinName = match.Groups[1].Value;
 
                     if (mProteinNameOrder.ContainsKey(proteinName))
                         continue;
@@ -2355,13 +2356,13 @@ namespace PeptideHitResultsProcessor.Processor
         public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage)
         {
             // This RegEx looks for standard amino acids, skipping A, T, C, and G
-            var reDefiniteAminoAcid = new Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var definiteAminoAcidMatcher = new Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This RegEx looks for A, T, C, and G
-            var rePotentialNucleicAcid = new Regex("[ATCG]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var potentialNucleicAcidMatcher = new Regex("[ATCG]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This matches any letter
-            var reLetter = new Regex("[A-Z]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var letterMatcher = new Regex("[A-Z]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             var validProteinCount = 0;
             var invalidProteinCount = 0;
@@ -2395,9 +2396,9 @@ namespace PeptideHitResultsProcessor.Processor
                 // Read the first 500 proteins and confirm that each contains amino acid residues
                 while (fastaFile.ReadNextProteinEntry())
                 {
-                    var definiteAminoAcidCount = reDefiniteAminoAcid.Matches(fastaFile.ProteinSequence).Count;
-                    var potentialNucleicAcidCount = rePotentialNucleicAcid.Matches(fastaFile.ProteinSequence).Count;
-                    var letterCount = reLetter.Matches(fastaFile.ProteinSequence).Count;
+                    var definiteAminoAcidCount = definiteAminoAcidMatcher.Matches(fastaFile.ProteinSequence).Count;
+                    var potentialNucleicAcidCount = potentialNucleicAcidMatcher.Matches(fastaFile.ProteinSequence).Count;
+                    var letterCount = letterMatcher.Matches(fastaFile.ProteinSequence).Count;
 
                     if (definiteAminoAcidCount > 0.1 * letterCount)
                     {

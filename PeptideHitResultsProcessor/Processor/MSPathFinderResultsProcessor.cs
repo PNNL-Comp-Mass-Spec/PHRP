@@ -66,8 +66,6 @@ namespace PeptideHitResultsProcessor.Processor
         public MSPathFinderResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "September 28, 2020";
-
-            mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
 
         public const string TOOL_NAME = "MSPathFinder";
@@ -179,7 +177,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private readonly Regex mGetModName;
+        private readonly Regex mModListModNameMatcher = new(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
 
         /// <summary>
         /// Step through the Modifications and associate each modification with the residues
@@ -213,16 +211,16 @@ namespace PeptideHitResultsProcessor.Processor
                 var matchFound = false;
 
                 // Obtain the mod name, for example "Dehydro" from "Dehydro 52"
-                var reMatch = mGetModName.Match(modEntry);
+                var match = mModListModNameMatcher.Match(modEntry);
 
-                if (!reMatch.Success)
+                if (!match.Success)
                 {
                     ReportError("Invalid MSPathFinder mod entry format; must be a name then a space then a number: " + modEntry);
                     continue;
                 }
 
-                var modName = reMatch.Groups["ModName"].Value;
-                var residueNumber = reMatch.Groups["ResidueNumber"].Value;
+                var modName = match.Groups["ModName"].Value;
+                var residueNumber = match.Groups["ResidueNumber"].Value;
 
                 foreach (var modDef in modList)
                 {
@@ -342,14 +340,14 @@ namespace PeptideHitResultsProcessor.Processor
                 var matchFound = false;
 
                 // Obtain the mod name, for example "Dehydro" from "Dehydro 52"
-                var reMatch = mGetModName.Match(modEntry);
+                var match = mModListModNameMatcher.Match(modEntry);
 
-                if (!reMatch.Success)
+                if (!match.Success)
                 {
                     ReportError("Mod entry does not have a name separated by a number: " + modEntry, true);
                 }
 
-                var modName = reMatch.Groups["ModName"].Value;
+                var modName = match.Groups["ModName"].Value;
 
                 foreach (var modDef in modList)
                 {

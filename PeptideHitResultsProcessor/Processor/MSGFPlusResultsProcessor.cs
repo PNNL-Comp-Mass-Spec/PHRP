@@ -525,8 +525,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Make sure .PeptideSequenceWithMods does not have any generic mod masses
                 // It should only have mod symbols
-                var reMatch = mModMassRegEx.Match(searchResult.PeptideSequenceWithMods);
-                if (reMatch.Success)
+                var match = mModMassRegEx.Match(searchResult.PeptideSequenceWithMods);
+                if (match.Success)
                 {
                     // Modification mass did not have a symbol associated with it in the _ModDefs.txt file
                     // We could try to handle this, listing the modification mass in place of the modification symbol in the _ModDetails.txt file, but will
@@ -669,11 +669,11 @@ namespace PeptideHitResultsProcessor.Processor
             modMassFound = 0;
             containsStaticMod = false;
 
-            var reMatches = mModMassRegEx.Matches(modDigits);
+            var matches = mModMassRegEx.Matches(modDigits);
 
-            foreach (Match reMatch in reMatches)
+            foreach (Match match in matches)
             {
-                var modMassText = reMatch.Value;
+                var modMassText = match.Value;
 
                 // Convert modMass to a mass value
                 var modMass = double.Parse(modMassText);
@@ -2597,20 +2597,20 @@ namespace PeptideHitResultsProcessor.Processor
 
             // First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
             // This RegEx will match one or more mods, all at the N-terminus
-            var reMatch = NTerminalModMassMatcher.Match(peptide);
+            var match = NTerminalModMassMatcher.Match(peptide);
 
-            if (reMatch.Success)
+            if (match.Success)
             {
                 // Convert the mod mass (or masses) to one or more mod symbols
 
-                if (ConvertMSGFModMassesToSymbols("-", reMatch.Groups[1].Value,
+                if (ConvertMSGFModMassesToSymbols("-", match.Groups[1].Value,
                     out var modSymbols, out var dynModSymbols, msgfPlusModInfo,
                     true, false,
                     out var modMassFound, out containsStaticMod))
                 {
                     // Replace the mod digits with the mod symbols
 
-                    peptide = ReplaceMSGFModTextWithMatchedSymbol(peptide, reMatch.Groups[1], modSymbols, dynModSymbols, isMsgfPlus, containsStaticMod);
+                    peptide = ReplaceMSGFModTextWithMatchedSymbol(peptide, match.Groups[1], modSymbols, dynModSymbols, isMsgfPlus, containsStaticMod);
                     totalModMass += modMassFound;
                 }
             }
@@ -2694,17 +2694,17 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     // Found a mod; find the extent of the mod digits
-                    reMatch = ModMassMatcher.Match(peptide, index);
+                    match = ModMassMatcher.Match(peptide, index);
 
                     // Note that possibleCTerminalMod will be set to True once we hit the last residue
 
                     // Convert the mod mass (or masses) to one or more mod symbols
 
-                    if (ConvertMSGFModMassesToSymbols(currentResidue, reMatch.Groups[1].Value,
+                    if (ConvertMSGFModMassesToSymbols(currentResidue, match.Groups[1].Value,
                         out var modSymbols, out var dynModSymbols, msgfPlusModInfo,
                         false, possibleCTerminalMod, out var modMassFound, out containsStaticMod))
                     {
-                        peptide = ReplaceMSGFModTextWithMatchedSymbol(peptide, reMatch.Groups[1], modSymbols, dynModSymbols, isMsgfPlus, containsStaticMod);
+                        peptide = ReplaceMSGFModTextWithMatchedSymbol(peptide, match.Groups[1], modSymbols, dynModSymbols, isMsgfPlus, containsStaticMod);
                         totalModMass += modMassFound;
 
                         if (isMsgfPlus && containsStaticMod)
@@ -2720,7 +2720,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        var addOn = reMatch.Groups[1].Value.Length;
+                        var addOn = match.Groups[1].Value.Length;
                         if (addOn == 0)
                             index++;
                         else
@@ -2755,7 +2755,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private string ReplaceMSGFModTextWithMatchedSymbol(
             string peptide,
-            Capture reGroup,
+            Capture captureGroup,
             string modSymbols,
             string dynModSymbols,
             bool isMsgfPlus,
@@ -2763,9 +2763,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             string peptideNew;
 
-            if (reGroup.Index > 0)
+            if (captureGroup.Index > 0)
             {
-                peptideNew = peptide.Substring(0, reGroup.Index);
+                peptideNew = peptide.Substring(0, captureGroup.Index);
             }
             else
             {
@@ -2787,9 +2787,9 @@ namespace PeptideHitResultsProcessor.Processor
                 peptideNew += modSymbols;
             }
 
-            if (reGroup.Index + reGroup.Length < peptide.Length)
+            if (captureGroup.Index + captureGroup.Length < peptide.Length)
             {
-                peptideNew += peptide.Substring(reGroup.Index + reGroup.Length);
+                peptideNew += peptide.Substring(captureGroup.Index + captureGroup.Length);
             }
 
             return peptideNew;
@@ -2823,17 +2823,17 @@ namespace PeptideHitResultsProcessor.Processor
         {
             proteinInfo.Clear();
 
-            var reMatches = ProteinInfoMatcher.Matches(proteinList);
+            var matches = ProteinInfoMatcher.Matches(proteinList);
 
-            if (reMatches.Count == 0)
+            if (matches.Count == 0)
             {
                 // No match; likely just one protein
                 return TruncateProteinName(proteinList);
             }
 
-            foreach (Match reMatch in reMatches)
+            foreach (Match match in matches)
             {
-                var proteinName = TruncateProteinName(reMatch.Groups[1].Value);
+                var proteinName = TruncateProteinName(match.Groups[1].Value);
 
                 if (proteinInfo.ContainsKey(proteinName))
                 {
@@ -2843,8 +2843,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     var terminusChars = new TerminusChars
                     {
-                        NTerm = reMatch.Groups[2].Value[0],
-                        CTerm = reMatch.Groups[3].Value[0]
+                        NTerm = match.Groups[2].Value[0],
+                        CTerm = match.Groups[3].Value[0]
                     };
 
                     proteinInfo.Add(proteinName, terminusChars);
