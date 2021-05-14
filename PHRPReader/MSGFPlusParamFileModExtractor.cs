@@ -504,12 +504,15 @@ namespace PHRPReader
                     case "opt":
                         udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         break;
+
                     case "fix":
                         udtModInfo.ModType = MSGFPlusModType.StaticMod;
                         break;
+
                     case "custom":
                         udtModInfo.ModType = MSGFPlusModType.CustomAA;
                         break;
+
                     default:
                         ReportWarning(string.Format(
                                           "Unrecognized Mod Type {0} in the {1} parameter file; should be 'opt', 'fix', or 'custom'; will assume 'opt'",
@@ -789,21 +792,25 @@ namespace PHRPReader
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
                                     modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                                 break;
+
                             case AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
                                     modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                                 break;
+
                             case AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
                                     modType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                                 break;
+
                             case AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
                                     modType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                                 break;
+
                             default:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)

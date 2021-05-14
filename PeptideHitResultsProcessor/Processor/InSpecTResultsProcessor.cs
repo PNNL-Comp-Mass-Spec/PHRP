@@ -695,15 +695,19 @@ namespace PeptideHitResultsProcessor.Processor
                             case "opt":
                                 modDef.ModType = InspectModType.DynamicMod;
                                 break;
+
                             case "fix":
                                 modDef.ModType = InspectModType.StaticMod;
                                 break;
+
                             case "nterminal":
                                 modDef.ModType = InspectModType.DynNTermPeptide;
                                 break;
+
                             case "cterminal":
                                 modDef.ModType = InspectModType.DynCTermPeptide;
                                 break;
+
                             default:
                                 OnWarningEvent("Unrecognized Mod Type in the Inspect parameter file");
                                 modDef.ModType = InspectModType.DynamicMod;
@@ -984,7 +988,6 @@ namespace PeptideHitResultsProcessor.Processor
                             else
                             {
                                 // Error parsing header; assume this is a data line
-                                dataLine = true;
                             }
                             headerParsed = true;
                         }
