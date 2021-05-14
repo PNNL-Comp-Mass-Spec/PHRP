@@ -265,26 +265,29 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 // Query parseCommandLine to see if various parameters are present
-                if (parseCommandLine.RetrieveValueForParameter("I", out var value))
+                if (parseCommandLine.RetrieveValueForParameter("I", out var inputFilePath))
                 {
-                    mInputFilePath = value;
+                    mInputFilePath = inputFilePath;
                 }
                 else if (parseCommandLine.NonSwitchParameterCount > 0)
                 {
                     mInputFilePath = parseCommandLine.RetrieveNonSwitchParameter(0);
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("O", out value))
-                    mOutputDirectoryPath = value;
+                if (parseCommandLine.RetrieveValueForParameter("O", out var outputDirectoryPath))
+                    mOutputDirectoryPath = outputDirectoryPath;
 
-                if (parseCommandLine.RetrieveValueForParameter("P", out value))
-                    mParameterFilePath = value;
-                if (parseCommandLine.RetrieveValueForParameter("M", out value))
-                    Options.ModificationDefinitionsFilePath = value;
-                if (parseCommandLine.RetrieveValueForParameter("T", out value))
-                    Options.MassCorrectionTagsFilePath = value;
-                if (parseCommandLine.RetrieveValueForParameter("N", out value))
-                    Options.SearchToolParameterFilePath = value;
+                if (parseCommandLine.RetrieveValueForParameter("P", out var parameterFilePath))
+                    mParameterFilePath = parameterFilePath;
+
+                if (parseCommandLine.RetrieveValueForParameter("M", out var modDefsFilePath))
+                    Options.ModificationDefinitionsFilePath = modDefsFilePath;
+
+                if (parseCommandLine.RetrieveValueForParameter("T", out var massCorrectionTagsFilePath))
+                    Options.MassCorrectionTagsFilePath = massCorrectionTagsFilePath;
+
+                if (parseCommandLine.RetrieveValueForParameter("N", out var searchToolParameterFilePath))
+                    Options.SearchToolParameterFilePath = searchToolParameterFilePath;
 
                 if (parseCommandLine.IsParameterPresent("ProteinMods"))
                 {
@@ -296,11 +299,11 @@ namespace PeptideHitResultsProcRunner
                     mCreateProteinModsUsingPHRPDataFile = true;
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("F", out value))
-                    Options.FastaFilePath = value;
+                if (parseCommandLine.RetrieveValueForParameter("F", out var fastaFilePath))
+                    Options.FastaFilePath = fastaFilePath;
 
-                if (parseCommandLine.RetrieveValueForParameter("Fasta", out value))
-                    Options.FastaFilePath = value;
+                if (parseCommandLine.RetrieveValueForParameter("Fasta", out var fastaFilePath2))
+                    Options.FastaFilePath = fastaFilePath2;
 
                 if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
                     Options.IgnorePeptideToProteinMapperErrors = true;
@@ -311,118 +314,121 @@ namespace PeptideHitResultsProcRunner
                 if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
                     Options.UseExistingMTSPepToProteinMapFile = true;
 
-                if (parseCommandLine.RetrieveValueForParameter("FHT", out value))
+                if (parseCommandLine.RetrieveValueForParameter("FHT", out var createFirstHitsFile))
                 {
-                    if (ParseBoolean(value, out var blnValue))
+                    if (ParseBoolean(createFirstHitsFile, out var createFirstHits))
                     {
-                        Options.CreateFirstHitsFile = blnValue;
+                        Options.CreateFirstHitsFile = createFirstHits;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("Syn", out value))
+                if (parseCommandLine.RetrieveValueForParameter("Syn", out var createSynopsisFile))
                 {
-                    if (ParseBoolean(value, out var blnValue))
+                    if (ParseBoolean(createSynopsisFile, out var createSynFile))
                     {
-                        Options.CreateSynopsisFile = blnValue;
+                        Options.CreateSynopsisFile = createSynFile;
                     }
                 }
 
                 // InsFHT is a synonym for command line argument /FHT
-                if (parseCommandLine.RetrieveValueForParameter("InsFHT", out value))
+                if (parseCommandLine.RetrieveValueForParameter("InsFHT", out var createFirstHitsFile2))
                 {
-                    if (ParseBoolean(value, out var blnValue))
+                    if (ParseBoolean(createFirstHitsFile2, out var createFirstHits))
                     {
-                        Options.CreateFirstHitsFile = blnValue;
+                        Options.CreateFirstHitsFile = createFirstHits;
                     }
                 }
 
                 // InsSyn is a synonym for command line argument /Syn
-                if (parseCommandLine.RetrieveValueForParameter("InsSyn", out value))
+                if (parseCommandLine.RetrieveValueForParameter("InsSyn", out var createSynopsisFile2))
                 {
-                    if (ParseBoolean(value, out var blnValue))
+                    if (ParseBoolean(createSynopsisFile2, out var createSynFile))
                     {
-                        Options.CreateSynopsisFile = blnValue;
+                        Options.CreateSynopsisFile = createSynFile;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out value))
+                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out var msgfPlusEValue))
                 {
-                    if (float.TryParse(value, out var floatValue))
+                    if (float.TryParse(msgfPlusEValue, out var floatValue))
                     {
                         Options.MSGFPlusSynopsisFileEValueThreshold = floatValue;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out value))
+                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out var msgfPlusSpecEValue))
                 {
-                    if (float.TryParse(value, out var floatValue))
+                    if (float.TryParse(msgfPlusSpecEValue, out var floatValue))
                     {
                         Options.MSGFPlusSynopsisFileSpecEValueThreshold = floatValue;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("SynPValue", out value))
+                if (parseCommandLine.RetrieveValueForParameter("SynPValue", out var synPValue))
                 {
-                    if (float.TryParse(value, out var floatValue))
+                    if (float.TryParse(synPValue, out var floatValue))
                     {
                         Options.InspectSynopsisFilePValueThreshold = floatValue;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("SynProb", out value))
+                if (parseCommandLine.RetrieveValueForParameter("SynProb", out var synProb))
                 {
-                    if (float.TryParse(value, out var floatValue))
+                    if (float.TryParse(synProb, out var floatValue))
                     {
                         Options.MODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("MaxQScore", out value))
+                if (parseCommandLine.RetrieveValueForParameter("MaxQScore", out var andromedaScoreThreshold))
                 {
-                    if (int.TryParse(value, out var intValue))
+                    if (int.TryParse(andromedaScoreThreshold, out var threshold))
                     {
-                        Options.MaxQuantAndromedaScoreThreshold = intValue;
+                        Options.MaxQuantAndromedaScoreThreshold = threshold;
                     }
                 }
 
                 // ReSharper disable once StringLiteralTypo
-                if (parseCommandLine.RetrieveValueForParameter("MaxQPEP", out value))
+                if (parseCommandLine.RetrieveValueForParameter("MaxQPEP", out var posteriorErrorProbabilityThreshold))
                 {
-                    if (float.TryParse(value, out var floatValue))
+                    if (float.TryParse(posteriorErrorProbabilityThreshold, out var floatValue))
                     {
                         Options.MaxQuantPosteriorErrorProbabilityThreshold = floatValue;
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("S", out value))
+
+                if (parseCommandLine.RetrieveValueForParameter("S", out var recurseDirectories))
                 {
                     mRecurseDirectories = true;
-                    if (int.TryParse(value, out var intValue))
+                    if (int.TryParse(recurseDirectories, out var maxLevelsToRecurse))
                     {
-                        mMaxLevelsToRecurse = intValue;
+                        mMaxLevelsToRecurse = maxLevelsToRecurse;
                     }
                 }
-                if (parseCommandLine.RetrieveValueForParameter("A", out value))
-                    mOutputDirectoryAlternatePath = value;
+
+                if (parseCommandLine.RetrieveValueForParameter("A", out var alternateOutputPath))
+                    mOutputDirectoryAlternatePath = alternateOutputPath;
+
                 if (parseCommandLine.IsParameterPresent("R"))
                     mRecreateDirectoryHierarchyInAlternatePath = true;
 
-                if (parseCommandLine.RetrieveValueForParameter("L", out value))
+                if (parseCommandLine.RetrieveValueForParameter("L", out var logFilePath))
                 {
                     mLogMessagesToFile = true;
 
-                    if (!string.IsNullOrEmpty(value))
+                    if (!string.IsNullOrEmpty(logFilePath))
                     {
-                        mLogFilePath = value.Trim('"');
+                        mLogFilePath = logFilePath.Trim('"');
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("LogDir", out value))
+                if (parseCommandLine.RetrieveValueForParameter("LogDir", out var logDirectoryPath))
                 {
                     mLogMessagesToFile = true;
-                    if (!string.IsNullOrEmpty(value))
+                    if (!string.IsNullOrEmpty(logDirectoryPath))
                     {
-                        mLogDirectoryPath = value;
+                        mLogDirectoryPath = logDirectoryPath;
                     }
                 }
 
