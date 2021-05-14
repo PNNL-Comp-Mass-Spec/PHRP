@@ -23,7 +23,6 @@ using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM;
-using static PHRPReader.MSGFPlusParamFileModExtractor;
 
 namespace PeptideHitResultsProcessor.Processor
 {
@@ -785,7 +784,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool AddModificationsAndComputeMass(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<ModInfo> modList)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             bool success;
 
@@ -1085,7 +1084,7 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
             string outputDirectoryPath,
-            IReadOnlyCollection<ModInfo> modList,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             out string baseName,
             out string synOutputFilePath)
         {
@@ -1244,7 +1243,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string maxQuantParamFilePath,
-            out List<ModInfo> modList)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             modList = new List<ModInfo>();
 
@@ -1490,7 +1489,7 @@ namespace PeptideHitResultsProcessor.Processor
             modDef.ModMass = modInfo.MonoisotopicMass.ToString(CultureInfo.InvariantCulture);
             modDef.ModMassVal = modInfo.MonoisotopicMass;
             modDef.Residues = modInfo.Residues;
-            modDef.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
+            modDef.ModSymbol = MSGFPlusParamFileModExtractor.UNKNOWN_MSGFPlus_MOD_SYMBOL;
 
             switch (modInfo.Position)
             {
@@ -1500,50 +1499,54 @@ namespace PeptideHitResultsProcessor.Processor
                     break;
 
                 case MaxQuantModPosition.AnyNterm:
-                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
                         // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
+
                     modDef.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
-                        modDef.ModType = MSGFPlusModType.DynNTermPeptide;
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermPeptide;
 
                     break;
 
                 case MaxQuantModPosition.AnyCterm:
-                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
                         // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
+
                     modDef.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
-                        modDef.ModType = MSGFPlusModType.DynCTermPeptide;
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermPeptide;
 
                     break;
 
                 case MaxQuantModPosition.ProteinNterm:
-                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
                         // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
+
                     modDef.Residues = AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
-                        modDef.ModType = MSGFPlusModType.DynNTermProtein;
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermProtein;
 
                     break;
 
                 case MaxQuantModPosition.ProteinCterm:
-                    if (modDef.ModType == MSGFPlusModType.StaticMod && modDef.Residues != "-")
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
                         // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                        modDef.ModType = MSGFPlusModType.DynamicMod;
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
+
                     modDef.Residues = AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                    if (modDef.ModType == MSGFPlusModType.DynamicMod)
-                        modDef.ModType = MSGFPlusModType.DynCTermProtein;
+                    if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod)
+                        modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynCTermProtein;
 
                     break;
 
@@ -2147,7 +2150,7 @@ namespace PeptideHitResultsProcessor.Processor
             out MaxQuantSearchResult searchResult,
             ICollection<string> errorMessages,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<ModInfo> modList,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int lineNumber)
         {
             searchResult = new MaxQuantSearchResult();
@@ -2722,14 +2725,14 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    List<ModInfo> modList;
+                    List<MSGFPlusParamFileModExtractor.ModInfo> modList;
                     if (string.IsNullOrWhiteSpace(Options.SearchToolParameterFilePath))
                     {
                         OnWarningEvent(
                             "MaxQuant parameter file not defined; cannot add modification symbols to peptides in the synopsis file. " +
                             "To define, use /N at the command line or SearchToolParameterFilePath in a parameter file");
 
-                        modList = new List<ModInfo>();
+                        modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
                     }
                     else
                     {
