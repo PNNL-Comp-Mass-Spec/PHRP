@@ -16,7 +16,7 @@
         public double IonInjectionTime { get; set; }
 
         /// <summary>
-        /// scan event
+        /// Scan event
         /// </summary>
         public int ScanEvent { get; set; }
 

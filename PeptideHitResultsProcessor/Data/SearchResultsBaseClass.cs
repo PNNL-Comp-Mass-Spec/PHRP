@@ -200,7 +200,17 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Peptide sequence with modification symbols
         /// </summary>
-        /// <remarks>Mod symbols are single characters, like *, #, @, etc.</remarks>
+        /// <remarks>
+        /// <para>
+        /// For MS-GF+, mod symbols are single characters, like *, #, @, etc.
+        /// </para>
+        /// <para>
+        /// For MSPathFinder and MaxQuant, mod symbols are not added to the peptide; instead, modifications are listed in a separate column
+        /// </para>
+        /// <para>
+        /// For MSAlign and TopPIC, mod masses are embedded in the peptide, using square brackets, e.g. NRE(WYI)[30.01443]HIH
+        /// </para>
+        /// </remarks>
         public string PeptideSequenceWithMods { get; set; }
 
         /// <summary>
@@ -215,16 +225,16 @@ namespace PeptideHitResultsProcessor.Data
 
         /// <summary>
         /// In X!Tandem this is the theoretical monoisotopic MH
-        /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
+        /// In SEQUEST it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
         /// In Inspect, MS-GF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
         /// </summary>
         public string PeptideMH { get; set; }
 
         /// <summary>
         /// Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation)
-        /// In Sequest this is Theoretical Mass - Observed Mass
+        /// In SEQUEST this is Theoretical Mass - Observed Mass
         /// In X!Tandem, Inspect, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
-        /// however, PHRP negates that value while reading the synopsis file to match Sequest
+        /// however, PHRP negates that value while reading the synopsis file to match SEQUEST
         /// </summary>
         public string PeptideDeltaMass { get; set; }
 

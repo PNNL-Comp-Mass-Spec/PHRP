@@ -26,7 +26,7 @@ namespace PeptideHitResultsProcRunner
 {
     internal static class Program
     {
-        // Ignore Spelling: Prot, MaxQuant, MODa
+        // Ignore Spelling: Prot, MaxQuant, MODa, txt
 
         public const string PROGRAM_DATE = "May 7, 2021";
 

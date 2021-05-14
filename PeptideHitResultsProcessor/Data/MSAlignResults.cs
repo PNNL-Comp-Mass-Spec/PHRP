@@ -18,8 +18,10 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a MSAlign search result loaded from a synopsis file
-    /// See SearchResultsBaseClass for additional information
     /// </summary>
+    /// <remarks>
+    /// See SearchResultsBaseClass for additional information
+    /// </remarks>
     public class MSAlignResults : SearchResultsBaseClass
     {
         public string Prsm_ID { get; set; }

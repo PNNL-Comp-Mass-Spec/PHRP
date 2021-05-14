@@ -18,9 +18,11 @@ using PHRPReader.Data;
 namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
-    /// This class is used to track the peptide details for an InSpecT search result
-    /// See SearchResultsBaseClass for additional information
+    /// This class is used to track the peptide details for an InSpecT search result loaded from a synopsis file
     /// </summary>
+    /// <remarks>
+    /// See SearchResultsBaseClass for additional information
+    /// </remarks>
     public class InSpecTResults : SearchResultsBaseClass
     {
         // Scan: tracked by the base class

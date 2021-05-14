@@ -148,7 +148,7 @@ namespace PHRPReader
         public struct ModInfo
         {
             /// <summary>
-            /// Mod name (read from the parameter file) isn't used by MS-GF+, but it is used by MSPathFinder
+            /// Mod name (read from the parameter file) isn't used by MS-GF+, but it is used by MSPathFinder and MaxQuant
             /// </summary>
             public string ModName;
 

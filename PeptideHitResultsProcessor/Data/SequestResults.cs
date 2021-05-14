@@ -20,9 +20,11 @@ using PHRPReader.Data;
 namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
-    /// This class is used to track the peptide details for a Sequest search result loaded from a synopsis file
-    /// See SearchResultsBaseClass for additional information
+    /// This class is used to track the peptide details for a SEQUEST search result loaded from a synopsis file
     /// </summary>
+    /// <remarks>
+    /// See SearchResultsBaseClass for additional information
+    /// </remarks>
     public class SequestResults : SearchResultsBaseClass
     {
         public string NumScans { get; set; }

@@ -18,11 +18,13 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an MS-GF+ search result loaded from a synopsis file
-    /// See SearchResultsBaseClass for additional information
     /// </summary>
+    /// <remarks>
+    /// See SearchResultsBaseClass for additional information
+    /// </remarks>
     public class MSGFPlusResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: tda
+        // Ignore Spelling: tda, terminii, tryptic
 
         public string FragMethod { get; set; }
         public string NTT { get; set; }
@@ -31,13 +33,20 @@ namespace PeptideHitResultsProcessor.Data
         public string MSGFScore { get; set; }
 
         /// <summary>
-        /// SpecProb in MSGFDB; SpecEValue in MS-GF+
+        /// SpecEValue in MS-GF+
+        /// SpecProb in MSGFDB
         /// </summary>
         public string SpecEValue { get; set; }
+
+        /// <summary>
+        /// Rank_MSGFDB_SpecEValue in MS-GF+
+        /// Rank_MSGFDB_SpecProb in MSGFDB
+        /// </summary>
         public string RankSpecEValue { get; set; }
 
         /// <summary>
-        /// PValue in MSGFDB; EValue in MS-GF+
+        /// EValue in MS-GF+
+        /// PValue in MSGFDB
         /// </summary>
         public string EValue { get; set; }
 
@@ -52,7 +61,11 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Pep QValue
         /// </summary>
-        /// <remarks>Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MS-GF+</remarks>
+        /// <remarks>
+        /// Only present if searched using -tda 1
+        /// PepQValue in MS-GF+
+        /// PepFDR in MSGFDB
+        /// </remarks>
         public string PepQValue { get; set; }
 
         public string PrecursorMZ { get; set; }
