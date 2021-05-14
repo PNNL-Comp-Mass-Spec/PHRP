@@ -163,12 +163,17 @@ namespace PHRPReader.Data
         Peptide = 14,
 
         /// <summary>
-        /// Proteins
+        /// Comma separated list of dynamic modifications in the peptide
+        /// </summary>
+        DynamicModifications = 15,
+
+        /// <summary>
+        /// Protein names
         /// </summary>
         /// <remarks>
         /// Semicolon separated list
         /// </remarks>
-        Proteins = 15,
+        Proteins = 16,
 
         /// <summary>
         /// Name of the best scoring protein this peptide is associated with
@@ -177,12 +182,12 @@ namespace PHRPReader.Data
         /// Typically there is only one protein name here
         /// However, in cases of a tied score, will be a semicolon separated list
         /// </remarks>
-        LeadingRazorProtein = 16,
+        LeadingRazorProtein = 17,
 
         /// <summary>
         /// Number of tryptic terminii
         /// </summary>
-        NTT = 17,
+        NTT = 18,
 
         /// <summary>
         /// Posterior error probability
@@ -191,7 +196,7 @@ namespace PHRPReader.Data
         /// Similar to p-value
         /// Smaller values (closer to zero) are higher confidence
         /// </remarks>
-        PEP = 18,
+        PEP = 19,
 
         /// <summary>
         ///  Andromeda score for the best MS/MS spectrum with this peptide
@@ -199,62 +204,62 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Higher scores are better
         /// </remarks>
-        Score = 19,
+        Score = 20,
 
         /// <summary>
         /// Score difference to the second best identified peptide with a different amino acid sequence
         /// </summary>
-        DeltaScore = 20,
+        DeltaScore = 21,
 
         /// <summary>
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
         /// </summary>
-        Intensity = 21,
+        Intensity = 22,
 
         /// <summary>
         /// Mass Analyzer of the instrument
         /// </summary>
-        MassAnalyzer = 22,
+        MassAnalyzer = 23,
 
         /// <summary>
         /// Type of precursor ion as identified by MaxQuant
         /// </summary>
-        PrecursorType = 23,
+        PrecursorType = 24,
 
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        RetentionTime = 24,
+        RetentionTime = 25,
 
         /// <summary>
         /// Scan number where the precursor ion was observed
         /// </summary>
-        PrecursorScan = 25,
+        PrecursorScan = 26,
 
         /// <summary>
         /// Intensity of the precursor ion in the scan that it was observed
         /// </summary>
-        PrecursorIntensity = 26,
+        PrecursorIntensity = 27,
 
         /// <summary>
         /// Number of peaks (MS/MS ions) matching to the predicted fragmentation spectrum
         /// </summary>
-        NumberOfMatches = 27,
+        NumberOfMatches = 28,
 
         /// <summary>
         /// Fraction of intensity in the MS/MS spectrum that is annotated
         /// </summary>
-        IntensityCoverage = 28,
+        IntensityCoverage = 29,
 
         /// <summary>
         /// Number of missed enzymatic cleavages
         /// </summary>
-        MissedCleavages = 29,
+        MissedCleavages = 30,
 
         /// <summary>
         /// Unique (consecutive) identifier for each row in msms.txt
         /// </summary>
-        MsMsID = 30,
+        MsMsID = 31,
 
         /// <summary>
         /// Identifier of the protein-group this redundant peptide sequence is associated with
@@ -268,7 +273,7 @@ namespace PHRPReader.Data
         /// Can be used to look up the extended protein information in the proteinGroups.txt file
         /// </para>
         /// </remarks>
-        ProteinGroupIDs = 31,
+        ProteinGroupIDs = 32,
 
         /// <summary>
         /// The identifier of the non-redundant peptide sequence
@@ -276,17 +281,17 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Corresponds to the id column in the peptides.txt file
         /// </remarks>
-        PeptideID = 32,
+        PeptideID = 33,
 
         /// <summary>
         /// Identifier referencing a row in the modificationSpecificPeptides.txt file
         /// </summary>
-        ModPeptideID = 33,
+        ModPeptideID = 34,
 
         /// <summary>
         /// Identifier referencing a row in the evidence.txt file
         /// </summary>
-        EvidenceID = 34
+        EvidenceID = 35
     }
 
     /// <summary>

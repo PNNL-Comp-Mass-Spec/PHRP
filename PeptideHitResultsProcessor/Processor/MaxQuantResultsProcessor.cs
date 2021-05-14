@@ -2923,6 +2923,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.MH,
                     searchResult.CalculatedMonoMass,
                     GetPeptideSequence(searchResult),
+                    searchResult.Modifications,
                     searchResult.Proteins,
                     searchResult.LeadingRazorProtein,
                     searchResult.NumberOfTrypticTerminii.ToString(),

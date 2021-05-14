@@ -151,6 +151,7 @@ namespace PHRPReader.Reader
                 { "MH", MaxQuantSynFileColumns.MH },
                 { "Mass", MaxQuantSynFileColumns.Mass },
                 { "Peptide", MaxQuantSynFileColumns.Peptide },
+                { "Modifications", MaxQuantSynFileColumns.DynamicModifications },
                 { "Proteins", MaxQuantSynFileColumns.Proteins },
                 { "LeadingRazorProtein", MaxQuantSynFileColumns.LeadingRazorProtein },
                 { "NTT", MaxQuantSynFileColumns.NTT },
