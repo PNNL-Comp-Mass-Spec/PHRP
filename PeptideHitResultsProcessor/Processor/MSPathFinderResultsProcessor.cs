@@ -990,6 +990,17 @@ namespace PeptideHitResultsProcessor.Processor
                 {"PepQValue", MSPathFinderResultsFileColumns.PepQValue}
             };
 
+            // These columns were in older versions of MSPathFinder
+            // Ignore them
+            var legacyColumnNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "IsotopeCorrPrevMs1",
+                "IsotopeCorrNextMs1",
+                "CorrMostAbundantPlusOneIsotope",
+                "ChargeCorrMinusOne",
+                "ChargeCorrPlusOne"
+            };
+
             columnMapping.Clear();
 
             try
@@ -1018,9 +1029,8 @@ namespace PeptideHitResultsProcessor.Processor
                             {
                                 // Recognized column name; update columnMapping
                                 columnMapping[resultFileColumn] = index;
-                                useDefaultHeaders = false;
                             }
-                            else
+                            else if (!legacyColumnNames.Contains(splitLine[index]))
                             {
                                 // Unrecognized column name
                                 OnWarningEvent("Warning: Unrecognized column header name '" + splitLine[index] + "' in ParseMSPathFinderResultsFileHeaderLine");
