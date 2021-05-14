@@ -313,34 +313,40 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == ModificationDefinition.ResidueModificationType.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ResidueModificationType.StaticMod)
                         {
-                            var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
-
-                            if (modificationDefinition.TargetResiduesContain(chChar))
-                            {
-                                // Match found; add this modification
-                                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
-
-                                searchResult.SearchResultAddModification(
-                                    modificationDefinition, chChar, residueLocInPeptide,
-                                    residueTerminusState, updateModOccurrenceCounts);
-                            }
+                            continue;
                         }
+
+                        var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+
+                        if (!modificationDefinition.TargetResiduesContain(chChar))
+                        {
+                            continue;
+                        }
+
+                        // Match found; add this modification
+                        var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
+                        searchResult.SearchResultAddModification(
+                            modificationDefinition, chChar, residueLocInPeptide,
+                            residueTerminusState, updateModOccurrenceCounts);
                     }
                 }
                 else if (StringUtilities.IsLetterAtoZ(chMostRecentLetter))
                 {
                     var success = searchResult.SearchResultAddDynamicModification(chChar, chMostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
-                    if (!success)
+                    if (success)
                     {
-                        var errorMessage = searchResult.ErrorMessage;
-                        if (string.IsNullOrEmpty(errorMessage))
-                        {
-                            errorMessage = "SearchResultAddDynamicModification returned false for symbol " + chChar;
-                        }
-                        SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
+                        continue;
                     }
+
+                    var errorMessage = searchResult.ErrorMessage;
+                    if (string.IsNullOrEmpty(errorMessage))
+                    {
+                        errorMessage = "SearchResultAddDynamicModification returned false for symbol " + chChar;
+                    }
+                    SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
                 }
                 else
                 {
@@ -387,22 +393,24 @@ namespace PeptideHitResultsProcessor.Processor
                 peptideNew = peptide;
             }
 
-            if (peptideNew.Length >= 4)
+            if (peptideNew.Length < 4)
             {
-                if (peptideNew[peptideNew.Length - 2] == '.')
-                {
-                    // Peptide already has the C-terminal residue
-                    // Replace it using kvProteinInfo
-                    peptideNew = peptideNew.Substring(0, peptideNew.Length - 2) + "." + kvProteinInfo.Value.CTerm;
-                }
-                else if (peptideNew[peptideNew.Length - 1] == '.')
-                {
-                    peptideNew += kvProteinInfo.Value.CTerm;
-                }
-                else
-                {
-                    peptideNew = peptideNew + "." + kvProteinInfo.Value.CTerm;
-                }
+                return peptideNew;
+            }
+
+            if (peptideNew[peptideNew.Length - 2] == '.')
+            {
+                // Peptide already has the C-terminal residue
+                // Replace it using kvProteinInfo
+                peptideNew = peptideNew.Substring(0, peptideNew.Length - 2) + "." + kvProteinInfo.Value.CTerm;
+            }
+            else if (peptideNew[peptideNew.Length - 1] == '.')
+            {
+                peptideNew += kvProteinInfo.Value.CTerm;
+            }
+            else
+            {
+                peptideNew = peptideNew + "." + kvProteinInfo.Value.CTerm;
             }
 
             return peptideNew;
@@ -417,19 +425,21 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var chargeScanComboText = udtScanGroupInfo.Charge + "_" + udtScanGroupInfo.Scan;
 
-            if (!scanGroupCombo.ContainsKey(chargeScanComboText))
+            if (scanGroupCombo.ContainsKey(chargeScanComboText))
             {
-                if (currentScanGroupID < 0)
-                {
-                    currentScanGroupID = nextScanGroupID;
-                    nextScanGroupID++;
-                }
-
-                udtScanGroupInfo.ScanGroupID = currentScanGroupID;
-
-                scanGroupDetails.Add(udtScanGroupInfo);
-                scanGroupCombo.Add(chargeScanComboText, true);
+                return;
             }
+
+            if (currentScanGroupID < 0)
+            {
+                currentScanGroupID = nextScanGroupID;
+                nextScanGroupID++;
+            }
+
+            udtScanGroupInfo.ScanGroupID = currentScanGroupID;
+
+            scanGroupDetails.Add(udtScanGroupInfo);
+            scanGroupCombo.Add(chargeScanComboText, true);
         }
 
         private void AppendToSearchResults(
@@ -529,14 +539,17 @@ namespace PeptideHitResultsProcessor.Processor
                 if (match.Success)
                 {
                     // Modification mass did not have a symbol associated with it in the _ModDefs.txt file
-                    // We could try to handle this, listing the modification mass in place of the modification symbol in the _ModDetails.txt file, but will
-                    // instead abort processing
+                    // We could try to handle this, listing the modification mass in place of the modification symbol in the _ModDetails.txt file,
+                    // but will instead abort processing
 
                     mNumericModErrors++;
 
                     if (mNumericModErrors < 250)
                     {
-                        var localErrorMessage = "Search result contains a numeric mod mass that could not be associated with a modification symbol; ResultID = " + searchResult.ResultID + ", ModMass = " + reMatch.Value;
+                        var localErrorMessage = string.Format(
+                            "Search result contains a numeric mod mass that could not be associated with a modification symbol; ResultID = {0}, ModMass = {1}",
+                            searchResult.ResultID, match.Value);
+
                         SetErrorMessage(localErrorMessage);
                     }
                     else if (mNumericModErrors == 250)
@@ -739,14 +752,16 @@ namespace PeptideHitResultsProcessor.Processor
                             }
                         }
 
-                        if (updateCandidate)
+                        if (!updateCandidate)
                         {
-                            bestMatchIndex = index;
-                            bestMassDiff = candidateMassDiff;
-                            symbolBestMatch = msgfPlusModInfo[index].ModSymbol;
-                            residuesBestBatch = msgfPlusModInfo[index].Residues;
-                            matchFound = true;
+                            continue;
                         }
+
+                        bestMatchIndex = index;
+                        bestMassDiff = candidateMassDiff;
+                        symbolBestMatch = msgfPlusModInfo[index].ModSymbol;
+                        residuesBestBatch = msgfPlusModInfo[index].Residues;
+                        matchFound = true;
                     }
 
                     if (!matchFound && nTerminalMod)
@@ -826,9 +841,10 @@ namespace PeptideHitResultsProcessor.Processor
                 mPrecursorMassErrorWarningCount = 0;
 
                 // Look for custom amino acids
-                var customAA = (from item in msgfPlusModInfo
-                                where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA
-                                select item).ToList();
+                var customAA =
+                    (from item in msgfPlusModInfo
+                     where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA
+                     select item).ToList();
 
                 foreach (var customAADef in customAA)
                 {
@@ -1212,24 +1228,26 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>KeyValuePair of the best protein name</returns>
         private KeyValuePair<string, int> GetBestProteinName(string currentProteinName, int currentProteinNumber, string candidateProteinName)
         {
-            if (mProteinNameOrder.Count > 0)
+            if (mProteinNameOrder.Count == 0)
             {
-                // Lookup the protein number (to make sure we use the protein name that occurs first in the FASTA file)
-                // Only possible if the user provided the path to the FASTA file
+                return new KeyValuePair<string, int>(currentProteinName, currentProteinNumber);
+            }
 
-                if (mProteinNameOrder.TryGetValue(candidateProteinName, out var proteinNumber))
+            // Lookup the protein number (to make sure we use the protein name that occurs first in the FASTA file)
+            // Only possible if the user provided the path to the FASTA file
+
+            if (mProteinNameOrder.TryGetValue(candidateProteinName, out var proteinNumber))
+            {
+                if (proteinNumber < currentProteinNumber)
                 {
-                    if (proteinNumber < currentProteinNumber)
-                    {
-                        // A better protein name has been found (or this is the first protein and we just determined the protein number to associate with it)
-                        return new KeyValuePair<string, int>(candidateProteinName, proteinNumber);
-                    }
+                    // A better protein name has been found (or this is the first protein and we just determined the protein number to associate with it)
+                    return new KeyValuePair<string, int>(candidateProteinName, proteinNumber);
                 }
-                else
-                {
-                    // Protein not found in mProteinNameOrder
-                    // It's likely a reverse-hit protein
-                }
+            }
+            else
+            {
+                // Protein not found in mProteinNameOrder
+                // It's likely a reverse-hit protein
             }
 
             // A better protein name was not found; return the current info
@@ -1352,8 +1370,9 @@ namespace PeptideHitResultsProcessor.Processor
 
             var searchEngineParams = new SearchEngineParameters(SEARCH_ENGINE_NAME);
 
-            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PeptideHitResultTypes.MSGFPlus,
-                                                                              searchEngineParams, out var localErrorMessage, out var localWarningMessage);
+            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(
+                SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PeptideHitResultTypes.MSGFPlus, 
+                searchEngineParams, out var localErrorMessage, out var localWarningMessage);
 
             if (!string.IsNullOrWhiteSpace(localErrorMessage))
             {
@@ -1404,8 +1423,6 @@ namespace PeptideHitResultsProcessor.Processor
             List<PepToProteinMapping> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             var successOverall = true;
 
             try
@@ -2240,18 +2257,21 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
+                if (errorMessages.Count >= MAX_ERROR_MESSAGE_COUNT)
                 {
-                    if (splitLine?.Length > 0)
-                    {
-                        errorMessages.Add(string.Format(
-                            "Error parsing MS-GF+ results for RowIndex '{0}'", splitLine[0]));
-                    }
-                    else
-                    {
-                        errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry");
-                    }
+                    return false;
                 }
+
+                if (splitLine?.Length > 0)
+                {
+                    errorMessages.Add(string.Format(
+                        "Error parsing MS-GF+ results for RowIndex '{0}'", splitLine[0]));
+                }
+                else
+                {
+                    errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry");
+                }
+
                 return false;
             }
         }
@@ -2350,7 +2370,11 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    var query = from item in msgfPlusModInfo where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA select item;
+                    var query =
+                        from item in msgfPlusModInfo
+                        where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA
+                        select item;
+
                     if (query.Any())
                     {
                         // Custom amino acids are defined; read their values and update the mass calculator
@@ -2581,16 +2605,12 @@ namespace PeptideHitResultsProcessor.Processor
             totalModMass = 0;
 
             // Remove the prefix and suffix residues
-            if (peptide.Length >= 4)
+            if (peptide.Length >= 4 && peptide[1] == '.' && peptide[peptide.Length - 2] == '.')
             {
-                if (peptide[1] == '.' &&
-                    peptide[peptide.Length - 2] == '.')
-                {
-                    prefix = peptide.Substring(0, 2);
-                    suffix = peptide.Substring(peptide.Length - 2, 2);
+                prefix = peptide.Substring(0, 2);
+                suffix = peptide.Substring(peptide.Length - 2, 2);
 
-                    peptide = peptide.Substring(2, peptide.Length - 4);
-                }
+                peptide = peptide.Substring(2, peptide.Length - 4);
             }
 
             // peptide should now be the primary peptide sequence, without the prefix or suffix residues
