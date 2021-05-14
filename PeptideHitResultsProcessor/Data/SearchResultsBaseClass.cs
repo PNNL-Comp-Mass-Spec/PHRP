@@ -160,8 +160,7 @@ namespace PeptideHitResultsProcessor.Data
             get => mPeptidePreResidues;
             set
             {
-                if (value == null)
-                    value = string.Empty;
+                value ??= string.Empty;
                 mPeptidePreResidues = value;
                 ComputePeptideCleavageStateInProtein();
             }
@@ -176,8 +175,7 @@ namespace PeptideHitResultsProcessor.Data
             get => mPeptidePostResidues;
             set
             {
-                if (value == null)
-                    value = string.Empty;
+                value ??= string.Empty;
                 mPeptidePostResidues = value;
                 ComputePeptideCleavageStateInProtein();
             }

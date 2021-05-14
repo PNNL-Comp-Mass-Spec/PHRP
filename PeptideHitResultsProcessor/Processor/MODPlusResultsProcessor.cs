@@ -1462,10 +1462,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Compute FDR values then assign QValues
             ComputeQValues(filteredSearchResults);
 
-            if (mProteinNamePositionSplit == null)
-            {
-                mProteinNamePositionSplit = new Regex(@"(.+)\[([^\]]+)\]", RegexOptions.Compiled);
-            }
+            mProteinNamePositionSplit ??= new Regex(@"(.+)\[([^\]]+)\]", RegexOptions.Compiled);
 
             var resultID = 1;
             foreach (var result in filteredSearchResults)
