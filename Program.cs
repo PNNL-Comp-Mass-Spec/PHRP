@@ -397,6 +397,8 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
+                if (parseCommandLine.RetrieveValueForParameter("DB", out var connectionString))
+                    Options.DMSConnectionString = connectionString;
 
                 if (parseCommandLine.RetrieveValueForParameter("S", out var recurseDirectories))
                 {
