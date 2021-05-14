@@ -50,18 +50,22 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (precursorInfoFile.Exists)
                 {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(precursorInfoFile.FullName, 80));
                     precursorsByScan = LoadPrecursorsFromPrecursorInfoFile(precursorInfoFile);
                 }
                 else if (sicStatsFile.Exists)
                 {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(sicStatsFile.FullName, 80));
                     precursorsByScan = LoadPrecursorsFromSICStatsFile(sicStatsFile);
                 }
                 else if (extendedScanStatsFile.Exists)
                 {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(extendedScanStatsFile.FullName, 80));
                     precursorsByScan = LoadPrecursorsFromExtendedScanStatsFile(extendedScanStatsFile);
                 }
                 else
                 {
+                    OnStatusEvent("Data file with precursor m/z values not found for dataset " + dataset);
                     precursorsByScan = new Dictionary<int, double>();
                 }
 
