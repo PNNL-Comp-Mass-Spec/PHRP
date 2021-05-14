@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa, txt
 
-        public const string PROGRAM_DATE = "May 7, 2021";
+        public const string PROGRAM_DATE = "May 13, 2021";
 
         private static readonly PHRPOptions Options = new();
 
@@ -489,7 +489,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
                                       "The input file should be one of the following:\n" +
-                                      "  MSGF+ results file ({0}.tsv or {1}.tsv)\n" +
+                                      "  MS-GF+ results file ({0}.tsv or {1}.tsv)\n" +
                                       "  MSGF-DB results file ({1}.txt)\n" +
                                       "  MSAlign results file ({2}.txt)\n" +
                                       "  MODa results file ({3}.txt)\n" +
@@ -562,11 +562,13 @@ namespace PeptideHitResultsProcRunner
                                       "and can be, at most, 8 characters long)."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /N to specify the parameter file provided to the search tool. " +
-                                      "This is only used when processing Inspect or MSGF+ files."));
+                                      "This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MODa, MODPlus, MSAlign, TopPIC, and InSpecT. " +
+                                      "For MaxQuant, provide either an XML-based parameter file (root element is <MaxQuantParams>) " +
+                                      "or provide the parameters.txt file created in the txt results directory."));
                 Console.WriteLine();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue " +
+                                      "When processing an MS-GF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue " +
                                       "to customize the thresholds used to determine which peptides are written to the synopsis file"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Defaults are /MSGFPlusSpecEValue:" +
@@ -583,10 +585,10 @@ namespace PeptideHitResultsProcRunner
                                       " will also be included in the synopsis file."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) " +
-                                      "when processing Inspect or MSGF+ results (default is /InsFHT:True)"));
+                                      "when processing Inspect or MS-GF+ results (default is /InsFHT:True)"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) " +
-                                      "when processing Inspect or MSGF+ results (default is /InsSyn:True)"));
+                                      "when processing Inspect or MS-GF+ results (default is /InsSyn:True)"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing a MODPlus or MODa results file, use /SynProb to customize " +
