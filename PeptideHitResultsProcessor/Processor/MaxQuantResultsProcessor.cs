@@ -136,7 +136,7 @@ namespace PeptideHitResultsProcessor.Processor
             ScanIndex = 2,
             Sequence = 3,
             Length = 4,
-            MissedCleavages = 5,
+            MissedCleavageCount = 5,
             Modifications = 6,
             ModifiedSequence = 7,
             Proteins = 8,
@@ -242,7 +242,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Number of missed enzymatic cleavages
             /// </summary>
-            public string MissedCleavages;
+            public string MissedCleavageCount;
 
             /// <summary>
             /// Post-translational modifications contained within the identified peptide
@@ -634,7 +634,7 @@ namespace PeptideHitResultsProcessor.Processor
                 SuffixResidue = string.Empty;
                 NumberOfTrypticTerminii = 0;
                 Length = string.Empty;
-                MissedCleavages = string.Empty;
+                MissedCleavageCount = string.Empty;
                 Modifications = string.Empty;
                 ModifiedSequence = string.Empty;
                 Proteins = string.Empty;
@@ -2191,8 +2191,8 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out searchResult.Length);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavages], out searchResult.MissedCleavages);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out searchResult.Modifications);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavageCount], out searchResult.MissedCleavageCount);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModifiedSequence], out searchResult.ModifiedSequence);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out string proteins);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out searchResult.Fragmentation);
@@ -2405,7 +2405,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Scan index", MaxQuantResultsFileColumns.ScanIndex},
                 {"Sequence", MaxQuantResultsFileColumns.Sequence},
                 {"Length", MaxQuantResultsFileColumns.Length},
-                {"Missed cleavages", MaxQuantResultsFileColumns.MissedCleavages},
+                {"Missed cleavages", MaxQuantResultsFileColumns.MissedCleavageCount},
                 {"Modifications", MaxQuantResultsFileColumns.Modifications},
                 {"Modified sequence", MaxQuantResultsFileColumns.ModifiedSequence},
                 {"Proteins", MaxQuantResultsFileColumns.Proteins},
@@ -2938,7 +2938,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PrecursorIntensity,
                     searchResult.NumberOfMatches,
                     searchResult.IntensityCoverage,
-                    searchResult.MissedCleavages,
+                    searchResult.MissedCleavageCount,
                     searchResult.MsMsID,
                     searchResult.ProteinGroupIDs,
                     searchResult.PeptideID,
