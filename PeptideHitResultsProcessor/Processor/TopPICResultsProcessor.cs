@@ -726,8 +726,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             // Note that TopPIC synopsis files are normally sorted on PValue, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered

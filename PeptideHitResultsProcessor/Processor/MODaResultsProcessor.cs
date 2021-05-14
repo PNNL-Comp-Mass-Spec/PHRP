@@ -756,7 +756,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="pepToProteinMapping"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,

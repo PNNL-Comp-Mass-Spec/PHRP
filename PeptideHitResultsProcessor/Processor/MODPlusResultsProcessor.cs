@@ -658,8 +658,6 @@ namespace PeptideHitResultsProcessor.Processor
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             // Note that MODPlus synopsis files are normally sorted on Probability value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
