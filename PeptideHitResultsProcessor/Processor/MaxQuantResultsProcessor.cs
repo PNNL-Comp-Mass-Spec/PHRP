@@ -1238,15 +1238,15 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read mod info from the MaxQuant parameter file
         /// </summary>
-        /// <param name="maxQuantParamFilePath"></param>
+        /// <param name="maxQuantParamFilePath">
+        /// This is typically the XML-based MaxQuant parameter file, but it can alternatively be
+        /// the parameters.txt file created in the txt output directory</param>
         /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string maxQuantParamFilePath,
             out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
-            modList = new List<ModInfo>();
-
             try
             {
                 var sourceFile = new FileInfo(maxQuantParamFilePath);
@@ -1254,11 +1254,98 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     SetErrorMessage("MaxQuant parameter file not found: " + maxQuantParamFilePath);
                     SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
+                    modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
                     return false;
                 }
 
+                if (sourceFile.Name.Equals("parameters.txt", StringComparison.OrdinalIgnoreCase))
+                    return ExtractModInfoFromTxtParameterFile(sourceFile, out modList);
+
+                if (sourceFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                    return ExtractModInfoFromXmlParameterFile(sourceFile, out modList);
+
+                SetErrorMessage("MaxQuant parameter should either have a .xml extension or be named parameters.txt; " +
+                                "unsupported file: " + maxQuantParamFilePath);
+
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromParamFile:  " + ex.Message, ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+                return false;
+            }
+        }
+
+        private bool ExtractModInfoFromTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+            try
+            {
+                // Open the parameters.txt file and look for static mod names
+                // The parameters.txt file does not list dynamic mods
+
+                OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
+
+                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var lineNumber = 0;
+
+                while (!reader.EndOfStream)
+                {
+                    var lineIn = reader.ReadLine();
+                    lineNumber++;
+
+                    if (string.IsNullOrWhiteSpace(lineIn) || !lineIn.StartsWith("Fixed modifications", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Found the static mods line, e.g.
+                    // Fixed modifications	Carbamidomethyl (C)
+
+                    var lineParts = lineIn.Split('\t');
+
+                    if (lineParts.Length < 2)
+                    {
+                        OnWarningEvent(string.Format(
+                            "Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected",
+                            lineNumber));
+
+                        continue;
+                    }
+
+                    var staticMods = lineParts[1];
+
+                    // ToDo: determine how multiple static mods are listed
+
+                    foreach (var maxQuantModName in staticMods.Split(','))
+                    {
+                        var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                        modList.Add(modDef);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile:  " + ex.Message, ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                return false;
+            }
+        }
+
+        private bool ExtractModInfoFromXmlParameterFile(FileSystemInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+            try
+            {
                 // Open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
-                OnStatusEvent("Reading the MaxQuant parameter file, " + sourceFile.Name);
+                OnStatusEvent("Reading the MaxQuant parameter file, " + PathUtils.CompactPathString(sourceFile.FullName, 80));
 
                 using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -1295,14 +1382,14 @@ namespace PeptideHitResultsProcessor.Processor
                 foreach (var fixedMod in fixedModNodes)
                 {
                     var maxQuantModName = fixedMod.Value;
-                    var modDef = GetModDetails(MSGFPlusModType.StaticMod, maxQuantModName);
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
                     modList.Add(modDef);
                 }
 
                 foreach (var dynamicMod in dynamicModNodes)
                 {
                     var maxQuantModName = dynamicMod.Value;
-                    var modDef = GetModDetails(MSGFPlusModType.DynamicMod, maxQuantModName);
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
                     modList.Add(modDef);
                 }
 
@@ -1310,7 +1397,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromParamFile:  " + ex.Message, ex);
+                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile:  " + ex.Message, ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -1340,7 +1427,9 @@ namespace PeptideHitResultsProcessor.Processor
             var baseNameByDatasetName = GetDatasetNameMap(datasetNames, out longestCommonBaseName, out var warnings);
 
             foreach (var warning in warnings)
+            {
                 OnWarningEvent(warning);
+            }
 
             return baseNameByDatasetName;
         }
@@ -1469,11 +1558,43 @@ namespace PeptideHitResultsProcessor.Processor
             return baseNameByDatasetName;
         }
 
-        private ModInfo GetModDetails(MSGFPlusModType modType, string maxQuantModName)
+        /// <summary>
+        /// Look for the modification, by name, in modList, which has modification info loaded from the MaxQuant parameter file
+        /// If not found, look in MaxQuantMods, which has modification info loaded from modifications.xml
+        /// </summary>
+        /// <param name="modList">List of modifications loaded from the MaxQuant parameter file (or from parameters.txt)</param>
+        /// <param name="modName">Modification name to find</param>
+        /// <param name="modMass">Output: modification mass</param>
+        /// <returns>True if found, otherwise false</returns>
+        private bool GetMaxQuantModMass(IEnumerable<MSGFPlusParamFileModExtractor.ModInfo> modList, string modName, out double modMass)
         {
-            var modDef = new ModInfo
+            foreach (var modDef in modList)
             {
-                ModType = modType
+                if (!string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                modMass = modDef.ModMassVal;
+                return true;
+            }
+
+            if (MaxQuantMods.TryGetValue(modName, out var modInfo))
+            {
+                modMass = modInfo.MonoisotopicMass;
+                return true;
+            }
+
+            modMass = 0;
+            return false;
+        }
+
+        private MSGFPlusParamFileModExtractor.ModInfo GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType modType, string maxQuantModName)
+        {
+            var modDef = new MSGFPlusParamFileModExtractor.ModInfo
+            {
+                ModType = modType,
+                ModTypeInParameterFile = modType
             };
 
             if (!MaxQuantMods.TryGetValue(maxQuantModName, out var modInfo))
