@@ -2197,6 +2197,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Read the remaining data values
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecIndex], out string specIndex);
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
 
                 GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MH], out string peptideMh);
@@ -2210,6 +2211,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.QValue], out string qValue);
 
                 searchResult.FragMethod = fragMethod;
+                searchResult.SpecIndex = specIndex;
                 searchResult.PrecursorMZ = precursorMz;
                 searchResult.PeptideMH = peptideMh;
                 searchResult.NTT = ntt;

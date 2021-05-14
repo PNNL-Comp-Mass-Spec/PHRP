@@ -27,9 +27,22 @@ namespace PeptideHitResultsProcessor.Data
         // Ignore Spelling: tda, terminii, tryptic
 
         public string FragMethod { get; set; }
+
+        public string SpecIndex { get; set; }
+
+        public string PrecursorMZ { get; set; }
+
+        public string MSGFPlusComputedDelM { get; set; }
+
+        public string MSGFPlusComputedDelMPPM { get; set; }
+
+        /// <summary>
+        /// Number of tryptic terminii
+        /// </summary>
         public string NTT { get; set; }
 
         public string DeNovoScore { get; set; }
+
         public string MSGFScore { get; set; }
 
         /// <summary>
@@ -68,10 +81,6 @@ namespace PeptideHitResultsProcessor.Data
         /// </remarks>
         public string PepQValue { get; set; }
 
-        public string PrecursorMZ { get; set; }
-        public string MSGFPlusComputedDelM { get; set; }
-        public string MSGFPlusComputedDelMPPM { get; set; }
-
         /// <summary>
         /// Isotope error
         /// </summary>
@@ -103,20 +112,23 @@ namespace PeptideHitResultsProcessor.Data
             base.Clear();
 
             FragMethod = string.Empty;
-            NTT = string.Empty;
-
-            DeNovoScore = string.Empty;
-            MSGFScore = string.Empty;
-            SpecEValue = string.Empty;
-            RankSpecEValue = string.Empty;
-            EValue = string.Empty;
-
-            QValue = string.Empty;
-            PepQValue = string.Empty;
+            SpecIndex = string.Empty;
 
             PrecursorMZ = string.Empty;
             MSGFPlusComputedDelM = string.Empty;
             MSGFPlusComputedDelMPPM = string.Empty;
+
+            NTT = string.Empty;
+
+            DeNovoScore = string.Empty;
+            MSGFScore = string.Empty;
+
+            SpecEValue = string.Empty;
+            RankSpecEValue = string.Empty;
+
+            EValue = string.Empty;
+            QValue = string.Empty;
+            PepQValue = string.Empty;
 
             IsotopeError = string.Empty;
             UsedMSGFPlus = false;
