@@ -1529,7 +1529,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromParamFile:  " + ex.Message, ex);
+                SetErrorMessage("Error in ExtractModInfoFromParamFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
                 return false;
@@ -1588,7 +1588,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile:  " + ex.Message, ex);
+                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -1653,7 +1653,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile:  " + ex.Message, ex);
+                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -2260,7 +2260,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in LoadMaxQuantModificationDefinitions: " + ex.Message);
+                SetErrorMessage("Error in LoadMaxQuantModificationDefinitions", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -2367,7 +2367,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in LoadPeptideInfo: " + ex.Message);
+                SetErrorMessage("Error in LoadPeptideInfo", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
             }
         }
@@ -2588,7 +2588,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseMaxQuantSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMaxQuantSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -2599,7 +2599,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseMaxQuantSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMaxQuantSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -2864,7 +2864,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MaxQuant peptides file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant peptides file", ex);
                 return false;
             }
         }
@@ -2953,7 +2953,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MaxQuant results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant results file", ex);
                 return false;
             }
         }
@@ -2991,7 +2991,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MaxQuant synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MaxQuant synopsis file", ex);
                 return false;
             }
 
@@ -3262,13 +3262,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in MaxQuantResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in MaxQuantResultsProcessor.ProcessFile (2)", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ProcessFile (1):" + ex.Message, ex);
+                SetErrorMessage("Error in ProcessFile (1)", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 

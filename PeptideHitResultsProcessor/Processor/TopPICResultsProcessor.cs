@@ -637,7 +637,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -905,7 +905,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseTopPICSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseTopPICSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -916,7 +916,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseTopPICSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseTopPICSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1206,7 +1206,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the TopPIC results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the TopPIC results file", ex);
                 return false;
             }
 
@@ -1245,7 +1245,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the TopPIC synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the TopPIC synopsis file", ex);
                 return false;
             }
 

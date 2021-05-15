@@ -568,7 +568,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -653,7 +653,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(msAlignParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(msAlignParamFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -846,7 +846,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseMSAlignSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMSAlignSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -857,7 +857,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseMSAlignSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMSAlignSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1132,7 +1132,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MSAlign results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MSAlign results file", ex);
                 return false;
             }
 
@@ -1171,7 +1171,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MSAlign synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MSAlign synopsis file", ex);
                 return false;
             }
 

@@ -540,7 +540,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -638,7 +638,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MODa parameter file (" + Path.GetFileName(modaParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MODa parameter file (" + Path.GetFileName(modaParamFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -730,7 +730,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MGF Index to Scan Map file (" + Path.GetFileName(indexToScanMapFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MGF Index to Scan Map file (" + Path.GetFileName(indexToScanMapFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -940,7 +940,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseMODaSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMODaSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -951,7 +951,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseMODaSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMODaSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1184,7 +1184,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MODa results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODa results file", ex);
                 return false;
             }
         }
@@ -1221,7 +1221,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MODa synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODa synopsis file", ex);
                 return false;
             }
 

@@ -1093,14 +1093,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in CreateFHTorSYNResultsFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in CreateFHTorSYNResultsFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in CreateFHTorSYNResultsFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in CreateFHTorSYNResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1614,7 +1614,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseMSGFPlusSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMSGFPlusSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -1625,7 +1625,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseMSGFPlusSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMSGFPlusSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -2479,13 +2479,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (2):  " + ex.Message);
+                    SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (2)", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (1):" + ex.Message);
+                SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (1)", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 
@@ -2928,7 +2928,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating ScanGroupInfo file: " + ex.Message);
+                SetErrorMessage("Error creating ScanGroupInfo file", ex);
             }
         }
 

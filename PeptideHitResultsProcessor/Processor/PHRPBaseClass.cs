@@ -335,7 +335,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                ReportError("Error caching protein names from fasta file " + Path.GetFileName(Options.FastaFilePath) + ": " + ex.Message);
+                ReportError("Error caching protein names from fasta file " + Path.GetFileName(Options.FastaFilePath), false, ex);
                 return false;
             }
         }
@@ -439,7 +439,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error cleaning up the file paths: " + ex.Message, ex);
+                SetErrorMessage("Error cleaning up the file paths", ex);
                 SetErrorCode(PHRPErrorCode.FilePathError);
                 return false;
             }
@@ -908,7 +908,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreatePepToProteinMapFile: " + ex.Message, ex);
+                SetErrorMessage("Error in CreatePepToProteinMapFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
             }
 
@@ -1135,7 +1135,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateProteinModDetailsFile:" + ex.Message, ex);
+                SetErrorMessage("Error in CreateProteinModDetailsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1510,7 +1510,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in LoadParameterFileSettings:" + ex.Message, ex);
+                SetErrorMessage("Error in LoadParameterFileSettings", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
                 return false;
             }
@@ -1599,7 +1599,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(pepToProteinMapFilePath) + "): " + ex.Message, ex);
+                SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(pepToProteinMapFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -1732,7 +1732,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void ReportError(string errMsg, bool throwException = false, Exception ex = null)
         {
-            SetErrorMessage(errMsg);
+            SetErrorMessage(errMsg, ex);
 
             if (throwException)
             {
@@ -2256,7 +2256,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" + ex.Message, ex);
+                SetErrorMessage("Error in ValidatePeptideToProteinMapResults", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }

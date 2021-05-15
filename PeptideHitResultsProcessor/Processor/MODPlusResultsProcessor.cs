@@ -557,7 +557,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile: " + ex.Message);
+                SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -640,7 +640,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MODPlus parameter file (" + Path.GetFileName(modPlusParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MODPlus parameter file (" + Path.GetFileName(modPlusParamFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -802,7 +802,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseMODPlusSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseMODPlusSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -813,7 +813,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseMODPlusSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseMODPlusSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1070,7 +1070,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MODPlus results file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODPlus results file", ex);
                 return false;
             }
         }
@@ -1107,7 +1107,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the MODPlus synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the MODPlus synopsis file", ex);
                 return false;
             }
 

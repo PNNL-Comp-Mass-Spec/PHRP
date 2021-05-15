@@ -536,14 +536,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in CreateFHTorSYNResultsFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in CreateFHTorSYNResultsFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in CreateFHTorSYNResultsFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in CreateFHTorSYNResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
@@ -752,7 +752,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the Inspect parameter file (" + Path.GetFileName(inspectParameterFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the Inspect parameter file (" + Path.GetFileName(inspectParameterFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -864,7 +864,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
@@ -900,7 +900,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the Inspect synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the Inspect synopsis file", ex);
                 return false;
             }
 
@@ -1104,7 +1104,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseInspectSynopsisFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseInspectSynopsisFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -1115,7 +1115,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseInspectSynopsisFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseInspectSynopsisFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }

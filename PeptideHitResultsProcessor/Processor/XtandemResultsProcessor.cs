@@ -550,7 +550,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseXTandemResultsFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseXTandemResultsFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -561,7 +561,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseXTandemResultsFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseXTandemResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1166,7 +1166,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ParseXTandemResultsFileInputParameters: " + ex.Message);
+                SetErrorMessage("Error in ParseXTandemResultsFileInputParameters", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 success = false;
             }
@@ -1543,13 +1543,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (2): " + ex.Message);
+                    SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (2)", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (1):" + ex.Message);
+                SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (1)", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 

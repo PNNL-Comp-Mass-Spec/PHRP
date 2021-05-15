@@ -353,7 +353,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error reading input file in ParseSynopsisOrFirstHitsFile: " + ex.Message);
+                    SetErrorMessage("Error reading input file in ParseSynopsisOrFirstHitsFile", ex);
                     SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
@@ -364,7 +364,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error creating the output file in ParseSynopsisOrFirstHitsFile: " + ex.Message);
+                SetErrorMessage("Error creating the output file in ParseSynopsisOrFirstHitsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -546,7 +546,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in SequestResultsProcessor.ProcessFile:  " + ex.Message);
+                SetErrorMessage("Error in SequestResultsProcessor.ProcessFile", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 
@@ -647,7 +647,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the Sequest synopsis file: " + ex.Message);
+                SetErrorMessage("Error parsing the header line in the Sequest synopsis file", ex);
                 return false;
             }
 
