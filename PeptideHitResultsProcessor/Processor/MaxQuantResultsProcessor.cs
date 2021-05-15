@@ -738,7 +738,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void AddDynamicModificationsToResidues(MaxQuantResults searchResult, bool updateModOccurrenceCounts, IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
 
-            if (!string.IsNullOrWhiteSpace(searchResult.Modifications))
+            if (string.IsNullOrWhiteSpace(searchResult.Modifications))
             {
                 return;
             }
