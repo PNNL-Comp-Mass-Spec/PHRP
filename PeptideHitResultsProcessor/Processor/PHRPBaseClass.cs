@@ -1950,8 +1950,10 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void SetErrorMessage(string message, Exception ex = null)
         {
-            if (message == null)
-                message = string.Empty;
+            message ??= string.Empty;
+
+            if (ex != null && message.IndexOf(ex.Message, StringComparison.Ordinal) < 0)
+                message += ": " + ex.Message;
 
             mErrorMessage = message;
             if (message.Length > 0)
