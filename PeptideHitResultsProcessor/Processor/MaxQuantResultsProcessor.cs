@@ -2473,8 +2473,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var validSearchResult = ParseMaxQuantSynFileEntry(
                             lineIn, searchResult, errorMessages,
-                            resultsProcessed, columnMapping, modList,
-                            out _);
+                            resultsProcessed, columnMapping, out _);
 
                         resultsProcessed++;
                         if (!validSearchResult)
