@@ -735,7 +735,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private static readonly Dictionary<char, List<int>> mResiduePositions = new();
 
-        private void AddDynamicModificationsToResidues(MaxQuantResults searchResult, bool updateModOccurrenceCounts, IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        private void AddDynamicModificationsToResidues(
+            MaxQuantResults searchResult,
+            bool updateModOccurrenceCounts,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
 
             if (string.IsNullOrWhiteSpace(searchResult.Modifications))
@@ -861,8 +864,6 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
             bool staticModPresent)
         {
-            bool success;
-
             try
             {
                 // Some of the other tools add IsotopicMods here
@@ -879,14 +880,12 @@ namespace PeptideHitResultsProcessor.Processor
                 // Populate .PeptideModDescription
                 searchResult.UpdateModDescription();
 
-                success = true;
+                return true;
             }
             catch (Exception)
             {
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         private static string CombineDatasetNameParts(
