@@ -3056,91 +3056,75 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading ResultID value fromMaxQuant results, line {0}", resultsProcessed + 1));
+                            "Error reading ResultID value from MaxQuant results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }
 
                 searchResult.ResultID = int.Parse(value);
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Scan], out string scan);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Dataset], out string dataset);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DatasetID], out int datasetId);
 
-                //searchResult.Scan = scan;
-                //searchResult.Charge = charge;
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Charge], out string charge);
 
-                //if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Sequence], out peptideSequence))
-                //{
-                //    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
-                //    {
-                //        errorMessages.Add(string.Format(
-                //            "Error reading Peptide sequence value from MaxQuant results, line {0}", resultsProcessed + 1));
-                //    }
-                //    return false;
-                //}
+                searchResult.DatasetName = dataset;
+                searchResult.DatasetID = datasetId;
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Protein], out string proteinName);
-                //searchResult.ProteinName = proteinName;
-                //searchResult.MultipleProteinCount = "0";
+                searchResult.Scan = scan;
+                searchResult.Charge = charge;
 
-                //searchResult.PeptideDeltaMass = "0";
+                if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out peptideSequence))
+                {
+                    if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
+                    {
+                        errorMessages.Add(string.Format(
+                            "Error reading Peptide sequence value from MaxQuant results, line {0}", resultsProcessed + 1));
+                    }
+                    return false;
+                }
 
-                //// Note that MaxQuant sequences don't actually have mod symbols; that information is tracked via searchResult.Modifications
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Proteins], out string proteinNames);
 
-                //// Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
-                //searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
+                // Protein names in the synopsis file are a semicolon separated list
+                foreach (var proteinName in proteinNames.Split(';'))
+                {
+                    searchResult.Proteins.Add(proteinName);
+                }
 
-                //var searchResultBase = (SearchResultsBaseClass)searchResult;
+                if (searchResult.Proteins.Count > 0)
+                {
+                    searchResult.ProteinName = searchResult.Proteins[0];
+                    searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
+                }
 
-                //ComputePseudoPeptideLocInProtein(searchResultBase);
+                searchResult.PeptideDeltaMass = "0";
 
-                //// Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                //searchResult.ComputePeptideCleavageStateInProtein();
+                // Note that MaxQuant peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
 
-                //// Read the remaining data values
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MostAbundantIsotopeMz], out string mostAbundantIsotopeMz);
+                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Modifications], out string modifications);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Composition], out string composition);
+                var searchResultBase = (SearchResultsBaseClass)searchResult;
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ProteinDesc], out string proteinDesc);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ProteinLength], out string proteinLength);
+                ComputePseudoPeptideLocInProtein(searchResultBase);
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ResidueStart], out string residueStart);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ResidueEnd], out string residueEnd);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MatchedFragments], out string matchedFragments);
+                // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                searchResult.ComputePeptideCleavageStateInProtein();
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.SpecEValue], out string specEValue);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.EValue], out string eValue);
+                // ToDo: Read the remaining data values
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DynamicModifications], out string dynamicModifications);
 
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.QValue], out string qValue);
-                //GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PepQValue], out string pepQValue);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.LeadingRazorProtein], out string leadingRazorProtein);
 
-                //searchResult.MostAbundantIsotopeMz = mostAbundantIsotopeMz;
-                //searchResult.Modifications = modifications;
-                //searchResult.Composition = composition;
-                //searchResult.ProteinDesc = proteinDesc;
-                //searchResult.ProteinLength = proteinLength;
-                //searchResult.ResidueStart = residueStart;
-                //searchResult.ResidueEnd = residueEnd;
-                //searchResult.MatchedFragments = matchedFragments;
+                // ToDo: Store the data
+                searchResult.Modifications = dynamicModifications;
+                searchResult.LeadingRazorProtein = leadingRazorProtein;
                 //searchResult.SpecEValue = specEValue;
                 //searchResult.EValue = eValue;
                 //searchResult.QValue = qValue;
                 //searchResult.PepQValue = pepQValue;
-
-                //// Update the peptide location in the protein
-                //if (!string.IsNullOrEmpty(searchResult.ResidueStart))
-                //{
-                //    int.TryParse(searchResult.ResidueStart, out var peptideLocInProteinStart);
-                //    searchResult.PeptideLocInProteinStart = peptideLocInProteinStart;
-                //}
-
-                //if (!string.IsNullOrEmpty(searchResult.ResidueEnd))
-                //{
-                //    int.TryParse(searchResult.ResidueEnd, out var peptideLocInProteinEnd);
-                //    searchResult.PeptideLocInProteinEnd = peptideLocInProteinEnd;
-                //}
 
                 return true;
             }
