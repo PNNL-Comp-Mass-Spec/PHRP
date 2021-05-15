@@ -115,7 +115,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Protein(s) associated with this peptide
         /// </summary>
-        public List<string> Proteins { get; }
+        public List<string> Proteins { get; } = new();
 
         /// <summary>
         /// Name of the best scoring protein this peptide is associated with
@@ -273,7 +273,6 @@ namespace PeptideHitResultsProcessor.Data
         public MaxQuantResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
-            Proteins = new List<string>();
         }
 
         public override void Clear()
