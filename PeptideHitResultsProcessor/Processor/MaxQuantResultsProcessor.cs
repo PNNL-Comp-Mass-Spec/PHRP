@@ -815,19 +815,23 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Step through the searchResult.Modifications and associate each dynamic modification with the residues
-        /// Also add static mods, if defined
+        /// Add modifications to a peptide read from the MaxQuant synopsis file
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <param name="modList"></param>
+        /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         private void AddModificationsToResidues(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            bool staticModPresent)
         {
             // Add dynamic mods
             AddDynamicModificationsToResidues(searchResult, updateModOccurrenceCounts, modList);
+
+            if (!staticModPresent)
+                return;
 
             // Add static mods
             var staticModResidues = GetResiduesWithStaticMods(
@@ -842,10 +846,20 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Add modifications to a peptide read from the MaxQuant synopsis file
+        /// Next, compute the monoisotopic mass
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modList"></param>
+        /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
+        /// <returns>True if success, false if an error</returns>
         private bool AddModificationsAndComputeMass(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            bool staticModPresent)
         {
             bool success;
 
@@ -857,7 +871,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // searchResult.SearchResultAddIsotopicModifications(updateModOccurrenceCounts)
 
                 // Parse .Modifications to determine the modified residues present
-                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modList);
+                AddModificationsToResidues(searchResult, updateModOccurrenceCounts, modList, staticModPresent);
 
                 // Compute the monoisotopic mass for this peptide
                 searchResult.ComputeMonoisotopicMass();
@@ -1000,9 +1014,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="modList"></param>
+        /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         private double ComputeTotalModMass(
             MaxQuantSearchResult searchResult,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            bool staticModPresent)
         {
             if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary))
             {
@@ -1051,8 +1067,10 @@ namespace PeptideHitResultsProcessor.Processor
                     "cannot determine mod mass", modName));
             }
 
-            // Add static mods
+            if (!staticModPresent)
+                return totalModMass;
 
+            // Add static mods
             var staticModResidues = GetResiduesWithStaticMods(
                 modList, searchResult.Sequence,
                 searchResult.PrefixResidue, searchResult.SuffixResidue);
@@ -1948,6 +1966,9 @@ namespace PeptideHitResultsProcessor.Processor
             string prefixResidue,
             string suffixResidue)
         {
+            // Construct a list of residues with static modification
+            // If a residue has multiple static mods, it will be added multiple times
+
             mResiduePositions.Clear();
 
             for (var residueNumber = 1; residueNumber <= cleanSequence.Length; residueNumber++)
@@ -1960,9 +1981,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 mResiduePositions.Add(cleanSequence[residueNumber - 1], new List<int> { residueNumber });
             }
-
-            // Construct a list of residues with static modification
-            // If a residue has multiple static mods, it will be added multiple times
 
             var staticModResidues = new List<ResidueModificationInfo>();
 
@@ -2406,6 +2424,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             var columnMapping = new Dictionary<MaxQuantSynFileColumns, int>();
 
+            var staticModPresent = modList.Any(modItem => modItem.ModTypeInParameterFile == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod);
+
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
@@ -2544,7 +2564,7 @@ namespace PeptideHitResultsProcessor.Processor
                             firstMatchForGroup = true;
                         }
 
-                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList, staticModPresent);
                         if (!modsAdded)
                         {
                             if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -2629,6 +2649,8 @@ namespace PeptideHitResultsProcessor.Processor
             int lineNumber)
         {
             searchResult = new MaxQuantSearchResult();
+
+            var staticModPresent = modList.Any(modItem => modItem.ModTypeInParameterFile == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod);
 
             try
             {
@@ -2723,7 +2745,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EvidenceID], out searchResult.EvidenceID);
 
                 // Parse the modification list to determine the total mod mass
-                var totalModMass = ComputeTotalModMass(searchResult, modList);
+                var totalModMass = ComputeTotalModMass(searchResult, modList, staticModPresent);
 
                 // Construct
                 searchResult.Modifications = ConstructDynamicModificationList(searchResult);
