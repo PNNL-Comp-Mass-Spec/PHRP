@@ -697,46 +697,51 @@ namespace PHRPReader
                 // Instantiate the appropriate PHRP SynFileReader
                 switch (resultType)
                 {
-                    case PeptideHitResultTypes.Sequest:
-                        SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.XTandem:
-                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
-                        SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
                     case PeptideHitResultTypes.Inspect:
                         SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case PeptideHitResultTypes.MSGFPlus:
-                        // MS-GF+
-                        SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                    case PeptideHitResultTypes.MaxQuant:
+                        SynFileReader = new MaxQuantSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MODa:
+                        SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MODPlus:
+                        SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case PeptideHitResultTypes.MSAlign:
                         SynFileReader = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case PeptideHitResultTypes.MODa:
-                        SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
                     // Future:
                     // case PeptideHitResultTypes.MSFragger:
                     //     SynFileReader = new MSFraggerSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                     //     break;
 
-                    case PeptideHitResultTypes.MODPlus:
-                        SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                    case PeptideHitResultTypes.MSGFPlus:
+                        // MS-GF+
+                        SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case PeptideHitResultTypes.MSPathFinder:
                         SynFileReader = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
+                    case PeptideHitResultTypes.Sequest:
+                        SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
                     case PeptideHitResultTypes.TopPIC:
                         SynFileReader = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.XTandem:
+                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
+                        SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     default:
@@ -1137,16 +1142,16 @@ namespace PHRPReader
 
             switch (resultType)
             {
-                case PeptideHitResultTypes.Sequest:
                 case PeptideHitResultTypes.Inspect:
-                case PeptideHitResultTypes.MSGFPlus:
-                case PeptideHitResultTypes.MSAlign:
+                case PeptideHitResultTypes.MaxQuant:
                 case PeptideHitResultTypes.MODa:
                 case PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MSAlign:
                 case PeptideHitResultTypes.MSFragger:
+                case PeptideHitResultTypes.MSGFPlus:
                 case PeptideHitResultTypes.MSPathFinder:
+                case PeptideHitResultTypes.Sequest:
                 case PeptideHitResultTypes.TopPIC:
-                case PeptideHitResultTypes.MaxQuant:
 
                     if (inputFileName.EndsWith("_fht", StringComparison.OrdinalIgnoreCase) ||
                         inputFileName.EndsWith("_syn", StringComparison.OrdinalIgnoreCase))
@@ -1160,15 +1165,25 @@ namespace PHRPReader
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_inspect".Length);
                             }
                         }
-                        else if (resultType == PeptideHitResultTypes.MSGFPlus)
+                        else if (resultType == PeptideHitResultTypes.MaxQuant)
                         {
-                            if (datasetName.EndsWith("_msgfplus", StringComparison.OrdinalIgnoreCase))
+                            if (datasetName.EndsWith("_maxq", StringComparison.OrdinalIgnoreCase))
                             {
-                                datasetName = datasetName.Substring(0, datasetName.Length - "_msgfplus".Length);
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_maxq".Length);
                             }
-                            else if (datasetName.EndsWith("_msgfdb", StringComparison.OrdinalIgnoreCase))
+                        }
+                        else if (resultType == PeptideHitResultTypes.MODa)
+                        {
+                            if (datasetName.EndsWith("_moda", StringComparison.OrdinalIgnoreCase))
                             {
-                                datasetName = datasetName.Substring(0, datasetName.Length - "_msgfdb".Length);
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_moda".Length);
+                            }
+                        }
+                        else if (resultType == PeptideHitResultTypes.MODPlus)
+                        {
+                            if (datasetName.EndsWith("_modp", StringComparison.OrdinalIgnoreCase))
+                            {
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_modp".Length);
                             }
                         }
                         else if (resultType == PeptideHitResultTypes.MSAlign)
@@ -1178,21 +1193,22 @@ namespace PHRPReader
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msalign".Length);
                             }
                         }
-                        else if (resultType == PeptideHitResultTypes.MODa)
                         else if (resultType == PeptideHitResultTypes.MSFragger)
                         {
-                            if (datasetName.EndsWith("_moda", StringComparison.OrdinalIgnoreCase))
                             if (datasetName.EndsWith("_msfragger", StringComparison.OrdinalIgnoreCase))
                             {
-                                datasetName = datasetName.Substring(0, datasetName.Length - "_moda".Length);
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msfragger".Length);
                             }
                         }
-                        else if (resultType == PeptideHitResultTypes.MODPlus)
+                        else if (resultType == PeptideHitResultTypes.MSGFPlus)
                         {
-                            if (datasetName.EndsWith("_modp", StringComparison.OrdinalIgnoreCase))
+                            if (datasetName.EndsWith("_msgfplus", StringComparison.OrdinalIgnoreCase))
                             {
-                                datasetName = datasetName.Substring(0, datasetName.Length - "_modp".Length);
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_msgfplus".Length);
+                            }
+                            else if (datasetName.EndsWith("_msgfdb", StringComparison.OrdinalIgnoreCase))
+                            {
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_msgfdb".Length);
                             }
                         }
                         else if (resultType == PeptideHitResultTypes.MSPathFinder)
@@ -1207,13 +1223,6 @@ namespace PHRPReader
                             if (datasetName.EndsWith("_toppic", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_toppic".Length);
-                            }
-                        }
-                        else if (resultType == PeptideHitResultTypes.MaxQuant)
-                        {
-                            if (datasetName.EndsWith("_maxq", StringComparison.OrdinalIgnoreCase))
-                            {
-                                datasetName = datasetName.Substring(0, datasetName.Length - "_maxq".Length);
                             }
                         }
                     }
@@ -1257,12 +1266,14 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
             // Future:
             // AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_SYN);
             // AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_FHT);
@@ -1270,7 +1281,6 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
 
@@ -1772,16 +1782,17 @@ namespace PHRPReader
         {
             return resultTypeName.ToLower() switch
             {
-                "peptide_hit" => PeptideHitResultTypes.Sequest,
-                "xt_peptide_hit" => PeptideHitResultTypes.XTandem,
                 "in_peptide_hit" => PeptideHitResultTypes.Inspect,
-                "msg_peptide_hit" => PeptideHitResultTypes.MSGFPlus,
-                "msa_peptide_hit" => PeptideHitResultTypes.MSAlign,
                 "moda_peptide_hit" => PeptideHitResultTypes.MODa,
                 "modplus_peptide_hit" => PeptideHitResultTypes.MODPlus,
+                "msa_peptide_hit" => PeptideHitResultTypes.MSAlign,
                 "msf_peptide_hit" => PeptideHitResultTypes.MSFragger,
+                "msg_peptide_hit" => PeptideHitResultTypes.MSGFPlus,
                 "msp_peptide_hit" => PeptideHitResultTypes.MSPathFinder,
+                "mxq_peptide_hit" => PeptideHitResultTypes.MaxQuant,
+                "peptide_hit" => PeptideHitResultTypes.Sequest,
                 "tpc_peptide_hit" => PeptideHitResultTypes.TopPIC,
+                "xt_peptide_hit" => PeptideHitResultTypes.XTandem,
                 _ => PeptideHitResultTypes.Unknown
             };
         }
@@ -1819,16 +1830,17 @@ namespace PHRPReader
 
             mCachedReader = resultType switch
             {
-                PeptideHitResultTypes.Sequest => new SequestSynFileReader(datasetName, string.Empty),
-                PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.Inspect => new InspectSynFileReader(datasetName, string.Empty),
-                PeptideHitResultTypes.MSGFPlus => new MSGFPlusSynFileReader(datasetName, string.Empty),
-                PeptideHitResultTypes.MSAlign => new MSAlignSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MaxQuant => new MaxQuantSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MODPlus => new MODPlusSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MSAlign => new MSAlignSynFileReader(datasetName, string.Empty),
                 // Future: PeptideHitResultTypes.MSFragger => new MSFraggerSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.MSGFPlus => new MSGFPlusSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MSPathFinder => new MSPathFinderSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.Sequest => new SequestSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.TopPIC => new TopPICSynFileReader(datasetName, string.Empty),
+                PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, string.Empty),
                 _ => throw new Exception("Unsupported PeptideHitResultTypes value: " + resultType)
             };
 
@@ -1979,16 +1991,17 @@ namespace PHRPReader
         {
             return resultType switch
             {
-                PeptideHitResultTypes.Sequest => "Tool_Version_Info_Sequest.txt",
-                PeptideHitResultTypes.XTandem => "Tool_Version_Info_XTandem.txt",
                 PeptideHitResultTypes.Inspect => "Tool_Version_Info_Inspect.txt",
-                PeptideHitResultTypes.MSGFPlus => "Tool_Version_Info_MSGFPlus.txt",  // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
-                PeptideHitResultTypes.MSAlign => "Tool_Version_Info_MSAlign.txt",
+                PeptideHitResultTypes.MaxQuant => "Tool_Version_Info_MaxQuant.txt",
                 PeptideHitResultTypes.MODa => "Tool_Version_Info_MODa.txt",
                 PeptideHitResultTypes.MODPlus => "Tool_Version_Info_MODPlus.txt",
+                PeptideHitResultTypes.MSAlign => "Tool_Version_Info_MSAlign.txt",
                 PeptideHitResultTypes.MSFragger => "Tool_Version_Info_MSFragger.txt",
+                PeptideHitResultTypes.MSGFPlus => "Tool_Version_Info_MSGFPlus.txt",         // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
                 PeptideHitResultTypes.MSPathFinder => "Tool_Version_Info_MSPathFinder.txt",
+                PeptideHitResultTypes.Sequest => "Tool_Version_Info_Sequest.txt",
                 PeptideHitResultTypes.TopPIC => "Tool_Version_Info_TopPIC.txt",
+                PeptideHitResultTypes.XTandem => "Tool_Version_Info_XTandem.txt",
                 _ => string.Empty
             };
         }
