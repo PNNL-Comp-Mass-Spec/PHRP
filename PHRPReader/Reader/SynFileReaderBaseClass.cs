@@ -202,8 +202,14 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType,
+        /// <remarks>
+        /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable,
+        /// but data related methods will not be callable
+        /// </remarks>
+        protected SynFileReaderBaseClass(
+            string datasetName,
+            string inputFilePath,
+            PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             ErrorMessages = new List<string>();
@@ -238,7 +244,10 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="peptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+        /// <remarks>
+        /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable,
+        /// but data related methods will not be callable
+        /// </remarks>
         protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
@@ -272,7 +281,7 @@ namespace PHRPReader.Reader
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="startupOptions">Startup options</param>
         /// <remarks>
-        /// If inputFilePath is an empty string,  the functions that solely depend on dataset name will be callable, but data related functions will not be callable
+        /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable, but data related methods will not be callable
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
@@ -292,7 +301,8 @@ namespace PHRPReader.Reader
             if (string.IsNullOrEmpty(inputFilePath))
             {
                 // User instantiated the class without a filename
-                // Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
+                // Methods that solely require a dataset name will be callable, but cannot call methods that read a data line
+
                 InputFilePath = string.Empty;
                 InputDirectoryPath = string.Empty;
 

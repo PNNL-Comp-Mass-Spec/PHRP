@@ -1444,8 +1444,9 @@ namespace PeptideHitResultsProcessor.Processor
                 // Note that MS-GF+ synopsis files are normally sorted on SpecEValue, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
                 //  we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
-                // Although this was a possibility with Inspect, it likely never occurs for MS-GF+
-                //  But, we'll keep the check in place just in case
+
+                // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
+                // Values are PeptideSequenceWithMods_Scan_Charge
 
                 var peptidesFoundForSpecEValueLevel = new SortedSet<string>();
 

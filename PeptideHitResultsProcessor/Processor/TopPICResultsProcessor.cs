@@ -748,7 +748,10 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize searchResult
                 var searchResult = new TopPICResults(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize peptidesFoundForPValueLevel
+                // Initialize a SortedSet that will be used to avoid double-counting the same PSM in the same scan
+                // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
+                // Values are PeptideSequenceWithMods_Scan_Charge
+
                 var peptidesFoundForPValueLevel = new SortedSet<string>();
                 var previousPValue = string.Empty;
 

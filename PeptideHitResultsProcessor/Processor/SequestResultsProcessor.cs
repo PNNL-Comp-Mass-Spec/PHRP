@@ -207,8 +207,12 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize searchResult
                 var searchResult = new SequestResults(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize peptidesFoundForXCorrLevel
+                // Initialize a SortedSet that will be used to avoid double-counting the same PSM in the same scan
+                // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
+                // Values are PeptideSequenceWithMods_Scan_NumScans_Charge_MH
+
                 var peptidesFoundForXCorrLevel = new SortedSet<string>();
+
                 var previousXCorr = string.Empty;
 
                 try

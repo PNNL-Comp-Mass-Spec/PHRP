@@ -939,8 +939,12 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize searchResult
                 var searchResult = new InSpecTResults(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize peptidesFoundForTotalPRMScoreLevel
+                // Initialize a SortedSet that will be used to avoid double-counting the same PSM in the same scan
+                // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
+                // Values are PeptideSequenceWithMods_Scan_Charge
+
                 var peptidesFoundForTotalPRMScoreLevel = new SortedSet<string>();
+
                 var previousTotalPRMScore = string.Empty;
 
                 // Assure that pepToProteinMapping is sorted on peptide

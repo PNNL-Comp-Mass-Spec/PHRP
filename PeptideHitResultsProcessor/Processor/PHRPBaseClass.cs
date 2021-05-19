@@ -1837,11 +1837,14 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Append an entry to the _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <param name="updateResultToSeqMapFile">Set to True only for the first protein of each peptide in each group</param>
+        /// <remarks>Call InitializeOutputFiles once prior to calling this method</remarks>
         protected void SaveResultsFileEntrySeqInfo(SearchResultsBaseClass searchResult, bool updateResultToSeqMapFile)
         {
-            // Note: Be sure to call Me.InitializeOutputFiles before calling this function
-            // updateResultToSeqMapFile should be set to True only for the first protein of each peptide in each group
-
             // This ID is assigned using a SortedSet containing mPeptideCleanSequence and mPeptideModDescription
             var uniqueSeqID = mUniqueSequences.GetNextUniqueSequenceID(
                 searchResult.PeptideCleanSequence,

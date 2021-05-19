@@ -58,27 +58,27 @@ namespace PHRPReader.Data
             UnknownType = 0,
 
             /// <summary>
-            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
+            /// Dynamic mod on a residue or peptide terminus; supported by SEQUEST and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             DynamicMod = 1,
 
             /// <summary>
-            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
+            /// Static mod on a residue or peptide terminus; supported by SEQUEST but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             StaticMod = 2,
 
             /// <summary>
-            /// Peptide terminus static mod (DMS Symbol is T); used by Sequest and MSGFDB; note that terminal mods are always dynamic in X!Tandem
+            /// Peptide terminus static mod (DMS Symbol is T); used by SEQUEST and MSGFDB; note that terminal mods are always dynamic in X!Tandem
             /// </summary>
             TerminalPeptideStaticMod = 3,
 
             /// <summary>
-            /// Isotopic mod, e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
+            /// Isotopic mod, e.g. N15, or C13; supported by SEQUEST; most likely not supported by XTandem
             /// </summary>
             IsotopicMod = 4,
 
             /// <summary>
-            /// Protein terminus static mod; supported by Sequest; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
+            /// Protein terminus static mod; supported by SEQUEST; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
             /// </summary>
             ProteinTerminusStaticMod = 5
         }
@@ -94,27 +94,27 @@ namespace PHRPReader.Data
             UnknownType = 0,
 
             /// <summary>
-            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
+            /// Dynamic mod on a residue or peptide terminus; supported by SEQUEST and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             DynamicMod = 1,
 
             /// <summary>
-            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
+            /// Static mod on a residue or peptide terminus; supported by SEQUEST but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             StaticMod = 2,
 
             /// <summary>
-            /// Peptide terminus static mod (DMS Symbol is T); used by Sequest and MSGFDB; note that terminal mods are always dynamic in X!Tandem
+            /// Peptide terminus static mod (DMS Symbol is T); used by SEQUEST and MSGFDB; note that terminal mods are always dynamic in X!Tandem
             /// </summary>
             TerminalPeptideStaticMod = 3,
 
             /// <summary>
-            /// Isotopic mod, e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
+            /// Isotopic mod, e.g. N15, or C13; supported by SEQUEST; most likely not supported by XTandem
             /// </summary>
             IsotopicMod = 4,
 
             /// <summary>
-            /// Protein terminus static mod; supported by Sequest; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
+            /// Protein terminus static mod; supported by SEQUEST; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
             /// </summary>
             ProteinTerminusStaticMod = 5
         }

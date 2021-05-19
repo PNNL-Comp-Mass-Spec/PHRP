@@ -8,6 +8,8 @@ namespace PHRPReader.Data
     /// </summary>
     public class SearchEngineParameters
     {
+        // Ignore Spelling: Daltons, tryptic
+
         /// <summary>
         /// Monoisotopic mass
         /// </summary>
@@ -77,6 +79,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
+        /// <remarks>This only populated for MSAlign, MODa, and MODPlus</remarks>
         public List<ModificationDefinition> ModList { get; }
 
         /// <summary>

@@ -667,7 +667,10 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize searchResult
                 var searchResult = new MSPathFinderResults(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize two SortedSets
+                // Initialize two SortedSets that will be used to avoid double-counting the same PSM in the same scan
+                // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
+                // Values are PeptideSequenceWithMods_Scan_Charge
+
                 var peptidesFoundForSpecEValue = new SortedSet<string>();
                 var peptidesFoundForQValue = new SortedSet<string>();
 

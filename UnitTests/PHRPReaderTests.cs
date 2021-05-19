@@ -12,7 +12,7 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PHRPReaderTests
     {
-        // Ignore Spelling: gb, gi
+        // Ignore Spelling: Da, gb, gi
 
         private struct MSGFPlusInfo
         {
