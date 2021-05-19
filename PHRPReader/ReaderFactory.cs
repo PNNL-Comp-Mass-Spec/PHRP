@@ -722,6 +722,10 @@ namespace PHRPReader
                     case PeptideHitResultTypes.MODa:
                         SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
+                    // Future:
+                    // case PeptideHitResultTypes.MSFragger:
+                    //     SynFileReader = new MSFraggerSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                    //     break;
 
                     case PeptideHitResultTypes.MODPlus:
                         SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
@@ -1029,6 +1033,9 @@ namespace PHRPReader
                 AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                // Future:
+                // AddFileToFind(filesToFind, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.GetPHRPSynopsisFileName, dataset);
+                // AddFileToFind(filesToFind, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.GetPHRPSynopsisFileName, dataset);
@@ -1136,6 +1143,7 @@ namespace PHRPReader
                 case PeptideHitResultTypes.MSAlign:
                 case PeptideHitResultTypes.MODa:
                 case PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MSFragger:
                 case PeptideHitResultTypes.MSPathFinder:
                 case PeptideHitResultTypes.TopPIC:
                 case PeptideHitResultTypes.MaxQuant:
@@ -1171,10 +1179,13 @@ namespace PHRPReader
                             }
                         }
                         else if (resultType == PeptideHitResultTypes.MODa)
+                        else if (resultType == PeptideHitResultTypes.MSFragger)
                         {
                             if (datasetName.EndsWith("_moda", StringComparison.OrdinalIgnoreCase))
+                            if (datasetName.EndsWith("_msfragger", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_moda".Length);
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_msfragger".Length);
                             }
                         }
                         else if (resultType == PeptideHitResultTypes.MODPlus)
@@ -1252,6 +1263,9 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_FHT);
+            // Future:
+            // AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_SYN);
+            // AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
@@ -1765,6 +1779,7 @@ namespace PHRPReader
                 "msa_peptide_hit" => PeptideHitResultTypes.MSAlign,
                 "moda_peptide_hit" => PeptideHitResultTypes.MODa,
                 "modplus_peptide_hit" => PeptideHitResultTypes.MODPlus,
+                "msf_peptide_hit" => PeptideHitResultTypes.MSFragger,
                 "msp_peptide_hit" => PeptideHitResultTypes.MSPathFinder,
                 "tpc_peptide_hit" => PeptideHitResultTypes.TopPIC,
                 _ => PeptideHitResultTypes.Unknown
@@ -1811,6 +1826,7 @@ namespace PHRPReader
                 PeptideHitResultTypes.MSAlign => new MSAlignSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MODPlus => new MODPlusSynFileReader(datasetName, string.Empty),
+                // Future: PeptideHitResultTypes.MSFragger => new MSFraggerSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MSPathFinder => new MSPathFinderSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.TopPIC => new TopPICSynFileReader(datasetName, string.Empty),
                 _ => throw new Exception("Unsupported PeptideHitResultTypes value: " + resultType)
@@ -1970,6 +1986,7 @@ namespace PHRPReader
                 PeptideHitResultTypes.MSAlign => "Tool_Version_Info_MSAlign.txt",
                 PeptideHitResultTypes.MODa => "Tool_Version_Info_MODa.txt",
                 PeptideHitResultTypes.MODPlus => "Tool_Version_Info_MODPlus.txt",
+                PeptideHitResultTypes.MSFragger => "Tool_Version_Info_MSFragger.txt",
                 PeptideHitResultTypes.MSPathFinder => "Tool_Version_Info_MSPathFinder.txt",
                 PeptideHitResultTypes.TopPIC => "Tool_Version_Info_TopPIC.txt",
                 _ => string.Empty

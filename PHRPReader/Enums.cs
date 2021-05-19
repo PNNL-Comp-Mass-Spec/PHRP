@@ -110,6 +110,11 @@ namespace PHRPReader
         /// <summary>
         /// MaxQuant
         /// </summary>
-        MaxQuant = 10
+        MaxQuant = 10,
+
+        /// <summary>
+        /// MSFragger
+        /// </summary>
+        MSFragger = 11
     }
 }
