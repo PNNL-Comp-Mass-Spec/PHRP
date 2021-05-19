@@ -976,14 +976,11 @@ namespace PeptideHitResultsProcessor.Processor
                                     }
 
                                     var modsAdded = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
-                                    if (!modsAdded)
+                                    if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                                     {
-                                        if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
-                                        {
-                                            errorMessages.Add(string.Format(
-                                                "Error adding modifications to sequence for Group ID '{0}'",
-                                                groupIDInXMLFile));
-                                        }
+                                        errorMessages.Add(string.Format(
+                                            "Error adding modifications to sequence for Group ID '{0}'",
+                                            groupIDInXMLFile));
                                     }
 
                                     sequenceWithMods = searchResults[searchResultIndex].PeptideCleanSequence + "_" + searchResults[searchResultIndex].PeptideModDescription;

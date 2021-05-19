@@ -1040,12 +1040,9 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                        if (!modsAdded)
+                        if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
-                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
-                            {
-                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
-                            }
+                            errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                         }
 
                         SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
