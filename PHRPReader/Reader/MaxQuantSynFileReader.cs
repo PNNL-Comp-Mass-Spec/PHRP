@@ -307,11 +307,7 @@ namespace PHRPReader.Reader
         {
             searchEngineParams = new SearchEngineParameters(MAXQUANT_SEARCH_ENGINE_NAME);
 
-            //var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
-
-            // ReadSearchEngineVersion(mPeptideHitResultType, searchEngineParams);
-
-            var success = false;
+            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
             return success;
         }
 
@@ -327,6 +323,138 @@ namespace PHRPReader.Reader
         public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             throw new NotImplementedException();
+        }
+
+        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)
+        {
+            try
+            {
+                var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
+                var paramFile = new FileInfo(paramFilePath);
+
+                if (!paramFile.Exists)
+                {
+                    ReportWarning("MaxQuant param file not found: " + paramFilePath);
+                    return false;
+                }
+
+                searchEngineParams.UpdateSearchEngineParamFilePath(paramFilePath);
+
+                using var reader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                // Note that XDocument supersedes XmlDocument and XPathDocument
+                // XDocument can often be easier to use since XDocument is LINQ-based
+
+                var doc = XDocument.Parse(reader.ReadToEnd());
+
+                // Determine the enzyme name
+
+                var enzymeName = XmlReaderUtilities.GetElementValueOrDefault(
+                    doc.Root,
+                    "parameterGroups", "parameterGroup", "enzymes", "string");
+
+                if (string.IsNullOrWhiteSpace(enzymeName))
+                {
+                    ReportWarning("'enzymes' node not found in the MaxQuant parameter file");
+                }
+                else
+                {
+                    searchEngineParams.Enzyme = enzymeName;
+
+                    switch (searchEngineParams.Enzyme)
+                    {
+                        case "Trypsin":
+                        case "Trypsin/P":
+                        case "LysC":
+                        case "LysC/P":
+                        case "D.P":
+                        case "ArgC":
+                        case "AspC":
+                        case "GluC":
+                        case "GluN":
+                        case "AspN":
+                        case "LysN":
+                        case "Chymotrypsin+":
+                        case "Chymotrypsin":
+                            break;
+
+                        default:
+                            ReportWarning(string.Format("Unrecognized enzyme '{0}' in the MaxQuant parameter file", searchEngineParams.Enzyme));
+                            break;
+                    }
+                }
+
+                // Determine the cleavage specificity
+                var enzymeMode = XmlReaderUtilities.GetElementValueOrDefault(
+                    doc.Root,
+                    "parameterGroups", "parameterGroup", "enzymeMode");
+
+                if (string.IsNullOrWhiteSpace(enzymeMode))
+                {
+                    ReportWarning("'enzymeMode' node not found in the MaxQuant parameter file");
+                }
+                else
+                {
+                    switch (enzymeMode)
+                    {
+                        case "0":
+                            // Fully tryptic
+                            searchEngineParams.MinNumberTermini = 2;
+                            break;
+
+                        case "1":
+                            // Partially tryptic, free N-terminus
+                            searchEngineParams.MinNumberTermini = 1;
+                            break;
+
+                        case "2":
+                            // Partially tryptic, free C-terminus
+                            searchEngineParams.MinNumberTermini = 1;
+                            break;
+
+                        case "3":
+                            // Partially tryptic
+                            searchEngineParams.MinNumberTermini = 1;
+                            break;
+
+                        case "4":
+                            // Non-tryptic
+                            searchEngineParams.MinNumberTermini = 0;
+                            break;
+
+                        default:
+                            ReportWarning(string.Format("Unrecognized enzymeMode '{0}'' in the MaxQuant parameter file", enzymeMode));
+                            break;
+                    }
+                }
+
+                // Determine the precursor mass tolerance (will store 0 if a problem or not found)
+                //var firstSearchPrecursorTolerancePPM = XmlReaderUtilities.GetElementValueOrDefault(
+                //    doc.Root,
+                //    "parameterGroups", "parameterGroup", "firstSearchTol");
+
+                var mainSearchPrecursorTolerancePPM = XmlReaderUtilities.GetElementValueOrDefault(
+                    doc.Root,
+                    "parameterGroups", "parameterGroup", "mainSearchTol");
+
+                if (double.TryParse(mainSearchPrecursorTolerancePPM, out var tolerancePPM))
+                {
+                    searchEngineParams.PrecursorMassToleranceDa = PeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
+                    searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
+                }
+                else
+                {
+                    searchEngineParams.PrecursorMassToleranceDa = 0;
+                    searchEngineParams.PrecursorMassTolerancePpm = 0;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ReportError("Error in ReadSearchEngineParamFile: " + ex.Message);
+                return false;
+            }
         }
     }
 }

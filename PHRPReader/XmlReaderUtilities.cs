@@ -8,6 +8,44 @@ namespace PHRPReader
     public static class XmlReaderUtilities
     {
         /// <summary>
+        /// Traverse an XML node hierarchy for the given element names
+        /// If the final element is found, return its value, otherwise return an empty string
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// /// <param name="elementNames"></param>
+        /// <remarks>See also <see cref="TryGetElementValue"/></remarks>
+        /// <returns>Value if found, or an empty string</returns>
+        public static string GetElementValueOrDefault(XElement parentNode, params string[] elementNames)
+        {
+            if (elementNames.Length == 0)
+                return parentNode.Value;
+
+            if (elementNames.Length == 1)
+            {
+                if (TryGetElementValue(parentNode, elementNames[0], out var value))
+                    return value;
+
+                return string.Empty;
+            }
+
+            for (var i = 0; i < elementNames.Length; i++)
+            {
+                var childNode = parentNode.Element(elementNames[i]);
+                if (childNode == null)
+                    return string.Empty;
+
+                if (i == elementNames.Length - 1)
+                {
+                    return childNode.Value;
+                }
+
+                parentNode = childNode;
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
         /// Get the named attribute from the given element
         /// </summary>
         /// <param name="item"></param>
