@@ -7,6 +7,8 @@ using NUnit.Framework;
 using PHRPReader;
 using PHRPReader.Data;
 
+// ReSharper disable StringLiteralTypo
+
 namespace PHRP_UnitTests
 {
     [TestFixture]
@@ -354,6 +356,50 @@ namespace PHRP_UnitTests
                 {
                     Console.WriteLine("Fragmentation scan {0,-4}, precursor {1:F2} m/z, peak area {2}", item.Key, item.Value.MZ, item.Value.PeakArea);
                 }
+            }
+        }
+
+        [Test]
+        [TestCase(PeptideHitResultTypes.MSAlign, @"MSA201807121159_Auto1609998\MSAlign_15ppm_0pt01_FDR_2012-01-03.txt")]
+        [TestCase(PeptideHitResultTypes.MSGFPlus, @"MSG201802011337_Auto1547784\MSGFPlus_Tryp_DynSTYPhos_Stat_CysAlk_20ppmParTol.txt")]
+        [TestCase(PeptideHitResultTypes.MSGFPlus, @"MSG202011150906_Auto1850387\MSGFPlus_Tryp_MetOx_StatCysAlk_20ppmParTol.txt")]
+        [TestCase(PeptideHitResultTypes.MSPathFinder, @"MSP201804280928_Auto1578533\MSPF_MetOx_CysDehydro_NTermAcet_SingleInternalCleavage.txt")]
+        [TestCase(PeptideHitResultTypes.MaxQuant, @"MXQ202103181341_Auto1878805\MaxQuant_Tryp_Dyn_MetOx_NTermAcet_20ppmParTol.xml")]
+        [TestCase(PeptideHitResultTypes.Sequest, @"Seq201212131618_Auto901984\sequest_DNA_N14_NE_Dyn_Met_Ox_Stat_Cys_Iodo.params")]
+        [TestCase(PeptideHitResultTypes.TopPIC, @"TPC201808171745_Auto1624200\TopPIC_15ppmParTol_NumShift1_2018-08-16.txt")]
+        [TestCase(PeptideHitResultTypes.XTandem, @"XTM201702142141_Auto1408699\xtandem_ETD_Rnd1Tryp_StatCysAlk_STYPhos_NoRefinement_20ppmParent_0pt5DaFrag.xml")]
+        public void TestLoadSearchEngineParameters(PeptideHitResultTypes resultType, string parameterFilePath)
+        {
+            var parameterFile = FindFile(parameterFilePath);
+
+            if (parameterFile.Directory == null)
+                throw new NullReferenceException("Unable to determine the parent directory of the parameter file");
+
+            var startupOptions = new StartupOptions
+            {
+                DisableOpeningInputFiles = true
+            };
+
+            var placeholderInputFilePath = Path.Combine(parameterFile.Directory.FullName, ReaderFactory.NON_EXISTENT_FILE_PLACEHOLDER_NAME);
+            var factory = new ReaderFactory(placeholderInputFilePath, resultType, startupOptions);
+
+            factory.SynFileReader.LoadSearchEngineParameters(parameterFile.Name, out var searchEngineParams);
+
+            Console.WriteLine();
+            Console.WriteLine("{0,-21} {1}", "Search Engine:", searchEngineParams.SearchEngineName);
+            Console.WriteLine("{0,-21} {1} {2}", "Precursor tolerance:", searchEngineParams.PrecursorMassTolerancePpm, "ppm");
+            Console.WriteLine("{0,-21} {1} {2}", "Precursor tolerance:", searchEngineParams.PrecursorMassToleranceDa, "Da");
+            Console.WriteLine("{0,-21} {1}", "Min number termini:", searchEngineParams.MinNumberTermini);
+            Console.WriteLine("{0,-21} {1}", "Enzyme:", searchEngineParams.Enzyme);
+
+            if (!string.IsNullOrWhiteSpace(searchEngineParams.FastaFilePath))
+            {
+                Console.WriteLine("{0,-21} {1}", "FASTA File:", searchEngineParams.FastaFilePath);
+            }
+
+            foreach (var modInfo in searchEngineParams.ModList)
+            {
+                Console.WriteLine(modInfo.ToString());
             }
         }
 
