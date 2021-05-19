@@ -318,11 +318,21 @@ namespace PHRPReader.Reader
                     InputDirectoryPath = inputFile.Directory.FullName;
                 }
 
-                var phrpSynopsisName = ReaderFactory.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
-                var expectedSynopsisName = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
+                if (startupOptions.DisableOpeningInputFiles)
+                {
+                    // File loading is disabled
+                    // Methods that solely require a dataset name will be callable, but cannot call methods that read a data line
 
-                isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
-                                 inputFile.Name.EndsWith("_syn.txt", StringComparison.OrdinalIgnoreCase);
+                    isSynopsisFile = false;
+                }
+                else
+                {
+                    var phrpSynopsisName = ReaderFactory.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
+                    var expectedSynopsisName = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
+
+                    isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
+                                     inputFile.Name.EndsWith("_syn.txt", StringComparison.OrdinalIgnoreCase);
+                }
             }
 
             mErrorMessage = string.Empty;

@@ -57,6 +57,8 @@ namespace PHRPReader
         public const string SIC_STATS_FILENAME_SUFFIX = "_SICStats.txt";
         public const string PRECURSOR_INFO_FILENAME_SUFFIX = "_PrecursorInfo.txt";
 
+        public const string NON_EXISTENT_FILE_PLACEHOLDER_NAME = "NonExistent_PHRP_InputFile.xyz";
+
 #pragma warning restore 1591
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
@@ -558,51 +560,87 @@ namespace PHRPReader
 
         private void InitializeReader(string inputFilePath, PeptideHitResultTypes resultType)
         {
-            var modSummaryFilePath = string.Empty;
-
             try
             {
-                if (string.IsNullOrEmpty(inputFilePath))
+                FileInfo inputFile;
+
+                if (mStartupOptions.DisableOpeningInputFiles)
                 {
-                    ReportError("Input file name is empty");
-                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                    if (!mInitialized)
-                        throw new FileNotFoundException(ErrorMessage);
-                    return;
-                }
+                    // Auto-set these to false
+                    mStartupOptions.LoadModsAndSeqInfo = false;
+                    mStartupOptions.LoadMSGFResults = false;
+                    mStartupOptions.LoadScanStatsData = false;
 
-                // Confirm that the source file exists
-                // Make sure inputFilePath points to a valid file
-                var inputFile = new FileInfo(inputFilePath);
-
-                if (inputFile.Directory == null)
-                {
-                    ReportError("Unable to determine the parent directory of " + inputFile.FullName);
-                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                    if (!mInitialized)
-                        throw new FileNotFoundException(ErrorMessage);
-                    return;
-                }
-
-                mInputDirectoryPath = inputFile.Directory.FullName;
-                mInputFilePath = inputFile.FullName;
-
-                if (!inputFile.Exists)
-                {
-                    ReportError("Input file not found: " + inputFilePath);
-                    if (inputFilePath.Contains(".."))
+                    if (string.IsNullOrWhiteSpace(inputFilePath))
                     {
-                        ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                        ReportWarning("Input file name is empty");
+                        inputFile = new FileInfo(NON_EXISTENT_FILE_PLACEHOLDER_NAME);
                     }
-                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                    if (!mInitialized)
-                        throw new FileNotFoundException(ErrorMessage);
-                    return;
+                    else
+                    {
+                        inputFile = new FileInfo(inputFilePath);
+                    }
+
+                    if (inputFile.Directory == null)
+                    {
+                        ReportWarning("Unable to determine the parent directory of " + inputFile.FullName);
+                        mInputDirectoryPath = string.Empty;
+                    }
+                    else
+                    {
+                        mInputDirectoryPath = inputFile.Directory.FullName;
+                    }
+
+                    mInputFilePath = inputFile.FullName;
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(inputFilePath))
+                    {
+                        ReportError("Input file name is empty");
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
+
+                    // Confirm that the source file exists
+                    // Make sure inputFilePath points to a valid file
+                    inputFile = new FileInfo(inputFilePath);
+
+                    if (inputFile.Directory == null)
+                    {
+                        ReportError("Unable to determine the parent directory of " + inputFile.FullName);
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
+
+                    mInputDirectoryPath = inputFile.Directory.FullName;
+                    mInputFilePath = inputFile.FullName;
+
+                    if (!inputFile.Exists)
+                    {
+                        ReportError("Input file not found: " + inputFilePath);
+                        if (inputFilePath.Contains(".."))
+                        {
+                            ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                        }
+
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
                 }
 
                 // Validate the input files, including updating resultType if it is PeptideHitResultTypes.Unknown
                 // Note that the following populates DatasetName
-                var success = ValidateInputFiles(inputFilePath, ref resultType, ref modSummaryFilePath);
+                var success = ValidateInputFiles(inputFile, ref resultType, out var modSummaryFilePath);
 
                 if (!success)
                 {
@@ -612,8 +650,9 @@ namespace PHRPReader
                     return;
                 }
 
-                // Open the input file for reading
-                // Note that this will also load the MSGFSpecEValue info and ScanStats info
+                // Initialize the SynFileReader
+                // If the input file exists, open the input file for reading
+                // Note that this will also load the MSGFSpecEValue info and ScanStats info (if enabled via properties in mStartupOptions)
                 success = InitializeReader(resultType);
 
                 if (success && mStartupOptions.LoadModsAndSeqInfo)
@@ -695,6 +734,10 @@ namespace PHRPReader
 
                 // Open the peptide-hit result file (from PHRP) for reading
                 // Instantiate the appropriate PHRP SynFileReader
+
+                // If mInputFilePath is an empty string, the reader will be instantiated, and methods that solely depend on dataset name will be callable,
+                // but data related methods will not be callable
+
                 switch (resultType)
                 {
                     case PeptideHitResultTypes.Inspect:
@@ -773,6 +816,11 @@ namespace PHRPReader
 
                 SynFileReader.ClearErrors();
                 SynFileReader.ClearWarnings();
+
+                if (mStartupOptions.DisableOpeningInputFiles)
+                {
+                    return true;
+                }
 
                 // Open the data file and count the number of lines so that we can compute progress
                 mSourceFileLineCount = CountLines(mInputFilePath);
@@ -2853,53 +2901,58 @@ namespace PHRPReader
             return false;
         }
 
-        private bool ValidateInputFiles(string inputFilePath, ref PeptideHitResultTypes resultType, ref string modSummaryFilePath)
+        private bool ValidateInputFiles(FileInfo inputFile, ref PeptideHitResultTypes resultType, out string modSummaryFilePath)
         {
-            var inputFile = new FileInfo(inputFilePath);
-            if (!inputFile.Exists)
-            {
-                SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                ReportError("Input file not found: " + inputFilePath);
-                if (inputFilePath.Contains(".."))
-                {
-                    ReportWarning("Absolute path: " + inputFile.DirectoryName);
-                }
-
-                return false;
-            }
-
             // Try to auto-determine the result type if it is not specified
             if (resultType == PeptideHitResultTypes.Unknown)
             {
-                resultType = AutoDetermineResultType(inputFilePath);
+                resultType = AutoDetermineResultType(inputFile.FullName);
             }
 
             if (resultType == PeptideHitResultTypes.Unknown)
             {
+                modSummaryFilePath = string.Empty;
+
+                if (mStartupOptions.DisableOpeningInputFiles)
+                {
+                    ReportWarning(string.Format(
+                        "Error: Unable to auto-determine file format for {0}; cannot determine the dataset name",
+                        inputFile.FullName));
+
+                    return true;
+                }
+
                 SetLocalErrorCode(PHRPReaderErrorCodes.InputFileFormatNotRecognized);
-                ReportError("Error: Unable to auto-determine file format for " + inputFilePath);
+                ReportError("Error: Unable to auto-determine file format for " + inputFile.FullName);
                 return false;
             }
 
             // Extract the dataset name from the input file path
-            DatasetName = AutoDetermineDatasetName(inputFilePath, resultType);
+            DatasetName = AutoDetermineDatasetName(inputFile.FullName, resultType);
 
             if (string.IsNullOrEmpty(DatasetName))
             {
                 if (mStartupOptions.LoadModsAndSeqInfo || mStartupOptions.LoadMSGFResults || mStartupOptions.LoadScanStatsData)
                 {
-                    ReportError("Error: Unable to auto-determine the dataset name from the input file name: " + inputFilePath);
+                    ReportError("Error: Unable to auto-determine the dataset name from the input file name: " + inputFile.FullName);
                     SetLocalErrorCode(PHRPReaderErrorCodes.InputFileFormatNotRecognized);
+                    modSummaryFilePath = string.Empty;
                     return false;
                 }
 
-                ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " + inputFilePath);
-                ReportWarning("Standard input file suffixes include: \n" +
-                              "  _msgfplus_fht.txt\n" +
-                              "  _msgfplus_syn.txt\n" +
-                              "  _mspath_syn.txt\n" +
-                              "  _toppic_syn.txt\n" +
-                              "  _xt.txt");
+                if (!inputFile.Name.Equals(NON_EXISTENT_FILE_PLACEHOLDER_NAME))
+                {
+                    ReportWarning("Unable to auto-determine the dataset name from the input file name; " +
+                                  "this is not a critical error since not reading related files: \n" + inputFile.FullName);
+
+                    ReportWarning("Standard input file suffixes include: \n" +
+                                  "  _msgfplus_fht.txt\n" +
+                                  "  _msgfplus_syn.txt\n" +
+                                  "  _maxq_syn.txt\n" +
+                                  "  _mspath_syn.txt\n" +
+                                  "  _toppic_syn.txt\n" +
+                                  "  _xt.txt");
+                }
             }
 
             if (mStartupOptions.LoadModsAndSeqInfo)
@@ -2911,6 +2964,7 @@ namespace PHRPReader
                                               "given the PHRP result type {1}",
                                               DatasetName, resultType.ToString()));
                     SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound);
+                    modSummaryFilePath = string.Empty;
                     return false;
                 }
 

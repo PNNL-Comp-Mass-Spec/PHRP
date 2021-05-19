@@ -7,6 +7,16 @@
     public class StartupOptions
     {
         /// <summary>
+        /// When true, do not try to open the input file
+        /// This allows the input file to be non-existent, or even an empty string
+        /// </summary>
+        /// <remarks>
+        /// Note that some methods (e.g. LoadSearchEngineParameters) accept a filename but not a full path
+        /// To allow for the InputDirectoryPath to be initialized, instantiate the reader with a full path to a non-existent file
+        /// </remarks>
+        public bool DisableOpeningInputFiles { get; set; }
+
+        /// <summary>
         /// If true, load the modification and SeqInfo data
         /// </summary>
         public bool LoadModsAndSeqInfo { get; set; }
@@ -38,6 +48,7 @@
         /// </summary>
         public StartupOptions()
         {
+            DisableOpeningInputFiles = false;
             LoadModsAndSeqInfo = true;
             LoadMSGFResults = true;
             LoadScanStatsData = false;
