@@ -214,7 +214,10 @@ namespace PHRPReader.Data
         /// <summary>
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
         /// </summary>
-        Intensity = 22,
+        /// <remarks>
+        /// All peptides with the same sequence will have the same total peptide intensity value for a given dataset
+        /// </remarks>
+        TotalPeptideIntensity = 22,
 
         /// <summary>
         /// Mass Analyzer of the instrument
