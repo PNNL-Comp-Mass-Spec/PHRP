@@ -1036,6 +1036,8 @@ namespace PHRPReader
 
                 AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 // Future:
