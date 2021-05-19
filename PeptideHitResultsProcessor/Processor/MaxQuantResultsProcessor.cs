@@ -1677,6 +1677,21 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
+        /// Otherwise, updates value to string.Empty
+        /// </summary>
+        /// <returns>True if columnIndex >= 0</returns>
+        protected bool GetColumnValueCheckNaN(string[] splitLine, int columnIndex, out string value)
+        {
+            var valueDefined = GetColumnValue(splitLine, columnIndex, out value, string.Empty);
+
+            if (valueDefined && value.Equals("NaN"))
+                value = string.Empty;
+
+            return valueDefined;
+        }
+
+        /// <summary>
         /// Examine the Raw File names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
@@ -2689,6 +2704,8 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
+                // Note that we replace NaN (not-a-number) with an empty string for several of the values
+
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out searchResult.Length);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavageCount], out searchResult.MissedCleavageCount);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out searchResult.ModificationSummary);
@@ -2706,8 +2723,8 @@ namespace PeptideHitResultsProcessor.Processor
                 // This is (M+H)+ when the charge carrier is a proton
                 searchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SimpleMassErrorPPM], out searchResult.SimpleMassErrorPPM);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out searchResult.RetentionTime);
 
@@ -2721,15 +2738,15 @@ namespace PeptideHitResultsProcessor.Processor
                     double.TryParse(searchResult.Score, out searchResult.ScoreValue);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out searchResult.DeltaScore);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScoreDiff], out searchResult.ScoreDiff);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.LocalizationProb], out searchResult.LocalizationProb);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out searchResult.DeltaScore);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.ScoreDiff], out searchResult.ScoreDiff);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.LocalizationProb], out searchResult.LocalizationProb);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Combinatorics], out searchResult.Combinatorics);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PIF], out searchResult.PIF);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.FractionOfTotalSpectrum], out searchResult.FractionOfTotalSpectrum);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.BasePeakFraction], out searchResult.BasePeakFraction);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorScanNumber], out searchResult.PrecursorScanNumber);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out searchResult.PrecursorIntensity);
+                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out searchResult.PrecursorIntensity);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexFraction], out searchResult.PrecursorApexFraction);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffset], out searchResult.PrecursorApexOffset);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffsetTime], out searchResult.PrecursorApexOffsetTime);

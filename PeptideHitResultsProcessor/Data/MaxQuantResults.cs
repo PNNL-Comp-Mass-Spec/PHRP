@@ -76,7 +76,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Mass error, in Da, as computed by MaxQuant
         /// </summary>
         /// <remarks>
-        /// This is NaN if a peptide has Type=MSMS
+        /// This is an empty string if a peptide has Type=MSMS
         /// In contrast, if a peptide has Type=MULTI-MSMS, a value will be defined
         /// </remarks>
         public string MaxQuantComputedDelM { get; set; }
@@ -87,7 +87,7 @@ namespace PeptideHitResultsProcessor.Data
         /// as computed by MaxQuant
         /// </summary>
         /// <remarks>
-        /// This is NaN if a peptide has Type=MSMS
+        /// This is an empty string if a peptide has Type=MSMS
         /// In contrast, if a peptide has Type=MULTI-MSMS, a value will be defined
         /// </remarks>
         public string MaxQuantComputedDelMPPM { get; set; }
