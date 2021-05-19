@@ -740,7 +740,6 @@ namespace PeptideHitResultsProcessor.Processor
             bool updateModOccurrenceCounts,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
-
             if (string.IsNullOrWhiteSpace(searchResult.Modifications))
             {
                 return;
@@ -1561,6 +1560,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Open the parameters.txt file and look for static mod names
                 // The parameters.txt file does not list dynamic mods
+                // It also does not list reporter ion based mods (e.g. TMT)
 
                 OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
 
