@@ -73,6 +73,16 @@ namespace PeptideHitResultsProcessor.Data
         public string PrecursorMZ { get; set; }
 
         /// <summary>
+        /// Mass error, in Da, as computed by PHRP
+        /// </summary>
+        public string PHRPComputedDelM { get; set; }
+
+        /// <summary>
+        /// Mass error, in ppm, as computed by PHRP
+        /// </summary>
+        public string PHRPComputedDelMPPM { get; set; }
+
+        /// <summary>
         /// Mass error, in Da, as computed by MaxQuant
         /// </summary>
         /// <remarks>
@@ -91,11 +101,6 @@ namespace PeptideHitResultsProcessor.Data
         /// In contrast, if a peptide has Type=MULTI-MSMS, a value will be defined
         /// </remarks>
         public string MaxQuantComputedDelMPPM { get; set; }
-
-        /// <summary>
-        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
-        /// </summary>
-        public string MH { get; set; }
 
         /// <summary>
         /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
@@ -289,9 +294,10 @@ namespace PeptideHitResultsProcessor.Data
             FragMethod = string.Empty;
             SpecIndex = string.Empty;
             PrecursorMZ = string.Empty;
+            PHRPComputedDelM = string.Empty;
+            PHRPComputedDelMPPM = string.Empty;
             MaxQuantComputedDelM = string.Empty;
             MaxQuantComputedDelMPPM = string.Empty;
-            MH = string.Empty;
             CalculatedMonoMass = string.Empty;
             Modifications = string.Empty;
             Proteins.Clear();

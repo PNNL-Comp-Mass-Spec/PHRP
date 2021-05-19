@@ -2454,15 +2454,6 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize searchResult
                 var searchResult = new MaxQuantResults(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize two SortedSets
-                var peptidesFoundForSpecEValue = new SortedSet<string>();
-                var peptidesFoundForQValue = new SortedSet<string>();
-
-                var firstMatchForGroup = false;
-
-                var previousSpecEValue = string.Empty;
-                var previousQValue = string.Empty;
-
                 var errorMessages = new List<string>();
 
                 try
@@ -2517,77 +2508,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
 
-                        var newValue = true;
-
-                        // ToDo:
-                        //if (string.IsNullOrEmpty(searchResult.SpecEValue))
-                        //{
-                        //    if (searchResult.QValue == previousQValue)
-                        //    {
-                        //        // New result has the same QValue as the previous result
-                        //        // See if peptidesFoundForQValue contains the peptide, scan and charge
-
-                        //        if (peptidesFoundForQValue.Contains(key))
-                        //        {
-                        //            firstMatchForGroup = false;
-                        //        }
-                        //        else
-                        //        {
-                        //            peptidesFoundForQValue.Add(key);
-                        //            firstMatchForGroup = true;
-                        //        }
-
-                        //        newValue = false;
-                        //    }
-                        //}
-                        //else if (searchResult.SpecEValue == previousSpecEValue)
-                        //{
-                        //    // New result has the same SpecEValue as the previous result
-                        //    // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
-
-                        //    if (peptidesFoundForSpecEValue.Contains(key))
-                        //    {
-                        //        firstMatchForGroup = false;
-                        //    }
-                        //    else
-                        //    {
-                        //        peptidesFoundForSpecEValue.Add(key);
-                        //        firstMatchForGroup = true;
-                        //    }
-
-                        //    newValue = false;
-                        //}
-
-                        if (newValue)
+                        var modsAdded = AddModificationsAndComputeMass(searchResult, true, modList, staticModPresent);
+                        if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
-                            // New SpecEValue or new QValue
-                            // Reset the SortedSets
-                            peptidesFoundForSpecEValue.Clear();
-                            peptidesFoundForQValue.Clear();
-
-                            // ToDo: Customize
-
-                            // Update the cached values
-                            //previousSpecEValue = searchResult.SpecEValue;
-                            //previousQValue = searchResult.QValue;
-
-                            // Append a new entry to the SortedSets
-                            peptidesFoundForSpecEValue.Add(key);
-                            peptidesFoundForQValue.Add(key);
-
-                            firstMatchForGroup = true;
+                            errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
                         }
 
-                        var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList, staticModPresent);
-                        if (!modsAdded)
-                        {
-                            if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
-                            {
-                                errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
-                            }
-                        }
-
-                        SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+                        SaveResultsFileEntrySeqInfo(searchResult, true);
 
                         // Update the progress
                         UpdateSynopsisFileCreationProgress(reader);
@@ -2763,14 +2690,15 @@ namespace PeptideHitResultsProcessor.Processor
                 // Parse the modification list to determine the total mod mass
                 var totalModMass = ComputeTotalModMass(searchResult, modList, staticModPresent);
 
-                // Construct
+                // Construct the list of dynamic modifications
                 searchResult.Modifications = ConstructDynamicModificationList(searchResult);
 
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMass(searchResult.Sequence, totalModMass);
 
-                // We would ideally manually compute the mass error using the observed precursor ion m/z value
-                // However, that information is not available in the MaxQuant results
+                // For other tools, we manually compute the mass error using the observed precursor ion m/z value
+                // This cannot be done with the information in the msms.txt file, but it can be done if a PrecursorInfo file exists
+                // Method ComputeObservedMassErrors will do this
 
                 // Compare the mass computed by PHRP to the one reported by MaxQuant
                 var deltaMassVsMaxQuant = searchResult.CalculatedMonoMassValue - searchResult.CalculatedMonoMassPHRP;
@@ -3116,9 +3044,29 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
                 }
 
-                searchResult.PeptideDeltaMass = "0";
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MH], out string parentIonMH);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Mass], out string monoisotopicMass);
+
+                searchResult.PrecursorMZ = precursorMz;
+                searchResult.ParentIonMH = parentIonMH;
+                searchResult.CalculatedMonoMass = monoisotopicMass;
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM], out string phrpComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM], out string phrpComputedDelMppm);
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_MaxQuant], out string maxquantComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM_MaxQuant], out string maxquantComputedDelMppm);
+
+                searchResult.PeptideDeltaMass = phrpComputedDelM;
+                searchResult.PHRPComputedDelM = phrpComputedDelM;
+                searchResult.PHRPComputedDelMPPM = phrpComputedDelMppm;
+
+                searchResult.MaxQuantComputedDelM = maxquantComputedDelM;
+                searchResult.MaxQuantComputedDelMPPM = maxquantComputedDelMppm;
 
                 // Note that MaxQuant peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
+                // Thus, .PeptideSequenceWithMods will not have any mod symbols
 
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
@@ -3130,18 +3078,57 @@ namespace PeptideHitResultsProcessor.Processor
                 // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 searchResult.ComputePeptideCleavageStateInProtein();
 
-                // ToDo: Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DynamicModifications], out string dynamicModifications);
+                // Read the remaining data values
 
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.SpecIndex], out string specIndex);
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DynamicModifications], out string dynamicModifications);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.LeadingRazorProtein], out string leadingRazorProtein);
 
-                // ToDo: Store the data
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NTT], out string ntt);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PEP], out string posteriorErrorProbability);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Score], out string andromedaScore);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DeltaScore], out string deltaScore);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.TotalPeptideIntensity], out string totalPeptideIntensity);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MassAnalyzer], out string massAnalyzer);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorType], out string precursorType);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.RetentionTime], out string retentionTime);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorScan], out string precursorScan);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorIntensity], out string precursorIntensity);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NumberOfMatches], out string numberOfMatches);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.IntensityCoverage], out string intensityCoverage);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MissedCleavages], out string missedCleavages);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MsMsID], out string msMsID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ProteinGroupIDs], out string proteinGroupIDs);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PeptideID], out string peptideID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ModPeptideID], out string modPeptideID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.EvidenceID], out string evidenceID);
+
+                // Store the data
+                searchResult.FragMethod = fragMethod;
+                searchResult.SpecIndex = specIndex;
                 searchResult.Modifications = dynamicModifications;
                 searchResult.LeadingRazorProtein = leadingRazorProtein;
-                //searchResult.SpecEValue = specEValue;
-                //searchResult.EValue = eValue;
-                //searchResult.QValue = qValue;
-                //searchResult.PepQValue = pepQValue;
+
+                searchResult.NTT = ntt;
+                searchResult.PEP = posteriorErrorProbability;
+                searchResult.Score = andromedaScore;
+                searchResult.DeltaScore = deltaScore;
+                searchResult.TotalPeptideIntensity = totalPeptideIntensity;
+                searchResult.MassAnalyzer = massAnalyzer;
+                searchResult.PrecursorType = precursorType;
+                searchResult.RetentionTime = retentionTime;
+                searchResult.PrecursorScanNumber = precursorScan;
+                searchResult.PrecursorIntensity = precursorIntensity;
+                searchResult.NumberOfMatches = numberOfMatches;
+                searchResult.IntensityCoverage = intensityCoverage;
+                searchResult.MissedCleavageCount = missedCleavages;
+                searchResult.MsMsID = msMsID;
+                searchResult.ProteinGroupIDs = proteinGroupIDs;
+                searchResult.PeptideID = peptideID;
+                searchResult.ModPeptideID = modPeptideID;
+                searchResult.EvidenceID = evidenceID;
 
                 return true;
             }
@@ -3485,7 +3472,18 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // Scan is the same; check Score
+                // Scan is the same, check charge
+                if (x.ChargeNum > y.ChargeNum)
+                {
+                    return 1;
+                }
+
+                if (x.ChargeNum < y.ChargeNum)
+                {
+                    return -1;
+                }
+
+                // Charge is the same; check Score
                 if (x.ScoreValue < y.ScoreValue)
                 {
                     return 1;
