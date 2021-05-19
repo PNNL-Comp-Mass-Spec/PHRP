@@ -121,7 +121,7 @@ namespace PeptideHitResultsProcessor.Processor
             Suffix = 2,
             Proteins = 3,
             LeadingRazorProtein = 4,
-            Intensity = 5,
+            TotalPeptideIntensity = 5,
             Id = 6
         }
 
@@ -539,7 +539,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// From the peptides.txt file, column "Intensity"
             /// </remarks>
-            public string PeptideIntensity;
+            public string TotalPeptideIntensity;
 
             /// <summary>
             /// Parent Ion Fraction: the fraction of the target peak that makes up of the total intensity in the inclusion window
@@ -690,7 +690,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ScoreDiff = string.Empty;
                 LocalizationProb = string.Empty;
                 Combinatorics = string.Empty;
-                PeptideIntensity = string.Empty;
+                TotalPeptideIntensity = string.Empty;
                 PIF = string.Empty;
                 FractionOfTotalSpectrum = string.Empty;
                 BasePeakFraction = string.Empty;
@@ -2373,7 +2373,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.LeadingRazorProtein], out peptideInfo.LeadingRazorProtein);
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Intensity], out peptideInfo.Intensity);
+                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.TotalPeptideIntensity], out peptideInfo.TotalPeptideIntensity);
 
                     foreach (var item in intensityByExperimentColumns)
                     {
@@ -2770,7 +2770,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PrefixResidue = peptideInfo.Prefix;
                     searchResult.SuffixResidue = peptideInfo.Suffix;
                     searchResult.LeadingRazorProtein = peptideInfo.LeadingRazorProtein;
-                    searchResult.PeptideIntensity = peptideInfo.Intensity;
+                    searchResult.TotalPeptideIntensity = peptideInfo.TotalPeptideIntensity;
 
                     var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(GetPeptideSequence(searchResult));
 
@@ -2823,7 +2823,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Amino acid after", MaxQuantPeptidesFileColumns.Suffix},
                 {"Proteins", MaxQuantPeptidesFileColumns.Proteins},
                 {"Leading razor protein", MaxQuantPeptidesFileColumns.LeadingRazorProtein},
-                {"Intensity", MaxQuantPeptidesFileColumns.Intensity},
+                {"Intensity", MaxQuantPeptidesFileColumns.TotalPeptideIntensity},
                 {"id", MaxQuantPeptidesFileColumns.Id}
             };
 
@@ -2849,7 +2849,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                var intensityColumnIndex = columnMapping[MaxQuantPeptidesFileColumns.Intensity];
+                var intensityColumnIndex = columnMapping[MaxQuantPeptidesFileColumns.TotalPeptideIntensity];
                 if (intensityColumnIndex < 0)
                 {
                     OnWarningEvent("Intensity column not found in the MaxQuant peptides.txt file");
@@ -3418,7 +3418,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PEP,
                     searchResult.Score,
                     searchResult.DeltaScore,
-                    searchResult.PeptideIntensity,
+                    searchResult.TotalPeptideIntensity,
                     searchResult.MassAnalyzer,
                     searchResult.PrecursorType,
                     searchResult.RetentionTime,

@@ -157,9 +157,14 @@ namespace PeptideHitResultsProcessor.Data
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// All peptides with the same sequence will have the same total peptide intensity value for a given dataset
+        /// </para>
+        /// <para>
         /// From the peptides.txt file, column "Intensity"
+        /// </para>
         /// </remarks>
-        public string PeptideIntensity { get; set; }
+        public string TotalPeptideIntensity { get; set; }
 
         /// <summary>
         /// Mass Analyzer of the instrument
@@ -295,7 +300,7 @@ namespace PeptideHitResultsProcessor.Data
             PEP = string.Empty;
             Score = string.Empty;
             DeltaScore = string.Empty;
-            PeptideIntensity = string.Empty;
+            TotalPeptideIntensity = string.Empty;
             MassAnalyzer = string.Empty;
             PrecursorType = string.Empty;
             RetentionTime = string.Empty;

@@ -54,7 +54,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide
         /// </summary>
-        public string Intensity;
+        public string TotalPeptideIntensity;
 
         /// <summary>
         /// Summed up extracted ion current (XIC) of all isotopic clusters associated with this peptide, by experiment
@@ -79,7 +79,7 @@ namespace PeptideHitResultsProcessor.Data
             Suffix = string.Empty;
             Proteins.Clear();
             LeadingRazorProtein = string.Empty;
-            Intensity = string.Empty;
+            TotalPeptideIntensity = string.Empty;
             IntensityByExperiment.Clear();
         }
     }

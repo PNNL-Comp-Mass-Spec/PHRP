@@ -158,7 +158,7 @@ namespace PHRPReader.Reader
                 { "PEP", MaxQuantSynFileColumns.PEP },
                 { "Score", MaxQuantSynFileColumns.Score },
                 { "DeltaScore", MaxQuantSynFileColumns.DeltaScore },
-                { "Intensity", MaxQuantSynFileColumns.Intensity },
+                { "TotalPeptideIntensity", MaxQuantSynFileColumns.TotalPeptideIntensity },
                 { "MassAnalyzer", MaxQuantSynFileColumns.MassAnalyzer },
                 { "PrecursorType", MaxQuantSynFileColumns.PrecursorType },
                 { "RetentionTime", MaxQuantSynFileColumns.RetentionTime },
