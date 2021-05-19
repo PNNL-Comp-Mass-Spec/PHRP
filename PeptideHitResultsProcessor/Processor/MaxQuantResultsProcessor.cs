@@ -2143,19 +2143,19 @@ namespace PeptideHitResultsProcessor.Processor
 
                 foreach (var modificationNode in doc.Elements("modifications").Elements("modification"))
                 {
-                    if (!TryGetAttribute(modificationNode, "title", out var modTitle))
+                    if (!XmlReaderUtilities.TryGetAttribute(modificationNode, "title", out var modTitle))
                     {
                         OnWarningEvent("Modification node in the MaxQuant modifications file is missing the title attribute");
                         continue;
                     }
 
-                    if (!TryGetAttribute(modificationNode, "composition", out var composition))
+                    if (!XmlReaderUtilities.TryGetAttribute(modificationNode, "composition", out var composition))
                     {
                         OnWarningEvent("Modification node in the MaxQuant modifications file is missing the composition attribute");
                         continue;
                     }
 
-                    TryGetAttribute(modificationNode, "description", out var modDescription);
+                    XmlReaderUtilities.TryGetAttribute(modificationNode, "description", out var modDescription);
 
                     if (MaxQuantMods.ContainsKey(modTitle))
                     {
@@ -2173,7 +2173,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     MaxQuantMods.Add(modTitle, maxQuantMod);
 
-                    if (TryGetElementValue(modificationNode, "position", out var positionText))
+                    if (XmlReaderUtilities.TryGetElementValue(modificationNode, "position", out var positionText))
                     {
                         maxQuantMod.Position = positionText switch
                         {
@@ -2193,7 +2193,7 @@ namespace PeptideHitResultsProcessor.Processor
                             maxQuantMod.Title));
                     }
 
-                    if (TryGetElementValue(modificationNode, "type", out var modTypeText))
+                    if (XmlReaderUtilities.TryGetElementValue(modificationNode, "type", out var modTypeText))
                     {
                         maxQuantMod.ModType = modTypeText switch
                         {
@@ -2214,7 +2214,7 @@ namespace PeptideHitResultsProcessor.Processor
                             maxQuantMod.Title));
                     }
 
-                    if (TryGetElementValue(modificationNode, "terminus_type", out var terminusTypeText))
+                    if (XmlReaderUtilities.TryGetElementValue(modificationNode, "terminus_type", out var terminusTypeText))
                     {
                         maxQuantMod.TerminusType = terminusTypeText switch
                         {
@@ -2242,7 +2242,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     foreach (var modificationSiteNode in modificationSiteNodes)
                     {
-                        if (TryGetAttribute(modificationSiteNode, "site", out var modificationSite))
+                        if (XmlReaderUtilities.TryGetAttribute(modificationSiteNode, "site", out var modificationSite))
                         {
                             if (string.IsNullOrWhiteSpace(modificationSite))
                             {

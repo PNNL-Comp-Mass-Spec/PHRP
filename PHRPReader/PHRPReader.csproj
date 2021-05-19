@@ -89,6 +89,7 @@
     <Compile Include="Reader\TopPICSynFileReader.cs" />
     <Compile Include="Reader\XTandemSynFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlReaderUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PRISM-Library">
