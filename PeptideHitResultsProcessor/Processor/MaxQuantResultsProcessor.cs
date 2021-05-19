@@ -1636,6 +1636,19 @@ namespace PeptideHitResultsProcessor.Processor
                 //    <string>Acetyl (Protein N-term)</string>
                 // </variableModifications>
 
+                // <isobaricLabels>
+                //   <IsobaricLabelInfo>
+                //     <internalLabel>TMT6plex-Lys126</internalLabel>
+                //     <terminalLabel>TMT6plex-Nter126</terminalLabel>
+                //     <correctionFactorM2>0</correctionFactorM2>
+                //     <correctionFactorM1>0</correctionFactorM1>
+                //     <correctionFactorP1>0</correctionFactorP1>
+                //     <correctionFactorP2>0</correctionFactorP2>
+                //     <tmtLike>True</tmtLike>
+                //   </IsobaricLabelInfo>
+                //   ...
+                // </isobaricLabels>
+
                 var parameterGroupNodes = doc.Elements("MaxQuantParams").Elements("parameterGroups").Elements("parameterGroup").ToList();
 
                 if (parameterGroupNodes.Count == 0)
@@ -1652,6 +1665,10 @@ namespace PeptideHitResultsProcessor.Processor
                 var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
                 var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
 
+                // Check for reporter ion mods, e.g. 6-plex or 10-plex TMT
+                var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
+                var terminalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
+
                 foreach (var fixedMod in fixedModNodes)
                 {
                     var maxQuantModName = fixedMod.Value;
@@ -1663,6 +1680,20 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     var maxQuantModName = dynamicMod.Value;
                     var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                if (internalIsobaricLabelNodes.Count > 0)
+                {
+                    var maxQuantModName = internalIsobaricLabelNodes[0].Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                if (terminalIsobaricLabelNodes.Count > 0)
+                {
+                    var maxQuantModName = terminalIsobaricLabelNodes[0].Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
                     modList.Add(modDef);
                 }
 
