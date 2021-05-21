@@ -17,6 +17,8 @@ namespace PHRPReader.Data
     /// </summary>
     public class PSM
     {
+        // Ignore Spelling: Daltons, tryptic
+
         /// <summary>
         /// Unknown collision mode
         /// </summary>
@@ -101,7 +103,7 @@ namespace PHRPReader.Data
         public float ElutionTimeMinutes { get; set; }
 
         /// <summary>
-        /// Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
+        /// Mass difference, in Daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
         /// </summary>
         public string MassErrorDa { get; set; }
 
