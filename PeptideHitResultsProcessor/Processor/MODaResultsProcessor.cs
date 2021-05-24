@@ -98,7 +98,6 @@ namespace PeptideHitResultsProcessor.Processor
             public string Peptide;
             public string Protein;
             public string PeptidePosition;          // Protein start/stop residues of the peptide, e.g. 108~115
-            public double FDR;                      // Computed by this class
             public double QValue;                   // Computed by this class
 
             public void Clear()
@@ -122,7 +121,6 @@ namespace PeptideHitResultsProcessor.Processor
                 Peptide = string.Empty;
                 Protein = string.Empty;
                 PeptidePosition = string.Empty;
-                FDR = 0;
                 QValue = 0;
             }
 
