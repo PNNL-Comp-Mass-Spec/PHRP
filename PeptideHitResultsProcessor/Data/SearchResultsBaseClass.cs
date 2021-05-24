@@ -284,24 +284,26 @@ namespace PeptideHitResultsProcessor.Data
             // Initialize sequenceWithMods to the clean sequence; we'll insert the mod symbols below if mSearchResultModifications.Count > 0
             var sequenceWithMods = mPeptideCleanSequence;
 
-            if (mSearchResultModifications.Count > 0)
+            if (mSearchResultModifications.Count == 0)
             {
-                // Insert the modification symbols into sequenceWithMods
-                // First, sort mSearchResultModifications on .ResidueLocInPeptide and .MassCorrectionTag
+                return sequenceWithMods;
+            }
 
-                if (mSearchResultModifications.Count > 1)
-                {
-                    mSearchResultModifications.Sort(new IGenericResidueModificationInfoComparer());
-                }
+            // Insert the modification symbols into sequenceWithMods
+            // First, sort mSearchResultModifications on .ResidueLocInPeptide and .MassCorrectionTag
 
-                // Now step backward through residueModificationPositions and add the symbols to sequenceWithMods
-                for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
+            if (mSearchResultModifications.Count > 1)
+            {
+                mSearchResultModifications.Sort(new IGenericResidueModificationInfoComparer());
+            }
+
+            // Now step backward through residueModificationPositions and add the symbols to sequenceWithMods
+            for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
+            {
+                var resultMod = mSearchResultModifications[index];
+                if (resultMod.ModDefinition.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.UnknownType)
                 {
-                    var resultMod = mSearchResultModifications[index];
-                    if (resultMod.ModDefinition.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.UnknownType)
-                    {
-                        sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
-                    }
+                    sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
                 }
             }
 
@@ -1070,37 +1072,40 @@ namespace PeptideHitResultsProcessor.Data
 
             PeptideModDescription = string.Empty;
 
-            if (mSearchResultModifications.Count > 0)
+            if (mSearchResultModifications.Count == 0)
             {
-                var udtModNameAndResidueLoc = new PHRPBaseClass.ModNameAndResidueLoc[mSearchResultModifications.Count];
-                var pointerArray = new int[mSearchResultModifications.Count];
+                return;
+            }
 
-                if (mSearchResultModifications.Count == 1)
-                {
-                    pointerArray[0] = 0;
-                }
-                else
-                {
-                    // Construct a pointer array so that we can search the modifications by .ResidueLocInPeptide
-                    for (var index = 0; index <= mSearchResultModifications.Count - 1; index++)
-                    {
-                        udtModNameAndResidueLoc[index].ResidueLocInPeptide = mSearchResultModifications[index].ResidueLocInPeptide;
-                        udtModNameAndResidueLoc[index].ModName = mSearchResultModifications[index].ModDefinition.MassCorrectionTag;
-                        pointerArray[index] = index;
-                    }
+            var udtModNameAndResidueLoc = new PHRPBaseClass.ModNameAndResidueLoc[mSearchResultModifications.Count];
+            var pointerArray = new int[mSearchResultModifications.Count];
 
-                    Array.Sort(udtModNameAndResidueLoc, pointerArray, new PHRPBaseClass.IModNameAndResidueLocComparer());
-                }
-
-                // Step through the modifications and add the modification name and residue position to mPeptideModDescription
-                // Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
+            if (mSearchResultModifications.Count == 1)
+            {
+                pointerArray[0] = 0;
+            }
+            else
+            {
+                // Construct a pointer array so that we can search the modifications by .ResidueLocInPeptide
                 for (var index = 0; index <= mSearchResultModifications.Count - 1; index++)
                 {
-                    var resultMods = mSearchResultModifications[pointerArray[index]];
-                    if (index > 0)
-                        PeptideModDescription += MOD_LIST_SEP_CHAR;
-                    PeptideModDescription += resultMods.ModDefinition.MassCorrectionTag.Trim() + ':' + resultMods.ResidueLocInPeptide;
+                    udtModNameAndResidueLoc[index].ResidueLocInPeptide = mSearchResultModifications[index].ResidueLocInPeptide;
+                    udtModNameAndResidueLoc[index].ModName = mSearchResultModifications[index].ModDefinition.MassCorrectionTag;
+                    pointerArray[index] = index;
                 }
+
+                Array.Sort(udtModNameAndResidueLoc, pointerArray, new PHRPBaseClass.IModNameAndResidueLocComparer());
+            }
+
+            // Step through the modifications and add the modification name and residue position to mPeptideModDescription
+            // Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
+            for (var index = 0; index <= mSearchResultModifications.Count - 1; index++)
+            {
+                var resultMods = mSearchResultModifications[pointerArray[index]];
+                if (index > 0)
+                    PeptideModDescription += MOD_LIST_SEP_CHAR;
+
+                PeptideModDescription += resultMods.ModDefinition.MassCorrectionTag.Trim() + ':' + resultMods.ResidueLocInPeptide;
             }
         }
 
