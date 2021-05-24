@@ -21,7 +21,8 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSAlignResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: Cysteine, Da, Defs, enums, fht, Frag, histone, IodoAcet, IodoAcid, methylation, monoisotopic, Prsm, pvalue, txt
+        // Ignore Spelling: Cysteine, Da, Defs, enums, Evalue, fht, Frag, histone, IodoAcet, IodoAcid
+        // Ignore Spelling: methylation, monoisotopic, Prsm, pvalue, txt
 
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
@@ -107,9 +108,9 @@ namespace PeptideHitResultsProcessor.Processor
             public string Unexpected_modifications;
             public string Matched_peaks;
             public string Matched_fragment_ions;
-            public string Pvalue;
+            public string PValue;
             public double PValueNum;
-            public string Evalue;
+            public string EValue;
             public string FDR;
             public string FragMethod;                   // Only present in MSAlign_Histone results
             public int RankPValue;
@@ -139,9 +140,9 @@ namespace PeptideHitResultsProcessor.Processor
                 Unexpected_modifications = string.Empty;
                 Matched_peaks = string.Empty;
                 Matched_fragment_ions = string.Empty;
-                Pvalue = string.Empty;
+                PValue = string.Empty;
                 PValueNum = 0;
-                Evalue = string.Empty;
+                EValue = string.Empty;
                 FDR = string.Empty;
                 FragMethod = string.Empty;
                 RankPValue = 0;
@@ -1020,8 +1021,8 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
                 GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
                 GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
-                if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Pvalue], out udtSearchResult.PValue);
+                if (!double.TryParse(udtSearchResult.PValue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
 
                 // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
@@ -1030,7 +1031,7 @@ namespace PeptideHitResultsProcessor.Processor
                 udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0); // Matched_Peak_Count
                 udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0); // Matched_Fragment_Ion_Count
 
-                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Evalue], out udtSearchResult.EValue);
                 GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
 
                 if (string.Equals(udtSearchResult.FDR, "infinity", StringComparison.OrdinalIgnoreCase))
@@ -1693,9 +1694,9 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.Peaks,                        // Peak_count
                     udtSearchResult.Matched_peaks,                // Matched_Peak_Count
                     udtSearchResult.Matched_fragment_ions,        // Matched_Fragment_Ion_Count
-                    udtSearchResult.Pvalue,
+                    udtSearchResult.PValue,
                     udtSearchResult.RankPValue.ToString(),
-                    udtSearchResult.Evalue,
+                    udtSearchResult.EValue,
                     udtSearchResult.FDR
                 };
 
@@ -1749,11 +1750,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // Charge is the same; check Pvalue
-                var result = string.CompareOrdinal(x.Pvalue, y.Pvalue);
+                // Charge is the same; check PValue
+                var result = string.CompareOrdinal(x.PValue, y.PValue);
                 if (result == 0)
                 {
-                    // Pvalue is the same; check peptide
+                    // PValue is the same; check peptide
                     result = string.CompareOrdinal(x.Peptide, y.Peptide);
                     if (result == 0)
                     {

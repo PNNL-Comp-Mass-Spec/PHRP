@@ -132,7 +132,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string VariablePTMs;
             public string Matched_peaks;
             public string Matched_fragment_ions;
-            public string Pvalue;
+            public string PValue;
             public double PValueNum;
             public int RankPValue;
             public string Evalue;
@@ -170,7 +170,7 @@ namespace PeptideHitResultsProcessor.Processor
                 VariablePTMs = string.Empty;
                 Matched_peaks = string.Empty;
                 Matched_fragment_ions = string.Empty;
-                Pvalue = string.Empty;
+                PValue = string.Empty;
                 PValueNum = 0;
                 RankPValue = 0;
                 Evalue = string.Empty;
@@ -1083,8 +1083,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
-                if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.PValue);
+                if (!double.TryParse(udtSearchResult.PValue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
 
                 // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
@@ -1751,7 +1751,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (dataHasPValues)
                 {
-                    data.Add(udtSearchResult.Pvalue);
+                    data.Add(udtSearchResult.PValue);
                     data.Add(udtSearchResult.RankPValue.ToString());
                 }
 
@@ -1809,11 +1809,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // Charge is the same; check Pvalue
-                var result = string.CompareOrdinal(x.Pvalue, y.Pvalue);
+                // Charge is the same; check PValue
+                var result = string.CompareOrdinal(x.PValue, y.PValue);
                 if (result == 0)
                 {
-                    // Pvalue is the same; check peptide
+                    // PValue is the same; check peptide
                     result = string.CompareOrdinal(x.Proteoform, y.Proteoform);
                     if (result == 0)
                     {

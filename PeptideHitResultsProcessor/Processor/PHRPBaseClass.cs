@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "April 6, 2021";
+            FileDate = "May 18, 2021";
 
             Options = options;
 
