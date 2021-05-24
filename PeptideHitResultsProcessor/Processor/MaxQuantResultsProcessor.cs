@@ -2468,10 +2468,6 @@ namespace PeptideHitResultsProcessor.Processor
             bool resetMassCorrectionTagsAndModificationDefinitions,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
-            // Note that MaxQuant synopsis files are normally sorted on Probability value, ascending
-            // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
-
             var columnMapping = new Dictionary<MaxQuantSynFileColumns, int>();
 
             var staticModPresent = modList.Any(modItem => modItem.ModTypeInParameterFile == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod);
@@ -2541,8 +2537,6 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             continue;
                         }
-
-                        var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, true, modList, staticModPresent);
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
