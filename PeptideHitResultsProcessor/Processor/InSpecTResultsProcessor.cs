@@ -141,7 +141,7 @@ namespace PeptideHitResultsProcessor.Processor
             public string FractionB;
             public string Intensity;
             public int NTT;
-            public string pValue;                   // Lower values are better scores
+            public string PValue;                   // Lower values are better scores
             public float PValueNum;                 // Store the value of the string for quick reference when sorting
             public string FScore;                   // Higher values are better scores
             public float FScoreNum;                 // Store the value of the string for quick reference when sorting
@@ -178,7 +178,7 @@ namespace PeptideHitResultsProcessor.Processor
                 FractionB = string.Empty;
                 Intensity = string.Empty;
                 NTT = 0;
-                pValue = string.Empty;
+                PValue = string.Empty;
                 PValueNum = 0;
                 FScore = string.Empty;
                 FScoreNum = 0;
@@ -1200,8 +1200,8 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.Intensity = splitLine[(int)InspectResultsFileColumns.Intensity];
                     udtSearchResult.NTT = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.NTT], 0);
 
-                    udtSearchResult.pValue = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.PValue]);
-                    udtSearchResult.PValueNum = StringUtilities.CSngSafe(udtSearchResult.pValue, 0);
+                    udtSearchResult.PValue = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.PValue]);
+                    udtSearchResult.PValueNum = StringUtilities.CSngSafe(udtSearchResult.PValue, 0);
 
                     udtSearchResult.FScore = splitLine[(int)InspectResultsFileColumns.FScore];
                     udtSearchResult.FScoreNum = StringUtilities.CSngSafe(udtSearchResult.FScore, 0);
@@ -1950,7 +1950,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.FractionB,
                     udtSearchResult.Intensity,
                     udtSearchResult.NTT.ToString(),
-                    udtSearchResult.pValue,
+                    udtSearchResult.PValue,
                     udtSearchResult.FScore,
                     udtSearchResult.DeltaScore,
                     udtSearchResult.DeltaScoreOther,
