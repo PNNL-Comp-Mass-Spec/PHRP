@@ -175,6 +175,11 @@ namespace PeptideHitResultsProcessor.Processor
                 // Unused at present: DelM = string.Empty
                 // Unused at present: DelM_PPM = string.Empty
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, SpecEValue {2}", Scan, Sequence, SpecEValue);
+            }
         }
 
         private readonly Regex mModListModNameMatcher = new(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);

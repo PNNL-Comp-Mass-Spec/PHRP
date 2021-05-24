@@ -196,6 +196,11 @@ namespace PeptideHitResultsProcessor.Processor
                 PrecursorError = string.Empty;
                 DelMPPM = string.Empty;
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, PeptideAnnotation, PValue);
+            }
         }
 
         private struct ModInfo

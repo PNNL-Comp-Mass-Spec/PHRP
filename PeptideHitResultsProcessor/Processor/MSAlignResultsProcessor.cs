@@ -146,6 +146,11 @@ namespace PeptideHitResultsProcessor.Processor
                 FragMethod = string.Empty;
                 RankPValue = 0;
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, EValue {2}", ScanNum, Peptide, EValue);
+            }
         }
 
         private int mDeltaMassWarningCount;

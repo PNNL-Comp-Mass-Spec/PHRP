@@ -217,6 +217,11 @@ namespace PeptideHitResultsProcessor.Processor
                 IMSDriftTime = string.Empty;
                 IsotopeError = 0;
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, SpecEValue {2}", ScanNum, Peptide, SpecEValue);
+            }
         }
 
         private struct ScanGroupInfo

@@ -125,6 +125,11 @@ namespace PeptideHitResultsProcessor.Processor
                 FDR = 0;
                 QValue = 0;
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, Probability {2}", ScanNum, Peptide, Probability);
+            }
         }
 
         private int mDeltaMassWarningCount;

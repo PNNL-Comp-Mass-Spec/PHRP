@@ -178,6 +178,11 @@ namespace PeptideHitResultsProcessor.Processor
                 Qvalue = string.Empty;
                 Proteoform_QValue = string.Empty;
             }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, Proteoform, PValue);
+            }
         }
 
         private int mDeltaMassWarningCount;

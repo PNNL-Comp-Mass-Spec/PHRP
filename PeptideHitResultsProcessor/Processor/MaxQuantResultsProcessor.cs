@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "May 13, 2021";
+            FileDate = "May 21, 2021";
 
             MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -708,6 +708,11 @@ namespace PeptideHitResultsProcessor.Processor
                 PeptideID = string.Empty;
                 ModPeptideID = string.Empty;
                 EvidenceID = string.Empty;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("Scan {0}: {1}, PEP {2}", Scan, Sequence, PEP);
             }
         }
 

@@ -135,7 +135,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             public override string ToString()
             {
-                return Probability + ": " + Peptide;
+                return string.Format("Scan {0}: {1}, Probability {2}", ScanNum, Peptide, Probability);
             }
         }
 
