@@ -18,12 +18,21 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string GetModNameWithoutResidues()
         {
-            // Look for a space followed by an open parenthesis
-            var charIndex = MaxQuantModName.IndexOf(" (", StringComparison.Ordinal);
-            if (charIndex < 0)
-                return MaxQuantModName;
+            return GetModNameWithoutResidues(MaxQuantModName);
+        }
 
-            return MaxQuantModName.Substring(0, charIndex);
+        /// <summary>
+        /// For mods with names like "Oxidation (M)" or "Acetyl (Protein N-term)", return "Oxidation" or "Acetyl"
+        /// Otherwise, return the full name
+        /// </summary>
+        public static string GetModNameWithoutResidues(string maxQuantModName)
+        {
+            // Look for a space followed by an open parenthesis
+            var charIndex = maxQuantModName.IndexOf(" (", StringComparison.Ordinal);
+            if (charIndex < 0)
+                return maxQuantModName;
+
+            return maxQuantModName.Substring(0, charIndex);
         }
 
         /// <summary>
