@@ -190,6 +190,14 @@ namespace PHRPReader
             public char ModSymbol;
 
             /// <summary>
+            /// Modification name, without residues
+            /// </summary>
+            /// <remarks>
+            /// Only used for MaxQuant results; empty string for other tools
+            /// </remarks>
+            public string ShortName;
+
+            /// <summary>
             /// Mod type, name, mass, residues
             /// </summary>
             public override string ToString()
@@ -604,6 +612,7 @@ namespace PHRPReader
                 }
 
                 udtModInfo.ModName = ParseModSpecGetName(splitLine[4], ref unnamedModID);
+                udtModInfo.ShortName = string.Empty;
 
                 return true;
             }
@@ -697,6 +706,7 @@ namespace PHRPReader
                 }
 
                 udtModInfo.ModName = ParseModSpecGetName(splitLine[0], ref unnamedModID);
+                udtModInfo.ShortName = string.Empty;
 
                 // splitLine[4] has UniModID
 

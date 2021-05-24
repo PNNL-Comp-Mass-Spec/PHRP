@@ -740,6 +740,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private static readonly Dictionary<char, List<int>> mResiduePositions = new();
 
+        /// <summary>
+        /// Add dynamic modifications to a peptide read from the MaxQuant synopsis file
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modList"></param>
         private void AddDynamicModificationsToResidues(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
@@ -772,7 +778,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var modName = match.Groups["ModName"].Value;
                 var residueNumber = match.Groups["ResidueNumber"].Value;
 
-                if (!GetMaxQuantModMass(modList, modName, out var modMass))
+                if (!GetMaxQuantModMass(modList, modName, true, out var modMass))
                 {
                     ReportError(string.Format(
                         "Mod name '{0}' was not defined in the MaxQuant parameter file or in modifications.xml; " +
@@ -999,7 +1005,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                 searchResult.MassErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
 
-                // Update the value in the list
+                // Update the value in the list of structs
                 filteredSearchResults[i] = searchResult;
             }
         }
@@ -1020,7 +1026,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         private double ComputeTotalModMass(
             MaxQuantSearchResult searchResult,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            IList<MSGFPlusParamFileModExtractor.ModInfo> modList,
             bool staticModPresent)
         {
             if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary))
@@ -1059,7 +1065,7 @@ namespace PeptideHitResultsProcessor.Processor
                     modCount = 1;
                 }
 
-                if (GetMaxQuantModMass(modList, modName, out var modMass))
+                if (GetMaxQuantModMass(modList, modName, false, out var modMass))
                 {
                     totalModMass += modCount * modMass;
                     continue;
@@ -1090,8 +1096,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Parse out dynamic modifications from ModifiedSequence (read from msms.txt)
         /// </summary>
         /// <param name="searchResult"></param>
+        /// <param name="modList"></param>
         /// <returns>Comma separated list of dynamic modification names and affected residues</returns>
-        private string ConstructDynamicModificationList(MaxQuantSearchResult searchResult)
+        private string ConstructDynamicModificationList(
+            MaxQuantSearchResult searchResult,
+            IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary) || searchResult.ModificationSummary.Equals("Unmodified"))
             {
@@ -1100,13 +1109,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             var modsWithCounts = searchResult.ModificationSummary.Split(',');
 
-            // This list holds modification names and affected residue number, separated by a space
-            // Modification names do not include affected residues
-            // For example, if the MaxQuant modification name is "Methyl (KR)" and the affected residue is the 5th amino acid in the protein,
-            // we append "Methyl 5" to modificationList
-            var modificationList = new List<string>();
-
             // This dictionary tracks information about mod names in ModificationSummary and ModifiedSequence
+            // Keys are MaxQuant mod name, values are instances of MaxQuantModifiedSequenceModInfo
             var modifiedSeqMods = new Dictionary<string, MaxQuantModifiedSequenceModInfo>();
 
             foreach (var modItem in modsWithCounts)
@@ -1199,7 +1203,16 @@ namespace PeptideHitResultsProcessor.Processor
                     currentResidueNumber, searchResult.Length, maskedModifiedSequence, searchResult.ModifiedSequence));
             }
 
-            // Look for each dynamic modification and store it in modificationList
+            // This list holds modification names and affected residue number, separated by a space
+            // Modification names do not include affected residues
+            // For example, if the MaxQuant modification name is "Methyl (KR)" and the affected residue is the 5th amino acid in the protein,
+            // we append "Methyl 5" to modificationList
+            var dynamicModifications = new List<string>();
+
+            // This dictionary maps from the abbreviated modification name stored in the synopsis file to the the full modification name (as used by MaxQuant)
+            var modificationNameMap = new Dictionary<string, string>();
+
+            // Look for each dynamic modification and store it in dynamicModifications
             foreach (var modItem in modifiedSeqMods)
             {
                 var matchedModNameWithParentheses = modItem.Value.MatchedModNameWithParentheses;
@@ -1261,13 +1274,59 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Append the modification to searchResult.Modifications
 
-                    modificationList.Add(string.Format("{0} {1}", modItem.Value.GetModNameWithoutResidues(), residueNumber));
+                    var maxQuantModName = modItem.Key;
+                    var shortModName = modItem.Value.GetModNameWithoutResidues();
+
+                    dynamicModifications.Add(string.Format("{0} {1}", shortModName, residueNumber));
+
+                    if (modificationNameMap.TryGetValue(shortModName, out var modificationNameToCompare))
+                    {
+                        if (!maxQuantModName.Equals(modificationNameToCompare))
+                        {
+                            OnWarningEvent(string.Format(
+                                "Multiple MaxQuant modifications have the same short modification name (with the residue removed); " +
+                                "short name {0} resolves to both {1} and {2}",
+                                shortModName, modificationNameToCompare, maxQuantModName));
+                        }
+                    }
+                    else
+                    {
+                        modificationNameMap.Add(shortModName, maxQuantModName);
+                    }
+
+                    var existingModFound = false;
+                    for (var i = 0; i < modList.Count; i++)
+                    {
+                        var paramFileMod = modList[i];
+                        if (!paramFileMod.ModName.Equals(maxQuantModName))
+                        {
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(modList[i].ShortName))
+                        {
+                            paramFileMod.ShortName = shortModName;
+
+                            // Update the value in the list of structs
+                            modList[i] = paramFileMod;
+                        }
+
+                        existingModFound = true;
+                        break;
+                    }
+
+                    if (!existingModFound)
+                    {
+                        OnWarningEvent(string.Format("Modification {0} not found in modList; this is unexpected", maxQuantModName));
+                        var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
+                        modList.Add(modDef);
+                    }
 
                     startIndex = charIndex + 1;
                 }
             }
 
-            return string.Join(",", modificationList);
+            return string.Join(",", dynamicModifications);
         }
 
         private bool CreateProteinModsFileWork(
@@ -1357,7 +1416,7 @@ namespace PeptideHitResultsProcessor.Processor
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string inputFilePath,
             string outputDirectoryPath,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            IList<MSGFPlusParamFileModExtractor.ModInfo> modList,
             out string baseName,
             out string synOutputFilePath)
         {
@@ -1888,18 +1947,33 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="modList">List of modifications loaded from the MaxQuant parameter file (or from parameters.txt)</param>
         /// <param name="modName">Modification name to find</param>
+        /// <param name="matchShortName">When true, modName is the short modification name</param>
         /// <param name="modMass">Output: modification mass</param>
         /// <returns>True if found, otherwise false</returns>
-        private bool GetMaxQuantModMass(IEnumerable<MSGFPlusParamFileModExtractor.ModInfo> modList, string modName, out double modMass)
+        private bool GetMaxQuantModMass(
+            IEnumerable<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            string modName,
+            bool matchShortName,
+            out double modMass)
         {
-            foreach (var modDef in modList)
+            foreach (var modItem in modList)
             {
-                if (!string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
+                if (matchShortName)
                 {
-                    continue;
+                    if (!string.Equals(modItem.ShortName, modName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (!string.Equals(modItem.ModName, modName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
                 }
 
-                modMass = modDef.ModMassVal;
+                modMass = modItem.ModMassVal;
                 return true;
             }
 
@@ -1909,6 +1983,20 @@ namespace PeptideHitResultsProcessor.Processor
                 return true;
             }
 
+            if (matchShortName)
+            {
+                foreach (var modItem in MaxQuantMods)
+                {
+                    var shortModName = MaxQuantModifiedSequenceModInfo.GetModNameWithoutResidues(modItem.Key);
+                    if (shortModName.Equals(modName))
+                    {
+                        modMass = modItem.Value.MonoisotopicMass;
+                        return true;
+                    }
+                }
+            }
+
+            OnWarningEvent(string.Format("Modification {0} not found in modList or MaxQuantMods", modName));
             modMass = 0;
             return false;
         }
@@ -2616,7 +2704,7 @@ namespace PeptideHitResultsProcessor.Processor
             out MaxQuantSearchResult searchResult,
             ICollection<string> errorMessages,
             IDictionary<MaxQuantResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList,
+            IList<MSGFPlusParamFileModExtractor.ModInfo> modList,
             int lineNumber)
         {
             searchResult = new MaxQuantSearchResult();
@@ -2721,7 +2809,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var totalModMass = ComputeTotalModMass(searchResult, modList, staticModPresent);
 
                 // Construct the list of dynamic modifications
-                searchResult.Modifications = ConstructDynamicModificationList(searchResult);
+                searchResult.Modifications = ConstructDynamicModificationList(searchResult, modList);
 
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMass(searchResult.Sequence, totalModMass);
