@@ -652,9 +652,10 @@ namespace PeptideHitResultsProcessor.Processor
             bool resetMassCorrectionTagsAndModificationDefinitions,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
-            // Note that MSPathfinder synopsis files are normally sorted on Probability value, ascending
+            // Note that MSPathfinder synopsis files are normally sorted on SpecEValue, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // (see peptidesFoundForSpecEValue and peptidesFoundForQValue below)
 
             var columnMapping = new Dictionary<MSPathFinderSynFileColumns, int>();
 
@@ -1158,7 +1159,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading Peptide sequence value from MSPathFinder results, line {0}", resultsProcessed + 1));
+                            "Error reading peptide sequence from MSPathFinder results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }

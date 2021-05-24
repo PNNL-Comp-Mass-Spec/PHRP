@@ -767,7 +767,8 @@ namespace PeptideHitResultsProcessor.Processor
         {
             // Note that MODa synopsis files are normally sorted on Probability value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // (see peptidesFoundForProbabilityLevel below)
 
             var columnMapping = new Dictionary<MODaSynFileColumns, int>();
 
@@ -1288,7 +1289,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading Peptide sequence value from MODa results, line {0}", resultsProcessed + 1));
+                            "Error reading peptide sequence from MODa results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }

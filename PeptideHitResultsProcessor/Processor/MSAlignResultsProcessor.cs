@@ -674,7 +674,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             // Note that MSAlign synopsis files are normally sorted on PValue, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
+            // (see peptidesFoundForPValueLevel below)
+
             // Although this was a possibility with Inspect, it likely never occurs for MSAlign
             //  But, we'll keep the check in place just in case
 
@@ -1234,7 +1236,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading Peptide sequence value from MSAlign results, line {0}", resultsProcessed + 1));
+                            "Error reading peptide sequence from MSAlign results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;

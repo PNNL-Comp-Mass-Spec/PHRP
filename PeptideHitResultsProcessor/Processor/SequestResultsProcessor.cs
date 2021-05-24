@@ -187,9 +187,11 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that synopsis files are normally sorted on XCorr descending, with lines
-            //  duplicated when peptide search results are mapped to multiple proteins
+            // duplicated when peptide search results are mapped to multiple proteins
+
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file,
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
+            // (see peptidesFoundForXCorrLevel below)
 
             var columnMapping = new Dictionary<SequestSynopsisFileColumns, int>();
 

@@ -658,9 +658,10 @@ namespace PeptideHitResultsProcessor.Processor
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Note that MODPlus synopsis files are normally sorted on Probability value, ascending
+            // Note that MODPlus synopsis files are normally sorted on Score value, descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+            // (see peptidesFoundForProbabilityLevel below)
 
             var columnMapping = new Dictionary<MODPlusSynFileColumns, int>();
 
@@ -1162,7 +1163,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading Peptide sequence value from MODPlus results, line {0}", resultsProcessed + 1));
+                            "Error reading peptide sequence from MODPlus results, line {0}", resultsProcessed + 1));
                     }
                     return false;
                 }

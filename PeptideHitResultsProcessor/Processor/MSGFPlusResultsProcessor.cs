@@ -1448,7 +1448,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Note that MS-GF+ synopsis files are normally sorted on SpecEValue, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-                //  we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
+                // we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
+                // (see peptidesFoundForSpecEValueLevel below)
 
                 // This is required since a PSM with multiple proteins will be listed on multiple lines in the synopsis file
                 // Values are PeptideSequenceWithMods_Scan_Charge
@@ -2156,7 +2157,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
                         errorMessages.Add(string.Format(
-                            "Error reading Peptide sequence value from MS-GF+ results, line {0}", resultsProcessed + 1));
+                            "Error reading peptide sequence from MS-GF+ results, line {0}", resultsProcessed + 1));
                     }
 
                     return false;

@@ -924,7 +924,8 @@ namespace PeptideHitResultsProcessor.Processor
         {
             // Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-            //  we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
+            // we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
+            // (see peptidesFoundForTotalPRMScoreLevel below)
 
             var currentPeptideWithMods = string.Empty;
 
