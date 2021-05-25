@@ -1554,18 +1554,18 @@ namespace PeptideHitResultsProcessor.Processor
                     forwardPeptideCount++;
                 }
 
-                double fDR = 1;
+                double fdr = 1;
 
                 if (forwardPeptideCount > 0)
                 {
-                    fDR = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
                 }
 
                 // Store the FDR values
                 for (var indexStore = index; indexStore <= indexEnd; indexStore++)
                 {
                     var udtResult = searchResults[indexStore];
-                    udtResult.FDR = fDR;
+                    udtResult.FDR = fdr;
 
                     searchResults[indexStore] = udtResult;
                 }
@@ -1793,7 +1793,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.CompareOrdinal(x.ProteinList, y.ProteinList);
+                    return string.CompareOrdinal(x.ProteinList, y.ProteinList);
                 }
                 return result;
             }
