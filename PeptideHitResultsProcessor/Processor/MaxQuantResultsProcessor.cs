@@ -1041,7 +1041,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             foreach (var modItem in searchResult.ModificationSummary.Split(','))
             {
-                if (modItem.Equals("Unmodified"))
+                if (modItem.Equals("Unmodified", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 // Convert the mod name to a mass value
@@ -1102,7 +1102,7 @@ namespace PeptideHitResultsProcessor.Processor
             MaxQuantSearchResult searchResult,
             IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
-            if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary) || searchResult.ModificationSummary.Equals("Unmodified"))
+            if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary) || searchResult.ModificationSummary.Equals("Unmodified", StringComparison.OrdinalIgnoreCase))
             {
                 return string.Empty;
             }
@@ -1298,7 +1298,7 @@ namespace PeptideHitResultsProcessor.Processor
                     for (var i = 0; i < modList.Count; i++)
                     {
                         var paramFileMod = modList[i];
-                        if (!paramFileMod.ModName.Equals(maxQuantModName))
+                        if (!paramFileMod.ModName.Equals(maxQuantModName, StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
                         }
@@ -1780,7 +1780,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var valueDefined = GetColumnValue(splitLine, columnIndex, out value, string.Empty);
 
-            if (valueDefined && value.Equals("NaN"))
+            if (valueDefined && value.Equals("NaN", StringComparison.OrdinalIgnoreCase))
                 value = string.Empty;
 
             return valueDefined;
@@ -1988,7 +1988,7 @@ namespace PeptideHitResultsProcessor.Processor
                 foreach (var modItem in MaxQuantMods)
                 {
                     var shortModName = MaxQuantModifiedSequenceModInfo.GetModNameWithoutResidues(modItem.Key);
-                    if (shortModName.Equals(modName))
+                    if (string.Equals(shortModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
                         modMass = modItem.Value.MonoisotopicMass;
                         return true;
