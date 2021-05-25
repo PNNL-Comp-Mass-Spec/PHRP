@@ -120,6 +120,10 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Protein(s) associated with this peptide
         /// </summary>
+        /// <remarks>
+        /// Empty string for peptides resulting from a reverse hit protein;
+        /// the reverse-hit protein name will be in LeadingRazorProtein
+        /// </remarks>
         public List<string> Proteins { get; } = new();
 
         /// <summary>
@@ -272,6 +276,14 @@ namespace PeptideHitResultsProcessor.Data
         public string EvidenceID { get; set; }
 
         /// <summary>
+        /// Q-Value
+        /// </summary>
+        /// <remarks>
+        /// Computed by PHRP
+        /// </remarks>
+        public string QValue;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="peptideMods"></param>
@@ -320,6 +332,7 @@ namespace PeptideHitResultsProcessor.Data
             PeptideID = string.Empty;
             ModPeptideID = string.Empty;
             EvidenceID = string.Empty;
+            QValue = string.Empty;
         }
     }
 }

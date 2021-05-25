@@ -645,6 +645,22 @@ namespace PeptideHitResultsProcessor.Processor
             public string EvidenceID;
 
             /// <summary>
+            /// FDR
+            /// </summary>
+            /// <remarks>
+            /// Computed by this class
+            /// </remarks>
+            public double FDR;
+
+            /// <summary>
+            /// Q-Value
+            /// </summary>
+            /// <remarks>
+            /// Computed by this class
+            /// </remarks>
+            public double QValue;
+
+            /// <summary>
             /// Reset all fields to default
             /// </summary>
             public void Clear()
@@ -708,6 +724,8 @@ namespace PeptideHitResultsProcessor.Processor
                 PeptideID = string.Empty;
                 ModPeptideID = string.Empty;
                 EvidenceID = string.Empty;
+                FDR = 0;
+                QValue = 0;
             }
 
             public override string ToString()
@@ -3222,6 +3240,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PeptideID], out string peptideID);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ModPeptideID], out string modPeptideID);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.EvidenceID], out string evidenceID);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.QValue], out string qValue);
 
                 // Store the data
                 searchResult.FragMethod = fragMethod;
@@ -3247,6 +3266,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.PeptideID = peptideID;
                 searchResult.ModPeptideID = modPeptideID;
                 searchResult.EvidenceID = evidenceID;
+                searchResult.QValue = qValue;
 
                 return true;
             }
@@ -3411,16 +3431,19 @@ namespace PeptideHitResultsProcessor.Processor
         private void SortAndWriteFilteredSearchResults(
             Dictionary<string, string> baseNameByDatasetName,
             TextWriter writer,
-            IEnumerable<MaxQuantSearchResult> filteredSearchResults,
+            List<MaxQuantSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
             var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
 
             // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
-            var query = from item in filteredSearchResults orderby item.ScoreValue descending, item.ScanNum, item.Sequence, item.LeadingRazorProtein select item;
+            filteredSearchResults.Sort(new MaxQuantSearchResultsComparerScoreScanChargePeptide());
+
+            // Compute FDR values, then assign QValues
+            ComputeQValues(filteredSearchResults);
 
             var index = 1;
-            foreach (var result in query)
+            foreach (var result in filteredSearchResults)
             {
                 var baseDatasetName = baseNameByDatasetName[result.DatasetName];
 
@@ -3431,6 +3454,63 @@ namespace PeptideHitResultsProcessor.Processor
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
+            }
+        }
+
+        /// <summary>
+        /// Compute FDR values, then assign QValues
+        /// </summary>
+        /// <param name="searchResults"></param>
+        /// <remarks>Assumes the data is sorted by descending score using MaxQuantSearchResultsComparerScoreScanChargePeptide</remarks>
+        private void ComputeQValues(IList<MaxQuantSearchResult> searchResults)
+        {
+            var forwardPeptideCount = 0;
+            var reversePeptideCount = 0;
+
+            for (var index = 0; index < searchResults.Count; index++)
+            {
+                // Reverse should be true for reverse-hit peptides
+                // Alternative, the LeadingRazor protein field will start with REV__ for reverse-hit peptides
+
+                if (searchResults[index].Reverse || searchResults[index].LeadingRazorProtein.StartsWith("REV__"))
+                {
+                    reversePeptideCount++;
+                }
+                else
+                {
+                    forwardPeptideCount++;
+                }
+
+                double fdr = 1;
+
+                if (forwardPeptideCount > 0)
+                {
+                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                }
+
+                var udtResult = searchResults[index];
+                udtResult.FDR = fdr;
+
+                searchResults[index] = udtResult;
+            }
+
+            // Now compute Q-Values
+            // We step through the list, from the worst scoring result to the best result
+            // The first Q-Value is the FDR of the final entry
+            // The next Q-Value is the minimum of (QValue, CurrentFDR)
+
+            var qValue = searchResults.Last().FDR;
+            if (qValue > 1)
+                qValue = 1;
+
+            for (var index = searchResults.Count - 1; index >= 0; index += -1)
+            {
+                var udtResult = searchResults[index];
+
+                qValue = Math.Min(qValue, udtResult.FDR);
+                udtResult.QValue = qValue;
+
+                searchResults[index] = udtResult;
             }
         }
 
@@ -3553,7 +3633,8 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.ProteinGroupIDs,
                     searchResult.PeptideID,
                     searchResult.ModPeptideID,
-                    searchResult.EvidenceID
+                    searchResult.EvidenceID,
+                    PRISM.StringUtilities.DblToString(searchResult.QValue, 5, 0.00005)
                 };
 
                 writer.WriteLine(StringUtilities.CollapseList(data));
@@ -3620,6 +3701,48 @@ namespace PeptideHitResultsProcessor.Processor
                     result = string.CompareOrdinal(x.LeadingRazorProtein, y.LeadingRazorProtein);
                 }
                 return result;
+            }
+        }
+
+
+        private class MaxQuantSearchResultsComparerScoreScanChargePeptide : IComparer<MaxQuantSearchResult>
+        {
+            public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
+            {
+                if (x.ScoreValue < y.ScoreValue)
+                {
+                    return 1;
+                }
+
+                if (x.ScoreValue > y.ScoreValue)
+                {
+                    return -1;
+                }
+
+                // P-value is the same; check scan number
+                if (x.ScanNum > y.ScanNum)
+                {
+                    return 1;
+                }
+
+                if (x.ScanNum < y.ScanNum)
+                {
+                    return -1;
+                }
+
+                // Scan is the same, check charge
+                if (x.ChargeNum > y.ChargeNum)
+                {
+                    return 1;
+                }
+
+                if (x.ChargeNum < y.ChargeNum)
+                {
+                    return -1;
+                }
+
+                // Charge is the same; check peptide
+                return string.CompareOrdinal(x.Sequence, y.Sequence);
             }
         }
     }
