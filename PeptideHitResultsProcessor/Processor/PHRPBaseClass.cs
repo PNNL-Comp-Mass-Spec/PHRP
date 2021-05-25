@@ -1411,9 +1411,16 @@ namespace PeptideHitResultsProcessor.Processor
                 // Used in DMS-generated protein collections
                 return true;
             }
+
             if (proteinName.StartsWith("xxx_", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by MS-GF+ and MSFragger
+                return true;
+            }
+
+            if (proteinName.StartsWith("REV__", StringComparison.OrdinalIgnoreCase))
+            {
+                // Used by MSFragger
                 return true;
             }
 
