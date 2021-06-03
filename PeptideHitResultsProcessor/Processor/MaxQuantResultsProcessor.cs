@@ -3168,16 +3168,22 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Proteins], out string proteinNames);
 
-                // Protein names in the synopsis file are a semicolon separated list
-                foreach (var proteinName in proteinNames.Split(';'))
+                if (!string.IsNullOrWhiteSpace(proteinNames))
                 {
-                    searchResult.Proteins.Add(proteinName);
-                }
+                    // Protein names in the synopsis file are a semicolon separated list
+                    foreach (var proteinName in proteinNames.Split(';'))
+                    {
+                        if (string.IsNullOrWhiteSpace(proteinName))
+                            continue;
 
-                if (searchResult.Proteins.Count > 0)
-                {
-                    searchResult.ProteinName = searchResult.Proteins[0];
-                    searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
+                        searchResult.Proteins.Add(proteinName);
+                    }
+
+                    if (searchResult.Proteins.Count > 0)
+                    {
+                        searchResult.ProteinName = searchResult.Proteins[0];
+                        searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
+                    }
                 }
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ], out string precursorMz);
@@ -3276,6 +3282,11 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ModPeptideID = modPeptideID;
                 searchResult.EvidenceID = evidenceID;
                 searchResult.QValue = qValue;
+
+                if (string.IsNullOrWhiteSpace(searchResult.MultipleProteinCount))
+                {
+                    searchResult.MultipleProteinCount = "0";
+                }
 
                 return true;
             }
