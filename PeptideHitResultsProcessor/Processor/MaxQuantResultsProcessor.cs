@@ -1575,8 +1575,8 @@ namespace PeptideHitResultsProcessor.Processor
                     UpdateSynopsisFileCreationProgress(reader);
                 }
 
-                // Sort the SearchResults by scan, charge, and descending Andromeda score
-                searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerScanChargeScorePeptide());
+                // Sort the SearchResults by dataset name, scan, charge, and descending Andromeda score
+                searchResultsUnfiltered.Sort(new MaxQuantSearchResultsComparerDatasetScanChargeScorePeptide());
 
                 // Now filter the data
                 var startIndex = 0;
@@ -1584,7 +1584,9 @@ namespace PeptideHitResultsProcessor.Processor
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
                     // Find all of the matches for the current result's scan
+                    // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
                     // MaxQuant will typically report just one match
+
                     var endIndex = startIndex;
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
@@ -3610,7 +3612,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Stores the synopsis file matches for a single scan (typically there will only be one result for MaxQuant)
+        /// Stores the synopsis file matches for a single scan in a single dataset (typically there will only be one result for MaxQuant)
         /// </summary>
         /// <param name="searchResults">Search results</param>
         /// <param name="startIndex">Start index for data in this scan</param>
@@ -3624,14 +3626,13 @@ namespace PeptideHitResultsProcessor.Processor
         {
             AssignRankByScore(searchResults, startIndex, endIndex);
 
+            // The calling procedure already sorted by dataset name, scan, charge, and Score; no need to re-sort
 
-            // If the MaxQuant results file has multiple datasets, there will often be multiple results with the same scan number
             // There are rare cases where a given scan (for a given dataset) has the same peptide listed multiple times in the msms.txt file,
             // with the only difference being mass error and/or evidence ID
             // Check for this
             mIndicesToSkip.Clear();
 
-            // The calling procedure already sorted by scan, charge, and Score; no need to re-sort
             for (var index = startIndex + 1; index <= endIndex; index++)
             {
                 if (searchResults[index].DatasetName.Equals(searchResults[index - 1].DatasetName) &&
@@ -3772,11 +3773,18 @@ namespace PeptideHitResultsProcessor.Processor
             return TOOL_NAME + " results processor";
         }
 
-        private class MaxQuantSearchResultsComparerScanChargeScorePeptide : IComparer<MaxQuantSearchResult>
+        private class MaxQuantSearchResultsComparerDatasetScanChargeScorePeptide : IComparer<MaxQuantSearchResult>
         {
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
             {
-                // First sort on Scan
+                // First sort on dataset name
+                var nameComparisonResult = string.Compare(x.DatasetName, y.DatasetName, StringComparison.Ordinal);
+                if (nameComparisonResult != 0)
+                {
+                    return nameComparisonResult;
+                }
+
+                // Same dataset, check scan
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;
@@ -3810,16 +3818,18 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Score is the same; check sequence
-                var result = string.CompareOrdinal(x.Sequence, y.Sequence);
-                if (result == 0)
+                var peptideComparisonResult = string.CompareOrdinal(x.Sequence, y.Sequence);
+
+                // ReSharper disable once ConvertIfStatementToReturnStatement
+                if (peptideComparisonResult != 0)
                 {
-                    // Peptide is the same, check Protein
-                    result = string.CompareOrdinal(x.LeadingRazorProtein, y.LeadingRazorProtein);
+                    return peptideComparisonResult;
                 }
-                return result;
+
+                // Peptide is the same, check Protein
+                return string.CompareOrdinal(x.LeadingRazorProtein, y.LeadingRazorProtein);
             }
         }
-
 
         private class MaxQuantSearchResultsComparerScoreScanChargePeptide : IComparer<MaxQuantSearchResult>
         {
@@ -3835,7 +3845,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // P-value is the same; check scan number
+                // Andromeda score is the same; check scan number
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;
