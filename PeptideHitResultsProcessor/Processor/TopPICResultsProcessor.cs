@@ -406,7 +406,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
         /// <param name="sortOnPValue"></param>
-        private void AssignRankAndDeltaNormValues(
+        private void AssignRankByScore(
             IList<TopPICSearchResult> searchResults,
             int startIndex,
             int endIndex,
@@ -1653,7 +1653,7 @@ namespace PeptideHitResultsProcessor.Processor
             ICollection<TopPICSearchResult> filteredSearchResults,
             bool dataHasPValues)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex, dataHasPValues);
+            AssignRankByScore(searchResults, startIndex, endIndex, dataHasPValues);
 
             // The calling procedure already sorted by scan, charge, and PValue; no need to re-sort
 

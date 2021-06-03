@@ -294,12 +294,12 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry  assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all of the data is from the same scan)
         /// </summary>
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
-        private void AssignRankAndDeltaNormValues(
+        private void AssignRankByScore(
             IList<MODaSearchResult> searchResults,
             int startIndex,
             int endIndex)
@@ -1608,7 +1608,7 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             ICollection<MODaSearchResult> filteredSearchResults)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
+            AssignRankByScore(searchResults, startIndex, endIndex);
 
             // The calling procedure already sorted by scan, charge, and SpecEValue; no need to re-sort
 

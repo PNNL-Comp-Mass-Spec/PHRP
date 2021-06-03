@@ -1402,7 +1402,7 @@ namespace PeptideHitResultsProcessor.Processor
             List<MSPathFinderSearchResult> filteredSearchResults)
         {
             // If there was more than one result, we could rank them by score
-            // AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex)
+            // AssignRankByScore(searchResults, startIndex, endIndex)
 
             // The calling procedure already sorted by scan, charge, and Score; no need to re-sort
 

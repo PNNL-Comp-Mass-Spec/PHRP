@@ -474,7 +474,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="searchResults">Search results</param>
         /// <param name="startIndex">Start index for data in this scan</param>
         /// <param name="endIndex">End index for data in this scan</param>
-        private void AssignRankAndDeltaNormValues(
+        private void AssignRankByScore(
             IList<MSGFPlusSearchResult> searchResults,
             int startIndex,
             int endIndex)
@@ -2951,7 +2951,7 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             List<MSGFPlusSearchResult> filteredSearchResults)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
+            AssignRankByScore(searchResults, startIndex, endIndex);
 
             // The calling procedure should have already sorted by scan, charge, and SpecEValue; no need to re-sort
 
@@ -3011,7 +3011,7 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             List<MSGFPlusSearchResult> filteredSearchResults)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
+            AssignRankByScore(searchResults, startIndex, endIndex);
 
             // The calling procedure already sorted by scan, charge, and SpecEValue; no need to re-sort
 
