@@ -412,6 +412,15 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             bool sortOnPValue)
         {
+            if (startIndex == endIndex)
+            {
+                // Only one result
+                var currentResult = searchResults[startIndex];
+                currentResult.RankPValue = 1;
+                searchResults[startIndex] = currentResult;
+                return;
+            }
+
             // Duplicate a portion of searchResults so that we can sort by PValue
 
             var resultsSubset = new Dictionary<int, TopPICSearchResult>();

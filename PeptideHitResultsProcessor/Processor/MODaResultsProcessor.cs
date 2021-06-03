@@ -307,6 +307,15 @@ namespace PeptideHitResultsProcessor.Processor
             // Prior to September 2014 ranks were assign per charge state per scan;
             // Ranks are now assigned per scan (across all charge states)
 
+            if (startIndex == endIndex)
+            {
+                // Only one result
+                var currentResult = searchResults[startIndex];
+                currentResult.RankProbability = 1;
+                searchResults[startIndex] = currentResult;
+                return;
+            }
+
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
             var resultsSubset = new Dictionary<int, MODaSearchResult>();
