@@ -602,9 +602,10 @@ namespace PeptideHitResultsProcessor.Processor
             public string PeakCoverage;
 
             /// <summary>
-            /// This will have '+' for peptides that are associated with a decoy protein
+            /// True for peptides that are associated with a decoy protein
             /// </summary>
-            public string Reverse;
+            /// <remarks>The msms.txt file has '+' in the Reverse column for decoy peptides</remarks>
+            public bool Reverse;
 
             /// <summary>
             /// Unique (consecutive) identifier for each row in msms.txt
@@ -721,7 +722,7 @@ namespace PeptideHitResultsProcessor.Processor
                 NumberOfMatches = string.Empty;
                 IntensityCoverage = string.Empty;
                 PeakCoverage = string.Empty;
-                Reverse = string.Empty;
+                Reverse = false;
                 MsMsID = string.Empty;
                 ProteinGroupIDs = string.Empty;
                 PeptideID = string.Empty;
@@ -2875,7 +2876,17 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.NumberOfMatches], out searchResult.NumberOfMatches);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out searchResult.IntensityCoverage);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out searchResult.PeakCoverage);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out searchResult.Reverse);
+
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out string reverseFlag);
+                if (reverseFlag == "+")
+                {
+                    searchResult.Reverse = true;
+                }
+                else if (reverseFlag.Length > 0)
+                {
+                    OnWarningEvent(string.Format("Unexpected symbol in the Reverse column, line {0}: {1}", lineNumber, reverseFlag));
+                }
+
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out searchResult.MsMsID);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinGroupIDs], out searchResult.ProteinGroupIDs);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeptideID], out searchResult.PeptideID);
