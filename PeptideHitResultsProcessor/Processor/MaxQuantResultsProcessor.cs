@@ -63,7 +63,7 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable CommentTypo
 
         // Ignore Spelling: AaSubstitution, acetyl, Carbamidomethyl, conf, Cterm, Crosslink, Da, Dehydro, Desc, diff, diffs, DimethNter
-        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, Orbitrap, plex, pyro, struct, terminii, tryptic, txt
+        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, Orbitrap, plex, pyro, struct, structs, terminii, tryptic, txt
 
         // ReSharper restore CommentTypo
 
@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "May 21, 2021";
+            FileDate = "June 2, 2021";
 
             MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
