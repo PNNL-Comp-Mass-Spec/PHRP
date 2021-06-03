@@ -1840,7 +1840,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var data = new List<string>
                 {
                     modDef.ModificationSymbol.ToString(),
-                    modDef.ModificationMass.ToString(CultureInfo.InvariantCulture),
+                    PRISM.StringUtilities.DblToString(modDef.ModificationMass, 6),
                     modDef.TargetResidues,
                     ModificationDefinition.ModificationTypeToModificationSymbol(modDef.ModificationType).ToString(),
                     modDef.MassCorrectionTag,
