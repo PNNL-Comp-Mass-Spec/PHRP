@@ -511,7 +511,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Numeric value of Score
             /// </summary>
-            public double ScoreValue;
+            public double ScoreNum;
 
             /// <summary>
             /// Score difference to the second best identified peptide with a different amino acid sequence
@@ -703,7 +703,7 @@ namespace PeptideHitResultsProcessor.Processor
                 PEP = string.Empty;
                 PEPValue = 0;
                 Score = string.Empty;
-                ScoreValue = 0;
+                ScoreNum = 0;
                 DeltaScore = string.Empty;
                 ScoreDiff = string.Empty;
                 RankScore = 0;
@@ -2857,7 +2857,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Score], out searchResult.Score))
                 {
-                    double.TryParse(searchResult.Score, out searchResult.ScoreValue);
+                    double.TryParse(searchResult.Score, out searchResult.ScoreNum);
                 }
 
                 GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out searchResult.DeltaScore);
@@ -3620,7 +3620,8 @@ namespace PeptideHitResultsProcessor.Processor
             //  or     pep < PosteriorErrorProbabilityThreshold
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].ScoreValue >= Options.MaxQuantAndromedaScoreThreshold ||
+
+                if (searchResults[index].ScoreNum >= Options.MaxQuantAndromedaScoreThreshold ||
                     searchResults[index].PEPValue < Options.MaxQuantPosteriorErrorProbabilityThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
@@ -3763,12 +3764,12 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Charge is the same; check Score
-                if (x.ScoreValue < y.ScoreValue)
+                if (x.ScoreNum < y.ScoreNum)
                 {
                     return 1;
                 }
 
-                if (x.ScoreValue > y.ScoreValue)
+                if (x.ScoreNum > y.ScoreNum)
                 {
                     return -1;
                 }
@@ -3789,12 +3790,12 @@ namespace PeptideHitResultsProcessor.Processor
         {
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
             {
-                if (x.ScoreValue < y.ScoreValue)
+                if (x.ScoreNum < y.ScoreNum)
                 {
                     return 1;
                 }
 
-                if (x.ScoreValue > y.ScoreValue)
+                if (x.ScoreNum > y.ScoreNum)
                 {
                     return -1;
                 }
