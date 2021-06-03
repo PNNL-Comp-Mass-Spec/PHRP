@@ -161,6 +161,7 @@ namespace PHRPReader.Reader
                 { "PEP", MaxQuantSynFileColumns.PEP },
                 { "Score", MaxQuantSynFileColumns.Score },
                 { "DeltaScore", MaxQuantSynFileColumns.DeltaScore },
+                { "RankScore", MaxQuantSynFileColumns.RankScore },
                 { "TotalPeptideIntensity", MaxQuantSynFileColumns.TotalPeptideIntensity },
                 { "MassAnalyzer", MaxQuantSynFileColumns.MassAnalyzer },
                 { "PrecursorType", MaxQuantSynFileColumns.PrecursorType },
@@ -174,7 +175,8 @@ namespace PHRPReader.Reader
                 { "ProteinGroupIDs", MaxQuantSynFileColumns.ProteinGroupIDs },
                 { "PeptideID", MaxQuantSynFileColumns.PeptideID },
                 { "ModPeptideID", MaxQuantSynFileColumns.ModPeptideID },
-                { "EvidenceID", MaxQuantSynFileColumns.EvidenceID }
+                { "EvidenceID", MaxQuantSynFileColumns.EvidenceID },
+                { "QValue", MaxQuantSynFileColumns.QValue }
             };
         }
 
@@ -344,7 +346,7 @@ namespace PHRPReader.Reader
                 else
                 {
                     psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = 1;
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.RankScore), mColumnHeaders, 1); ;
 
                     var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Peptide), mColumnHeaders);
 

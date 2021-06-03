@@ -523,6 +523,8 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public string ScoreDiff;
 
+            public int RankScore;
+
             /// <summary>
             /// PTM localization score
             /// </summary>
@@ -704,6 +706,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ScoreValue = 0;
                 DeltaScore = string.Empty;
                 ScoreDiff = string.Empty;
+                RankScore = 0;
                 LocalizationProb = string.Empty;
                 Combinatorics = string.Empty;
                 TotalPeptideIntensity = string.Empty;
@@ -913,6 +916,62 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Ranks each entry assumes all of the data is from the same scan)
+        /// </summary>
+        /// <param name="searchResults"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="endIndex"></param>
+        private void AssignRankByScore(
+            IList<MaxQuantSearchResult> searchResults,
+            int startIndex,
+            int endIndex)
+        {
+            if (startIndex == endIndex)
+            {
+                // Only one result
+                var currentResult = searchResults[startIndex];
+                currentResult.RankScore = 1;
+                searchResults[startIndex] = currentResult;
+                return;
+            }
+
+            // Duplicate a portion of searchResults so that we can sort by descending Andromeda Score
+
+            var resultsSubset = new Dictionary<int, MaxQuantSearchResult>();
+            for (var index = startIndex; index <= endIndex; index++)
+            {
+                resultsSubset.Add(index, searchResults[index]);
+            }
+
+            var resultsByScore = (from item in resultsSubset orderby item.Value.ScoreNum descending select item).ToList();
+
+            double lastValue = 0;
+            var currentRank = -1;
+
+            foreach (var entry in resultsByScore)
+            {
+                var result = searchResults[entry.Key];
+
+                if (currentRank < 0)
+                {
+                    lastValue = result.ScoreNum;
+                    currentRank = 1;
+                }
+                else
+                {
+                    if (Math.Abs(result.ScoreNum - lastValue) > double.Epsilon)
+                    {
+                        lastValue = result.ScoreNum;
+                        currentRank++;
+                    }
+                }
+
+                result.RankScore = currentRank;
+                searchResults[entry.Key] = result;
             }
         }
 
@@ -3547,8 +3606,8 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             List<MaxQuantSearchResult> filteredSearchResults)
         {
-            // If there was more than one result, we could rank them by score
-            // AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex)
+            AssignRankByScore(searchResults, startIndex, endIndex);
+
 
             // If the MaxQuant results file has multiple datasets, there will often be multiple results with the same scan number
 
@@ -3640,6 +3699,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PEP,
                     searchResult.Score,
                     searchResult.DeltaScore,
+                    searchResult.RankScore.ToString(),
                     searchResult.TotalPeptideIntensity,
                     searchResult.MassAnalyzer,
                     searchResult.PrecursorType,
