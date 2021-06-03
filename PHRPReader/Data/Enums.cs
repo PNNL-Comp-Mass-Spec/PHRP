@@ -355,7 +355,18 @@ namespace PHRPReader.Data
         Peptide_Position = 12,
         Score = 13,
         Probability = 14,
+
+        /// <summary>
+        /// Ranked score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means highest MODPlus score, 2 means next lower score, etc. (ties get the same rank)
+        /// </remarks>
         Rank_Score = 15,
+
+        /// <summary>
+        /// Q-Value (FDR)
+        /// </summary>
         QValue = 16
     }
 
@@ -402,7 +413,15 @@ namespace PHRPReader.Data
         Matched_Peak_Count = 14,
         Matched_Fragment_Ion_Count = 15,
         PValue = 16,
+
+        /// <summary>
+        /// Ranked score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means lowest (best) p-value, 2 means next higher p-value, etc. (ties get the same rank)
+        /// </remarks>
         Rank_PValue = 17,
+
         EValue = 18,
         FDR = 19,
         Species_ID = 20,
@@ -436,8 +455,11 @@ namespace PHRPReader.Data
         SpecProb = 0,
 
         /// <summary>
-        /// RankSpecProb
+        /// Ranked score
         /// </summary>
+        /// <remarks>
+        /// Rank 1 means lowest (best) SpecProb, 2 means next higher SpecProb, etc. (ties get the same rank)
+        /// </remarks>
         RankSpecProb = 1,
 
         /// <summary>
@@ -547,8 +569,11 @@ namespace PHRPReader.Data
         SpecProb_EValue = SpecEValue,
 
         /// <summary>
-        /// Rank SpecEValue
+        /// Ranked score
         /// </summary>
+        /// <remarks>
+        /// Rank 1 means lowest (best) Spec E-value, 2 means next higher E-value, etc. (ties get the same rank)
+        /// </remarks>
         RankSpecEValue = 15,
 
         /// <summary>
@@ -583,7 +608,7 @@ namespace PHRPReader.Data
         FDR_QValue = QValue,
 
         /// <summary>
-        /// Peptide QValue
+        /// Peptide Q-Value
         /// </summary>
         /// <remarks>
         /// Only present if searched using -tda 1
@@ -770,7 +795,15 @@ namespace PHRPReader.Data
 
         Score = 10,
         Probability = 11,
+
+        /// <summary>
+        /// Ranked score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means highest probability, 2 means next lower probability, etc. (ties get the same rank)
+        /// </remarks>
         Rank_Probability = 12,
+
         Peptide_Position = 13,
         QValue = 14
     }
@@ -917,7 +950,15 @@ namespace PHRPReader.Data
         Matched_Peak_Count = 19,
         Matched_Fragment_Ion_Count = 20,
         PValue = 21,
+
+        /// <summary>
+        /// Ranked score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means lowest (best) p-value, 2 means next higher p-value, etc. (ties get the same rank)
+        /// </remarks>
         Rank_PValue = 22,
+
         EValue = 23,
         QValue = 24,
         Proteoform_QValue = 25,

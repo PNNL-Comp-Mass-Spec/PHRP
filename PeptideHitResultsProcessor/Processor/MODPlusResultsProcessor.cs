@@ -1469,7 +1469,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Sort filteredSearchResults by descending score, ascending scan, ascending charge, ascending peptide, and ascending protein
             filteredSearchResults.Sort(new MODPlusSearchResultsComparerScoreScanChargePeptide());
 
-            // Compute FDR values then assign QValues
+            // Compute FDR values, then assign QValues
             ComputeQValues(filteredSearchResults);
 
             mProteinNamePositionSplit ??= new Regex(@"(.+)\[([^\]]+)\]", RegexOptions.Compiled);
@@ -1510,7 +1510,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Compute FDR values then assign QValues
+        /// Compute FDR values, then assign QValues
         /// </summary>
         /// <param name="searchResults"></param>
         /// <remarks>Assumes the data is sorted by descending score using MODPlusSearchResultsComparerScoreScanChargePeptide</remarks>
@@ -1775,7 +1775,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                // P-value is the same; check scan number
+                // MODPlus score is the same; check scan number
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;

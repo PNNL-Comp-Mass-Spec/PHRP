@@ -43,8 +43,19 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
 
+        /// <summary>
+        /// FASTA file path
+        /// </summary>
         public string FastaFilePath { get; set; }
 
+        /// <summary>
+        /// When true, ignore peptide to protein mapper errors
+        /// </summary>
+        /// <remarks>
+        /// Example error that may be reported if this is false:
+        /// 0.43% of the entries (96 / 22,127) in the peptide to protein map file (Dataset_maxq_syn_PepToProtMap.txt)
+        /// did not match to a protein in the FASTA file (Proteins_2020-10-21.fasta)
+        /// </remarks>
         public bool IgnorePeptideToProteinMapperErrors { get; set; }
 
         /// <summary>

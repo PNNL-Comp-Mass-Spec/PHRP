@@ -323,10 +323,13 @@ namespace PeptideHitResultsProcessor.Processor
             public string ModifiedSequence;
 
             /// <summary>
-            /// Protein associated with this peptide
+            /// Protein(s) associated with this peptide
+            /// Semicolon separated list
             /// </summary>
             /// <remarks>
-            /// Semicolon separated list
+            /// When the peptide is a reverse hit, this property will be an empty string and
+            /// the Reverse-hit protein name will be in the LeadingRazorProtein column.
+            /// Furthermore, Reverse will be set to true
             /// </remarks>
             public string Proteins;
 
@@ -334,8 +337,13 @@ namespace PeptideHitResultsProcessor.Processor
             /// Name of the best scoring protein this peptide is associated with
             /// </summary>
             /// <remarks>
+            /// <para>
             /// Typically there is only one protein name here
             /// However, in cases of a tied score, will be a semicolon separated list
+            /// </para>
+            /// <para>
+            /// From the peptides.txt file, column "Leading razor protein"
+            /// </para>
             /// </remarks>
             public string LeadingRazorProtein;
 
@@ -1292,7 +1300,7 @@ namespace PeptideHitResultsProcessor.Processor
             // we append "Methyl 5" to modificationList
             var dynamicModifications = new List<string>();
 
-            // This dictionary maps from the abbreviated modification name stored in the synopsis file to the the full modification name (as used by MaxQuant)
+            // This dictionary maps from the abbreviated modification name stored in the synopsis file to the full modification name (as used by MaxQuant)
             var modificationNameMap = new Dictionary<string, string>();
 
             // Look for each dynamic modification and store it in dynamicModifications
@@ -2192,8 +2200,8 @@ namespace PeptideHitResultsProcessor.Processor
             string prefixResidue,
             string suffixResidue)
         {
-            // Construct a list of residues with static modification
-            // If a residue has multiple static mods, it will be added multiple times
+            // Construct a list of residues with a static modification
+            // If a residue has multiple static mods, it will be added to mResiduePositions multiple times
 
             mResiduePositions.Clear();
 

@@ -491,7 +491,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return;
             }
 
-            // Duplicate a portion of searchResults so that we can sort by ascending Spectral Probability
+            // Duplicate a portion of searchResults so that we can sort by ascending Spec E-Value
 
             var resultsSubset = new Dictionary<int, MSGFPlusSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
