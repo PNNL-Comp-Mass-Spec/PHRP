@@ -1612,6 +1612,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 Console.WriteLine();
+                Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
                 var baseNameByDatasetName = GetDatasetNameMap(filteredSearchResults, out var longestCommonBaseName);
@@ -1641,6 +1642,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
+                Console.WriteLine();
                 OnStatusEvent("Creating synopsis file, " + PathUtils.CompactPathString(synOutputFilePath, 80));
 
                 using var writer = new StreamWriter(new FileStream(synOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
@@ -2929,7 +2931,8 @@ namespace PeptideHitResultsProcessor.Processor
                 if (Math.Abs(deltaMassVsMaxQuant) > 0.01)
                 {
                     OnWarningEvent(string.Format(
-                        "Calculated monoisotopic mass differs from the value reported by MaxQuant; delta mass: {0:F3} Da", deltaMassVsMaxQuant));
+                        "Calculated monoisotopic mass differs from the value reported by MaxQuant on line {0}; delta mass: {1:F3} Da",
+                        lineNumber, deltaMassVsMaxQuant));
                 }
 
                 // Lookup the Prefix and Suffix residues
