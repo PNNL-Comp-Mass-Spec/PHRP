@@ -1571,6 +1571,7 @@ namespace PeptideHitResultsProcessor.Processor
             else
             {
                 success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+
                 if (!success)
                 {
                     OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");

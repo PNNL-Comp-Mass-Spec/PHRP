@@ -726,7 +726,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
-        protected bool CreatePepToProteinMapFile(List<string> sourcePHRPDataFiles, string mtsPepToProteinMapFilePath)
+        /// <param name="maximumAllowableMatchErrorPercentThreshold">
+        /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
+        /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50
+        /// </param>
+        protected bool CreatePepToProteinMapFile(
+            List<string> sourcePHRPDataFiles,
+            string mtsPepToProteinMapFilePath,
+            double maximumAllowableMatchErrorPercentThreshold = 0.1)
         {
             var success = false;
 
@@ -831,7 +838,7 @@ namespace PeptideHitResultsProcessor.Processor
                             success = false;
                             break;
                         }
-                        success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
+                        success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors, maximumAllowableMatchErrorPercentThreshold);
                     }
                     else
                     {
@@ -854,7 +861,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (File.Exists(resultsFilePath))
                             {
-                                success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors);
+                                success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors, maximumAllowableMatchErrorPercentThreshold);
                             }
                             else
                             {
@@ -2182,57 +2189,63 @@ namespace PeptideHitResultsProcessor.Processor
                                     massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
         }
 
-        private bool ValidatePeptideToProteinMapResults(string peptideToProteinMapFilePath, bool ignorePeptideToProteinMapperErrors)
+        /// <summary>
+        /// Determine the percentage of results in peptideToProteinMapFilePath that have protein name __NoMatch__
+        /// </summary>
+        /// <param name="peptideToProteinMapFilePath">Peptide to protein map file</param>
+        /// <param name="ignorePeptideToProteinMapperErrors">When true, return true even if one or more peptides did not match to a known protein</param>
+        /// <param name="maximumAllowableMatchErrorPercentThreshold">
+        /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
+        /// This is typically 0.1, but for MaxQuant we set this to 50
+        /// </param>
+        /// <returns>
+        /// True if the required percentage of peptides matched a known protein, false if they did not and ignorePeptideToProteinMapperErrors is false
+        /// </returns>
+        private bool ValidatePeptideToProteinMapResults(
+            string peptideToProteinMapFilePath,
+            bool ignorePeptideToProteinMapperErrors,
+            double maximumAllowableMatchErrorPercentThreshold)
         {
-            bool success;
-
             try
             {
-                // Validate that none of the results in peptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH ( __NoMatch__ )
-
                 var peptideCount = ValidatePeptideToProteinMapResultsWork(peptideToProteinMapFilePath, out var peptideCountNoMatch);
 
                 if (peptideCount == 0)
                 {
                     SetErrorMessage("Peptide to protein mapping file is empty: " + peptideToProteinMapFilePath);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                    success = false;
+                    return false;
                 }
-                else if (peptideCountNoMatch == 0)
-                {
-                    success = true;
-                }
-                else
-                {
-                    // Value between 0 and 100
-                    var errorPercent = peptideCountNoMatch / (double)peptideCount * 100.0;
 
-                    var message = string.Format("{0:0.00}% of the entries ({1:N0} / {2:N0}) in the peptide to protein map file ({3}) " +
-                                                "did not match to a protein in the FASTA file ({4})",
-                                                errorPercent, peptideCountNoMatch, peptideCount,
-                                                Path.GetFileName(peptideToProteinMapFilePath),
-                                                Path.GetFileName(Options.FastaFilePath));
-
-                    if (ignorePeptideToProteinMapperErrors || errorPercent < 0.1)
-                    {
-                        OnWarningEvent(message);
-                        success = true;
-                    }
-                    else
-                    {
-                        SetErrorMessage(message);
-                        success = false;
-                    }
+                if (peptideCountNoMatch == 0)
+                {
+                    return true;
                 }
+
+                // Value between 0 and 100
+                var errorPercent = peptideCountNoMatch / (double)peptideCount * 100.0;
+
+                var message = string.Format("{0:0.00}% of the entries ({1:N0} / {2:N0}) in the peptide to protein map file ({3}) " +
+                                            "did not match to a protein in the FASTA file ({4})",
+                    errorPercent, peptideCountNoMatch, peptideCount,
+                    Path.GetFileName(peptideToProteinMapFilePath),
+                    Path.GetFileName(Options.FastaFilePath));
+
+                if (ignorePeptideToProteinMapperErrors || errorPercent < maximumAllowableMatchErrorPercentThreshold)
+                {
+                    OnWarningEvent(message);
+                    return true;
+                }
+
+                SetErrorMessage(message);
+                return false;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ValidatePeptideToProteinMapResults", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
-
-            return success;
         }
 
         private static int ValidatePeptideToProteinMapResultsWork(string peptideToProteinMapFilePath, out int peptideCountNoMatch)

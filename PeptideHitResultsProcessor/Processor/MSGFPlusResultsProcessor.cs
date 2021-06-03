@@ -2542,10 +2542,12 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        // Auto-change IgnorePeptideToProteinMapperErrors to True
-                        // We do this for MS-GF+ since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
-                        Options.IgnorePeptideToProteinMapperErrors = true;
-                        success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                        // Use a higher match error threshold since MS-GF+ often includes reverse protein peptides in the results
+                        // even though the FASTA typically does not have reverse proteins
+                        const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                        success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
+
                         if (!success)
                         {
                             OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");

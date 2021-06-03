@@ -1446,7 +1446,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                    const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
+
                     if (!success)
                     {
                         OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");

@@ -1387,10 +1387,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    // Auto-change mIgnorePeptideToProteinMapperErrors to True
-                    // We do this because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
-                    Options.IgnorePeptideToProteinMapperErrors = true;
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                    // Use a higher match error threshold because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
+                    const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
                     if (!success)
                     {
                         OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
