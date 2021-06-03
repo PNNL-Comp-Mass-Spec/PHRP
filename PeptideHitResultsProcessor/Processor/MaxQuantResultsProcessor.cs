@@ -3246,7 +3246,16 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.FragMethod = fragMethod;
                 searchResult.SpecIndex = specIndex;
                 searchResult.Modifications = dynamicModifications;
+
                 searchResult.LeadingRazorProtein = leadingRazorProtein;
+
+                if (leadingRazorProtein.Length > 0 && searchResult.Proteins.Count == 0)
+                {
+                    // This is most likely a peptide from a decoy protein (whose name should start with REV__)
+                    // Add it to the protein list
+                    searchResult.Proteins.Add(leadingRazorProtein);
+                    searchResult.ProteinName = leadingRazorProtein;
+                }
 
                 searchResult.NTT = ntt;
                 searchResult.PEP = posteriorErrorProbability;
