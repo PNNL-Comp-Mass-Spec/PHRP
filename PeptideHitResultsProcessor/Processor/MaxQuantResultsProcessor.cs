@@ -738,6 +738,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Used by StoreSynMatches when looking for duplicate results in the msms.txt file
+        /// </summary>
+        private static readonly SortedSet<int> mIndicesToSkip = new();
+
         private readonly Regex mModListModNameMatcher = new(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
 
         /// <summary>
@@ -3621,8 +3626,25 @@ namespace PeptideHitResultsProcessor.Processor
 
 
             // If the MaxQuant results file has multiple datasets, there will often be multiple results with the same scan number
+            // There are rare cases where a given scan (for a given dataset) has the same peptide listed multiple times in the msms.txt file,
+            // with the only difference being mass error and/or evidence ID
+            // Check for this
+            mIndicesToSkip.Clear();
 
             // The calling procedure already sorted by scan, charge, and Score; no need to re-sort
+            for (var index = startIndex + 1; index <= endIndex; index++)
+            {
+                if (searchResults[index].DatasetName.Equals(searchResults[index - 1].DatasetName) &&
+                    searchResults[index].Sequence.Equals(searchResults[index - 1].Sequence) &&
+                    searchResults[index].Modifications.Equals(searchResults[index - 1].Modifications) &&
+                    searchResults[index].Proteins.Equals(searchResults[index - 1].Proteins) &&
+                    searchResults[index].Charge.Equals(searchResults[index - 1].Charge) &&
+                    searchResults[index].Score.Equals(searchResults[index - 1].Score) &&
+                    searchResults[index].PEP.Equals(searchResults[index - 1].PEP))
+                {
+                    mIndicesToSkip.Add(index);
+                }
+            }
 
             ExpandListIfRequired(filteredSearchResults, endIndex - startIndex + 1);
 
@@ -3631,6 +3653,8 @@ namespace PeptideHitResultsProcessor.Processor
             //  or     pep < PosteriorErrorProbabilityThreshold
             for (var index = startIndex; index <= endIndex; index++)
             {
+                if (mIndicesToSkip.Contains(index))
+                    continue;
 
                 if (searchResults[index].ScoreNum >= Options.MaxQuantAndromedaScoreThreshold ||
                     searchResults[index].PEPValue < Options.MaxQuantPosteriorErrorProbabilityThreshold)
