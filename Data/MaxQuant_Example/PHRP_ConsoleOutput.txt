@@ -1,0 +1,166 @@
+Parsing msms.txt
+Input file:                                   msms.txt
+Output directory:                             F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example
+Detected MaxQuant results file
+
+Processing options for MaxQuant results processor
+Search Tool Parameter File:                   MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml
+Modification Definitions File:                Not defined
+Mass Correction Tags File:                    Mass_Correction_Tags.txt
+FASTA File:                                   M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta
+
+Create Protein Mods File:                     True
+Ignore Peptide to Protein Mapper Errors:      False
+Protein Mods File Includes Reversed Proteins: False
+Use Existing MTS PepToProtein Map File:       False
+
+Create First Hits File:                       True
+Create Synopsis File:                         True
+
+MaxQuant Synopsis File Andromeda Score Threshold: 50
+MaxQuant Synopsis File PEP Threshold:             0.010
+
+Loading MaxQuant modifications from C:\DMS_Programs\MaxQuant\bin\conf\modifications.xml
+Reading the MaxQuant parameter file, F:\...\MaxQuant_..\MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml
+Reading peptides from file F:\...\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example\peptides.txt
+
+
+Creating the SYN file
+Reading MaxQuant results file, F:\...\Pr..\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example\msms.txt
+Creating the SYN file (0.0% complete)
+Processing: 0% .
+Processing: 25% .
+Processing: 50% .
+Processing: 75% 
+
+Loading precursor m/z information from F:\...\MaxQua..\QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_PrecursorInfo.txt
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -380.24 ppm for GEADRDTYRR, Scan 794
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -60.72 ppm for VRGPKGPEEK, Scan 963
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 95.48 ppm for SAGVPSR, Scan 1059
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 402.46 ppm for KVTLSTDKNK, Scan 1126
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 67.64 ppm for QATENAKEEVKR, Scan 1162
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 127.49 ppm for YGGSVGSR, Scan 1307
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -62.59 ppm for LKATQVSK, Scan 1405
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -471.13 ppm for RYGGGGYGR, Scan 1553
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -446.18 ppm for FFQKDRK, Scan 1556
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -98.48 ppm for NRPAPYSRPK, Scan 1711
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -411.26 ppm for AVAILCNHQR, Scan 8712
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -108.41 ppm for VTSFTLAK, Scan 17402
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -96.67 ppm for NFVVVMVTKPK, Scan 26164
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: -112.74 ppm for RQILLPFR, Scan 34952
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 261.98 ppm for VQLDTIQGELNAPTQFK, Scan 42890
+
+Warning: Precursor mass error computed by PHRP is more than 60 ppm, indicating a possible error adding static and/or dynamic mods: 273.77 ppm for DSLLQDGEFTMDLR, Scan 49325
+
+Creating synopsis file, F:\...\MaxQuant_Ex..\QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt
+
+
+Creating the PHRP files for QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt
+Creating the PHRP files for QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt (0.0% complete)
+Processing: 0% 
+Processing: 25% 
+Processing: 50% 
+Processing: 75% 
+
+Creating Peptide to Protein Map file (90.0% complete)
+.
+  Checking for write permission by creating file F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
+
+  Deleting F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
+
+   SQLite DB Path defined: F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3
+Processing Options
+
+Input File:                F:\...\MaxQuant_Ex..\QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt
+Output Directory:          F:\Docume..\Projects\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example
+Proteins File:             M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta
+Input File Format:         PHRPFile (type 5)
+Ignore I/L Differences:    False
+Match Prefix and Suffix Residues: False
+Output Protein Sequence:   False
+Skip Coverage Computation: True
+Create _AllProteins.txt:   False
+
+Processing QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt
+Preprocessing input file
+
+Pre-processing PHRP data file: QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn.txt
+Creating QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt
+Running protein coverage summarizer (5.0% complete)
+Starting
+Initializing
+
+  DeleteSQLiteDBFile: File doesn't exist; nothing to do (F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3); calling method: clsProteinCoverageSummarizer.ProcessFile_Start
+Reading protein input file: M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta (5.9% complete)
+
+  Connecting to SQLite DB: Data Source=F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3;
+
+  Disabling Journaling and setting Synchronous mode to 0 (improves update speed)
+
+  ParseProteinFile: Creating table with CREATE TABLE udtProteinInfoType( Name TEXT, Description TEXT, Sequence TEXT, UniqueSequenceID INTEGER PRIMARY KEY, PercentCoverage REAL);
+Reading protein input file (6.1% complete)
+.Done: Processed 16,648 proteins (180,075 lines)
+Complete reading protein input file: M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta (45.5% complete)
+
+Parsing QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt
+Reading peptides from QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt and finding leader sequences (45.5% complete)
+Determining the shortest peptide in the input file (45.5% complete)
+Reading peptides the first column in the input file
+Reading peptides from QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt and finding leader sequences (leader seq length = 7) (50.0% complete)
+Creating the protein to peptide mapping file: QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_ProteinToPeptideMapping.txt (50.0% complete)
+Reading peptide input file (50.0% complete)
+Comparing proteins to peptide leader sequences
+Comparing proteins to peptide leader sequences (54.5% complete)
+
+  Connecting to SQLite DB: Data Source=F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3;
+
+  GetCachedProteinFromSQLiteDB: running query  SELECT UniqueSequenceID, Name, Description, Sequence, PercentCoverage FROM udtProteinInfoType WHERE UniqueSequenceID BETWEEN 0 AND 49999
+Processing complete; deleting the temporary SQLite database (93.2% complete)
+.
+  Closing persistent SQLite connection; calling method: clsProteinCoverageSummarizer.ProcessFile_Complete
+
+  DeleteSQLiteDBFile: Deleting F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3; calling method: clsProteinCoverageSummarizer.ProcessFile_Complete
+Done (93.2% complete)
+Post-processing (95.0% complete)
+
+Post-processing the results files
+Reading QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_ProteinToPeptideMapping.txt
+.Creating QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_PepToProtMap.txt
+Deleting QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt
+Deleting QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_ProteinToPeptideMapping.txt
+Processing successful
+
+Warning: 0.40% of the entries (97 / 23,972) in the peptide to protein map file (QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_PepToProtMap.txt) did not match to a protein in the FASTA file (M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta)
+
+Creating the Protein Mod Details file (95.0% complete)
+Processing: 0% Reading the PHRP ModSummary file
+Reading the PHRP SeqInfo file
+Reading the PHRP ModSummary file
+
+MSGF file not found: F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example\QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_MSGF.txt
+
+Warning: MSGF file not found; column MSGF_SpecProb will not have any data
+
+Processing: 25% 
+Processing: 50% 
+Processing: 75% ...
+Processing: 100% 
+Note: skipped 7 / 34,308 PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file
+Processing Complete
+
+Processing: 100% 
