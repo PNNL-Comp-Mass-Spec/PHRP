@@ -2612,7 +2612,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
+
                 var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
+                dynamicModNodes.AddRange(parameterGroupNodes.Elements("variableModificationsFirstSearch").Elements("string"));
+
 
                 // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
                 var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
