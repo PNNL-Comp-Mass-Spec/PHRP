@@ -107,8 +107,6 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MaxQuant = "_";
 
-        private const string SEARCH_ENGINE_NAME = "MaxQuant";
-
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
         /// <summary>
