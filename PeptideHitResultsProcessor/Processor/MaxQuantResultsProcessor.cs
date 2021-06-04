@@ -1692,6 +1692,13 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
 
+                // ReSharper disable once StringLiteralTypo
+                OnWarningEvent("The parameters.txt file only lists static mods. " +
+                               "It does not include dynamic mods or isobaric mods (like TMT or iTRAQ). " +
+                               "To allow PHRP to accurately compute monoisotopic mass values, you should reference an XML-based parameter file. " +
+                               "For example, MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml at " +
+                               "https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MaxQuant_Example");
+
                 using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var lineNumber = 0;
