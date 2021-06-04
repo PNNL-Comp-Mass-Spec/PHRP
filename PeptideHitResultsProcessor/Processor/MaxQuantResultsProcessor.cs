@@ -1147,15 +1147,39 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(deltaMassDa, precursorMz,
-                    searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP,
-                    true);
+                double peptideDeltaMassPpm;
+                double precursorErrorDa;
 
-                searchResult.MassErrorPpm = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
+                if (Math.Abs(deltaMassDa) < 15)
+                {
+                    peptideDeltaMassPpm =
+                        ComputeDelMCorrectedPPM(deltaMassDa, precursorMz, searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP, true);
 
-                var precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassCorrectedPpm, searchResult.CalculatedMonoMassPHRP);
+                    // Note that this will be a C13-corrected precursor error; not the absolute precursor error
+                    precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassPpm, searchResult.CalculatedMonoMassPHRP);
+                }
+                else
+                {
+                    // Delta mass value is unreasonably large; do not try to correct the delta mass
+                    peptideDeltaMassPpm = PeptideMassCalculator.MassToPPM(deltaMassDa, searchResult.CalculatedMonoMassPHRP);
+                    precursorErrorDa = deltaMassDa;
 
-                // Note that this will be a C13-corrected precursor error; not the absolute precursor error
+                    if (!warningShown)
+                    {
+                        mPrecursorMassErrorWarningCount++;
+                        ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
+                            10,
+                            string.Format(
+                                "Peptide mass computed by PHRP differs from the precursor mass by more than 15 Da, indicating an error adding static and/or dynamic mods: {0:F2} Da for {1}, Scan {2}",
+                                deltaMassDa,
+                                searchResult.Sequence,
+                                searchResult.Scan));
+
+                        warningShown = true;
+                    }
+                }
+
+                searchResult.MassErrorPpm = PRISM.StringUtilities.DblToString(peptideDeltaMassPpm, 5, 0.00005);
                 searchResult.MassErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
 
                 // Update the value in the list of structs
