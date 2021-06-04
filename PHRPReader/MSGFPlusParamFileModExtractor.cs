@@ -153,8 +153,11 @@ namespace PHRPReader
             public bool IsobaricMod;
 
             /// <summary>
-            /// Mod name (read from the parameter file) isn't used by MS-GF+, but it is used by MSPathFinder and MaxQuant
+            /// Mod name (read from the parameter file)
             /// </summary>
+            /// <remarks>
+            /// The mod name isn't used by MS-GF+, but it is used by MSPathFinder and MaxQuant
+            /// </remarks>
             public string ModName;
 
             /// <summary>

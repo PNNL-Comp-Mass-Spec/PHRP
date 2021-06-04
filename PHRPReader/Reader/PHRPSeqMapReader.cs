@@ -382,7 +382,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                throw new Exception("Exception loading Pep to Prot Map data from " + Path.GetFileName(filePath) + ": " + ex.Message);
+                throw new Exception("Exception loading Peptide to Protein Map data from " + Path.GetFileName(filePath) + ": " + ex.Message);
             }
 
             return true;
