@@ -39,35 +39,34 @@ namespace PeptideHitResultsProcessor.Processor
         public Dictionary<string, Dictionary<int, double>> LoadPrecursorIons(IEnumerable<string> datasetNames)
         {
             var precursorsByDataset = new Dictionary<string, Dictionary<int, double>>();
+            var inputDirectory = new DirectoryInfo(InputDirectoryPath);
+
+            var directoriesToCheck = new List<DirectoryInfo>
+            {
+                inputDirectory
+            };
+
+            foreach (var subDirectory in inputDirectory.GetDirectories())
+            {
+                directoriesToCheck.Add(subDirectory);
+            }
+
+            if (inputDirectory.Parent != null)
+            {
+                directoriesToCheck.Add(inputDirectory.Parent);
+
+                foreach (var subDirectory in inputDirectory.Parent.GetDirectories())
+                {
+                    if (subDirectory.FullName.Equals(inputDirectory.FullName))
+                        continue;
+
+                    directoriesToCheck.Add(subDirectory);
+                }
+            }
 
             foreach (var dataset in datasetNames)
             {
-                var precursorInfoFile = new FileInfo(Path.Combine(InputDirectoryPath, dataset + ReaderFactory.PRECURSOR_INFO_FILENAME_SUFFIX));
-                var sicStatsFile = new FileInfo(Path.Combine(InputDirectoryPath, dataset + ReaderFactory.SIC_STATS_FILENAME_SUFFIX));
-                var extendedScanStatsFile = new FileInfo(Path.Combine(InputDirectoryPath, dataset + ReaderFactory.EXTENDED_SCAN_STATS_FILENAME_SUFFIX));
-
-                Dictionary<int, double> precursorsByScan;
-
-                if (precursorInfoFile.Exists)
-                {
-                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(precursorInfoFile.FullName, 80));
-                    precursorsByScan = LoadPrecursorsFromPrecursorInfoFile(precursorInfoFile);
-                }
-                else if (sicStatsFile.Exists)
-                {
-                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(sicStatsFile.FullName, 80));
-                    precursorsByScan = LoadPrecursorsFromSICStatsFile(sicStatsFile);
-                }
-                else if (extendedScanStatsFile.Exists)
-                {
-                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(extendedScanStatsFile.FullName, 80));
-                    precursorsByScan = LoadPrecursorsFromExtendedScanStatsFile(extendedScanStatsFile);
-                }
-                else
-                {
-                    OnStatusEvent("Data file with precursor m/z values not found for dataset " + dataset);
-                    precursorsByScan = new Dictionary<int, double>();
-                }
+                var precursorsByScan = LoadPrecursorIons(directoriesToCheck, dataset);
 
                 if (precursorsByScan.Count > 0)
                 {
@@ -76,6 +75,37 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return precursorsByDataset;
+        }
+
+        private Dictionary<int, double> LoadPrecursorIons(IEnumerable<DirectoryInfo> directoriesToCheck, string dataset)
+        {
+            foreach (var directory in directoriesToCheck)
+            {
+                var precursorInfoFile = new FileInfo(Path.Combine(directory.FullName, dataset + ReaderFactory.PRECURSOR_INFO_FILENAME_SUFFIX));
+                var sicStatsFile = new FileInfo(Path.Combine(directory.FullName, dataset + ReaderFactory.SIC_STATS_FILENAME_SUFFIX));
+                var extendedScanStatsFile = new FileInfo(Path.Combine(directory.FullName, dataset + ReaderFactory.EXTENDED_SCAN_STATS_FILENAME_SUFFIX));
+
+                if (precursorInfoFile.Exists)
+                {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(precursorInfoFile.FullName, 80));
+                    return LoadPrecursorsFromPrecursorInfoFile(precursorInfoFile);
+                }
+
+                if (sicStatsFile.Exists)
+                {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(sicStatsFile.FullName, 80));
+                    return LoadPrecursorsFromSICStatsFile(sicStatsFile);
+                }
+
+                if (extendedScanStatsFile.Exists)
+                {
+                    OnStatusEvent("Loading precursor m/z information from " + PathUtils.CompactPathString(extendedScanStatsFile.FullName, 80));
+                    return LoadPrecursorsFromExtendedScanStatsFile(extendedScanStatsFile);
+                }
+            }
+
+            OnStatusEvent("Data file with precursor m/z values not found for dataset " + dataset);
+            return new Dictionary<int, double>();
         }
 
         private Dictionary<int, double> LoadPrecursorsFromPrecursorInfoFile(FileSystemInfo precursorInfoFile)
