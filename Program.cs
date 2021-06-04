@@ -476,18 +476,21 @@ namespace PeptideHitResultsProcRunner
                 // Console.WriteLine(" [/DatasetDir:DatasetDirectoryPath]")
                 //
                 Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]");
-                Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]");
+                Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath]");
+                Console.WriteLine(" [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]");
                 Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]");
                 Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]");
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
                 Console.WriteLine(" [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
                 Console.WriteLine(" [/SynProb:0.05] [/MaxQScore:50] [/MaxQPEP:0.01]");
                 Console.WriteLine(" [/DB:DatabaseConnectionString]");
-                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
+                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R]");
+                Console.WriteLine(" [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
                                       "The input file should be one of the following:\n" +
-                                      "  MS-GF+ results file ({0}.tsv or {1}.tsv)\n" +
+                                      "  MaxQuant results files (msms.txt and peptides.txt)\n" +
+                                      "  MS-GF+ results file ({0}.tsv or {1}.tsv or .tsv)\n" +
                                       "  MSGF-DB results file ({1}.txt)\n" +
                                       "  MSAlign results file ({2}.txt)\n" +
                                       "  MODa results file ({3}.txt)\n" +
@@ -562,7 +565,9 @@ namespace PeptideHitResultsProcRunner
                                       "Use /N to specify the parameter file provided to the search tool. " +
                                       "This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MODa, MODPlus, MSAlign, TopPIC, and InSpecT. " +
                                       "For MaxQuant, provide either an XML-based parameter file (root element is <MaxQuantParams>) " +
-                                      "or provide the parameters.txt file created in the txt results directory."));
+                                      "or provide the parameters.txt file created in the txt results directory. " +
+                                      "The XML-based parameter file is preferred, since it is required to allow PHRP " +
+                                      "to accurately compute monoisotopic masses of peptides identified by MaxQuant."));
                 Console.WriteLine();
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
@@ -606,9 +611,10 @@ namespace PeptideHitResultsProcRunner
                     "The default is /MaxQPEP:0.01"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
-                    "When processing MaxQuant results, the DMS database is contacted to lookup dataset IDs by dataset name, " +
+                    "When processing MaxQuant results using a computer on the pnl.gov domain, " +
+                    "the DMS database is contacted to lookup dataset IDs by dataset name, " +
                     "where dataset name comes from the 'Raw file' column in the msms.txt file. " +
-                    "The default is /DB:\"{0}\"", PHRPOptions.DMS_CONNECTION_STRING)));
+                    "The default is \n/DB:\"{0}\"", PHRPOptions.DMS_CONNECTION_STRING)));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /S to process all valid files in the input directory and subdirectories. " +
