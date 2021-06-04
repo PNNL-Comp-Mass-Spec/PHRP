@@ -1527,8 +1527,13 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+                    const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
 
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
+                    success = CreatePepToProteinMapFile(
+                        sourcePHRPDataFiles,
+                        mtsPepToProteinMapFilePath,
+                        MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                        MATCH_ERROR_PERCENT_WARNING_THRESHOLD);
 
                     if (!success)
                     {

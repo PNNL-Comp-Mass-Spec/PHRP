@@ -726,14 +726,16 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
-        /// <param name="maximumAllowableMatchErrorPercentThreshold">
+        /// <param name="maximumAllowableMatchErrorPercentThreshold"></param>
+        /// <param name="matchErrorPercentWarningThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
         /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50
         /// </param>
         protected bool CreatePepToProteinMapFile(
             List<string> sourcePHRPDataFiles,
             string mtsPepToProteinMapFilePath,
-            double maximumAllowableMatchErrorPercentThreshold = 0.1)
+            double maximumAllowableMatchErrorPercentThreshold = 0.1,
+            double matchErrorPercentWarningThreshold = 0)
         {
             var success = false;
 
@@ -838,7 +840,12 @@ namespace PeptideHitResultsProcessor.Processor
                             success = false;
                             break;
                         }
-                        success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors, maximumAllowableMatchErrorPercentThreshold);
+
+                        success = ValidatePeptideToProteinMapResults(
+                            resultsFilePath,
+                            Options.IgnorePeptideToProteinMapperErrors,
+                            maximumAllowableMatchErrorPercentThreshold,
+                            matchErrorPercentWarningThreshold);
                     }
                     else
                     {
@@ -861,7 +868,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (File.Exists(resultsFilePath))
                             {
-                                success = ValidatePeptideToProteinMapResults(resultsFilePath, Options.IgnorePeptideToProteinMapperErrors, maximumAllowableMatchErrorPercentThreshold);
+                                success = ValidatePeptideToProteinMapResults(
+                                    resultsFilePath,
+                                    Options.IgnorePeptideToProteinMapperErrors,
+                                    maximumAllowableMatchErrorPercentThreshold,
+                                    matchErrorPercentWarningThreshold);
                             }
                             else
                             {
@@ -2198,13 +2209,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
         /// This is typically 0.1, but for MaxQuant we set this to 50
         /// </param>
+        /// <param name="matchErrorPercentWarningThreshold">
+        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown
+        /// This is typically 0, but for MaxQuant we set it to 5
+        /// </param>
         /// <returns>
         /// True if the required percentage of peptides matched a known protein, false if they did not and ignorePeptideToProteinMapperErrors is false
         /// </returns>
         private bool ValidatePeptideToProteinMapResults(
             string peptideToProteinMapFilePath,
             bool ignorePeptideToProteinMapperErrors,
-            double maximumAllowableMatchErrorPercentThreshold)
+            double maximumAllowableMatchErrorPercentThreshold,
+            double matchErrorPercentWarningThreshold)
         {
             try
             {
@@ -2233,7 +2249,16 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (ignorePeptideToProteinMapperErrors || errorPercent < maximumAllowableMatchErrorPercentThreshold)
                 {
-                    OnWarningEvent(message);
+                    if (errorPercent >= matchErrorPercentWarningThreshold)
+                    {
+                        OnWarningEvent(message);
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        OnStatusEvent(message);
+                    }
+
                     return true;
                 }
 
