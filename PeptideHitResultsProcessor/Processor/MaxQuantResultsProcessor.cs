@@ -2554,7 +2554,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile", ex);
+                SetErrorMessage("Error in LoadMaxQuantTxtParameterFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -2652,7 +2652,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile", ex);
+                SetErrorMessage("Error in LoadMaxQuantXmlParameterFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
@@ -2682,10 +2682,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 if (sourceFile.Name.Equals("parameters.txt", StringComparison.OrdinalIgnoreCase))
-                    return ExtractModInfoFromTxtParameterFile(sourceFile, out modList);
+                    return LoadMaxQuantTxtParameterFile(sourceFile, out modList);
 
                 if (sourceFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
-                    return ExtractModInfoFromXmlParameterFile(sourceFile, out modList);
+                    return LoadMaxQuantXmlParameterFile(sourceFile, out modList);
 
                 SetErrorMessage("MaxQuant parameter should either have a .xml extension or be named parameters.txt; " +
                                 "unsupported file: " + maxQuantParamFilePath);
@@ -2696,7 +2696,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ExtractModInfoFromParamFile", ex);
+                SetErrorMessage("Error in LoadSearchEngineParamFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
                 return false;
@@ -3569,9 +3569,10 @@ namespace PeptideHitResultsProcessor.Processor
                         var modificationDefinitionSuccess = LoadMaxQuantModificationDefinitions(inputFile.Directory);
                         if (!modificationDefinitionSuccess)
                             return false;
+                        }
 
-                        // Load the MaxQuant Parameter File so that we can determine the modification names
-                        var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out modList);
+                        // Examine the MaxQuant parameter file to determine the modification names and precursor match tolerance
+                        var modInfoExtracted = LoadSearchEngineParamFile(Options.SearchToolParameterFilePath, out modList);
                         if (!modInfoExtracted)
                         {
                             return false;
