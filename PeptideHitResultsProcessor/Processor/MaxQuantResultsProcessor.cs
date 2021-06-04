@@ -772,12 +772,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private readonly Regex mModCountMatcher = new(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
+        private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+
         /// <summary>
         /// This variable keeps track of the number of PSMs whose computed monoisotopic mass
         /// does not agree with the monoisotopic mass computed from the precursor m/z, within a reasonable tolerance
         /// </summary>
+        private int mPrecursorMassErrorWarningCount;
 
-        private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+        /// <summary>
+        /// Precursor match tolerance read from the MaxQuant parameter file
+        /// </summary>
+        private PrecursorMassTolerance mPrecursorMassTolerance;
 
         /// <summary>
         /// Keys in this dictionary are amino acid symbol
@@ -2489,7 +2495,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Open the parameters.txt file and look for static mod names
+        /// Open the parameters.txt file and look for static mod names and precursor match tolerance
         /// </summary>
         /// <param name="sourceFile"></param>
         /// <param name="modList"></param>
@@ -2501,6 +2507,10 @@ namespace PeptideHitResultsProcessor.Processor
         private bool LoadMaxQuantTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+            // The first search tolerance is not listed in the parameters.txt file
+            // Use 75 ppm (as a wide, default tolerance)
+            mPrecursorMassTolerance = new PrecursorMassTolerance(75, true);
 
             try
             {
@@ -2616,6 +2626,8 @@ namespace PeptideHitResultsProcessor.Processor
                 var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
                 dynamicModNodes.AddRange(parameterGroupNodes.Elements("variableModificationsFirstSearch").Elements("string"));
 
+                var firstSearchToleranceNode = parameterGroupNodes.Elements("firstSearchTol").ToList();
+                var searchToleranceUnitNode = parameterGroupNodes.Elements("searchTolInPpm").ToList();
 
                 // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
                 var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
@@ -2649,6 +2661,41 @@ namespace PeptideHitResultsProcessor.Processor
                     var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
                     modDef.IsobaricMod = true;
                     modList.Add(modDef);
+                }
+
+                if (firstSearchToleranceNode.Count > 0)
+                {
+                    var searchTolerance = firstSearchToleranceNode[0].Value;
+                    bool toleranceIsPPM;
+
+                    if (searchToleranceUnitNode.Count > 0)
+                    {
+                        toleranceIsPPM = searchToleranceUnitNode[0].Value.Trim().Equals("True", StringComparison.OrdinalIgnoreCase);
+                    }
+                    else
+                    {
+                        SetErrorMessage("The MaxQuant parameter file has a <firstSearchTol> node but is missing the <searchTolInPpm> node; see " + sourceFile.FullName);
+                        SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                        return false;
+                    }
+
+                    if (!double.TryParse(searchTolerance, out var searchToleranceValue))
+                    {
+                        SetErrorMessage(string.Format(
+                            "The <firstSearchTol> node in the MaxQuant parameter file is not numeric ({0}); see {1}",
+                            searchTolerance, sourceFile.FullName));
+
+                        SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                        return false;
+                    }
+
+                    mPrecursorMassTolerance = new PrecursorMassTolerance(searchToleranceValue, toleranceIsPPM);
+                }
+                else
+                {
+                    // The first search tolerance node is missing
+                    // Use 75 ppm (as a wide, default tolerance)
+                    mPrecursorMassTolerance = new PrecursorMassTolerance(75, true);
                 }
 
                 return true;
@@ -3566,11 +3613,15 @@ namespace PeptideHitResultsProcessor.Processor
                             "To define, use /N at the command line or SearchToolParameterFilePath in a parameter file");
 
                         modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+                        mPrecursorMassTolerance = new PrecursorMassTolerance();
                     }
                     else
                     {
+                        // Load MaxQuant modifications from the modifications.xml file (if it can be found)
                         var modificationDefinitionSuccess = LoadMaxQuantModificationDefinitions(inputFile.Directory);
                         if (!modificationDefinitionSuccess)
+                        {
                             return false;
                         }
 
