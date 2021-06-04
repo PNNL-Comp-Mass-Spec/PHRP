@@ -175,17 +175,15 @@ namespace PeptideHitResultsProcRunner
         private static void DisplayProgressPercent(int percentComplete, bool addCarriageReturn)
         {
             if (addCarriageReturn)
-            {
                 Console.WriteLine();
-            }
+
             if (percentComplete > 100)
                 percentComplete = 100;
+
             Console.Write("Processing: " + percentComplete + "% ");
 
             if (addCarriageReturn)
-            {
                 Console.WriteLine();
-            }
         }
 
         private static string GetAppVersion()

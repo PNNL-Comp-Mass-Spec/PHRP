@@ -1376,7 +1376,7 @@ namespace PeptideHitResultsProcessor.Processor
             var searchEngineParams = new SearchEngineParameters(SEARCH_ENGINE_NAME);
 
             var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(
-                SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PeptideHitResultTypes.MSGFPlus, 
+                SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PeptideHitResultTypes.MSGFPlus,
                 searchEngineParams, out var localErrorMessage, out var localWarningMessage);
 
             if (!string.IsNullOrWhiteSpace(localErrorMessage))
