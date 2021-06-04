@@ -57,6 +57,7 @@
     <Compile Include="Data\MaxQuantModInfo.cs" />
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
+    <Compile Include="Data\PrecursorMassTolerance.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Data\FirstHitInfo.cs" />

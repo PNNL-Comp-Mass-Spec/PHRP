@@ -237,47 +237,6 @@ namespace PeptideHitResultsProcessor.Processor
             public char CTerm;
         }
 
-        private struct ParentMassTolerance
-        {
-            // Given a tolerance of 20ppm, we would have ToleranceLeft=20, ToleranceRight=20, and ToleranceIsPPM=True
-            // Given a tolerance of 0.5Da,2.5Da, we would have ToleranceLeft=0.5, ToleranceRight=2.5, and ToleranceIsPPM=False
-            public double ToleranceLeft;
-            public double ToleranceRight;
-            public bool IsPPM;
-
-            public void Clear()
-            {
-                ToleranceLeft = 0;
-                ToleranceRight = 0;
-                IsPPM = false;
-            }
-
-            public override string ToString()
-            {
-                string units;
-                double equivalenceThreshold;
-
-                if (IsPPM)
-                {
-                    units = "ppm";
-                    equivalenceThreshold = 0.01;
-                }
-                else
-                {
-                    units = "Da";
-                    equivalenceThreshold = 0.0001;
-                }
-
-                if (Math.Abs(ToleranceLeft - ToleranceRight) < equivalenceThreshold)
-                {
-                    return "+/-" + ToleranceLeft + " " + units;
-                }
-                else
-                {
-                    return "-" + ToleranceRight + ", +" + ToleranceLeft + " " + units;
-                }
-            }
-        }
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
