@@ -173,6 +173,11 @@ namespace PHRPReader
             /// <summary>
             /// Affected residues
             /// </summary>
+            /// <remarks>
+            /// One letter amino acid symbols, or one of the symbols used by DMS
+            /// to track N-terminal and C-Terminal peptide/protein residues
+            /// (e.g., constant N_TERMINAL_PEPTIDE_SYMBOL_DMS in the <see cref="AminoAcidModInfo"/> class)
+            /// </remarks>
             public string Residues;
 
             /// <summary>

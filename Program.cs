@@ -531,7 +531,7 @@ namespace PeptideHitResultsProcRunner
                                       "This file should be tab delimited, with the first column containing the modification symbol, " +
                                       "the second column containing the modification mass, plus optionally a third column " +
                                       "listing the residues that can be modified with the given mass " +
-                                      "(1 letter residue symbols, no need to separated with commas or spaces)."));
+                                      "(1 letter residue symbols, no need to separate with commas or spaces)."));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. " +
