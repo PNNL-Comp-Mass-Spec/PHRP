@@ -346,7 +346,7 @@ namespace PHRPReader.Reader
                 else
                 {
                     psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.RankScore), mColumnHeaders, 1); ;
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.RankScore), mColumnHeaders, 0);
 
                     var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Peptide), mColumnHeaders);
 
