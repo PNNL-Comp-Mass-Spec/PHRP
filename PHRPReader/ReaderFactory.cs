@@ -260,7 +260,7 @@ namespace PHRPReader
         /// <summary>
         /// Returns a number between 0 and 100 indicating the percentage of the source file that has been read
         /// </summary>
-        public float PercentComplete => mSourceFileLineCount > 0 ? mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f : 0;
+        public float PercentComplete => mSourceFileLineCount > 0 ? mSourceFileLinesRead / (float)mSourceFileLineCount * 100f : 0;
 
         /// <summary>
         /// Returns the PHRP SynFileReader object

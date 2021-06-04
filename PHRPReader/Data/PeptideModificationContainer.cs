@@ -181,7 +181,7 @@ namespace PHRPReader.Data
             if (useNextAvailableModificationSymbol && mDefaultModificationSymbols.Count > 0)
             {
                 // Add modificationDefinition to the list, using the next available default modification symbol
-                modificationDefinition.ModificationSymbol = Convert.ToChar(mDefaultModificationSymbols.Dequeue());
+                modificationDefinition.ModificationSymbol = (char)mDefaultModificationSymbols.Dequeue();
             }
 
             Modifications.Add(modificationDefinition);
@@ -349,14 +349,15 @@ namespace PHRPReader.Data
 
             // Determine the number of digits that we will display to the left of the decimal point
             var formatDigitsDouble = Math.Log10(Math.Abs(modificationMass));
-            if (Math.Abs(formatDigitsDouble - Convert.ToInt32(formatDigitsDouble)) < float.Epsilon)
+
+            if (Math.Abs(formatDigitsDouble - (int)formatDigitsDouble) < float.Epsilon)
             {
                 // ModMass is a power of 10
-                formatDigits = Convert.ToInt32(formatDigitsDouble) + 1;
+                formatDigits = (int)formatDigitsDouble + 1;
             }
             else
             {
-                formatDigits = Convert.ToInt32(Math.Ceiling(formatDigitsDouble));
+                formatDigits = (int)Math.Ceiling(formatDigitsDouble);
             }
 
             if (formatDigits < 1)

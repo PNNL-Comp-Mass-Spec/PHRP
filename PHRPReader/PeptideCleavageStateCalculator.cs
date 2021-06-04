@@ -216,7 +216,7 @@ namespace PHRPReader
         /// <param name="cleavageState"></param>
         public static short CleavageStateToShort(PeptideCleavageState cleavageState)
         {
-            return Convert.ToInt16(cleavageState);
+            return (short)cleavageState;
         }
 
         /// <summary>

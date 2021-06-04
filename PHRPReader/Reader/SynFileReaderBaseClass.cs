@@ -889,7 +889,7 @@ namespace PHRPReader.Reader
                         entriesParsed++;
                         if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 5)
                         {
-                            var pctComplete = entriesParsed / Convert.ToDouble(ResultToSeqMap.Count) * 100;
+                            var pctComplete = entriesParsed / (double)ResultToSeqMap.Count * 100;
                             Console.WriteLine(" ... associating proteins with sequences: " + pctComplete.ToString("0.0") + "% complete");
                             lastProgress = DateTime.UtcNow;
                             notifyComplete = true;

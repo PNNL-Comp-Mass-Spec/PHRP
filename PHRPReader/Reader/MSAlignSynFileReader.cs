@@ -421,7 +421,7 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Charge), mColumnHeaders, 0));
+                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Charge), mColumnHeaders, 0);
 
                     var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Protein), mColumnHeaders);
                     psm.AddProtein(protein);

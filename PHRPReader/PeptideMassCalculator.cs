@@ -278,7 +278,7 @@ namespace PHRPReader
             mErrorMessage = string.Empty;
             foreach (var chChar in primarySequence)
             {
-                // Use Convert.ToInt32 to convert to the ASCII value, then subtract 65
+                // Use Convert.ToInt16 to convert to the ASCII value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chChar);
 
                 try
