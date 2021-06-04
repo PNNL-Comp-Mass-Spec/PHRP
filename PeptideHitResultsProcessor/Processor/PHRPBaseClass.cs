@@ -1638,10 +1638,16 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var datasetIDs = new Dictionary<string, int>();
 
+            if (string.IsNullOrWhiteSpace(Options.DMSConnectionString) ||
+                Options.DMSConnectionString.Equals("false", StringComparison.OrdinalIgnoreCase))
+            {
+                return datasetIDs;
+            }
+
             try
             {
                 var domain = Domain.GetComputerDomain();
-                if (!domain.Name.Equals("pnl.gov"))
+                if (!domain.Name.Equals("pnl.gov", StringComparison.OrdinalIgnoreCase))
                     return datasetIDs;
             }
             catch (Exception)

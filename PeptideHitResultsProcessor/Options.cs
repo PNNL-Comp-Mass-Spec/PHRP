@@ -34,8 +34,9 @@ namespace PeptideHitResultsProcessor
         public bool CreateProteinModsFile { get; set; }
 
         /// <summary>
-        /// DMS database connection string
+        /// DMS database connection string (only used if the computer is on the pnl.gov domain)
         /// </summary>
+        /// <remarks>Set this to an empty string or to "false" to disable contacting DMS</remarks>
         public string DMSConnectionString { get; set; }
 
         /// <summary>
