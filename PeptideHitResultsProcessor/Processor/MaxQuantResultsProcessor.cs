@@ -1635,221 +1635,6 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Read mod info from the MaxQuant parameter file
-        /// </summary>
-        /// <param name="maxQuantParamFilePath">
-        /// This is typically the XML-based MaxQuant parameter file, but it can alternatively be
-        /// the parameters.txt file created in the txt output directory</param>
-        /// <param name="modList"></param>
-        /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromParamFile(
-            string maxQuantParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
-        {
-            try
-            {
-                var sourceFile = new FileInfo(maxQuantParamFilePath);
-                if (!sourceFile.Exists)
-                {
-                    SetErrorMessage("MaxQuant parameter file not found: " + maxQuantParamFilePath);
-                    SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
-                    modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-                    return false;
-                }
-
-                if (sourceFile.Name.Equals("parameters.txt", StringComparison.OrdinalIgnoreCase))
-                    return ExtractModInfoFromTxtParameterFile(sourceFile, out modList);
-
-                if (sourceFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
-                    return ExtractModInfoFromXmlParameterFile(sourceFile, out modList);
-
-                SetErrorMessage("MaxQuant parameter should either have a .xml extension or be named parameters.txt; " +
-                                "unsupported file: " + maxQuantParamFilePath);
-
-                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
-                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-                return false;
-            }
-            catch (Exception ex)
-            {
-                SetErrorMessage("Error in ExtractModInfoFromParamFile", ex);
-                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
-                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Open the parameters.txt file and look for static mod names
-        /// </summary>
-        /// <param name="sourceFile"></param>
-        /// <param name="modList"></param>
-        /// <remarks>
-        /// The parameters.txt file does not list dynamic mods
-        /// It also does not list isobaric mods (like TMT or iTRAQ)
-        /// </remarks>
-        /// <returns>True if success, false if an error</returns>
-        private bool ExtractModInfoFromTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
-        {
-            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-
-            try
-            {
-                OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
-
-                // ReSharper disable once StringLiteralTypo
-                OnWarningEvent("The parameters.txt file only lists static mods. " +
-                               "It does not include dynamic mods or isobaric mods (like TMT or iTRAQ). " +
-                               "To allow PHRP to accurately compute monoisotopic mass values, you should reference an XML-based parameter file. " +
-                               "For example, MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml at " +
-                               "https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MaxQuant_Example");
-
-                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                var lineNumber = 0;
-
-                while (!reader.EndOfStream)
-                {
-                    var lineIn = reader.ReadLine();
-                    lineNumber++;
-
-                    if (string.IsNullOrWhiteSpace(lineIn) || !lineIn.StartsWith("Fixed modifications", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    // Found the static mods line, e.g.
-                    // Fixed modifications	Carbamidomethyl (C)
-
-                    var lineParts = lineIn.Split('\t');
-
-                    if (lineParts.Length < 2)
-                    {
-                        OnWarningEvent(string.Format(
-                            "Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected",
-                            lineNumber));
-
-                        continue;
-                    }
-
-                    var staticMods = lineParts[1];
-
-                    // ToDo: determine how multiple static mods are listed
-
-                    foreach (var maxQuantModName in staticMods.Split(','))
-                    {
-                        var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
-                        modList.Add(modDef);
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile", ex);
-                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
-                return false;
-            }
-        }
-
-        private bool ExtractModInfoFromXmlParameterFile(FileSystemInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
-        {
-            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
-
-            try
-            {
-                // Open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
-                OnStatusEvent("Reading the MaxQuant parameter file, " + PathUtils.CompactPathString(sourceFile.FullName, 80));
-
-                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                // Note that XDocument supersedes XmlDocument and XPathDocument
-                // XDocument can often be easier to use since XDocument is LINQ-based
-
-                var doc = XDocument.Parse(reader.ReadToEnd());
-
-                // <fixedModifications>
-                //    <string>Carbamidomethyl (C)</string>
-                // </fixedModifications>
-
-                // <variableModifications>
-                //    <string>Oxidation (M)</string>
-                //    <string>Acetyl (Protein N-term)</string>
-                // </variableModifications>
-
-                // <isobaricLabels>
-                //   <IsobaricLabelInfo>
-                //     <internalLabel>TMT6plex-Lys126</internalLabel>
-                //     <terminalLabel>TMT6plex-Nter126</terminalLabel>
-                //     <correctionFactorM2>0</correctionFactorM2>
-                //     <correctionFactorM1>0</correctionFactorM1>
-                //     <correctionFactorP1>0</correctionFactorP1>
-                //     <correctionFactorP2>0</correctionFactorP2>
-                //     <tmtLike>True</tmtLike>
-                //   </IsobaricLabelInfo>
-                //   ...
-                // </isobaricLabels>
-
-                var parameterGroupNodes = doc.Elements("MaxQuantParams").Elements("parameterGroups").Elements("parameterGroup").ToList();
-
-                if (parameterGroupNodes.Count == 0)
-                {
-                    OnWarningEvent("MaxQuant parameter file is missing the <parameterGroup> element; cannot add modification symbols to peptides in the synopsis file");
-                    return false;
-                }
-
-                if (parameterGroupNodes.Count > 1)
-                {
-                    OnWarningEvent("MaxQuant parameter file has more than one <parameterGroup> element; this is unexpected");
-                }
-
-                var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
-                var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
-
-                // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
-                var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
-                var terminalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
-
-                foreach (var fixedMod in fixedModNodes)
-                {
-                    var maxQuantModName = fixedMod.Value;
-                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
-                    modList.Add(modDef);
-                }
-
-                foreach (var dynamicMod in dynamicModNodes)
-                {
-                    var maxQuantModName = dynamicMod.Value;
-                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
-                    modList.Add(modDef);
-                }
-
-                if (internalIsobaricLabelNodes.Count > 0)
-                {
-                    var maxQuantModName = internalIsobaricLabelNodes[0].Value;
-                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
-                    modDef.IsobaricMod = true;
-                    modList.Add(modDef);
-                }
-
-                if (terminalIsobaricLabelNodes.Count > 0)
-                {
-                    var maxQuantModName = terminalIsobaricLabelNodes[0].Value;
-                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
-                    modDef.IsobaricMod = true;
-                    modList.Add(modDef);
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile", ex);
-                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to string.Empty
         /// </summary>
@@ -2700,6 +2485,221 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage("Error in LoadPeptideInfo", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+            }
+        }
+
+        /// <summary>
+        /// Open the parameters.txt file and look for static mod names
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="modList"></param>
+        /// <remarks>
+        /// The parameters.txt file does not list dynamic mods
+        /// It also does not list isobaric mods (like TMT or iTRAQ)
+        /// </remarks>
+        /// <returns>True if success, false if an error</returns>
+        private bool LoadMaxQuantTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+            try
+            {
+                OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
+
+                // ReSharper disable once StringLiteralTypo
+                OnWarningEvent("The parameters.txt file only lists static mods. " +
+                               "It does not include dynamic mods or isobaric mods (like TMT or iTRAQ). " +
+                               "To allow PHRP to accurately compute monoisotopic mass values, you should reference an XML-based parameter file. " +
+                               "For example, MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml at " +
+                               "https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MaxQuant_Example");
+
+                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var lineNumber = 0;
+
+                while (!reader.EndOfStream)
+                {
+                    var lineIn = reader.ReadLine();
+                    lineNumber++;
+
+                    if (string.IsNullOrWhiteSpace(lineIn) || !lineIn.StartsWith("Fixed modifications", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Found the static mods line, e.g.
+                    // Fixed modifications	Carbamidomethyl (C)
+
+                    var lineParts = lineIn.Split('\t');
+
+                    if (lineParts.Length < 2)
+                    {
+                        OnWarningEvent(string.Format(
+                            "Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected",
+                            lineNumber));
+
+                        continue;
+                    }
+
+                    var staticMods = lineParts[1];
+
+                    // ToDo: determine how multiple static mods are listed
+
+                    foreach (var maxQuantModName in staticMods.Split(','))
+                    {
+                        var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                        modList.Add(modDef);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromTxtParameterFile", ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                return false;
+            }
+        }
+
+        private bool LoadMaxQuantXmlParameterFile(FileSystemInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+
+            try
+            {
+                // Open the MaxQuant parameter file with an XML reader and look for static and dynamic mod names
+                OnStatusEvent("Reading the MaxQuant parameter file, " + PathUtils.CompactPathString(sourceFile.FullName, 80));
+
+                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                // Note that XDocument supersedes XmlDocument and XPathDocument
+                // XDocument can often be easier to use since XDocument is LINQ-based
+
+                var doc = XDocument.Parse(reader.ReadToEnd());
+
+                // <fixedModifications>
+                //    <string>Carbamidomethyl (C)</string>
+                // </fixedModifications>
+
+                // <variableModifications>
+                //    <string>Oxidation (M)</string>
+                //    <string>Acetyl (Protein N-term)</string>
+                // </variableModifications>
+
+                // <isobaricLabels>
+                //   <IsobaricLabelInfo>
+                //     <internalLabel>TMT6plex-Lys126</internalLabel>
+                //     <terminalLabel>TMT6plex-Nter126</terminalLabel>
+                //     <correctionFactorM2>0</correctionFactorM2>
+                //     <correctionFactorM1>0</correctionFactorM1>
+                //     <correctionFactorP1>0</correctionFactorP1>
+                //     <correctionFactorP2>0</correctionFactorP2>
+                //     <tmtLike>True</tmtLike>
+                //   </IsobaricLabelInfo>
+                //   ...
+                // </isobaricLabels>
+
+                var parameterGroupNodes = doc.Elements("MaxQuantParams").Elements("parameterGroups").Elements("parameterGroup").ToList();
+
+                if (parameterGroupNodes.Count == 0)
+                {
+                    OnWarningEvent("MaxQuant parameter file is missing the <parameterGroup> element; cannot add modification symbols to peptides in the synopsis file");
+                    return false;
+                }
+
+                if (parameterGroupNodes.Count > 1)
+                {
+                    OnWarningEvent("MaxQuant parameter file has more than one <parameterGroup> element; this is unexpected");
+                }
+
+                var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
+                var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
+
+                // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
+                var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
+                var terminalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
+
+                foreach (var fixedMod in fixedModNodes)
+                {
+                    var maxQuantModName = fixedMod.Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                foreach (var dynamicMod in dynamicModNodes)
+                {
+                    var maxQuantModName = dynamicMod.Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
+                    modList.Add(modDef);
+                }
+
+                if (internalIsobaricLabelNodes.Count > 0)
+                {
+                    var maxQuantModName = internalIsobaricLabelNodes[0].Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modDef.IsobaricMod = true;
+                    modList.Add(modDef);
+                }
+
+                if (terminalIsobaricLabelNodes.Count > 0)
+                {
+                    var maxQuantModName = terminalIsobaricLabelNodes[0].Value;
+                    var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modDef.IsobaricMod = true;
+                    modList.Add(modDef);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromXmlParameterFile", ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Read mod info from the MaxQuant parameter file
+        /// </summary>
+        /// <param name="maxQuantParamFilePath">
+        /// This is typically the XML-based MaxQuant parameter file, but it can alternatively be
+        /// the parameters.txt file created in the txt output directory</param>
+        /// <param name="modList"></param>
+        /// <returns>True on success, false if an error</returns>
+        private bool LoadSearchEngineParamFile(
+            string maxQuantParamFilePath,
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            try
+            {
+                var sourceFile = new FileInfo(maxQuantParamFilePath);
+                if (!sourceFile.Exists)
+                {
+                    SetErrorMessage("MaxQuant parameter file not found: " + maxQuantParamFilePath);
+                    SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
+                    modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+                    return false;
+                }
+
+                if (sourceFile.Name.Equals("parameters.txt", StringComparison.OrdinalIgnoreCase))
+                    return ExtractModInfoFromTxtParameterFile(sourceFile, out modList);
+
+                if (sourceFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                    return ExtractModInfoFromXmlParameterFile(sourceFile, out modList);
+
+                SetErrorMessage("MaxQuant parameter should either have a .xml extension or be named parameters.txt; " +
+                                "unsupported file: " + maxQuantParamFilePath);
+
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in ExtractModInfoFromParamFile", ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
+                return false;
             }
         }
 
