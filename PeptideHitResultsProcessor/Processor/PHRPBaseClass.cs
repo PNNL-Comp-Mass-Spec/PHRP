@@ -1647,7 +1647,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var domain = Domain.GetComputerDomain();
-                if (!domain.Name.Equals("pnl.gov", StringComparison.OrdinalIgnoreCase))
+                if (!domain.Name.EndsWith("pnl.gov", StringComparison.OrdinalIgnoreCase))
                     return datasetIDs;
             }
             catch (Exception)
