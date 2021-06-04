@@ -2874,6 +2874,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             var staticModPresent = modList.Any(modItem => modItem.ModTypeInParameterFile == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod);
 
+            var isobaricModPresent = modList.Any(modItem => modItem.IsobaricMod);
+
             try
             {
                 searchResult.Clear();
@@ -2995,12 +2997,24 @@ namespace PeptideHitResultsProcessor.Processor
                 // Method ComputeObservedMassErrors will do this
 
                 // Compare the mass computed by PHRP to the one reported by MaxQuant
-                var deltaMassVsMaxQuant = searchResult.CalculatedMonoMassValue - searchResult.CalculatedMonoMassPHRP;
+                var deltaMassVsMaxQuant = searchResult.CalculatedMonoMassPHRP - searchResult.CalculatedMonoMassValue;
+
                 if (Math.Abs(deltaMassVsMaxQuant) > 0.01)
                 {
-                    OnWarningEvent(string.Format(
-                        "Calculated monoisotopic mass differs from the value reported by MaxQuant on line {0}; delta mass: {1:F3} Da",
-                        lineNumber, deltaMassVsMaxQuant));
+                    // The mass value reported by MaxQuant does not include the mass of any isobaric tags (either at the N-terminus or on K residues)
+                    // If modList contains any isobaric mods, preferentially use the mass computed by PHRP
+
+                    if (isobaricModPresent)
+                    {
+                        searchResult.CalculatedMonoMass = PRISM.StringUtilities.DblToString(searchResult.CalculatedMonoMassPHRP, 6);
+                        searchResult.CalculatedMonoMassValue = searchResult.CalculatedMonoMassPHRP;
+                    }
+                    else
+                    {
+                        OnWarningEvent(string.Format(
+                            "Calculated monoisotopic mass differs from the value reported by MaxQuant on line {0} for {1}, {2} Da; delta mass: {3:F3} Da",
+                            lineNumber, searchResult.Sequence, searchResult.CalculatedMonoMassValue, deltaMassVsMaxQuant));
+                    }
                 }
 
                 // Lookup the Prefix and Suffix residues
