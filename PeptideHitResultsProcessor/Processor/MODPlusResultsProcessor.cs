@@ -164,9 +164,9 @@ namespace PeptideHitResultsProcessor.Processor
             var sequence = searchResult.PeptideSequenceWithMods;
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
-                var chChar = sequence[index];
+                var character = sequence[index];
 
-                if (StringUtilities.IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(character))
                 {
                     if (parsingModMass)
                     {
@@ -175,7 +175,7 @@ namespace PeptideHitResultsProcessor.Processor
                         parsingModMass = false;
                     }
 
-                    mostRecentResidue = chChar;
+                    mostRecentResidue = character;
                     residueLocInPeptide++;
 
                     // Look for static mods to associate with this residue
@@ -186,32 +186,32 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
-                        if (modificationDefinition.TargetResiduesContain(chChar))
+                        if (modificationDefinition.TargetResiduesContain(character))
                         {
                             // Match found; add this modification
                             var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
                             searchResult.SearchResultAddModification(
-                                modificationDefinition, chChar, residueLocInPeptide,
+                                modificationDefinition, character, residueLocInPeptide,
                                 residueTerminusState, updateModOccurrenceCounts);
                         }
                     }
                 }
                 else
                 {
-                    var isNumberChar = chChar is '+' or '-' || char.IsDigit(chChar);
+                    var isNumberChar = character is '+' or '-' || char.IsDigit(character);
 
                     if (parsingModMass)
                     {
-                        if (isNumberChar || chChar == '.')
+                        if (isNumberChar || character == '.')
                         {
-                            modMassDigits += chChar;
+                            modMassDigits += character;
                         }
                     }
                     else if (isNumberChar)
                     {
                         // Mod Mass Start
-                        modMassDigits = chChar.ToString();
+                        modMassDigits = character.ToString();
                         parsingModMass = true;
                     }
                     else
@@ -267,12 +267,12 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void AssociateDynamicModWithResidue(
             SearchResultsBaseClass searchResult,
-            char chMostRecentResidue,
+            char mostRecentResidue,
             int residueLocInPeptide,
             string modMassDigits,
             bool updateModOccurrenceCounts)
         {
-            var residueForMod = chMostRecentResidue;
+            var residueForMod = mostRecentResidue;
             var residueLocForMod = residueLocInPeptide;
 
             if (double.TryParse(modMassDigits, out var modMass))
@@ -412,9 +412,9 @@ namespace PeptideHitResultsProcessor.Processor
 
             for (var index = 0; index <= primarySequence.Length - 1; index++)
             {
-                var chChar = primarySequence[index];
+                var character = primarySequence[index];
 
-                if (!StringUtilities.IsLetterAtoZ(chChar))
+                if (!StringUtilities.IsLetterAtoZ(character))
                     continue;
 
                 // Look for static mods to associate with this residue
@@ -424,7 +424,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
 
                     var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
-                    var matchFound = modificationDefinition.TargetResiduesContain(chChar);
+                    var matchFound = modificationDefinition.TargetResiduesContain(character);
 
                     if (!matchFound && index == 0)
                     {
@@ -1451,10 +1451,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    foreach (var chTargetResidue in modDef.TargetResidues)
+                    foreach (var targetResidue in modDef.TargetResidues)
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modDef.ModificationMass, modDef.ModificationType, chTargetResidue,
+                            modDef.ModificationMass, modDef.ModificationType, targetResidue,
                             AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                     }
                 }

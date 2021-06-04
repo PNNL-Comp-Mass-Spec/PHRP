@@ -62,14 +62,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
-        /// <param name="chChar">Character to examine</param>
+        /// <param name="character">Character to examine</param>
         /// <remarks>
         /// Note that the Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters
         /// In contrast, this method only returns True for normal letters between A and Z (case insensitive)
         /// </remarks>
-        public static bool IsLetterAtoZ(char chChar)
+        public static bool IsLetterAtoZ(char character)
         {
-            return RegexIsLetter.IsMatch(chChar.ToString());
+            return RegexIsLetter.IsMatch(character.ToString());
         }
 
         public static string LongestCommonStringFromStart(List<string> items, bool caseSensitive = false)

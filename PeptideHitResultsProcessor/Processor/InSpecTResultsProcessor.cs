@@ -239,11 +239,11 @@ namespace PeptideHitResultsProcessor.Processor
             var sequence = searchResult.PeptideSequenceWithMods;
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
-                var chChar = sequence[index];
+                var character = sequence[index];
 
-                if (StringUtilities.IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(character))
                 {
-                    mostRecentLetter = chChar;
+                    mostRecentLetter = character;
                     residueLocInPeptide++;
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
@@ -253,20 +253,20 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
-                        if (modificationDefinition.TargetResiduesContain(chChar))
+                        if (modificationDefinition.TargetResiduesContain(character))
                         {
                             // Match found; add this modification
                             var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
                             searchResult.SearchResultAddModification(
-                                modificationDefinition, chChar, residueLocInPeptide,
+                                modificationDefinition, character, residueLocInPeptide,
                                 residueTerminusState, updateModOccurrenceCounts);
                         }
                     }
                 }
                 else if (StringUtilities.IsLetterAtoZ(mostRecentLetter))
                 {
-                    searchResult.SearchResultAddDynamicModification(chChar, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                    searchResult.SearchResultAddDynamicModification(character, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                 }
                 else
                 {

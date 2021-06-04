@@ -263,18 +263,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="updateModOccurrenceCounts"></param>
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
-            var chMostRecentLetter = '-';
+            var mostRecentLetter = '-';
             var residueLocInPeptide = 0;
 
             var sequence = searchResult.PeptideSequenceWithMods;
 
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
-                var chChar = sequence[index];
+                var character = sequence[index];
 
-                if (StringUtilities.IsLetterAtoZ(chChar))
+                if (StringUtilities.IsLetterAtoZ(character))
                 {
-                    chMostRecentLetter = chChar;
+                    mostRecentLetter = character;
                     residueLocInPeptide++;
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
@@ -286,7 +286,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
-                        if (!modificationDefinition.TargetResiduesContain(chChar))
+                        if (!modificationDefinition.TargetResiduesContain(character))
                         {
                             continue;
                         }
@@ -295,13 +295,13 @@ namespace PeptideHitResultsProcessor.Processor
                         var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
                         searchResult.SearchResultAddModification(
-                            modificationDefinition, chChar, residueLocInPeptide,
+                            modificationDefinition, character, residueLocInPeptide,
                             residueTerminusState, updateModOccurrenceCounts);
                     }
                 }
-                else if (StringUtilities.IsLetterAtoZ(chMostRecentLetter))
+                else if (StringUtilities.IsLetterAtoZ(mostRecentLetter))
                 {
-                    var success = searchResult.SearchResultAddDynamicModification(chChar, chMostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                    var success = searchResult.SearchResultAddDynamicModification(character, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                     if (success)
                     {
                         continue;
@@ -310,13 +310,13 @@ namespace PeptideHitResultsProcessor.Processor
                     var errorMessage = searchResult.ErrorMessage;
                     if (string.IsNullOrEmpty(errorMessage))
                     {
-                        errorMessage = "SearchResultAddDynamicModification returned false for symbol " + chChar;
+                        errorMessage = "SearchResultAddDynamicModification returned false for symbol " + character;
                     }
                     SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
                 }
                 else
                 {
-                    // We found a modification symbol but chMostRecentLetter is not a letter
+                    // We found a modification symbol but mostRecentLetter is not a letter
                     // Therefore, this modification symbol is at the beginning of the string; ignore the symbol
                 }
             }
@@ -1797,7 +1797,7 @@ namespace PeptideHitResultsProcessor.Processor
                             }
                             else
                             {
-                                precursorErrorDa = PeptideMassCalculator.PPMToMass(pMErrorPPM, peptideMonoisotopicMass);
+                                precursorErrorDa = PeptideMassCalculator.PPMToMass(parentMassErrorPPM, peptideMonoisotopicMass);
 
                                 // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                                 udtSearchResult.PMErrorDa = StringUtilities.MassErrorToString(precursorErrorDa);
@@ -1810,9 +1810,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (double.TryParse(udtSearchResult.PrecursorMZ, out var precursorMZ))
                     {
-                        var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(precursorErrorDa, precursorMZ,
-                                                                                      udtSearchResult.ChargeNum, peptideMonoisotopicMass,
-                                                                                      true);
+                        var peptideDeltaMassCorrectedPpm =
+                            ComputeDelMCorrectedPPM(precursorErrorDa, precursorMZ, udtSearchResult.ChargeNum, peptideMonoisotopicMass, true);
 
                         udtSearchResult.PMErrorPPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
 

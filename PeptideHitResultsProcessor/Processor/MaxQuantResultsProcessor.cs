@@ -74,7 +74,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             FileDate = "June 3, 2021";
 
-            MaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
+            mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -756,6 +756,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private static readonly SortedSet<int> mIndicesToSkip = new();
 
+        /// <summary>
+        /// Dictionary of MaxQuant modifications, loaded from modifications.xml
+        /// </summary>
+        /// <remarks>Keys are mod names, values are the details of each modification</remarks>
+        private readonly Dictionary<string, MaxQuantModInfo> mMaxQuantMods;
+
         private readonly Regex mModListModNameMatcher = new(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
 
         /// <summary>
@@ -767,10 +773,9 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly Regex mModCountMatcher = new(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
         /// <summary>
-        /// Dictionary of MaxQuant modifications, loaded from modifications.xml
+        /// This variable keeps track of the number of PSMs whose computed monoisotopic mass
+        /// does not agree with the monoisotopic mass computed from the precursor m/z, within a reasonable tolerance
         /// </summary>
-        /// <remarks>Keys are mod names, values are the details of each modification</remarks>
-        private Dictionary<string, MaxQuantModInfo> MaxQuantMods { get; }
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
@@ -853,16 +858,16 @@ namespace PeptideHitResultsProcessor.Processor
                     residueLocInPeptide = finalResidueLoc;
                 }
 
-                var chMostRecentResidue = '-';
+                var mostRecentResidue = '-';
 
                 if (residueLocInPeptide >= 1 && residueLocInPeptide <= finalResidueLoc)
                 {
-                    chMostRecentResidue = searchResult.PeptideCleanSequence[residueLocInPeptide - 1];
+                    mostRecentResidue = searchResult.PeptideCleanSequence[residueLocInPeptide - 1];
                 }
 
                 // Associate the mod with the given residue
                 searchResult.SearchResultAddModification(
-                    modMass, chMostRecentResidue, residueLocInPeptide,
+                    modMass, mostRecentResidue, residueLocInPeptide,
                     residueTerminusState, updateModOccurrenceCounts);
             }
         }
@@ -1277,7 +1282,7 @@ namespace PeptideHitResultsProcessor.Processor
                         break;
 
                     // Examine this modification's metadata to see if it is an N-terminal mod
-                    var nTerminalMod = MaxQuantMods.TryGetValue(modItem.Value.MaxQuantModName, out var modInfo) &&
+                    var nTerminalMod = mMaxQuantMods.TryGetValue(modItem.Value.MaxQuantModName, out var modInfo) &&
                                        modInfo.Position is MaxQuantModPosition.AnyNterm or MaxQuantModPosition.ProteinNterm;
 
                     // ReSharper disable CommentTypo
@@ -2108,7 +2113,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return true;
             }
 
-            if (MaxQuantMods.TryGetValue(modName, out var modInfo))
+            if (mMaxQuantMods.TryGetValue(modName, out var modInfo))
             {
                 modMass = modInfo.MonoisotopicMass;
                 return true;
@@ -2116,7 +2121,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (matchShortName)
             {
-                foreach (var modItem in MaxQuantMods)
+                foreach (var modItem in mMaxQuantMods)
                 {
                     var shortModName = MaxQuantModifiedSequenceModInfo.GetModNameWithoutResidues(modItem.Key);
                     if (string.Equals(shortModName, modName, StringComparison.OrdinalIgnoreCase))
@@ -2127,7 +2132,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
-            OnWarningEvent(string.Format("Modification {0} not found in modList or MaxQuantMods", modName));
+            OnWarningEvent(string.Format("Modification {0} not found in modList or mMaxQuantMods", modName));
             modMass = 0;
             return false;
         }
@@ -2140,7 +2145,7 @@ namespace PeptideHitResultsProcessor.Processor
                 ModTypeInParameterFile = modType
             };
 
-            if (!MaxQuantMods.TryGetValue(maxQuantModName, out var modInfo))
+            if (!mMaxQuantMods.TryGetValue(maxQuantModName, out var modInfo))
             {
                 OnWarningEvent(string.Format(
                     "The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file",
@@ -2415,7 +2420,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Loading MaxQuant modifications from " + modificationDefinitionFile.FullName);
 
-                MaxQuantMods.Clear();
+                mMaxQuantMods.Clear();
 
                 using var reader = new StreamReader(new FileStream(modificationDefinitionFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -2466,7 +2471,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     XmlReaderUtilities.TryGetAttribute(modificationNode, "description", out var modDescription);
 
-                    if (MaxQuantMods.ContainsKey(modTitle))
+                    if (mMaxQuantMods.ContainsKey(modTitle))
                     {
                         OnWarningEvent(string.Format(
                             "MaxQuant modifications file has a duplicate definition for the modification titled '{0}'",
@@ -2480,7 +2485,7 @@ namespace PeptideHitResultsProcessor.Processor
                         Description = modDescription
                     };
 
-                    MaxQuantMods.Add(modTitle, maxQuantMod);
+                    mMaxQuantMods.Add(modTitle, maxQuantMod);
 
                     if (XmlReaderUtilities.TryGetElementValue(modificationNode, "position", out var positionText))
                     {

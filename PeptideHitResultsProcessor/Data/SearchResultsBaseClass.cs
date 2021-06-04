@@ -526,14 +526,14 @@ namespace PeptideHitResultsProcessor.Data
         /// <param name="residue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="modificationMass"></param>
-        /// <param name="chAffectedAtom"></param>
+        /// <param name="affectedAtom"></param>
         /// <returns>True if index is valid; otherwise, returns false</returns>
         public bool GetSearchResultModDetailsByIndex(
             int index,
             out char residue,
             out int residueLocInPeptide,
             out double modificationMass,
-            out char chAffectedAtom)
+            out char affectedAtom)
         {
             if (index >= 0 && index < mSearchResultModifications.Count)
             {
@@ -541,14 +541,14 @@ namespace PeptideHitResultsProcessor.Data
                 residue = resultMod.Residue;
                 residueLocInPeptide = resultMod.ResidueLocInPeptide;
                 modificationMass = resultMod.ModDefinition.ModificationMass;
-                chAffectedAtom = resultMod.ModDefinition.AffectedAtom;
+                affectedAtom = resultMod.ModDefinition.AffectedAtom;
                 return true;
             }
 
             residue = Convert.ToChar(0);
             residueLocInPeptide = 0;
             modificationMass = 0;
-            chAffectedAtom = Convert.ToChar(0);
+            affectedAtom = Convert.ToChar(0);
             return false;
         }
 
@@ -577,14 +577,14 @@ namespace PeptideHitResultsProcessor.Data
         /// Associates the given modification symbol with the given residue
         /// </summary>
         /// <param name="modificationSymbol"></param>
-        /// <param name="chTargetResidue"></param>
+        /// <param name="targetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns>True if successful, false if the modification symbol is unknown</returns>
         public bool SearchResultAddDynamicModification(
             char modificationSymbol,
-            char chTargetResidue,
+            char targetResidue,
             int residueLocInPeptide,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             bool updateModOccurrenceCounts)
@@ -593,7 +593,7 @@ namespace PeptideHitResultsProcessor.Data
 
             // Find the modification that uses this modification symbol and applies to this target residue
             var modificationDefinition = mPeptideMods.LookupDynamicModificationDefinitionByTargetInfo(
-                modificationSymbol, chTargetResidue, residueTerminusState, out var existingModFound);
+                modificationSymbol, targetResidue, residueTerminusState, out var existingModFound);
 
             if (existingModFound)
             {
@@ -606,7 +606,7 @@ namespace PeptideHitResultsProcessor.Data
                 {
                     success = SearchResultAddModification(
                         modificationDefinition,
-                        chTargetResidue,
+                        targetResidue,
                         residueLocInPeptide,
                         residueTerminusState,
                         updateModOccurrenceCounts);
@@ -625,20 +625,20 @@ namespace PeptideHitResultsProcessor.Data
         /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <param name="chTargetResidue"></param>
+        /// <param name="targetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns>True if mod successfully added</returns>
         public bool SearchResultAddModification(
             double modificationMass,
-            char chTargetResidue,
+            char targetResidue,
             int residueLocInPeptide,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             bool updateModOccurrenceCounts)
         {
             return SearchResultAddModification(
-                modificationMass, chTargetResidue, residueLocInPeptide, residueTerminusState,
+                modificationMass, targetResidue, residueLocInPeptide, residueTerminusState,
                 updateModOccurrenceCounts,
                 PeptideModificationContainer.MASS_DIGITS_OF_PRECISION,
                 PeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
@@ -649,7 +649,7 @@ namespace PeptideHitResultsProcessor.Data
         /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <param name="chTargetResidue"></param>
+        /// <param name="targetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
@@ -658,7 +658,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <returns>True if mod successfully added</returns>
         public bool SearchResultAddModification(
             double modificationMass,
-            char chTargetResidue,
+            char targetResidue,
             int residueLocInPeptide,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             bool updateModOccurrenceCounts,
@@ -678,7 +678,7 @@ namespace PeptideHitResultsProcessor.Data
                 // If the modification mass is unknown, will auto-add it to the list of known modifications
                 var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
                     modificationMass,
-                    chTargetResidue,
+                    targetResidue,
                     residueTerminusState,
                     out _,
                     true,
@@ -687,7 +687,7 @@ namespace PeptideHitResultsProcessor.Data
 
                 success = SearchResultAddModification(
                     modificationDefinition,
-                    chTargetResidue,
+                    targetResidue,
                     residueLocInPeptide,
                     residueTerminusState,
                     updateModOccurrenceCounts);
@@ -700,14 +700,14 @@ namespace PeptideHitResultsProcessor.Data
         /// Associates the given modification with the given residue
         /// </summary>
         /// <param name="modificationDefinition"></param>
-        /// <param name="chTargetResidue"></param>
+        /// <param name="targetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns>True if successful, false if an error</returns>
         public bool SearchResultAddModification(
             ModificationDefinition modificationDefinition,
-            char chTargetResidue,
+            char targetResidue,
             int residueLocInPeptide,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             bool updateModOccurrenceCounts)
@@ -727,7 +727,7 @@ namespace PeptideHitResultsProcessor.Data
                     modificationDefinition.OccurrenceCount++;
                 }
 
-                mSearchResultModifications.Add(new AminoAcidModInfo(chTargetResidue, residueLocInPeptide, residueTerminusState, modificationDefinition));
+                mSearchResultModifications.Add(new AminoAcidModInfo(targetResidue, residueLocInPeptide, residueTerminusState, modificationDefinition));
                 success = true;
             }
 
@@ -938,22 +938,22 @@ namespace PeptideHitResultsProcessor.Data
         public string SequenceWithPrefixAndSuffix(bool returnSequenceWithMods)
         {
             string work;
-            char chPrefix = default;
-            char chSuffix = default;
+            char prefix = default;
+            char suffix = default;
 
             try
             {
-                chPrefix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                prefix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
 
                 if (mPeptidePreResidues != null)
                 {
                     work = mPeptidePreResidues.Trim();
                     if (work.Length > 0)
                     {
-                        chPrefix = work[work.Length - 1];
-                        if (chPrefix == PeptideCleavageStateCalculator.TERMINUS_SYMBOL_XTANDEM_NTerminus)
+                        prefix = work[work.Length - 1];
+                        if (prefix == PeptideCleavageStateCalculator.TERMINUS_SYMBOL_XTANDEM_NTerminus)
                         {
-                            chPrefix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                            prefix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
                         }
                     }
                 }
@@ -965,16 +965,16 @@ namespace PeptideHitResultsProcessor.Data
 
             try
             {
-                chSuffix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                suffix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
                 if (mPeptidePostResidues != null)
                 {
                     work = mPeptidePostResidues.Trim();
                     if (work.Length > 0)
                     {
-                        chSuffix = work[0];
-                        if (chSuffix == PeptideCleavageStateCalculator.TERMINUS_SYMBOL_XTANDEM_CTerminus)
+                        suffix = work[0];
+                        if (suffix == PeptideCleavageStateCalculator.TERMINUS_SYMBOL_XTANDEM_CTerminus)
                         {
-                            chSuffix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                            suffix = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
                         }
                     }
                 }
@@ -986,7 +986,7 @@ namespace PeptideHitResultsProcessor.Data
 
             if (returnSequenceWithMods && PeptideSequenceWithMods != null)
             {
-                return chPrefix + "." + PeptideSequenceWithMods + "." + chSuffix;
+                return prefix + "." + PeptideSequenceWithMods + "." + suffix;
             }
 
             if (mPeptideCleanSequence == null)
@@ -994,7 +994,7 @@ namespace PeptideHitResultsProcessor.Data
                 return string.Empty;
             }
 
-            return chPrefix + "." + mPeptideCleanSequence + "." + chSuffix;
+            return prefix + "." + mPeptideCleanSequence + "." + suffix;
         }
 
         /// <summary>

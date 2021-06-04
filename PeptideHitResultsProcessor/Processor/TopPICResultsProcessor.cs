@@ -203,10 +203,10 @@ namespace PeptideHitResultsProcessor.Processor
             var parsingModInfo = false;
             var modMassOrName = string.Empty;
 
-            var chMostRecentResidue = NO_RESIDUE;
+            var mostRecentResidue = NO_RESIDUE;
             var residueLocInPeptide = 0;
 
-            var chAmbiguousResidue = NO_RESIDUE;
+            var ambiguousResidue = NO_RESIDUE;
             var ambiguousResidueLocInPeptide = 0;
 
             var clearAmbiguousResidue = false;
@@ -215,22 +215,22 @@ namespace PeptideHitResultsProcessor.Processor
             var sequence = searchResult.PeptideSequenceWithMods;
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
-                var chChar = sequence[index];
+                var character = sequence[index];
 
-                if (!parsingModInfo && StringUtilities.IsLetterAtoZ(chChar))
+                if (!parsingModInfo && StringUtilities.IsLetterAtoZ(character))
                 {
-                    chMostRecentResidue = chChar;
+                    mostRecentResidue = character;
                     residueLocInPeptide++;
 
                     if (storeAmbiguousResidue)
                     {
-                        chAmbiguousResidue = chChar;
+                        ambiguousResidue = character;
                         ambiguousResidueLocInPeptide = residueLocInPeptide;
                         storeAmbiguousResidue = false;
                     }
                     else if (clearAmbiguousResidue)
                     {
-                        chAmbiguousResidue = NO_RESIDUE;
+                        ambiguousResidue = NO_RESIDUE;
                         clearAmbiguousResidue = false;
                     }
 
@@ -240,35 +240,35 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
-                            if (modificationDefinition.TargetResiduesContain(chChar))
+                            if (modificationDefinition.TargetResiduesContain(character))
                             {
                                 // Match found; add this modification
                                 var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
                                 searchResult.SearchResultAddModification(
-                                    modificationDefinition, chChar, residueLocInPeptide,
+                                    modificationDefinition, character, residueLocInPeptide,
                                     residueTerminusState, updateModOccurrenceCounts);
                             }
                         }
                     }
                 }
-                else if (chChar == '(')
+                else if (character == '(')
                 {
                     // Start of a mod group
                     storeAmbiguousResidue = true;
                 }
-                else if (chChar == ')')
+                else if (character == ')')
                 {
                     // End of a mod group
                     clearAmbiguousResidue = true;
                 }
-                else if (chChar == '[')
+                else if (character == '[')
                 {
                     // Mod Info Start
                     modMassOrName = string.Empty;
                     parsingModInfo = true;
                 }
-                else if (chChar == ']')
+                else if (character == ']')
                 {
                     // Mod Info End
 
@@ -278,16 +278,16 @@ namespace PeptideHitResultsProcessor.Processor
                     char residueForMod;
                     int residueLocForMod;
 
-                    if (chAmbiguousResidue == NO_RESIDUE)
+                    if (ambiguousResidue == NO_RESIDUE)
                     {
-                        residueForMod = chMostRecentResidue;
+                        residueForMod = mostRecentResidue;
                         residueLocForMod = residueLocInPeptide;
                     }
                     else
                     {
                         // Ambiguous mod
                         // We'll associate it with the first residue of the mod group
-                        residueForMod = chAmbiguousResidue;
+                        residueForMod = ambiguousResidue;
                         residueLocForMod = ambiguousResidueLocInPeptide;
                     }
 
@@ -353,7 +353,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else if (parsingModInfo)
                 {
-                    modMassOrName += chChar;
+                    modMassOrName += character;
                 }
                 else
                 {
@@ -984,11 +984,11 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // .Scans may have a list of scan numbers; extract the first scan number from .scans
                     var scanNumberDigits = string.Empty;
-                    foreach (var chChar in udtSearchResult.Scans)
+                    foreach (var character in udtSearchResult.Scans)
                     {
-                        if (char.IsDigit(chChar))
+                        if (char.IsDigit(character))
                         {
-                            scanNumberDigits += chChar;
+                            scanNumberDigits += character;
                         }
                     }
 

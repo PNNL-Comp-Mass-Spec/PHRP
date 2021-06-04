@@ -2252,7 +2252,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var peptideCount = 0;
             var linesRead = 0;
-            var chSplitChars = new[] { '\t' };
+            var splitChars = new[] { '\t' };
 
             var lastPeptide = string.Empty;
 
@@ -2268,7 +2268,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (linesRead <= 1 || string.IsNullOrEmpty(lineIn))
                     continue;
 
-                var splitLine = lineIn.Split(chSplitChars, 2);
+                var splitLine = lineIn.Split(splitChars, 2);
                 if (splitLine.Length == 0)
                     continue;
 

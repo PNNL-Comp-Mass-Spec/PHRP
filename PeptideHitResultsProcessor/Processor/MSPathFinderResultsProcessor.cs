@@ -257,16 +257,16 @@ namespace PeptideHitResultsProcessor.Processor
                             residueLocInPeptide = finalResidueLoc;
                         }
 
-                        var chMostRecentResidue = '-';
+                        var mostRecentResidue = '-';
 
                         if (residueLocInPeptide >= 1 && residueLocInPeptide <= finalResidueLoc)
                         {
-                            chMostRecentResidue = searchResult.PeptideCleanSequence[residueLocInPeptide - 1];
+                            mostRecentResidue = searchResult.PeptideCleanSequence[residueLocInPeptide - 1];
                         }
 
                         // Associate the mod with the given residue
                         searchResult.SearchResultAddModification(
-                            modDef.ModMassVal, chMostRecentResidue, residueLocInPeptide,
+                            modDef.ModMassVal, mostRecentResidue, residueLocInPeptide,
                             residueTerminusState, updateModOccurrenceCounts);
 
                         matchFound = true;
