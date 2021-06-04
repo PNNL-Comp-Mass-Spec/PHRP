@@ -1125,52 +1125,7 @@ namespace PeptideHitResultsProcessor.Processor
             IList<MSGFPlusParamFileModExtractor.ModInfo> modList,
             bool staticModPresent)
         {
-            if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary))
-            {
-                return 0;
-            }
-
-            double totalModMass = 0;
-
-            // Parse the dynamic modification info stored in ModificationSummary, e.g.
-            // "Acetyl (Protein N-term),Oxidation (M)" or "2 Oxidation (M)"
-
-            foreach (var modItem in searchResult.ModificationSummary.Split(','))
-            {
-                if (modItem.Equals("Unmodified", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // Convert the mod name to a mass value
-
-                // Check whether the mod name is preceded by an integer,
-                // for example the 2 in "2 Oxidation (M)"
-
-                var match = mModCountMatcher.Match(modItem);
-
-                string modName;
-                int modCount;
-
-                if (match.Success)
-                {
-                    modName = match.Groups["ModName"].Value;
-                    modCount = int.Parse(match.Groups["ModCount"].Value);
-                }
-                else
-                {
-                    modName = modItem;
-                    modCount = 1;
-                }
-
-                if (GetMaxQuantModMass(modList, modName, false, out var modMass))
-                {
-                    totalModMass += modCount * modMass;
-                    continue;
-                }
-
-                ReportError(string.Format(
-                    "Mod name '{0}' was not defined in the MaxQuant parameter file or in modifications.xml; " +
-                    "cannot determine mod mass", modName));
-            }
+            var totalModMass = GetDynamicModMass(searchResult, modList);
 
             if (!staticModPresent)
                 return totalModMass;
@@ -2048,6 +2003,64 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return baseNameByDatasetName;
+        }
+
+        /// <summary>
+        /// Sum up the mass values for dynamic mods defined for this peptide
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <param name="modList"></param>
+        /// <returns>Total dynamic mod mass, in Da</returns>
+        private double GetDynamicModMass(MaxQuantSearchResult searchResult, IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        {
+            if (string.IsNullOrWhiteSpace(searchResult.ModificationSummary))
+            {
+                return 0;
+            }
+
+            double dynamicModMass = 0;
+
+            // Parse the dynamic modification info stored in ModificationSummary, e.g.
+            // "Acetyl (Protein N-term),Oxidation (M)" or "2 Oxidation (M)"
+
+            foreach (var modItem in searchResult.ModificationSummary.Split(','))
+            {
+                if (modItem.Equals("Unmodified", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Convert the mod name to a mass value
+
+                // Check whether the mod name is preceded by an integer,
+                // for example the 2 in "2 Oxidation (M)"
+
+                var match = mModCountMatcher.Match(modItem);
+
+                string modName;
+                int modCount;
+
+                if (match.Success)
+                {
+                    modName = match.Groups["ModName"].Value;
+                    modCount = int.Parse(match.Groups["ModCount"].Value);
+                }
+                else
+                {
+                    modName = modItem;
+                    modCount = 1;
+                }
+
+                if (GetMaxQuantModMass(modList, modName, false, out var modMass))
+                {
+                    dynamicModMass += modCount * modMass;
+                    continue;
+                }
+
+                ReportError(string.Format(
+                    "Mod name '{0}' was not defined in the MaxQuant parameter file or in modifications.xml; " +
+                    "cannot determine mod mass", modName));
+            }
+
+            return dynamicModMass;
         }
 
         /// <summary>
