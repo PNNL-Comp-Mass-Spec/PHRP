@@ -202,13 +202,7 @@ namespace PHRPReader.Data
         /// </summary>
         /// <remarks>Retrieve full list of proteins using the Proteins property</remarks>
         // ReSharper disable once UnusedMember.Global
-        public string ProteinFirst
-        {
-            get
-            {
-                return mProteins.Count == 0 ? string.Empty : mProteins[0];
-            }
-        }
+        public string ProteinFirst => mProteins.Count == 0 ? string.Empty : mProteins[0];
 
         /// <summary>
         /// Uncharged monoisotopic mass of the precursor (observed mass based on observed m/z and charge)

@@ -3874,7 +3874,7 @@ namespace PeptideHitResultsProcessor.Processor
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
             {
                 // First sort on dataset name
-                var nameComparisonResult = string.Compare(x.DatasetName, y.DatasetName, StringComparison.Ordinal);
+                var nameComparisonResult = string.CompareOrdinal(x.DatasetName, y.DatasetName);
                 if (nameComparisonResult != 0)
                 {
                     return nameComparisonResult;
