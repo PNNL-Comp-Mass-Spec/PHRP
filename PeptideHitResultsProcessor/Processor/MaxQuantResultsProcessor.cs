@@ -1184,6 +1184,37 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Update the value in the list of structs
                 filteredSearchResults[i] = searchResult;
+
+                if (warningShown)
+                    continue;
+
+                // ReSharper disable once ConvertIfStatementToSwitchStatement
+                if (mPrecursorMassTolerance.IsPPM &&
+                    Math.Abs(peptideDeltaMassPpm) > mPrecursorMassTolerance.ToleranceLeft * 3)
+                {
+                    // Mass computed by PHRP differs from the precursor m/z by a larger amount than expected
+                    mPrecursorMassErrorWarningCount++;
+                    ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
+                        10,
+                        string.Format(
+                            "Precursor mass error computed by PHRP is more than {0:F0} ppm, indicating a possible error adding static and/or dynamic mods: {1:F2} ppm for {2}, Scan {3}",
+                            mPrecursorMassTolerance.ToleranceLeft * 3,
+                            peptideDeltaMassPpm,
+                            searchResult.Sequence,
+                            searchResult.Scan));
+                }
+                else if (!mPrecursorMassTolerance.IsPPM &&
+                         Math.Abs(precursorErrorDa) > mPrecursorMassTolerance.ToleranceLeft * 1.5)
+                {
+                    // Mass computed by PHRP differs from the precursor m/z by a larger amount than expected
+                    mPrecursorMassErrorWarningCount++;
+                    ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
+                        10,
+                        string.Format(
+                            "Precursor mass error computed by PHRP is more than {0:F0} Da, indicating a possible error adding static and/or dynamic mods: {1:F2} Da",
+                            mPrecursorMassTolerance.ToleranceLeft * 1.5,
+                            precursorErrorDa));
+                }
             }
         }
 
