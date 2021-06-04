@@ -1815,6 +1815,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     var maxQuantModName = internalIsobaricLabelNodes[0].Value;
                     var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modDef.IsobaricMod = true;
                     modList.Add(modDef);
                 }
 
@@ -1822,6 +1823,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     var maxQuantModName = terminalIsobaricLabelNodes[0].Value;
                     var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
+                    modDef.IsobaricMod = true;
                     modList.Add(modDef);
                 }
 
