@@ -562,9 +562,7 @@ namespace PeptideHitResultsProcessor.Processor
             double peptideMonoisotopicMass,
             bool adjustPrecursorMassForC13)
         {
-            var peptideDeltaMassCorrectedPpm = SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
-
-            return peptideDeltaMassCorrectedPpm;
+            return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, adjustPrecursorMassForC13);
         }
 
         private float ComputeDeltaNormScore(float currentScore, float nextScore, float valueIfCurrentScoreZero)
@@ -1234,7 +1232,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                             var precursorErrorDa = precursorMonoMass - peptideMonoisotopicMass;
 
-                            var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, true);
+                            var peptideDeltaMassCorrectedPpm =
+                                ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, true);
 
                             udtSearchResult.DelMPPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
                         }

@@ -1064,7 +1064,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Compute the original value for the precursor monoisotopic mass
             var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
 
-            return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
+            return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, adjustPrecursorMassForC13);
         }
 
         /// <summary>

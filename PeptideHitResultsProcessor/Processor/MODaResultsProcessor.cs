@@ -1080,7 +1080,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.DelM = StringUtilities.MassErrorToString(delM);
 
                     var peptideDeltaMassCorrectedPpm =
-                        SearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
+                        SearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, peptideMonoMassMODa, true);
 
                     udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
                 }

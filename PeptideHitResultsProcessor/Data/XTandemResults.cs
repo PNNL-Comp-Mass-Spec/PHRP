@@ -134,7 +134,7 @@ namespace PeptideHitResultsProcessor.Data
                 }
 
                 const bool adjustPrecursorMassForC13 = true;
-                PeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(delM, precursorMonoMass, adjustPrecursorMassForC13, PeptideMonoisotopicMass);
+                PeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(delM, precursorMonoMass, PeptideMonoisotopicMass, adjustPrecursorMassForC13);
             }
             else
             {

@@ -389,14 +389,14 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <param name="delM">Delta mass, in Da</param>
         /// <param name="precursorMonoMass">Precursor monoisotopic mass</param>
-        /// <param name="adjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
         /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="adjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
         /// <returns>Delta mass, in ppm</returns>
         public static double ComputeDelMCorrectedPPM(
             double delM,
             double precursorMonoMass,
-            bool adjustPrecursorMassForC13,
-            double peptideMonoisotopicMass)
+            double peptideMonoisotopicMass,
+            bool adjustPrecursorMassForC13)
         {
             var correctionCount = 0;
 
