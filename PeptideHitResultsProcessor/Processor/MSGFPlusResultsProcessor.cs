@@ -237,12 +237,14 @@ namespace PeptideHitResultsProcessor.Processor
             public char CTerm;
         }
 
-
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
-        private ParentMassTolerance mParentMassToleranceInfo;
-
         private int mPrecursorMassErrorWarningCount;
+
+        /// <summary>
+        /// Precursor match tolerance read from the MS-GF+ parameter file
+        /// </summary>
+        private PrecursorMassTolerance mPrecursorMassTolerance;
 
         /// <summary>
         /// Looks for numeric mods in MS-GF+ results
@@ -1110,14 +1112,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
-        private ParentMassTolerance ExtractParentMassToleranceFromParamFile(SearchEngineParameters searchEngineParams)
+        private PrecursorMassTolerance ExtractParentMassToleranceFromParamFile(SearchEngineParameters searchEngineParams)
         {
-            var parentMassToleranceInfo = new ParentMassTolerance();
-
             try
             {
-                parentMassToleranceInfo.Clear();
-
                 if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME, out var value))
                 {
                     if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
@@ -1129,7 +1127,7 @@ namespace PeptideHitResultsProcessor.Processor
                                           MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM,
                                           Path.GetFileName(searchEngineParams.SearchEngineParamFilePath)));
 
-                        return parentMassToleranceInfo;
+                        return new PrecursorMassTolerance();
                     }
                 }
 
@@ -1138,45 +1136,37 @@ namespace PeptideHitResultsProcessor.Processor
                 // Split the line on commas
                 var splitLine = value.Split(',');
 
-                double tolerance;
-                bool isPPM;
-
-                if (splitLine.Length == 1)
+                // ReSharper disable once ConvertIfStatementToSwitchStatement
+                if (splitLine.Length == 1 && ParseParentMassTolerance(splitLine[0], out var tolerance, out var isPPM))
                 {
-                    if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
-                    {
-                        parentMassToleranceInfo.ToleranceLeft = tolerance;
-                        parentMassToleranceInfo.ToleranceRight = tolerance;
-                        parentMassToleranceInfo.IsPPM = isPPM;
-                    }
-                }
-                else if (splitLine.Length > 1)
-                {
-                    if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
-                    {
-                        parentMassToleranceInfo.ToleranceLeft = tolerance;
-                        parentMassToleranceInfo.IsPPM = isPPM;
-
-                        if (ParseParentMassTolerance(splitLine[1], out tolerance, out isPPM))
-                        {
-                            parentMassToleranceInfo.ToleranceRight = tolerance;
-                        }
-                        else
-                        {
-                            parentMassToleranceInfo.ToleranceRight = parentMassToleranceInfo.ToleranceLeft;
-                        }
-                    }
+                    return new PrecursorMassTolerance(tolerance, isPPM);
                 }
 
-                Console.WriteLine();
-                return parentMassToleranceInfo;
+                if (splitLine.Length <= 1)
+                {
+                    return new PrecursorMassTolerance();
+                }
+
+                // ReSharper disable once InvertIf
+                if (ParseParentMassTolerance(splitLine[0], out var leftTolerance, out var leftToleranceIsPPM))
+                {
+                    // ReSharper disable once ConvertIfStatementToReturnStatement
+                    if (ParseParentMassTolerance(splitLine[1], out var rightTolerance, out _))
+                    {
+                        return new PrecursorMassTolerance(leftTolerance, rightTolerance, leftToleranceIsPPM);
+                    }
+
+                    return new PrecursorMassTolerance(leftTolerance, leftTolerance, leftToleranceIsPPM);
+                }
+
+                return new PrecursorMassTolerance();
             }
             catch (Exception ex)
             {
                 SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MS-GF+ parameter file ({0}): {1}",
                     Path.GetFileName(searchEngineParams.SearchEngineParamFilePath), ex.Message), ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
-                return parentMassToleranceInfo;
+                return new PrecursorMassTolerance();
             }
         }
 
@@ -1357,7 +1347,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Parse the PrecursorMassTolerance setting
-            mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(searchEngineParams);
+            mPrecursorMassTolerance = ExtractParentMassToleranceFromParamFile(searchEngineParams);
 
             // Parse the ChargeCarrierMass setting
             if (MSGFPlusSynFileReader.GetCustomChargeCarrierMass(searchEngineParams, out var customChargeCarrierMass))
@@ -1786,11 +1776,11 @@ namespace PeptideHitResultsProcessor.Processor
                         // Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
                         // In other words, it may not be the actual m/z selected for fragmentation.
 
-                        if (double.TryParse(udtSearchResult.PMErrorPPM, out var pMErrorPPM))
+                        if (double.TryParse(udtSearchResult.PMErrorPPM, out var parentMassErrorPPM))
                         {
-                            if (mParentMassToleranceInfo.IsPPM &&
-                                (pMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 ||
-                                 pMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5))
+                            if (mPrecursorMassTolerance.IsPPM &&
+                                (parentMassErrorPPM < -mPrecursorMassTolerance.ToleranceLeft * 1.5 ||
+                                 parentMassErrorPPM > mPrecursorMassTolerance.ToleranceRight * 1.5))
                             {
                                 // PPM error computed by MS-GF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MS-GF+
                                 mPrecursorMassErrorWarningCount++;
@@ -1798,8 +1788,8 @@ namespace PeptideHitResultsProcessor.Processor
                                                     10,
                                                     string.Format("Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: {0} vs. {1:F0}ppm,{2:F0}ppm",
                                                     udtSearchResult.PMErrorPPM,
-                                                    mParentMassToleranceInfo.ToleranceLeft,
-                                                    mParentMassToleranceInfo.ToleranceRight));
+                                                    mPrecursorMassTolerance.ToleranceLeft,
+                                                    mPrecursorMassTolerance.ToleranceRight));
 
                                 var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, udtSearchResult.ChargeNum, 0);
 
