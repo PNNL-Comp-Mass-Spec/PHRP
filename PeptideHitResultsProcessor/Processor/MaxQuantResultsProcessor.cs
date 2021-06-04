@@ -2253,47 +2253,86 @@ namespace PeptideHitResultsProcessor.Processor
 
                 foreach (var residueSymbol in modItem.Residues)
                 {
-                    if (residueSymbol == '-')
+                    switch (residueSymbol)
                     {
-                        // Apply this static mod to all residues
-                        // This is most likely invalid
-                        for (var residueNumber = 1; residueNumber <= cleanSequence.Length; residueNumber++)
-                        {
-                            foreach (var item in mResiduePositions)
+                        case '-':
+                            // Apply this static mod to all residues
+                            // This is most likely invalid
+                            for (var residueNumber = 1; residueNumber <= cleanSequence.Length; residueNumber++)
                             {
-                                foreach (var residuePosition in item.Value)
+                                foreach (var item in mResiduePositions)
                                 {
-                                    var terminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, residuePosition);
-
-                                    staticModResidues.Add(new ResidueModificationInfo
+                                    foreach (var residuePosition in item.Value)
                                     {
-                                        Residue = item.Key,
-                                        ResidueNumber = residuePosition,
-                                        ResidueTerminusState = terminusState,
-                                        ModInfo = modItem
-                                    });
+                                        var terminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue,
+                                            residuePosition);
+
+                                        staticModResidues.Add(new ResidueModificationInfo
+                                        {
+                                            Residue = item.Key,
+                                            ResidueNumber = residuePosition,
+                                            ResidueTerminusState = terminusState,
+                                            ModInfo = modItem
+                                        });
+                                    }
                                 }
                             }
-                        }
 
-                        continue;
-                    }
+                            break;
 
-                    if (!mResiduePositions.TryGetValue(residueSymbol, out var residuePositions))
-                        continue;
+                        case '<' or '[':
+                            // N-terminal peptide mod or N-terminal protein mod
+                            var nTerminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, 1);
 
-                    // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-                    foreach (var residuePosition in residuePositions)
-                    {
-                        var terminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, residuePosition);
+                            if (residueSymbol == '[' && nTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus)
+                                break;
 
-                        staticModResidues.Add(new ResidueModificationInfo
-                        {
-                            Residue = residueSymbol,
-                            ResidueNumber = residuePosition,
-                            ResidueTerminusState = terminusState,
-                            ModInfo = modItem
-                        });
+                            staticModResidues.Add(new ResidueModificationInfo
+                            {
+                                Residue = residueSymbol,
+                                ResidueNumber = 1,
+                                ResidueTerminusState = nTerminusState,
+                                ModInfo = modItem
+                            });
+
+                            break;
+
+                        case '>' or ']':
+                            // C-terminal peptide mod or N-terminal protein mod
+                            var cTerminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, cleanSequence.Length);
+
+                            if (residueSymbol == ']' && cTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus)
+                                break;
+
+                            staticModResidues.Add(new ResidueModificationInfo
+                            {
+                                Residue = residueSymbol,
+                                ResidueNumber = cleanSequence.Length,
+                                ResidueTerminusState = cTerminusState,
+                                ModInfo = modItem
+                            });
+
+                            break;
+
+                        default:
+                            if (!mResiduePositions.TryGetValue(residueSymbol, out var residuePositions))
+                                break;
+
+                            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+                            foreach (var residuePosition in residuePositions)
+                            {
+                                var terminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, residuePosition);
+
+                                staticModResidues.Add(new ResidueModificationInfo
+                                {
+                                    Residue = residueSymbol,
+                                    ResidueNumber = residuePosition,
+                                    ResidueTerminusState = terminusState,
+                                    ModInfo = modItem
+                                });
+                            }
+
+                            break;
                     }
                 }
             }
