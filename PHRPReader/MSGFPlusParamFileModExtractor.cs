@@ -427,9 +427,6 @@ namespace PHRPReader
                     switch (modSpecFormat)
                     {
                         case ModSpecFormats.MSGFPlusAndMSPathFinder:
-                            minimumModDefParts = 5;
-                            break;
-
                         case ModSpecFormats.TopPIC:
                             minimumModDefParts = 5;
                             break;
