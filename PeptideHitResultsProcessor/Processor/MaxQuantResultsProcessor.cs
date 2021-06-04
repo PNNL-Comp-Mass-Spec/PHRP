@@ -1083,10 +1083,16 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="filteredSearchResults">Search results</param>
         /// <param name="precursorsByDataset">Keys are dataset names, values are dictionaries of precursor m/z by scan number</param>
+        /// <param name="modList"></param>
         private void ComputeObservedMassErrors(
             IList<MaxQuantSearchResult> filteredSearchResults,
-            IReadOnlyDictionary<string, Dictionary<int, double>> precursorsByDataset)
+            IReadOnlyDictionary<string, Dictionary<int, double>> precursorsByDataset,
+            IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
+            mPrecursorMassErrorWarningCount = 0;
+
+            var isobaricModPresent = modList.Any(modItem => modItem.IsobaricMod);
+
             for (var i = 0; i < filteredSearchResults.Count; i++)
             {
                 var searchResult = filteredSearchResults[i];
@@ -1100,6 +1106,46 @@ namespace PeptideHitResultsProcessor.Processor
                 var observedPrecursorMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMz, searchResult.ChargeNum, 0);
 
                 var deltaMassDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
+                var warningShown = false;
+
+                if (deltaMassDa < -15 && isobaricModPresent)
+                {
+                    // When Isobaric mods are present, MaxQuant will sometimes treat one of them as optional
+                    foreach (var modItem in modList)
+                    {
+                        if (!modItem.IsobaricMod)
+                            continue;
+
+                        var adjustedDeltaMassAbs = Math.Abs(deltaMassDa + modItem.ModMassVal);
+
+                        if (adjustedDeltaMassAbs < 0.1 || Math.Abs(adjustedDeltaMassAbs - 1) < 0.1)
+                        {
+                            // The adjusted delta mass value is either close to 0 or close to 1
+                            // Remove one instance of this static isobaric mod
+
+                            searchResult.CalculatedMonoMassPHRP -= modItem.ModMassVal;
+
+                            // Update the delta mass
+                            deltaMassDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
+                            break;
+                        }
+                    }
+
+                    if (deltaMassDa < -15)
+                    {
+                        mPrecursorMassErrorWarningCount++;
+                        ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
+                            10,
+                            string.Format(
+                                "Peptide mass computed by PHRP differs from the precursor mass by more than {0} Da, indicating an error adding static and/or dynamic mods: {1:F2} Da for {2}, Scan {3}",
+                                15,
+                                deltaMassDa,
+                                searchResult.Sequence,
+                                searchResult.Scan));
+
+                        warningShown = true;
+                    }
+                }
 
                 var peptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(deltaMassDa, precursorMz,
                     searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP,
@@ -1597,7 +1643,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (precursorsByDataset.Count > 0)
                 {
-                    ComputeObservedMassErrors(filteredSearchResults, precursorsByDataset);
+                    ComputeObservedMassErrors(filteredSearchResults, precursorsByDataset, modList);
                 }
 
                 // The synopsis file name will be of the form DatasetName_maxq_syn.txt
