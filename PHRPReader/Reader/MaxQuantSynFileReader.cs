@@ -418,6 +418,7 @@ namespace PHRPReader.Reader
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PeptideID));
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ModPeptideID));
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.EvidenceID));
+                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.QValue));
 
                     if (psm.Proteins.Count == 0)
                     {
