@@ -366,7 +366,10 @@ namespace PHRPReader.Reader
                     {
                         foreach (var protein in proteinNames.Split(';'))
                         {
-                            psm.AddProtein(protein);
+                            if (string.IsNullOrWhiteSpace(protein))
+                                continue;
+
+                            psm.AddProtein(protein.Trim());
                         }
                     }
 
@@ -415,6 +418,16 @@ namespace PHRPReader.Reader
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PeptideID));
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ModPeptideID));
                     AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.EvidenceID));
+
+                    if (psm.Proteins.Count == 0)
+                    {
+                        // Add the leading razor protein to the protein list
+                        if (psm.TryGetScore(GetColumnNameByID(MaxQuantSynFileColumns.LeadingRazorProtein), out var leadingRazorProtein) &&
+                            !string.IsNullOrWhiteSpace(leadingRazorProtein))
+                        {
+                            psm.AddProtein(leadingRazorProtein.Trim());
+                        }
+                    }
                 }
             }
             catch (Exception ex)
