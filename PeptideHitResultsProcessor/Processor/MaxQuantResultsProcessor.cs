@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "June 3, 2021";
+            FileDate = "June 4, 2021";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
