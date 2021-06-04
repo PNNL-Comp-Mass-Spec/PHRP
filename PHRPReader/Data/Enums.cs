@@ -171,7 +171,15 @@ namespace PHRPReader.Data
         /// Protein names
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Semicolon separated list
+        /// </para>
+        /// <para>
+        /// If the peptide is from a reverse-hit protein, the Proteins column will be empty in the _syn.txt file,
+        /// and the decoy protein name will be in the LeadingRazorProtein column.
+        /// When the MaxQuantSynFileReader class reads the _syn.txt file, it adds the LeadingRazorProtein name
+        /// to the list of protein names, if the Proteins column is empty.
+        /// </para>
         /// </remarks>
         Proteins = 16,
 

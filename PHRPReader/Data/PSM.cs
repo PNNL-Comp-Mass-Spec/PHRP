@@ -211,7 +211,7 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
+        /// Uncharged monoisotopic mass of the precursor (observed mass based on observed m/z and charge)
         /// </summary>
         /// <remarks>This mass is based on the mass or m/z value reported by the search engine</remarks>
         public double PrecursorNeutralMass { get; set; }

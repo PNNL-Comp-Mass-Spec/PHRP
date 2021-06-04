@@ -30,6 +30,9 @@ namespace PeptideHitResultsProcessor.Data
 
         public string SpecIndex { get; set; }
 
+        /// <summary>
+        /// Precursor ion m/z (observed value), as reported by MS-GF+
+        /// </summary>
         public string PrecursorMZ { get; set; }
 
         public string MSGFPlusComputedDelM { get; set; }

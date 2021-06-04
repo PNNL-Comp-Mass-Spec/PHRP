@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MaxQuantResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, MaxQuant, Orbitrap, terminii, tryptic
+        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, MaxQuant, Orbitrap, plex, terminii, tryptic
 
         /// <summary>
         /// Dataset name
@@ -42,11 +42,12 @@ namespace PeptideHitResultsProcessor.Data
         public string SpecIndex { get; set; }
 
         /// <summary>
-        /// Precursor ion m/z (theoretical value, not observed value)
+        /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
         /// </summary>
         /// <remarks>
         /// <para>
         /// This is the theoretical m/z of the first isotope of the isotopic distribution of the parent ion
+        /// It does not account for isobaric mods
         /// </para>
         /// <para>
         /// For example, given a 3+ parent ion whose isotopic distribution in the MS1 spectrum
@@ -65,9 +66,26 @@ namespace PeptideHitResultsProcessor.Data
         /// "Full ms2 755.74@cid35.00"
         /// </para>
         /// <para>
-        /// MS-GF+ reports the precursor m/z as 755.40515, which is the observed m/z value
+        /// MS-GF+ reports the precursor m/z as 755.40515, which is the observed m/z value (after correction by MZ Refinery)
         /// MaxQuant reports the PrecursorMZ as 755.39497, which is the theoretical value based on the identified peptide (IINIGSVVGTMGNAGQVNYSAAK)
-        /// MaxQuant reports the PrecursorMZ as 755.39497, which is the theoretical value based on the identified peptide (IINIGSVVGTMGNAGQVNYSAAK)
+        /// </para>
+        /// <para>
+        /// Isobaric Label Example: given a 3+ parent ion whose isotopic distribution in the MS1 spectrum
+        /// has ions at 902.844, 903.176, 903.512, and 903.843 m/z, the most intense ion is the 903.17 ion.
+        /// The instrument might then isolate that ion for fragmentation, giving a spectrum label for the MS2 spectrum of
+        /// "Full ms2 903.18@hcd28.00"
+        /// </para>
+        /// <para>
+        /// MS-GF+ reports the precursor m/z as 903.17218, which is the observed m/z value (after correction by MZ Refinery)
+        /// MaxQuant reports the PrecursorMZ as 750.0655, which is the theoretical value based on the monoisotopic mass of the peptide (ILSLLEGQKIAFGGETDEATR),
+        /// not counting the isobaric 6-plex TMT mod that is present at both the N-terminus and on the internal K residue
+        /// Mono mass (without actual mods) = 2247.174619
+        /// Charge = 3
+        /// Reported m/z = (2247.174619 / 3) + 1.007276467, where 1.00727 is the charge carrier mass (one proton)
+        /// </para>
+        /// <para>
+        /// Correct mono mass = 2705.5004
+        /// Correct m/z calculation = (2705.5004 + 3 * 1.007276467) / 3 = 902.8407495
         /// </para>
         /// </remarks>
         public string PrecursorMZ { get; set; }

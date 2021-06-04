@@ -415,10 +415,11 @@ namespace PeptideHitResultsProcessor.Processor
             public string IsotopeIndex;
 
             /// <summary>
-            /// Precursor ion m/z (theoretical value, not observed value)
+            /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
             /// </summary>
             /// <remarks>
             /// This is the theoretical m/z of the first isotope of the isotopic distribution of the parent ion
+            /// It does not account for isobaric mods
             /// For more information, see class <see cref="MaxQuantResults"/>
             /// </remarks>
             public string PrecursorMZ;
@@ -431,11 +432,17 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MaxQuant
             /// </summary>
+            /// <remarks>
+            /// This mass will be overridden by PHRP if Isobaric mods were used
+            /// </remarks>
             public string CalculatedMonoMass;
 
             /// <summary>
             /// Numeric value of CalculatedMonoMass
             /// </summary>
+            /// <remarks>
+            /// This mass will be overridden by PHRP if Isobaric mods were used
+            /// </remarks>
             public double CalculatedMonoMassValue;
 
             /// <summary>
@@ -1714,16 +1721,22 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Open the parameters.txt file and look for static mod names
+        /// </summary>
+        /// <param name="sourceFile"></param>
+        /// <param name="modList"></param>
+        /// <remarks>
+        /// The parameters.txt file does not list dynamic mods
+        /// It also does not list isobaric mods (like TMT or iTRAQ)
+        /// </remarks>
+        /// <returns>True if success, false if an error</returns>
         private bool ExtractModInfoFromTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
             modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
 
             try
             {
-                // Open the parameters.txt file and look for static mod names
-                // The parameters.txt file does not list dynamic mods
-                // It also does not list reporter ion based mods (e.g. TMT)
-
                 OnStatusEvent("Reading the MaxQuant parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
 
                 using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -1827,7 +1840,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
                 var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
 
-                // Check for reporter ion mods, e.g. 6-plex or 10-plex TMT
+                // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
                 var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
                 var terminalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
 
@@ -2860,6 +2873,9 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out searchResult.ScanEventNumber);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out searchResult.IsotopeIndex);
 
+                // Note that this is the theoretical value for the precursor ion m/z
+                // It is not the observed precursor ion m/z (i.e., it is not the parent m/z isolated when the MS/MS spectrum was acquired)
+                // Furthermore, it does not account for the mass of any isobaric mods present
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MZ], out searchResult.PrecursorMZ);
 
                 // Store the monoisotopic MH value in .MH
