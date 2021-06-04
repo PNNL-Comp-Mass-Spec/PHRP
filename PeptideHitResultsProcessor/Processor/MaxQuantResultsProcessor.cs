@@ -2189,11 +2189,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                             break;
 
-                        case '<' or '[':
+                        case AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
                             // N-terminal peptide mod or N-terminal protein mod
                             var nTerminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, 1);
 
-                            if (residueSymbol == '[' && nTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus)
+                            if (residueSymbol == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS &&
+                                nTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus)
                                 break;
 
                             staticModResidues.Add(new ResidueModificationInfo
@@ -2206,11 +2207,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                             break;
 
-                        case '>' or ']':
+                        case AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
                             // C-terminal peptide mod or N-terminal protein mod
                             var cTerminusState = GetResidueTerminusState(cleanSequence.Length, prefixResidue, suffixResidue, cleanSequence.Length);
 
-                            if (residueSymbol == ']' && cTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus)
+                            if (residueSymbol == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS &&
+                                cTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus)
                                 break;
 
                             staticModResidues.Add(new ResidueModificationInfo
