@@ -941,8 +941,6 @@ namespace PHRPReader
         /// <param name="currentMass"></param>
         public static double PPMToMass(double ppmToConvert, double currentMass)
         {
-            // Converts ppmToConvert to a mass value, which is dependent on currentMass
-
             return ppmToConvert / 1000000.0 * currentMass;
         }
 

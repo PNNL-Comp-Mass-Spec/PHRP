@@ -239,6 +239,10 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
+        /// <summary>
+        /// This variable keeps track of the number of PSMs whose computed monoisotopic mass
+        /// does not agree with the monoisotopic mass computed from the precursor m/z, within 1.5x of the match tolerance
+        /// </summary>
         private int mPrecursorMassErrorWarningCount;
 
         /// <summary>
@@ -566,8 +570,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
-        /// <param name="peptideMonoisotopicMass"></param>
-        /// <param name="adjustPrecursorMassForC13">Peptide's monoisotopic mass</param>
+        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="adjustPrecursorMassForC13"></param>
         /// <returns>DelM, in ppm</returns>
         /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         private double ComputeDelMCorrectedPPM(
@@ -577,7 +581,7 @@ namespace PeptideHitResultsProcessor.Processor
             double peptideMonoisotopicMass,
             bool adjustPrecursorMassForC13)
         {
-            // Compute the original value for the precursor monoisotopic mass
+            // Compute the observed precursor monoisotopic mass
             var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
 
             return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, adjustPrecursorMassForC13);

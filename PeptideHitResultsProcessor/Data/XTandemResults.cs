@@ -118,7 +118,7 @@ namespace PeptideHitResultsProcessor.Data
                 // Negate delM so that it represents observed - theoretical
                 delM = -delM;
 
-                // Compute the original value for the precursor monoisotopic mass
+                // Compute the observed precursor monoisotopic mass
                 if (double.TryParse(ParentIonMH, out var parentIonMH))
                 {
                     precursorMonoMass = parentIonMH - PeptideMassCalculator.MASS_PROTON;

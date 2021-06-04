@@ -1055,8 +1055,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
-        /// <param name="peptideMonoisotopicMass"></param>
-        /// <param name="adjustPrecursorMassForC13">Peptide's monoisotopic mass</param>
+        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="adjustPrecursorMassForC13">When true, adjust for correct for C13 isotopic selection errors</param>
         /// <returns>DelM, in ppm</returns>
         /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         private double ComputeDelMCorrectedPPM(
@@ -1066,7 +1066,7 @@ namespace PeptideHitResultsProcessor.Processor
             double peptideMonoisotopicMass,
             bool adjustPrecursorMassForC13)
         {
-            // Compute the original value for the precursor monoisotopic mass
+            // Compute the observed precursor monoisotopic mass
             var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
 
             return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, adjustPrecursorMassForC13);
@@ -3619,7 +3619,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ProcessFile (1)", ex);
+                SetErrorMessage("Error in MaxQuantResultsProcessor.ProcessFile (1)", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 

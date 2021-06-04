@@ -6,6 +6,14 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "Required for IDisposable", Scope = "member", Target = "~F:PHRPReader.clsPHRPReader.mDisposedValue")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "member", Target = "~P:PHRPReader.clsPHRPReader.CanRead")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.clsPHRPReader")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.Data.ExtendedScanStatsFileColumns")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.Data.MODaSynFileColumns")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.Data.MSGFDBSynFileColumns")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.Reader.PHRPModSummaryReader")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.Reader.PHRPSeqMapReader")]
+[assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "Required", Scope = "type", Target = "~T:PHRPReader.ReaderFactory")]
 [assembly: SuppressMessage("Design", "RCS1075:Avoid empty catch clause that catches System.Exception.", Justification = "Allowed", Scope = "member", Target = "~M:PHRPReader.Data.PeptideModificationContainer.LookupMassCorrectionTagByMass(System.Double,System.Byte,System.Boolean,System.Byte)~System.String")]
 [assembly: SuppressMessage("Design", "RCS1075:Avoid empty catch clause that catches System.Exception.", Justification = "Allowed", Scope = "member", Target = "~M:PHRPReader.Data.PeptideModificationContainer.SetDefaultMassCorrectionTags")]
 [assembly: SuppressMessage("Design", "RCS1075:Avoid empty catch clause that catches System.Exception.", Justification = "Allowed", Scope = "member", Target = "~M:PHRPReader.Data.PeptideModificationContainer.StoreMassCorrectionTag(System.String,System.Double)")]
@@ -29,6 +37,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Argument included for symmetry with other SynFileReader classes", Scope = "member", Target = "~M:PHRPReader.Reader.MODPlusSynFileReader.GetPHRPFirstHitsFileName(System.String)~System.String")]
 [assembly: SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Argument included for symmetry with other SynFileReader classes", Scope = "member", Target = "~M:PHRPReader.Reader.MSPathFinderSynFileReader.GetPHRPFirstHitsFileName(System.String)~System.String")]
 [assembly: SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Argument included for symmetry with other SynFileReader classes", Scope = "member", Target = "~M:PHRPReader.Reader.XTandemSynFileReader.GetPHRPFirstHitsFileName(System.String)~System.String")]
+[assembly: SuppressMessage("Style", "IDE0066:Convert switch statement to expression", Justification = "Leave as-is for readability", Scope = "member", Target = "~M:PHRPReader.MSGFPlusParamFileModExtractor.ParseModSpecMSGFPlus(System.String,System.Collections.Generic.IReadOnlyList{System.String},System.Int32@,PHRPReader.MSGFPlusParamFileModExtractor.ModInfo@)~System.Boolean")]
 [assembly: SuppressMessage("Style", "IDE0066:Convert switch statement to expression", Justification = "Leave as-is", Scope = "member", Target = "~M:PHRPReader.Data.PeptideModificationContainer.AddUnknownModification(System.Double,PHRPReader.Data.ModificationDefinition.ResidueModificationType,System.Char,PHRPReader.Data.AminoAcidModInfo.ResidueTerminusState,System.Boolean,System.Boolean,System.Char,System.Byte,System.Byte)~PHRPReader.Data.ModificationDefinition")]
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Legacy name", Scope = "type", Target = "~T:PHRPReader.clsPHRPReader")]
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Legacy name", Scope = "type", Target = "~T:PHRPReader.clsPHRPStartupOptions")]
