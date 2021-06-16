@@ -792,61 +792,86 @@ namespace PHRPReader.Data
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
-                for (var index = 0; index <= Modifications.Count - 1; index++)
+                // On the first iteration, ignore terminal peptide and terminal protein mods
+                // On the second iteration, match terminal peptide and terminal protein mods
+
+                for (var modTypeIteration = 0; modTypeIteration < 2; modTypeIteration++)
                 {
-                    if (Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod &&
-                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.StaticMod &&
-                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.UnknownType ||
-                        Modifications[index].TargetResidues.Length == 0)
+                    for (var index = 0; index <= Modifications.Count - 1; index++)
                     {
-                        continue;
-                    }
+                        if (Modifications[index].TargetResidues.Length == 0)
+                            continue;
 
-                    // Absolute value of the mass difference
-                    var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
-
-                    if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
-                        continue;
-
-                    // Matching mass found
-                    // Now see if .TargetResidues contains chTargetResidue
-                    if (Modifications[index].TargetResiduesContain(chTargetResidue))
-                    {
-                        existingModFound = true;
-                    }
-
-                    if (!existingModFound && residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
-                    {
-                        switch (residueTerminusState)
+                        // ReSharper disable once ConvertIfStatementToSwitchStatement
+                        if (modTypeIteration == 0 &&
+                            Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod &&
+                            Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.StaticMod &&
+                            Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.UnknownType)
                         {
-                            case AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus:
-                            case AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus:
-                            case AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus:
-                                if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
-                                {
-                                    existingModFound = true;
-                                }
-                                break;
-                            case AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus:
-                            case AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus:
-                                if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
-                                {
-                                    existingModFound = true;
-                                }
-                                break;
+                            continue;
+                        }
+
+                        if (modTypeIteration == 1 &&
+                            Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod &&
+                            Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod)
+                        {
+                            continue;
+                        }
+
+                        // Absolute value of the mass difference
+                        var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
+
+                        if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
+                            continue;
+
+                        // Matching mass found
+                        // Now see if .TargetResidues contains chTargetResidue
+                        if (Modifications[index].TargetResiduesContain(chTargetResidue))
+                        {
+                            existingModFound = true;
+                        }
+
+                        if (!existingModFound && residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
+                        {
+                            // Note that MaxQuant allows N-terminal protein mods to occur at either the true N-terminal residue, or one residue to the right
+                            // For this reason, the _ModSummary.txt file will have entries like this:
+                            // Symbol  Mass       TargetResidues  ModType  MassCorrectionTag  Occurrence_Count
+                            // *       42.010567  [AMTSC          D        Acetyl             70
+
+                            switch (residueTerminusState)
+                            {
+                                case AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus:
+                                case AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus:
+                                case AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus:
+                                    if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                    {
+                                        existingModFound = true;
+                                    }
+
+                                    break;
+
+                                case AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus:
+                                case AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus:
+                                    if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                    {
+                                        existingModFound = true;
+                                    }
+
+                                    break;
+                            }
+                        }
+
+                        if (existingModFound)
+                        {
+                            // Match found; add to the list of candidate mods
+                            matchedMods.Add(new KeyValuePair<double, ModificationDefinition>(deltaMassAbs, Modifications[index]));
                         }
                     }
 
-                    if (existingModFound)
+                    if (matchedMods.Count > 0)
                     {
-                        // Match found; add to the list of candidate mods
-                        matchedMods.Add(new KeyValuePair<double, ModificationDefinition>(deltaMassAbs, Modifications[index]));
+                        return FindClosestMatchedMod(matchedMods, chTargetResidue);
                     }
-                }
-
-                if (matchedMods.Count > 0)
-                {
-                    return FindClosestMatchedMod(matchedMods, chTargetResidue);
                 }
             }
 
