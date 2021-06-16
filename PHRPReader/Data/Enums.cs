@@ -570,11 +570,11 @@ namespace PHRPReader.Data
         /// </summary>
         SpecEValue = 14,
 
-        /// <summary>
-        /// Obsolete name for Spec E-Value (MS-GF+) or SpecProb (MSGFDB)
-        /// </summary>
-        [Obsolete("Use .SpecEValue")]
-        SpecProb_EValue = SpecEValue,
+        // <summary>
+        // Obsolete name for Spec E-Value (MS-GF+) or SpecProb (MSGFDB)
+        // </summary>
+        // [Obsolete("Use .SpecEValue")]
+        // SpecProb_EValue = SpecEValue,
 
         /// <summary>
         /// Ranked score
@@ -584,22 +584,22 @@ namespace PHRPReader.Data
         /// </remarks>
         RankSpecEValue = 15,
 
-        /// <summary>
-        /// Obsolete name for Rank Spec E-Value (MS-GF+) or Rank SpecProb (MSGFDB)
-        /// </summary>
-        [Obsolete("Use .RankSpecEValue")]
-        RankSpecProb = RankSpecEValue,
+        // <summary>
+        // Obsolete name for Rank Spec E-Value (MS-GF+) or Rank SpecProb (MSGFDB)
+        // </summary>
+        // [Obsolete("Use .RankSpecEValue")]
+        // RankSpecProb = RankSpecEValue,
 
         /// <summary>
         /// E-Value
         /// </summary>
         EValue = 16,
 
-        /// <summary>
-        /// Obsolete name for E-Value (MS-GF+) or P-Value (MSGFDB)
-        /// </summary>
-        [Obsolete("Use .EValue")]
-        PValue_EValue = EValue,
+        // <summary>
+        // Obsolete name for E-Value (MS-GF+) or P-Value (MSGFDB)
+        // </summary>
+        // [Obsolete("Use .EValue")]
+        // PValue_EValue = EValue,
 
         /// <summary>
         /// Q-Value
@@ -609,11 +609,11 @@ namespace PHRPReader.Data
         /// </remarks>
         QValue = 17,
 
-        /// <summary>
-        /// Obsolete name for Q-Value (MS-GF+) or FDR (MSGFDB)
-        /// </summary>
-        [Obsolete("Use .QValue")]
-        FDR_QValue = QValue,
+        // <summary>
+        // Obsolete name for Q-Value (MS-GF+) or FDR (MSGFDB)
+        // </summary>
+        // [Obsolete("Use .QValue")]
+        // FDR_QValue = QValue,
 
         /// <summary>
         /// Peptide Q-Value
@@ -623,11 +623,11 @@ namespace PHRPReader.Data
         /// </remarks>
         PepQValue = 18,
 
-        /// <summary>
-        /// Obsolete name for PepQValue (MS-GF+) or PepFDR (MSGFDB)
-        /// </summary>
-        [Obsolete("Use .PepQValue")]
-        PepFDR_PepQValue = PepQValue,
+        // <summary>
+        // Obsolete name for PepQValue (MS-GF+) or PepFDR (MSGFDB)
+        // </summary>
+        // [Obsolete("Use .PepQValue")]
+        // PepFDR_PepQValue = PepQValue,
 
         /// <summary>
         /// EFDR
