@@ -685,7 +685,7 @@ namespace PHRPReader.Data
                             }
                         }
 
-                        if (!existingModFound && (residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
+                        if (!existingModFound && residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus)
                         {
                             // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -694,7 +694,7 @@ namespace PHRPReader.Data
                             }
                         }
 
-                        if (!existingModFound && (residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus))
+                        if (!existingModFound && residueTerminusState is AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus or AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus)
                         {
                             // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -855,7 +855,7 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 // ReSharper disable once InvertIf
-                if ((Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
+                if (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.UnknownType &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     // Absolute value of the mass difference
@@ -1040,7 +1040,7 @@ namespace PHRPReader.Data
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
                     if (Modifications[index].ModificationType == modType &&
-                        (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
+                        Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType &&
                         Modifications[index].TargetResidues.Length > 0)
                     {
                         if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) > float.Epsilon)
@@ -1090,7 +1090,7 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 if (Modifications[index].ModificationType == modType &&
-                    (Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType) &&
+                    Modifications[index].ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod or ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.UnknownType &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) < float.Epsilon)
