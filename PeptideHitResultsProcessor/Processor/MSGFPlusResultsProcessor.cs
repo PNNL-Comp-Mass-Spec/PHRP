@@ -2031,6 +2031,13 @@ namespace PeptideHitResultsProcessor.Processor
                     columnMapping.Add(resultColumn, -1);
                 }
 
+                // Add the columns that have duplicate enum values
+                columnMapping.Add(MSGFPlusSynFileColumns.SpecEValue, -1);
+                columnMapping.Add(MSGFPlusSynFileColumns.RankSpecEValue, -1);
+                columnMapping.Add(MSGFPlusSynFileColumns.EValue, -1);
+                columnMapping.Add(MSGFPlusSynFileColumns.QValue, -1);
+                columnMapping.Add(MSGFPlusSynFileColumns.PepQValue, -1);
+
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index < splitLine.Length; index++)
                 {
