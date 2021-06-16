@@ -946,13 +946,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the MSPathFinder results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     errorMessages.Add(string.Format(
-                        "Error parsing MSPathFinder results in ParseMSPathFinderResultsFileEntry, line {0}", lineNumber));
+                        "Error parsing MSPathFinder results in ParseMSPathFinderResultsFileEntry, line {0}: {1}", lineNumber, ex.Message));
                 }
 
                 return false;
@@ -1230,7 +1230,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1238,11 +1238,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MSPathFinder results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing MSPathFinder results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MSPathFinder Results in ParseMSPathFinderSynFileEntry");
+                        errorMessages.Add("Error parsing MSPathFinder Results in ParseMSPathFinderSynFileEntry: " + ex.Message);
                     }
                 }
             }

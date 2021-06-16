@@ -1123,7 +1123,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the TopPIC results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1131,11 +1131,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing TopPIC Results in ParseTopPICResultsFileEntry for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing TopPIC Results in ParseTopPICResultsFileEntry for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICResultsFileEntry");
+                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;
@@ -1413,7 +1413,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1421,11 +1421,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing TopPIC results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing TopPIC results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICSynFileEntry");
+                        errorMessages.Add("Error parsing TopPIC Results in ParseTopPICSynFileEntry: " + ex.Message);
                     }
                 }
                 return false;

@@ -1251,7 +1251,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1259,11 +1259,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing InSpecT results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing InSpecT results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing InSpecT Results in ParseInspectResultsFileEntry");
+                        errorMessages.Add("Error parsing InSpecT Results in ParseInspectResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;
@@ -1401,7 +1401,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1409,11 +1409,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing InSpecT results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing InSpecT results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing InSpecT Results in ParseInspectSynFileEntry");
+                        errorMessages.Add("Error parsing InSpecT Results in ParseInspectSynFileEntry: " + ex.Message);
                     }
                 }
                 return false;

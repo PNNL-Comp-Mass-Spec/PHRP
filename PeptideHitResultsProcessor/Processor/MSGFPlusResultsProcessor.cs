@@ -1898,7 +1898,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the MS-GF+ results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1906,11 +1906,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MS-GF+ results in ParseMSGFPlusResultsFileEntry for RowIndex '{0}'", rowIndex));
+                            "Error parsing MS-GF+ results in ParseMSGFPlusResultsFileEntry for RowIndex '{0}': {1}", rowIndex, ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry");
+                        errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;
@@ -2210,7 +2210,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count >= MAX_ERROR_MESSAGE_COUNT)
@@ -2221,11 +2221,11 @@ namespace PeptideHitResultsProcessor.Processor
                 if (splitLine?.Length > 0)
                 {
                     errorMessages.Add(string.Format(
-                        "Error parsing MS-GF+ results for RowIndex '{0}'", splitLine[0]));
+                        "Error parsing MS-GF+ results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                 }
                 else
                 {
-                    errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry");
+                    errorMessages.Add("Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry: " + ex.Message);
                 }
 
                 return false;

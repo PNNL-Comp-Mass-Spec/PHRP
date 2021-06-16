@@ -1099,7 +1099,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the MODa results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1107,11 +1107,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MODa results in ParseMODaResultsFileEntry for RowIndex '{0}'", rowIndex));
+                            "Error parsing MODa results in ParseMODaResultsFileEntry for RowIndex '{0}': {1}", rowIndex, ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MODa Results in ParseMODaResultsFileEntry");
+                        errorMessages.Add("Error parsing MODa Results in ParseMODaResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;
@@ -1357,7 +1357,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1365,11 +1365,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MODa results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing MODa results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MODa Results in ParseMODaSynFileEntry");
+                        errorMessages.Add("Error parsing MODa Results in ParseMODaSynFileEntry: " + ex.Message);
                     }
                 }
             }

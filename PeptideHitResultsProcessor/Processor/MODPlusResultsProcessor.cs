@@ -978,7 +978,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the MODPlus results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -986,11 +986,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!string.IsNullOrEmpty(spectrumIndex))
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry for SpectrumIndex '{0}'", spectrumIndex));
+                            "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry for SpectrumIndex '{0}': {1}", spectrumIndex, ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MODPlus Results in ParseMODPlusResultsFileEntry");
+                        errorMessages.Add("Error parsing MODPlus Results in ParseMODPlusResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;

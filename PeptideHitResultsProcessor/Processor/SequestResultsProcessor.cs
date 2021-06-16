@@ -33,7 +33,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public class SequestResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: fht, methylation
+        // Ignore Spelling: fht, methylation, sequest
 
         public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
@@ -463,18 +463,18 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorMessages.Add(string.Format("Error parsing Sequest Results for RowIndex '{0}'", splitLine[0]));
+                        errorMessages.Add(string.Format("Error parsing Sequest Results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing Sequest Results in ParseSequestResultsFileEntry");
+                        errorMessages.Add("Error parsing Sequest Results in ParseSequestResultsFileEntry: " + ex.Message);
                     }
                 }
                 return false;

@@ -1058,7 +1058,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the MSAlign results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1066,11 +1066,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MSAlign results in ParseMSAlignResultsFileEntry for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing MSAlign results in ParseMSAlignResultsFileEntry for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MSAlign results in ParseMSAlignResultsFileEntry");
+                        errorMessages.Add("Error parsing MSAlign results in ParseMSAlignResultsFileEntry: " + ex.Message);
                     }
                 }
 
@@ -1325,7 +1325,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
@@ -1333,11 +1333,11 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine?.Length > 0)
                     {
                         errorMessages.Add(string.Format(
-                            "Error parsing MSAlign results for RowIndex '{0}'", splitLine[0]));
+                            "Error parsing MSAlign results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
                     }
                     else
                     {
-                        errorMessages.Add("Error parsing MSAlign Results in ParseMSAlignSynFileEntry");
+                        errorMessages.Add("Error parsing MSAlign Results in ParseMSAlignSynFileEntry: " + ex.Message);
                     }
                 }
                 return false;
