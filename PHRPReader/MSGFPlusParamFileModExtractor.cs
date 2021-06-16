@@ -568,6 +568,7 @@ namespace PHRPReader
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
+
                             udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                             if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                                 udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;

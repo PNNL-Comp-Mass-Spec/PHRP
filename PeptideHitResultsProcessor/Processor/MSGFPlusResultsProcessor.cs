@@ -2571,7 +2571,7 @@ namespace PeptideHitResultsProcessor.Processor
                 peptide = peptide.Substring(2, peptide.Length - 4);
             }
 
-            // peptide should now be the primary peptide sequence, without the prefix or suffix residues
+            // Peptide should now be the primary peptide sequence, without the prefix or suffix residues
 
             // First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
             // This RegEx will match one or more mods, all at the N-terminus
@@ -2601,7 +2601,7 @@ namespace PeptideHitResultsProcessor.Processor
             // We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
 
             // In MSGFDB, static mods do not have a mod mass listed
-            // In MS-GF+,  static mods do have a mod mass listed
+            // In MS-GF+, static mods do have a mod mass listed
             // Regardless, we do not add mod symbols for static mods, but we do increment totalModMass
 
             // Find the index of the last residue

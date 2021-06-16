@@ -1051,6 +1051,7 @@ namespace PHRPReader.Data
                     modSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                     useNextAvailableModificationSymbol = false;
                     break;
+
                 default:
                     modSymbol = ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
                     useNextAvailableModificationSymbol = true;
@@ -1408,6 +1409,7 @@ namespace PHRPReader.Data
                                 validMod = false;
                             }
                             break;
+
                         case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
                             modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                             if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() &&
@@ -1416,6 +1418,7 @@ namespace PHRPReader.Data
                                 validMod = false;
                             }
                             break;
+
                         case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
                             modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                             if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString() &&
@@ -1424,6 +1427,7 @@ namespace PHRPReader.Data
                                 validMod = false;
                             }
                             break;
+
                         case ModificationDefinition.ResidueModificationType.UnknownType:
                             modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
                             break;

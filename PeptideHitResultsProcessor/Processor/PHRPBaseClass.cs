@@ -1863,6 +1863,7 @@ namespace PeptideHitResultsProcessor.Processor
                     modDef.MassCorrectionTag,
                     modDef.OccurrenceCount.ToString()
                 };
+
                 writer.WriteLine(StringUtilities.CollapseList(data));
             }
         }
