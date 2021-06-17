@@ -1,6 +1,10 @@
 @echo off
+
+if "%1"=="NoPause" Goto StartCopy
 echo Be sure to build PHRPReader.dll in Debug mode
 pause
+
+:StartCopy
 
 @echo on
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\CodeTestCS\lib"
@@ -21,7 +25,6 @@ call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\DMS_Managers\An
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_Converter_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_MzXML_PlugIn\bin"
-pause
 
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MASICResultsMerger\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MASICResultsMerger\Lib"
@@ -37,18 +40,19 @@ call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverag
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\Debug"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\Release"
-pause
 
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\SMAQC\SMAQC\dll"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\SMAQC\SMAQC\SMAQC\bin\Debug"
 
-:Aldrich
 call Distribute_Files_Work.bat "F:\Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib"
 call Distribute_Files_Work.bat "F:\Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Release"
 call Distribute_Files_Work.bat "F:\Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Debug"
 call Distribute_Files_Work.bat "F:\Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug"
 call Distribute_Files_Work.bat "F:\Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release"
 
-
+@echo off
+if "%1"=="NoPause" Goto Exit
 pause
+
+:Exit

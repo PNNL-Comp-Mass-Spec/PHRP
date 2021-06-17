@@ -44,9 +44,15 @@ if exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Prog
 if exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll" (del "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll")
 if exist "C:\DMS_Programs\PHRP\SQLite.Interop.dll" (del "C:\DMS_Programs\PHRP\SQLite.Interop.dll")
 
+pushd ..\PHRPReader\bin
+call Distribute_Files.bat NoPause
+popd
+
 @echo off
 echo.
+echo.
 echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
+echo.
 pause
 @echo on
 
