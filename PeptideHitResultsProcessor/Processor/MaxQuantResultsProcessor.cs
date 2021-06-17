@@ -1085,6 +1085,16 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Compute the monoisotopic MH value using the calculated monoisotopic mass
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
+        /// <returns>(M+H)+, as a string</returns>
+        private string ComputeMH(MaxQuantSearchResult searchResult)
+        {
+            return PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0), 6);
+        }
+
         /// <summary>
         /// Compute observed DelM and DelM_PPM values
         /// </summary>
@@ -3119,7 +3129,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Store the monoisotopic MH value in .MH
                 // This is (M+H)+ when the charge carrier is a proton
-                searchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0), 6);
+                searchResult.MH = ComputeMH(searchResult);
 
                 GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
                 GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
@@ -3193,6 +3203,10 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         searchResult.CalculatedMonoMass = PRISM.StringUtilities.DblToString(searchResult.CalculatedMonoMassPHRP, 6);
                         searchResult.CalculatedMonoMassValue = searchResult.CalculatedMonoMassPHRP;
+
+                        // Update the monoisotopic MH value
+                        // This is (M+H)+ when the charge carrier is a proton
+                        searchResult.MH = ComputeMH(searchResult);
                     }
                     else
                     {
