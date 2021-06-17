@@ -2195,7 +2195,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (residueSymbol == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS &&
                                 nTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus)
+                            {
                                 break;
+                            }
 
                             staticModResidues.Add(new ResidueModificationInfo
                             {
@@ -2213,7 +2215,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (residueSymbol == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS &&
                                 cTerminusState != AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus)
+                            {
                                 break;
+                            }
 
                             staticModResidues.Add(new ResidueModificationInfo
                             {
