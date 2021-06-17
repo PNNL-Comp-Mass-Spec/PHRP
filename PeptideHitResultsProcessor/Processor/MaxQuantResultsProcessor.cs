@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "June 4, 2021";
+            FileDate = "June 17, 2021";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -143,7 +143,7 @@ namespace PeptideHitResultsProcessor.Processor
             PrecursorType = 12,
             ScanEventNumber = 13,
             IsotopeIndex = 14,
-            MZ = 15,
+            MaxQuantPrecursorMZ = 15,
             CalculatedMonoMass = 16,
             MassErrorPPM = 17,
             MassErrorDa = 18,
@@ -413,6 +413,11 @@ namespace PeptideHitResultsProcessor.Processor
             public string IsotopeIndex;
 
             /// <summary>
+            /// Precursor ion m/z
+            /// </summary>
+            public string PrecursorMZ_PHRP;
+
+            /// <summary>
             /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
             /// </summary>
             /// <remarks>
@@ -420,7 +425,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// It does not account for isobaric mods
             /// For more information, see class <see cref="MaxQuantResults"/>
             /// </remarks>
-            public string PrecursorMZ;
+            public string PrecursorMZ_MaxQuant;
 
             /// <summary>
             /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
@@ -703,7 +708,8 @@ namespace PeptideHitResultsProcessor.Processor
                 PrecursorType = string.Empty;
                 ScanEventNumber = string.Empty;
                 IsotopeIndex = string.Empty;
-                PrecursorMZ = string.Empty;
+                PrecursorMZ_PHRP = string.Empty;
+                PrecursorMZ_MaxQuant = string.Empty;
                 MH = string.Empty;
                 CalculatedMonoMass = string.Empty;
                 CalculatedMonoMassValue = 0;
@@ -1079,6 +1085,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// <summary>
         /// Compute observed DelM and DelM_PPM values
         /// </summary>
         /// <param name="filteredSearchResults">Search results</param>
@@ -1102,6 +1109,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!precursorsByScan.TryGetValue(searchResult.ScanNum, out var precursorMz))
                     continue;
+
+                searchResult.PrecursorMZ_PHRP = PRISM.StringUtilities.DblToString(precursorMz, 5);
 
                 var observedPrecursorMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMz, searchResult.ChargeNum, 0);
 
@@ -3101,10 +3110,12 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out searchResult.ScanEventNumber);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out searchResult.IsotopeIndex);
 
+                // Skip searchResult.PrecursorMZ_PHRP here; it is populated later
+
                 // Note that this is the theoretical value for the precursor ion m/z
                 // It is not the observed precursor ion m/z (i.e., it is not the parent m/z isolated when the MS/MS spectrum was acquired)
                 // Furthermore, it does not account for the mass of any isobaric mods present
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MZ], out searchResult.PrecursorMZ);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MaxQuantPrecursorMZ], out searchResult.PrecursorMZ_MaxQuant);
 
                 // Store the monoisotopic MH value in .MH
                 // This is (M+H)+ when the charge carrier is a proton
@@ -3345,7 +3356,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Type", MaxQuantResultsFileColumns.PrecursorType},
                 {"Scan event number", MaxQuantResultsFileColumns.ScanEventNumber},
                 {"Isotope index", MaxQuantResultsFileColumns.IsotopeIndex},
-                {"m/z", MaxQuantResultsFileColumns.MZ},
+                {"m/z", MaxQuantResultsFileColumns.MaxQuantPrecursorMZ},
                 {"Mass", MaxQuantResultsFileColumns.CalculatedMonoMass},
                 {"Mass error [ppm]", MaxQuantResultsFileColumns.MassErrorPPM},
                 {"Mass error [Da]", MaxQuantResultsFileColumns.MassErrorDa},
@@ -3533,11 +3544,14 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ_PHRP], out string precursorMzPHRP);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ_MaxQuant], out string precursorMzMaxQuant);
+
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MH], out string parentIonMH);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Mass], out string monoisotopicMass);
 
-                searchResult.PrecursorMZ = precursorMz;
+                searchResult.PrecursorMZ_PHRP = precursorMzPHRP;
+                searchResult.PrecursorMZ_MaxQuant = precursorMzMaxQuant;
                 searchResult.ParentIonMH = parentIonMH;
                 searchResult.CalculatedMonoMass = monoisotopicMass;
 
@@ -3996,7 +4010,8 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Fragmentation,
                     searchResult.ScanIndex,
                     searchResult.Charge,
-                    searchResult.PrecursorMZ,
+                    searchResult.PrecursorMZ_PHRP,
+                    searchResult.PrecursorMZ_MaxQuant,
                     searchResult.MassErrorDa,
                     searchResult.MassErrorPpm,
                     searchResult.MassErrorDaMaxQuant,

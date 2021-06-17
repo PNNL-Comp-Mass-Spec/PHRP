@@ -146,7 +146,8 @@ namespace PHRPReader.Reader
                 { "FragMethod", MaxQuantSynFileColumns.FragMethod },
                 { "SpecIndex", MaxQuantSynFileColumns.SpecIndex },
                 { "Charge", MaxQuantSynFileColumns.Charge },
-                { "PrecursorMZ", MaxQuantSynFileColumns.PrecursorMZ },
+                { "PrecursorMZ", MaxQuantSynFileColumns.PrecursorMZ_PHRP },
+                { "PrecursorMZ_MaxQuant", MaxQuantSynFileColumns.PrecursorMZ_MaxQuant },
                 { "DelM", MaxQuantSynFileColumns.DelM },
                 { "DelM_PPM", MaxQuantSynFileColumns.DelM_PPM },
                 { "DelM_MaxQuant", MaxQuantSynFileColumns.DelM_MaxQuant },
@@ -373,8 +374,17 @@ namespace PHRPReader.Reader
                         }
                     }
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_PHRP), mColumnHeaders, 0.0);
+
+                    if (Math.Abs(precursorMZ) > float.Epsilon)
+                    {
+                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+                    }
+                    else
+                    {
+                        var precursorMZ_MaxQuant = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_MaxQuant), mColumnHeaders, 0.0);
+                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ_MaxQuant, psm.Charge, 0);
+                    }
 
                     psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM), mColumnHeaders);
                     psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_PPM), mColumnHeaders);

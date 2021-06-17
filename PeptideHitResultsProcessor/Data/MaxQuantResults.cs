@@ -42,6 +42,11 @@ namespace PeptideHitResultsProcessor.Data
         public string SpecIndex { get; set; }
 
         /// <summary>
+        /// Precursor m/z (observed value)
+        /// </summary>
+        public string PrecursorMZ_PHRP { get; set; }
+
+        /// <summary>
         /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
         /// </summary>
         /// <remarks>
@@ -88,7 +93,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Correct m/z calculation = (2705.5004 + 3 * 1.007276467) / 3 = 902.8407495
         /// </para>
         /// </remarks>
-        public string PrecursorMZ { get; set; }
+        public string PrecursorMZ_MaxQuant { get; set; }
 
         /// <summary>
         /// Mass error, in Da, as computed by PHRP
@@ -323,7 +328,8 @@ namespace PeptideHitResultsProcessor.Data
             DatasetID = 0;
             FragMethod = string.Empty;
             SpecIndex = string.Empty;
-            PrecursorMZ = string.Empty;
+            PrecursorMZ_PHRP = string.Empty;
+            PrecursorMZ_MaxQuant = string.Empty;
             PHRPComputedDelM = string.Empty;
             PHRPComputedDelMPPM = string.Empty;
             MaxQuantComputedDelM = string.Empty;
