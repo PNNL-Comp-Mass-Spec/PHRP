@@ -1072,6 +1072,9 @@ namespace PHRPReader.Reader
 
                 using var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
+                // The delimiter is typically an equals sign, but for InSpecT it is a comma
+                var keyValueDelimiter = peptideHitResultType == PeptideHitResultTypes.Inspect ? ',' : '=';
+
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
@@ -1080,13 +1083,13 @@ namespace PHRPReader.Reader
 
                     var dataLine = lineIn.TrimStart();
 
-                    if (string.IsNullOrWhiteSpace(dataLine) || dataLine.StartsWith("#") || !dataLine.Contains('='))
+                    if (string.IsNullOrWhiteSpace(dataLine) || dataLine.StartsWith("#") || !dataLine.Contains(keyValueDelimiter))
                     {
                         continue;
                     }
 
-                    // Split the line on the equals sign
-                    var kvSetting = ParseKeyValueSetting(dataLine, '=', "#");
+                    // Split the line on the equals sign (for InSpecT, split on the first comma)
+                    var kvSetting = ParseKeyValueSetting(dataLine, keyValueDelimiter, "#");
 
                     if (string.IsNullOrEmpty(kvSetting.Key))
                     {
