@@ -496,7 +496,7 @@ namespace PeptideHitResultsProcRunner
                                       "  MODa results file ({3}.txt)\n" +
                                       "  MODPlus results file ({4}.txt)\n" +
                                       "  MSPathFinder results file ({5}.txt)\n" +
-                                      "  Inspect results file ({6}.txt)\n" +
+                                      "  InSpecT results file ({6}.txt)\n" +
                                       "  SEQUEST Synopsis File ({7}.txt)\n" +
                                       "  SEQUEST First Hits file ({8}.txt)\n" +
                                       "  TopPIC results file ({9}.txt)\n" +
@@ -580,7 +580,7 @@ namespace PeptideHitResultsProcRunner
                                       MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "When processing an Inspect results file, use /SynPValue to customize " +
+                                      "When processing an InSpecT results file, use /SynPValue to customize " +
                                       "the PValue threshold used to determine which peptides are written to the synopsis file. " +
                                       "The default is /SynPValue:0.2  Note that peptides with a " +
                                       "TotalPRMScore >= " + InSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
@@ -588,10 +588,10 @@ namespace PeptideHitResultsProcRunner
                                       " will also be included in the synopsis file."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) " +
-                                      "when processing Inspect or MS-GF+ results (default is /InsFHT:True)"));
+                                      "when processing InSpecT or MS-GF+ results (default is /InsFHT:True)"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) " +
-                                      "when processing Inspect or MS-GF+ results (default is /InsSyn:True)"));
+                                      "when processing InSpecT or MS-GF+ results (default is /InsSyn:True)"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing a MODPlus or MODa results file, use /SynProb to customize " +

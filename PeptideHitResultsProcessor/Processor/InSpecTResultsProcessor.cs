@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         private const string PHOS_MOD_RESIDUES = "STY";
 
         /// <summary>
-        /// These columns correspond to the tab-delimited file created directly by Inspect
+        /// These columns correspond to the tab-delimited file created directly by InSpecT
         /// </summary>
         private enum InspectResultsFileColumns
         {
@@ -384,7 +384,7 @@ namespace PeptideHitResultsProcessor.Processor
                 AddDynamicAndStaticResidueMods(searchResult, updateModOccurrenceCounts);
 
                 // Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
-                // Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
+                // Since InSpecT allows a terminal peptide residue to be modified twice, we'll allow that to happen,
                 //  even though, biologically, that's typically not possible
                 // However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus
                 //  (where two COOH groups are present)
@@ -612,7 +612,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         if (double.TryParse(precursorErrorText, out var precursorError))
                         {
-                            // Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
+                            // Note: the October 2008 version of InSpecT uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
                             // Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
                             peptideMH = (precursorMZ - precursorError) * charge - (charge - 1) * PeptideMassCalculator.MASS_PROTON;
                         }
@@ -634,7 +634,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Read mod info from the Inspect parameter file
+        /// Read mod info from the InSpecT parameter file
         /// </summary>
         /// <param name="inspectParameterFilePath"></param>
         /// <param name="modList"></param>
@@ -649,7 +649,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (string.IsNullOrWhiteSpace(inspectParameterFilePath))
                 {
-                    SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info");
+                    SetErrorMessage("InSpecT Parameter File name not defined; unable to extract mod info");
                     SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
@@ -712,7 +712,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 break;
 
                             default:
-                                OnWarningEvent("Unrecognized Mod Type in the Inspect parameter file");
+                                OnWarningEvent("Unrecognized Mod Type in the InSpecT parameter file");
                                 modDef.ModType = InspectModType.DynamicMod;
                                 break;
                         }
@@ -739,7 +739,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Check for phosphorylation
-                    // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
+                    // InSpecT requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
                     //  However, we want to use the more precise mass of 79.9663
                     if (modDef.ModName == PHOS_MOD_NAME.ToLower() && modDef.ModMass == "80")
                     {
@@ -755,7 +755,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the Inspect parameter file (" + Path.GetFileName(inspectParameterFilePath) + ")", ex);
+                SetErrorMessage("Error reading the InSpecT parameter file (" + Path.GetFileName(inspectParameterFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -903,7 +903,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing the header line in the Inspect synopsis file", ex);
+                SetErrorMessage("Error parsing the header line in the InSpecT synopsis file", ex);
                 return false;
             }
 
@@ -911,7 +911,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse and Inspect synopsis file
+        /// Parse and InSpecT synopsis file
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
@@ -920,7 +920,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
+            // Note that InSpecT synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             // we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
             // (see peptidesFoundForTotalPRMScoreLevel below)
@@ -1127,7 +1127,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse the header line of an Inspect results file
+        /// Parse the header line of an InSpecT results file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="inspectModInfo"></param>
@@ -1142,7 +1142,7 @@ namespace PeptideHitResultsProcessor.Processor
             ICollection<string> errorMessages,
             int resultsProcessed)
         {
-            // Parses an entry from the Inspect results file
+            // Parses an entry from the InSpecT results file
             // The expected header line is:
             // #SpectrumFile	Scan#	Annotation	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	p-value	F-Score	DeltaScore	DeltaScoreOther	RecordNumber	DBFilePos	SpecFilePos PrecursorMZ	PrecursorError DelM_PPM
 
@@ -1219,7 +1219,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (splitLine.Length >= (int)InspectResultsFileColumns.PrecursorError + 1)
                     {
-                        // Inspect version 2008-10-14 added these two Precursor mass columns
+                        // InSpecT version 2008-10-14 added these two Precursor mass columns
                         udtSearchResult.PrecursorMZ = splitLine[(int)InspectResultsFileColumns.PrecursorMZ];
                         udtSearchResult.PrecursorError = splitLine[(int)InspectResultsFileColumns.PrecursorError];
 
@@ -1271,7 +1271,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse the header line of an Inspect _syn.txt file
+        /// Parse the header line of an InSpecT _syn.txt file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -1329,13 +1329,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
-                // will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+                // will all be based on the first protein since InSpecT only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 if (GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorError], out string peptideDeltaMass))
                 {
                     searchResult.PeptideDeltaMass = peptideDeltaMass;
-                    // Note: .peptideDeltaMass is stored in the Inspect results file as "Observed_Mass - Theoretical_Mass"
+                    // Note: .peptideDeltaMass is stored in the InSpecT results file as "Observed_Mass - Theoretical_Mass"
                     // However, in MTS .peptideDeltaMass is "Theoretical - Observed"
                     // Therefore, we will negate .peptideDeltaMass
                     try
@@ -1423,7 +1423,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">Inspect results file (Dataset_inspect.txt)</param>
+        /// <param name="inputFilePath">InSpecT results file (Dataset_inspect.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>
@@ -1474,7 +1474,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
-                    // Load the Inspect Parameter File so that we can determine the modification names and masses
+                    // Load the InSpecT Parameter File so that we can determine the modification names and masses
                     if (!ExtractModInfoFromInspectParamFile(Options.SearchToolParameterFilePath, out var inspectModInfo))
                     {
                         if (inspectModInfo == null || inspectModInfo.Count == 0)
@@ -1658,13 +1658,13 @@ namespace PeptideHitResultsProcessor.Processor
                 Match match;
                 if (inspectModInfo[index].ModType == InspectModType.DynNTermPeptide)
                 {
-                    // Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
+                    // InSpecT notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
                     // Look for this using a RegEx
                     match = NTerminalModMassMatcher.Match(peptide);
                 }
                 else if (inspectModInfo[index].ModType == InspectModType.DynCTermPeptide)
                 {
-                    // Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
+                    // InSpecT notates C-terminal mods like this: R.HVIFLAER+14.R
                     // Look for this using a RegEx
                     match = CTerminalModMassMatcher.Match(peptide);
                 }

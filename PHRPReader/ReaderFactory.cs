@@ -253,7 +253,7 @@ namespace PHRPReader
         public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
-        /// Peptide hit result type; SEQUEST, XTandem, Inspect, MSGFPlus, etc.
+        /// Peptide hit result type; SEQUEST, XTandem, InSpecT, MSGFPlus, etc.
         /// </summary>
         public PeptideHitResultTypes PeptideHitResultType => SynFileReader?.PeptideHitResultType ?? PeptideHitResultTypes.Unknown;
 
@@ -937,7 +937,7 @@ namespace PHRPReader
             filesToFind.Add(MSAlignSynFileReader.FILENAME_SUFFIX_SYN);
             filesToFind.Add(MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
 
-            // Inspect
+            // InSpecT
             filesToFind.Add(InspectSynFileReader.FILENAME_SUFFIX_SYN);
             filesToFind.Add(InspectSynFileReader.FILENAME_SUFFIX_FHT);
 
@@ -1348,7 +1348,7 @@ namespace PHRPReader
                 return resultType;
             }
 
-            // Open the file and read the header line to determine if this is a SEQUEST file, Inspect file, MSGFDB, or something else
+            // Open the file and read the header line to determine if this is a SEQUEST file, InSpecT file, MS-GF+, or something else
             if (!File.Exists(filePath))
             {
                 // File doesn't exist; assume MSGFPlus

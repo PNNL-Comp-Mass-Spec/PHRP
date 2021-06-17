@@ -377,7 +377,7 @@ namespace PeptideHitResultsProcessor.Processor
                 AddDynamicAndStaticResidueMods(searchResult, updateModOccurrenceCounts);
 
                 // Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
-                // Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
+                // Since InSpecT allows a terminal peptide residue to be modified twice, we'll allow that to happen,
                 //  even though, biologically, that's typically not possible
                 // However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus
                 //  (where two COOH groups are present)
@@ -745,7 +745,7 @@ namespace PeptideHitResultsProcessor.Processor
             // we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
             // (see peptidesFoundForPValueLevel below)
 
-            // Although this was a possibility with Inspect, it likely never occurs for TopPIC
+            // Although this was a possibility with InSpecT, it likely never occurs for TopPIC
             // But, we'll keep the check in place just in case
 
             var columnMapping = new Dictionary<TopPICSynFileColumns, int>();
@@ -1372,7 +1372,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
-                // will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+                // will all be based on the first protein since InSpecT only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values

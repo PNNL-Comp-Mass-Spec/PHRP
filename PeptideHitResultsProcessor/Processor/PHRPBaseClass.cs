@@ -591,7 +591,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void ComputePseudoPeptideLocInProtein(SearchResultsBaseClass searchResult)
         {
-            // Set these to 1 and 10000 since MSGFDB, SEQUEST, and Inspect results files do not contain protein sequence information
+            // Set these to 1 and 10000 since MSGFDB, SEQUEST, and InSpecT results files do not contain protein sequence information
             // If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
             searchResult.ProteinSeqResidueNumberStart = 1;
             searchResult.ProteinSeqResidueNumberEnd = 10000;
@@ -1444,7 +1444,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (proteinName.StartsWith("xxx.", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by Inspect
+                // Used by InSpecT
                 return true;
             }
 

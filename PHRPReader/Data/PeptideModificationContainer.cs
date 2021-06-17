@@ -54,13 +54,13 @@ namespace PHRPReader.Data
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM = ']';
 
         /// <summary>
-        /// Symbol used by Inspect for tracking a modification at the peptide N-terminus
+        /// Symbol used by InSpecT for tracking a modification at the peptide N-terminus
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const char N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = '[';
 
         /// <summary>
-        /// Symbol used by Inspect for tracking a modification at the peptide C-terminus
+        /// Symbol used by InSpecT for tracking a modification at the peptide C-terminus
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = ']';

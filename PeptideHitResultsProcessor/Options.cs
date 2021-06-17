@@ -60,7 +60,7 @@ namespace PeptideHitResultsProcessor
         public bool IgnorePeptideToProteinMapperErrors { get; set; }
 
         /// <summary>
-        /// Inspect synopsis file p-value threshold
+        /// InSpecT synopsis file p-value threshold
         /// </summary>
         /// <remarks>Lower p-values are higher confidence results</remarks>
         public float InspectSynopsisFilePValueThreshold { get; set; }

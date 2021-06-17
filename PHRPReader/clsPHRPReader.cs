@@ -108,7 +108,7 @@ namespace PHRPReader
         public bool ModSummaryFileLoaded { get; } = false;
 
         /// <summary>
-        /// Peptide hit result type; SEQUEST, XTandem, Inspect, MSGFPlus, etc.
+        /// Peptide hit result type; SEQUEST, XTandem, InSpecT, MSGFPlus, etc.
         /// </summary>
         public PeptideHitResultTypes PeptideHitResultType => PeptideHitResultTypes.Unknown;
 

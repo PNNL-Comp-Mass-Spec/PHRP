@@ -64,7 +64,7 @@ namespace PHRPReader
         XTandem = 2,
 
         /// <summary>
-        /// Inspect
+        /// InSpecT
         /// </summary>
         Inspect = 3,
 

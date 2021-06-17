@@ -4,7 +4,7 @@
 //
 // Created 04/04/2012
 //
-// This class parses data lines from Inspect _inspect_syn.txt files
+// This class parses data lines from InSpecT _inspect_syn.txt files
 //
 //*********************************************************************************************************
 
@@ -15,29 +15,29 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP SynFileReader for Inspect
+    /// PHRP SynFileReader for InSpecT
     /// </summary>
     public class InspectSynFileReader : SynFileReaderBaseClass
     {
         // Ignore Spelling: chymotrypsin, Da, FilePos, PepToProt
 
         /// <summary>
-        /// Inspect synopsis file suffix
+        /// InSpecT synopsis file suffix
         /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_inspect_syn.txt";
 
         /// <summary>
-        /// Inspect first hits file suffix
+        /// InSpecT first hits file suffix
         /// </summary>
         public const string FILENAME_SUFFIX_FHT = "_inspect_fht.txt";
 
         /// <summary>
         /// Search engine name
         /// </summary>
-        private const string INS_SEARCH_ENGINE_NAME = "Inspect";
+        private const string INS_SEARCH_ENGINE_NAME = "InSpecT";
 
         /// <summary>
-        /// Mapping from enum to synopsis file column name for Inspect
+        /// Mapping from enum to synopsis file column name for InSpecT
         /// </summary>
         private static readonly Dictionary<InspectSynFileColumns, string> mSynopsisFileColumn = new();
 
@@ -323,7 +323,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Parses the specified Inspect parameter file
+        /// Parses the specified InSpecT parameter file
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
@@ -465,7 +465,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + linesRead + " in the Inspect data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the InSpecT data file: " + ex.Message);
             }
 
             return success;

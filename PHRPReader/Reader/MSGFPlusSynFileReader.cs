@@ -388,7 +388,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Get the MSGFDB column name associated with the given column
+        /// Get the MSGFDB column name associated with the given column (for legacy tool MSGFDB, not MS-GF+)
         /// </summary>
         /// <param name="column"></param>
         /// <returns>Column name</returns>
@@ -786,7 +786,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + linesRead + " in the MSGFDB data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the MS-GF+ data file: " + ex.Message);
                 return false;
             }
         }

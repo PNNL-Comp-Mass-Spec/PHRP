@@ -451,7 +451,7 @@ namespace PeptideHitResultsProcRunner
             if (resultsProcessor is InSpecTResultsProcessor)
             {
                 LogMessage(string.Format("{0,-45} {1:E2}",
-                    "Inspect Synopsis File PValue Threshold:", resultsProcessor.Options.InspectSynopsisFilePValueThreshold));
+                    "InSpecT Synopsis File PValue Threshold:", resultsProcessor.Options.InspectSynopsisFilePValueThreshold));
             }
 
             Console.WriteLine();
@@ -516,7 +516,7 @@ namespace PeptideHitResultsProcRunner
 
                     case ResultsFileFormat.InspectTXTFile:
                         PeptideHitResultType = PeptideHitResultTypes.Inspect;
-                        LogMessage("Detected Inspect results file");
+                        LogMessage("Detected InSpecT results file");
                         break;
 
                     case ResultsFileFormat.MSGFPlusTXTFile:
@@ -696,7 +696,7 @@ namespace PeptideHitResultsProcRunner
 
                     case ResultsFileFormat.InspectTXTFile:
                         mPeptideHitResultsProcessor = new InSpecTResultsProcessor(Options);
-                        LogMessage("Detected Inspect results file");
+                        LogMessage("Detected InSpecT results file");
                         break;
 
                     case ResultsFileFormat.MSGFPlusTXTFile:

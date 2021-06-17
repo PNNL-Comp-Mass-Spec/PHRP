@@ -120,7 +120,7 @@
         XTandemXMLFile = 3,
 
         /// <summary>
-        /// Inspect
+        /// InSpecT
         /// </summary>
         InspectTXTFile = 4,
 
