@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedParameter.Local
+
 namespace PHRPReader
 {
-    // ReSharper disable UnusedMember.Global
 #pragma warning disable RCS1163 // Unused parameter.
 #pragma warning disable IDE0060 // Remove unused parameter
 
@@ -714,7 +716,6 @@ namespace PHRPReader
         public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
         {
             ReaderFactory.ParseColumnHeaders(dataColumns, columnHeaders);
-            return;
         }
 
         /// <summary>
@@ -813,7 +814,4 @@ namespace PHRPReader
             MaxProteinsPerPSM = 0;      // 0 means to load all proteins
         }
     }
-
-#pragma warning restore IDE0060 // Remove unused parameter
-#pragma warning restore RCS1163 // Unused parameter.
 }
