@@ -2037,23 +2037,81 @@ namespace PHRPReader
         /// </summary>
         /// <param name="resultType"></param>
         /// <returns>Filename</returns>
+        [Obsolete("Use GetToolVersionInfoFileNames")]
         public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
         {
-            return resultType switch
+            var toolVersionFileNames = GetToolVersionInfoFilenames(resultType);
+            return toolVersionFileNames.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get the tool version info filename for the given analysis tool
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <returns>Filename</returns>
+        public static List<string> GetToolVersionInfoFilenames(PeptideHitResultTypes resultType)
+        {
+            var toolVersionFileNames = new List<string>();
+
+            switch (resultType)
             {
-                PeptideHitResultTypes.Inspect => "Tool_Version_Info_Inspect.txt",
-                PeptideHitResultTypes.MaxQuant => "Tool_Version_Info_MaxQuant.txt",
-                PeptideHitResultTypes.MODa => "Tool_Version_Info_MODa.txt",
-                PeptideHitResultTypes.MODPlus => "Tool_Version_Info_MODPlus.txt",
-                PeptideHitResultTypes.MSAlign => "Tool_Version_Info_MSAlign.txt",
-                PeptideHitResultTypes.MSFragger => "Tool_Version_Info_MSFragger.txt",
-                PeptideHitResultTypes.MSGFPlus => "Tool_Version_Info_MSGFPlus.txt",         // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
-                PeptideHitResultTypes.MSPathFinder => "Tool_Version_Info_MSPathFinder.txt",
-                PeptideHitResultTypes.Sequest => "Tool_Version_Info_Sequest.txt",
-                PeptideHitResultTypes.TopPIC => "Tool_Version_Info_TopPIC.txt",
-                PeptideHitResultTypes.XTandem => "Tool_Version_Info_XTandem.txt",
-                _ => string.Empty
-            };
+                case PeptideHitResultTypes.Inspect:
+                    toolVersionFileNames.Add("Tool_Version_Info_Inspect.txt");
+                    break;
+
+                case PeptideHitResultTypes.MaxQuant:
+                    toolVersionFileNames.Add("Tool_Version_Info_MaxQuant.txt");
+                    toolVersionFileNames.Add("Tool_Version_Info_MaxqPeak.txt");
+                    toolVersionFileNames.Add("Tool_Version_Info_MaxqS1.txt");
+                    toolVersionFileNames.Add("Tool_Version_Info_MaxqS2.txt");
+                    toolVersionFileNames.Add("Tool_Version_Info_MaxqS3.txt");
+                    break;
+
+                case PeptideHitResultTypes.MODa:
+                    toolVersionFileNames.Add("Tool_Version_Info_MODa.txt");
+                    break;
+
+                case PeptideHitResultTypes.MODPlus:
+                    toolVersionFileNames.Add("Tool_Version_Info_MODPlus.txt");
+                    break;
+
+                case PeptideHitResultTypes.MSAlign:
+                    toolVersionFileNames.Add("Tool_Version_Info_MSAlign.txt");
+                    break;
+
+                case PeptideHitResultTypes.MSFragger:
+                    toolVersionFileNames.Add("Tool_Version_Info_MSFragger.txt");
+                    break;
+
+                case PeptideHitResultTypes.MSGFPlus:
+                    // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
+                    toolVersionFileNames.Add("Tool_Version_Info_MSGFPlus.txt");
+                    break;
+
+                case PeptideHitResultTypes.MSPathFinder:
+                    toolVersionFileNames.Add("Tool_Version_Info_MSPathFinder.txt");
+                    break;
+
+                case PeptideHitResultTypes.Sequest:
+                    toolVersionFileNames.Add("Tool_Version_Info_Sequest.txt");
+                    break;
+
+                case PeptideHitResultTypes.TopPIC:
+                    toolVersionFileNames.Add("Tool_Version_Info_TopPIC.txt");
+                    break;
+
+                case PeptideHitResultTypes.XTandem:
+                    toolVersionFileNames.Add("Tool_Version_Info_XTandem.txt");
+                    break;
+
+                case PeptideHitResultTypes.Unknown:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(resultType), resultType, null);
+            }
+
+            return toolVersionFileNames;
         }
 
         private void HandleException(string baseMessage, Exception ex)

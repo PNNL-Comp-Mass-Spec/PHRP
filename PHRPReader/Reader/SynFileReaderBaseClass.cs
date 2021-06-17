@@ -1140,19 +1140,37 @@ namespace PHRPReader.Reader
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, ReaderFactory.GetToolVersionInfoFilename(peptideHitResultType));
+                var toolVersionInfoFilePath = string.Empty;
 
-                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == PeptideHitResultTypes.MSGFPlus)
+                var toolVersionInfoFilenames = ReaderFactory.GetToolVersionInfoFilenames(peptideHitResultType);
+
+                if (toolVersionInfoFilenames.Count == 0)
                 {
+                    ReportWarning("GetToolVersionInfoFilenames returned an empty list for result type " + peptideHitResultType);
+                    return false;
+                }
+
+                foreach (var toolVersionInfoFile in toolVersionInfoFilenames)
+                {
+                    toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, toolVersionInfoFile);
+
+                    if (File.Exists(toolVersionInfoFilePath) || peptideHitResultType != PeptideHitResultTypes.MSGFPlus)
+                    {
+                        break;
+                    }
+
                     // This could be an older MS-GF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
+
+                    // ReSharper disable once InvertIf
                     if (File.Exists(alternativeVersionInfoFilePath))
                     {
                         toolVersionInfoFilePath = alternativeVersionInfoFilePath;
+                        break;
                     }
                 }
 
-                if (!File.Exists(toolVersionInfoFilePath))
+                if (string.IsNullOrWhiteSpace(toolVersionInfoFilePath) || !File.Exists(toolVersionInfoFilePath))
                 {
                     ReportWarning("Tool version info file not found: " + toolVersionInfoFilePath);
                     return false;
