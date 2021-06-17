@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSGFPlusResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "February 3, 2021";
+            FileDate = "May 16, 2021";
             mModMassRegEx = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
