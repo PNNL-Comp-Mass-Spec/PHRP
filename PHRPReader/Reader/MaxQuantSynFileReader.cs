@@ -146,7 +146,7 @@ namespace PHRPReader.Reader
                 { "FragMethod", MaxQuantSynFileColumns.FragMethod },
                 { "SpecIndex", MaxQuantSynFileColumns.SpecIndex },
                 { "Charge", MaxQuantSynFileColumns.Charge },
-                { "PrecursorMZ", MaxQuantSynFileColumns.PrecursorMZ_PHRP },
+                { "PrecursorMZ", MaxQuantSynFileColumns.PrecursorMZ },
                 { "PrecursorMZ_MaxQuant", MaxQuantSynFileColumns.PrecursorMZ_MaxQuant },
                 { "DelM", MaxQuantSynFileColumns.DelM },
                 { "DelM_PPM", MaxQuantSynFileColumns.DelM_PPM },
@@ -374,7 +374,7 @@ namespace PHRPReader.Reader
                         }
                     }
 
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_PHRP), mColumnHeaders, 0.0);
+                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
 
                     if (Math.Abs(precursorMZ) > float.Epsilon)
                     {

@@ -42,9 +42,9 @@ namespace PeptideHitResultsProcessor.Data
         public string SpecIndex { get; set; }
 
         /// <summary>
-        /// Precursor m/z (observed value)
+        /// Precursor m/z (observed value, read from a _PrecursorInfo.txt file by PHRP)
         /// </summary>
-        public string PrecursorMZ_PHRP { get; set; }
+        public string PrecursorMZ { get; set; }
 
         /// <summary>
         /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
@@ -328,7 +328,7 @@ namespace PeptideHitResultsProcessor.Data
             DatasetID = 0;
             FragMethod = string.Empty;
             SpecIndex = string.Empty;
-            PrecursorMZ_PHRP = string.Empty;
+            PrecursorMZ = string.Empty;
             PrecursorMZ_MaxQuant = string.Empty;
             PHRPComputedDelM = string.Empty;
             PHRPComputedDelMPPM = string.Empty;

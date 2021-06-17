@@ -119,7 +119,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Precursor ion m/z (observed value, read from a _PrecursorInfo.txt file by PHRP)
         /// </summary>
-        PrecursorMZ_PHRP = 7,
+        PrecursorMZ = 7,
 
         /// <summary>
         /// Precursor ion m/z (theoretical value, not observed value)
