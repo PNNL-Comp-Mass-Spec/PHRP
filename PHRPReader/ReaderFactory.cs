@@ -32,7 +32,7 @@ namespace PHRPReader
     /// </summary>
     public class ReaderFactory : PRISM.EventNotifier, IDisposable
     {
-        // Ignore Spelling: DA, fht, kv, moda, MODa, modp, modplus, msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt, Za
+        // Ignore Spelling: A-Za-z, DA, fht, kv, moda, MODa, modp, modplus, msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt
 
         /// <summary>
         /// Symbol used by PHRP to indicate a protein terminus

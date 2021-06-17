@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public abstract class SearchResultsBaseClass
     {
-        // Ignore Spelling: Da, MaxQuant, MODa, acetyl, delM, Oxy
+        // Ignore Spelling: acetyl, Da, delM, MaxQuant, MODa, Oxy
 
         /// <summary>
         /// Mass difference, in Da, between ^12C and ^13C

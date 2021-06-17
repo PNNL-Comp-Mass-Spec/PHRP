@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public class TopPICResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: monoisotopic, Cysteine, enums, acetyl, methylation, toppic, syn, fht, Proteoform, Prsm, Da, Pvalue, Frag, txt
+        // Ignore Spelling: acetyl, Cysteine, Da, enums, fht, Frag, methylation, monoisotopic, Proteoform, Prsm, Pvalue, syn, toppic, txt
 
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {

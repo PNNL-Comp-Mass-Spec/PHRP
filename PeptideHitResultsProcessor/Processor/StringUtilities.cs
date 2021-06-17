@@ -6,7 +6,8 @@ namespace PeptideHitResultsProcessor.Processor
 {
     public static class StringUtilities
     {
-        // Ignore Spelling: Da, A-Za-z, Fscore, MaxQuant, prot, mts, MSFragger, xxx
+        // Ignore Spelling: A-Za-z
+
         private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
 
         public static int CIntSafe(string value, int defaultValue)

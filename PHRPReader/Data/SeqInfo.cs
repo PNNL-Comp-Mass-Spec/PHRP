@@ -13,7 +13,7 @@ namespace PHRPReader.Data
     /// </summary>
     public class SequenceInfo
     {
-        // Ignore Spelling: itrac, Phosph, IodoAcet, Da
+        // Ignore Spelling: Da, IodoAcet, itrac, Phosph
 
         /// <summary>
         /// Sequence ID

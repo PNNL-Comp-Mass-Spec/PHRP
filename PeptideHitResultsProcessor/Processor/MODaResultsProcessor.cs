@@ -23,7 +23,7 @@ namespace PeptideHitResultsProcessor.Processor
 {
     public class MODaResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: moda, MODa, txt, fht, mgf, methylation, ModDefs
+        // Ignore Spelling: fht, methylation, mgf, moda, MODa, ModDefs, txt
 
         public MODaResultsProcessor(PHRPOptions options) : base(options)
         {
