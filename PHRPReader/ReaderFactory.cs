@@ -2883,7 +2883,7 @@ namespace PHRPReader
                 }
                 else
                 {
-                    // Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
+                    // Note: we do not need to raise a warning for MS-GF+ results since the extended scan stats file isn't needed
                     if (SynFileReader.PeptideHitResultType != PeptideHitResultTypes.MSGFPlus)
                     {
                         ReportWarning("Extended ScanStats file not found: " + extendedScanStatsFilePath);

@@ -384,7 +384,7 @@ namespace PHRPReader.Reader
                     {
                         if (string.IsNullOrEmpty(resultToSeqMapFilePathPreferred))
                         {
-                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsReaderFactory.GetPHRPResultToSeqMapFileName()");
+                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using ReaderFactory.GetPHRPResultToSeqMapFileName()");
                         }
                         else
                         {
