@@ -145,7 +145,7 @@ Deleting QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_peptides.txt
 Deleting QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_ProteinToPeptideMapping.txt
 Processing successful
 
-Warning: 0.40% of the entries (97 / 23,972) in the peptide to protein map file (QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_PepToProtMap.txt) did not match to a protein in the FASTA file (M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta)
+0.40% of the entries (97 / 23,972) in the peptide to protein map file (QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_maxq_syn_PepToProtMap.txt) did not match to a protein in the FASTA file (M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta)
 
 Creating the Protein Mod Details file (95.0% complete)
 Processing: 0% Reading the PHRP ModSummary file

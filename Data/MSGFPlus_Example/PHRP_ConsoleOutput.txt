@@ -1,5 +1,24 @@
 Parsing QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus.tsv
-Processing: 0% Detected MSGF+ results file
+Input file:                                   QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus.tsv
+Output directory:                             F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Data\MSGFPlus_Example
+Detected MSGF+ results file
+
+Processing options for MSGFPlus results processor
+Search Tool Parameter File:                   MSGFPlus_PartTryp_MetOx_20ppmParTol.txt
+Modification Definitions File:                MSGFPlus_PartTryp_MetOx_20ppmParTol_ModDefs.txt
+Mass Correction Tags File:                    Mass_Correction_Tags.txt
+FASTA File:                                   Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.fasta
+
+Create Protein Mods File:                     True
+Ignore Peptide to Protein Mapper Errors:      False
+Protein Mods File Includes Reversed Proteins: False
+Use Existing MTS PepToProtein Map File:       False
+
+Create First Hits File:                       True
+Create Synopsis File:                         True
+
+MSGFPlus Synopsis File EValue Threshold:          0.75
+MSGFPlus Synopsis File SpecEValue Threshold:      5.00E-007
 
 
 Caching protein names from the FASTA file
@@ -7,27 +26,152 @@ Cached 4,316 proteins
 
 
 Creating the FHT file
-Creating the FHT file
-Processing: 0% ..
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8799658 vs. 20ppm,0ppm
+Creating the FHT file (0.0% complete)
+Processing: 0% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.78528273 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 2.3223107 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.0129957 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.13643943 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.23714708 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.5038983 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 3.0802681 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.7975711 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.6124122 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.9169209 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8584832 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.72443116 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.1646137 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.42898858 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.4285458 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.335202 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.27163595 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.2312205 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.3393344 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8621025 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.1244658 vs. 20ppm,0ppm
+
 Processing: 25% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.84259117 vs. 20ppm,0ppm
 
-Creating the SYN file
-Creating the SYN file
-..
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.9127833 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 3.4695358 vs. 20ppm,0ppm
+
 Processing: 50% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.5169474 vs. 20ppm,0ppm
 
-Loading the PepToProtein map file: QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_PepToProtMap.txt
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 6.683816 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.3295085 vs. 20ppm,0ppm
+
+Processing: 75% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.6393332 vs. 20ppm,0ppm
+
+
+Creating the SYN file
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8799658 vs. 20ppm,0ppm
+Creating the SYN file (0.0% complete)
+Processing: 0% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.78528273 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 2.3223107 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.0129957 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.13643943 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.23714708 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.5038983 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 3.0802681 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.7975711 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.6124122 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.9169209 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8584832 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.72443116 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.1646137 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.42898858 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.4285458 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.335202 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.27163595 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.2312205 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.3393344 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.8621025 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.1244658 vs. 20ppm,0ppm
+
+Processing: 25% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.84259117 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.9127833 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 3.4695358 vs. 20ppm,0ppm
+
+Processing: 50% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 0.5169474 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 6.683816 vs. 20ppm,0ppm
+
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.3295085 vs. 20ppm,0ppm
+
+Processing: 75% 
+Warning: Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: 1.6393332 vs. 20ppm,0ppm
+
+
+Loading the PepToProtein map file (if it exists): QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_PepToProtMap.txt
 
 
 Creating the PHRP files for QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_syn.txt
-Creating the PHRP files for QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_syn.txt
-..
+Creating the PHRP files for QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_syn.txt (0.1% complete)
+Processing: 0% 
+Processing: 25% 
+Processing: 50% 
 Processing: 75% 
 Creating the Protein Mod Details file (95.0% complete)
-Reading the PHRP ModSummary file
+Processing: 0% Reading the PHRP ModSummary file
 Reading the PHRP SeqInfo file
 Reading the PHRP ModSummary file
-..
+
+Processing: 25% 
+Processing: 50% 
+Processing: 75% .
 Processing: 100% 
 Note: skipped 561 / 14,673 PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file
 Processing Complete
