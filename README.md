@@ -24,10 +24,10 @@ to convert the .mzid file to a tab-delimited .tsv file.
 ## Example Command line 
 
 ```
-PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFDB_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFDB_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.revCat.fasta
+PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFPlus_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFPlus_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.revCat.fasta
 ```
 
-## Console Switches
+## Command Line Syntax
 
 PHRP is a console application, and must be run from the Windows command prompt.
 
@@ -144,13 +144,13 @@ comes from the 'Raw file' column in the msms.txt file. The default is
 To disable contacting DMS, use `/DB:""` or `/DB:false`
 
 Use `/S` to process all valid files in the input directory and subdirectories.
-Include a number after `/S` (like `/S:2`) to limit the level of subdirectories to
-examine.
+Include a number after `/S` (like `/S:2`) to limit the level of subdirectories 
+to examine.
 
 When using `/S`, you can redirect the output of the results using `/A`
 
-When using `/S`, you can use `/R` to re-create the input directory hierarchy in the
-alternate output directory (if defined).
+When using `/S`, you can use `/R` to re-create the input directory hierarchy in 
+the alternate output directory (if defined).
 
 Use `/L` to specify that a log file should be created. Use `/L:LogFilePath` to
 specify the name (or full path) for the log file. Use /LogDir to specify the
