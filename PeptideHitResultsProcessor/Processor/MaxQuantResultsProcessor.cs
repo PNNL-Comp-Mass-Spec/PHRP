@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "June 17, 2021";
+            FileDate = "June 21, 2021";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -400,16 +400,24 @@ namespace PeptideHitResultsProcessor.Processor
             /// Scan event number
             /// </summary>
             /// <remarks>
+            /// <para>
             /// The first MS2 spectrum after a MS1 spectrum has event number 1
             /// The second MS2 spectrum has event number 2
             /// etc.
             /// Once the next MS1 spectrum is reached, scan event number resets to 1 for the next MS2 spectrum
+            /// </para>
+            /// <para>
+            /// Not stored in the synopsis file
+            /// </para>
             /// </remarks>
             public string ScanEventNumber;
 
             /// <summary>
             /// Isotope index
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string IsotopeIndex;
 
             /// <summary>
@@ -493,9 +501,10 @@ namespace PeptideHitResultsProcessor.Processor
 
             /// <summary>
             /// Simple mass error (ppm)
+            /// Specific definition not known
             /// </summary>
             /// <remarks>
-            /// Definition not known
+            /// Not stored in the synopsis file
             /// </remarks>
             public string SimpleMassErrorPPM;
 
@@ -546,11 +555,17 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// PTM localization score
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string LocalizationProb;
 
             /// <summary>
             /// Number of possible distributions of the modifications over the peptide sequence
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string Combinatorics;
 
             /// <summary>
@@ -564,16 +579,25 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Parent Ion Fraction: the fraction of the target peak that makes up of the total intensity in the inclusion window
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string PIF;
 
             /// <summary>
             /// Percentage the parent ion intensity makes up of the total intensity of the whole spectrum.
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string FractionOfTotalSpectrum;
 
             /// <summary>
             /// Percentage the parent ion intensity in comparison to the highest peak in he MS spectrum
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string BasePeakFraction;
 
             /// <summary>
@@ -589,6 +613,9 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Fraction the intensity of the precursor ion makes up of the peak (apex) intensity
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string PrecursorApexFraction;
 
             /// <summary>
@@ -596,12 +623,16 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             /// <remarks>
             /// For example, if the precursor scan is 3220 and the offset is -45, the peak apex is in scan 3265
+            /// Not stored in the synopsis file
             /// </remarks>
             public string PrecursorApexOffset;
 
             /// <summary>
             /// How much time the precursor ion is offset from the peak (apex) position
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string PrecursorApexOffsetTime;
 
             /// <summary>
@@ -617,12 +648,22 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Fraction of peaks in the MS/MS spectrum that are annotated
             /// </summary>
+            /// <remarks>
+            /// Not stored in the synopsis file
+            /// </remarks>
             public string PeakCoverage;
 
             /// <summary>
             /// True for peptides that are associated with a decoy protein
             /// </summary>
-            /// <remarks>The msms.txt file has '+' in the Reverse column for decoy peptides</remarks>
+            /// <remarks>
+            /// <para>
+            /// The msms.txt file has '+' in the Reverse column for decoy peptides
+            /// </para>
+            /// <para>
+            /// Not stored in the synopsis file
+            /// </para>
+            /// </remarks>
             public bool Reverse;
 
             /// <summary>
