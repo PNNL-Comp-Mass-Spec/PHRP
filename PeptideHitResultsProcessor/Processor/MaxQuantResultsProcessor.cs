@@ -3203,6 +3203,10 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out searchResult.IntensityCoverage);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out searchResult.PeakCoverage);
 
+                // Round the coverage values
+                searchResult.IntensityCoverage = RoundValue(searchResult.IntensityCoverage);
+                searchResult.PeakCoverage = RoundValue(searchResult.PeakCoverage);
+
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out string reverseFlag);
                 if (reverseFlag == "+")
                 {

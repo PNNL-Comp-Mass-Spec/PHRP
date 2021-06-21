@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "June 17, 2021";
+            FileDate = "June 21, 2021";
 
             Options = options;
 
@@ -1829,6 +1829,21 @@ namespace PeptideHitResultsProcessor.Processor
                 Console.WriteLine();
                 Console.WriteLine(ProgressStepDescription);
             }
+        }
+
+        /// <summary>
+        /// Round a value (stored as text) to the given number of digits after the decimal point
+        /// </summary>
+        /// <param name="valueToRound"></param>
+        /// <param name="digitsAfterDecimal"></param>
+        protected string RoundValue(string valueToRound, byte digitsAfterDecimal = 4)
+        {
+            if (!double.TryParse(valueToRound, out var value))
+            {
+                return valueToRound;
+            }
+
+            return PRISM.StringUtilities.DblToString(value, digitsAfterDecimal, 0.00001);
         }
 
         protected void SaveModificationSummaryFile(string modificationSummaryFilePath)
