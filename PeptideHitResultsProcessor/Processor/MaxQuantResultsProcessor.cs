@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "June 21, 2021";
+            FileDate = "June 27, 2021";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -1968,7 +1968,9 @@ namespace PeptideHitResultsProcessor.Processor
             longestCommonBaseName = StringUtilities.LongestCommonStringFromStart(baseNameByDatasetName.Values.ToList());
             longestCommonBaseName = longestCommonBaseName.TrimEnd('_', '-');
 
-            if (longestCommonBaseName.Length > 7 && longestCommonBaseName.EndsWith("_0"))
+            if (longestCommonBaseName.Length > 7 && (
+                longestCommonBaseName.EndsWith("_0") ||
+                longestCommonBaseName.EndsWith("_f")))
             {
                 longestCommonBaseName = longestCommonBaseName.Substring(0, longestCommonBaseName.Length - 2);
             }
