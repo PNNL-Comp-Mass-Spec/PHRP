@@ -2370,6 +2370,11 @@ namespace PeptideHitResultsProcessor.Processor
                         success = CreateFHTorSYNResultsFile(
                             inputFilePath, fhtOutputFilePath, scanGroupFilePath, msgfPlusModInfo,
                             out _, specIdToIndex, FilteredOutputFileTypeConstants.FHTFile);
+
+                        if (!success)
+                        {
+                            return false;
+                        }
                     }
                     else
                     {
@@ -2390,6 +2395,11 @@ namespace PeptideHitResultsProcessor.Processor
                             inputFilePath, synOutputFilePath, scanGroupFilePath, msgfPlusModInfo,
                             out var isMsgfPlus, specIdToIndex, FilteredOutputFileTypeConstants.SynFile);
 
+                        if (!success)
+                        {
+                            return false;
+                        }
+
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoMSGFPlus also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
 
@@ -2406,12 +2416,16 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Now parse the _syn.txt file that we just created to create the other PHRP files
                         success = ParseMSGFPlusSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
+                        if (!success)
+                        {
+                            return false;
+                        }
 
                         // Remove all items from pepToProteinMapping to reduce memory overhead
                         pepToProteinMapping.Clear();
                         pepToProteinMapping.TrimExcess();
 
-                        if (success && Options.CreateProteinModsFile)
+                        if (Options.CreateProteinModsFile)
                         {
                             success = CreateProteinModsFileWork(baseName, inputFile, fhtOutputFilePath, synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath);
                         }

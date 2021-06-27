@@ -1523,6 +1523,10 @@ namespace PeptideHitResultsProcessor.Processor
                         synOutputFilePath = Path.Combine(outputDirectoryPath, synOutputFilePath + SYNOPSIS_FILE_SUFFIX);
 
                         success = CreateFHTorSYNResultsFile(inputFilePath, synOutputFilePath, inspectModInfo, FilteredOutputFileTypeConstants.SynFile);
+                        if (!success)
+                        {
+                            return false;
+                        }
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
@@ -1536,12 +1540,16 @@ namespace PeptideHitResultsProcessor.Processor
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                         success = ParseInspectSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
+                        if (!success)
+                        {
+                            return false;
+                        }
 
                         // Remove all items from pepToProteinMapping to reduce memory overhead
                         pepToProteinMapping.Clear();
                         pepToProteinMapping.TrimExcess();
 
-                        if (success && Options.CreateProteinModsFile)
+                        if (Options.CreateProteinModsFile)
                         {
                             if (string.IsNullOrWhiteSpace(synOutputFilePath))
                             {

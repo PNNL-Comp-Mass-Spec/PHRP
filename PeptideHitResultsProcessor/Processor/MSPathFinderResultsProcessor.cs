@@ -1333,14 +1333,22 @@ namespace PeptideHitResultsProcessor.Processor
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modList);
+                    if (!success)
+                    {
+                        return false;
+                    }
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modList);
+                    if (!success)
+                    {
+                        return false;
+                    }
 
-                    if (success && Options.CreateProteinModsFile)
+                    if (Options.CreateProteinModsFile)
                     {
                         // Check for an empty synopsis file
                         if (!ValidateFileHasData(synOutputFilePath, "Synopsis file", out var errorMessage))

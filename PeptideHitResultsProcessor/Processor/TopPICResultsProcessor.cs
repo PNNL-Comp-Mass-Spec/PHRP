@@ -1506,18 +1506,26 @@ namespace PeptideHitResultsProcessor.Processor
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
+                    if (!success)
+                    {
+                        return false;
+                    }
 
                     // Create the other PHRP-specific files
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
                     success = ParseTopPICSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
+                    if (!success)
+                    {
+                        return false;
+                    }
 
                     // Remove all items from pepToProteinMapping to reduce memory overhead
                     pepToProteinMapping.Clear();
                     pepToProteinMapping.TrimExcess();
 
-                    if (success && Options.CreateProteinModsFile)
+                    if (Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }

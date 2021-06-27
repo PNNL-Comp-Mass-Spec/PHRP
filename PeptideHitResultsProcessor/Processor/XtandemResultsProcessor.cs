@@ -1526,9 +1526,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var xtandemXTFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, ".txt"));
                     xtandemXTFilePath = Path.Combine(outputDirectoryPath, xtandemXTFilePath);
+                    
                     success = ParseXTandemResultsFile(inputFile.FullName, xtandemXTFilePath, false);
+                    if (!success)
+                    {
+                        return false;
+                    }
 
-                    if (success && Options.CreateProteinModsFile)
+                    if (Options.CreateProteinModsFile)
                     {
                         success = CreateProteinModsFileWork(inputFile, outputDirectoryPath, xtandemXTFilePath);
                     }

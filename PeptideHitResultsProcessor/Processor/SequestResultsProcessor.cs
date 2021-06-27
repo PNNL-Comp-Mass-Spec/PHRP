@@ -537,7 +537,12 @@ namespace PeptideHitResultsProcessor.Processor
                     success = false;
                 }
 
-                if (success && Options.CreateProteinModsFile)
+                if (!success)
+                {
+                    return false;
+                }
+
+                if (Options.CreateProteinModsFile)
                 {
                     success = CreateProteinModsFileWork(inputFile, outputDirectoryPath);
                 }
