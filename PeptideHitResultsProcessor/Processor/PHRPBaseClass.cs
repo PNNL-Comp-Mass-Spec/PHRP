@@ -2002,9 +2002,12 @@ namespace PeptideHitResultsProcessor.Processor
             message ??= string.Empty;
 
             if (ex != null && message.IndexOf(ex.Message, StringComparison.Ordinal) < 0)
+            {
                 message += ": " + ex.Message;
+            }
 
             mErrorMessage = message;
+
             if (message.Length > 0)
             {
                 OnErrorEvent(message, ex);
