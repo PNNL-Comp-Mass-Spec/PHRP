@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -44,7 +43,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "June 21, 2021";
+            FileDate = "June 28, 2021";
 
             Options = options;
 
@@ -112,6 +111,11 @@ namespace PeptideHitResultsProcessor.Processor
         private const float PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE = 95;
 
         private const string PROTEIN_NAME_NO_MATCH = "__NoMatch__";
+
+        /// <summary>
+        /// ProteinMods file skipped warning message
+        /// </summary>
+        public const string WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION = "Skipping creation of the ProteinMods file";
 
         protected struct SearchOptionModificationInfo
         {

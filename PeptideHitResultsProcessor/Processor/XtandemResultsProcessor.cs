@@ -1579,7 +1579,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!success)
                 {
-                    OnWarningEvent("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
+                    OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
                 }
             }
 
