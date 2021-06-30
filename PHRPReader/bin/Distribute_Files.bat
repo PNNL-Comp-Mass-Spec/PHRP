@@ -31,7 +31,7 @@ call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MASICResultsMer
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MTDB_Creator\libs"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\Debug"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin"
-call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin\"
+call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFPlusResultsFileFromPHRP\bin\"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Test_PHRPReader\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideListToXML\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideListToXML\Lib"
