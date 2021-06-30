@@ -7,19 +7,19 @@ pause
 
 @echo on
 
-xcopy Debug\PeptideHitResultsProcessor.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
-xcopy Debug\PeptideHitResultsProcessor.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
+xcopy Debug\PeptideHitResultsProcessor.dll "..\..\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
+xcopy Debug\PeptideHitResultsProcessor.dll "..\..\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
 
-xcopy Debug\PHRPReader.* "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
-xcopy Debug\PHRPReader.* "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
+xcopy Debug\PHRPReader.* "..\..\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
+xcopy Debug\PHRPReader.* "..\..\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
 
 rem PeptideHitResultsProcRunner is compiled as AnyCPU
-xcopy Debug\*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcessor.pdb "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.pdb "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PHRPReader.pdb "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PHRPReader.xml "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\*.dll "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcessor.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PHRPReader.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PHRPReader.xml "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
 
 xcopy Debug\*.dll "C:\DMS_Programs\PHRP" /D /Y
 xcopy Debug\PHRPReader.pdb "C:\DMS_Programs\PHRP" /D /Y
@@ -29,19 +29,19 @@ xcopy Debug\PeptideHitResultsProcRunner.pdb "C:\DMS_Programs\PHRP" /D /Y
 xcopy Debug\PHRPReader.pdb "C:\DMS_Programs\PHRP" /D /Y
 xcopy Debug\PHRPReader.xml "C:\DMS_Programs\PHRP" /D /Y
 
-if not exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86" mkdir "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86"
-if not exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64" mkdir "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64"
-xcopy Debug\x86\SQLite.Interop.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86\" /D /Y
-xcopy Debug\x64\SQLite.Interop.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64\" /D /Y
+if not exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86" mkdir "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86"
+if not exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64" mkdir "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64"
+xcopy Debug\x86\SQLite.Interop.dll "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86\" /D /Y
+xcopy Debug\x64\SQLite.Interop.dll "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64\" /D /Y
 
 if not exist C:\DMS_Programs\PHRP\x86 mkdir C:\DMS_Programs\PHRP\x86
 if not exist C:\DMS_Programs\PHRP\x64 mkdir C:\DMS_Programs\PHRP\x64
 xcopy Debug\x86\SQLite.Interop.dll C:\DMS_Programs\PHRP\x86\ /D /Y
 xcopy Debug\x64\SQLite.Interop.dll C:\DMS_Programs\PHRP\x64\ /D /Y
 
-if exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\SQLite.Interop.dll" (del "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\SQLite.Interop.dll")
-if exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\SQLite.Interop.dll" (del "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin\SQLite.Interop.dll")
-if exist "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll" (del "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll")
+if exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\SQLite.Interop.dll" (del "..\..\DMS_Managers\Analysis_Manager\AM_Common\SQLite.Interop.dll")
+if exist "..\..\DMS_Managers\Analysis_Manager\AM_Program\bin\SQLite.Interop.dll" (del "..\..\DMS_Managers\Analysis_Manager\AM_Program\bin\SQLite.Interop.dll")
+if exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll" (del "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\SQLite.Interop.dll")
 if exist "C:\DMS_Programs\PHRP\SQLite.Interop.dll" (del "C:\DMS_Programs\PHRP\SQLite.Interop.dll")
 
 pushd ..\PHRPReader\bin
