@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcRunner
     public class PeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: Battelle, enums, fasta, MaxQuant, MODa, parm, proc
+        // Ignore Spelling: Battelle, enums, MaxQuant, MODa, parm, proc
 
         /// <summary>
         /// Constructor

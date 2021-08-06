@@ -1580,7 +1580,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    // Use a higher match error threshold because some peptides reported by TopPIC don't perfectly match the fasta file
+                    // Use a higher match error threshold because some peptides reported by TopPIC don't perfectly match the FASTA file
                     const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
 
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);

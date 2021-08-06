@@ -1404,7 +1404,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    // Use a higher match error threshold because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
+                    // Use a higher match error threshold because some peptides reported by MODPlus may not match the FASTA file (due to amino acid substitutions)
                     const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
 
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);

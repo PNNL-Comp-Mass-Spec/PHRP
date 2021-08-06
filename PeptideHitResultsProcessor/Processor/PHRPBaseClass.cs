@@ -338,7 +338,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                ReportError("Error caching protein names from fasta file " + Path.GetFileName(Options.FastaFilePath), false, ex);
+                ReportError("Error caching protein names from FASTA file " + Path.GetFileName(Options.FastaFilePath), false, ex);
                 return false;
             }
         }
@@ -754,19 +754,19 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (string.IsNullOrEmpty(Options.FastaFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined");
+                    SetErrorMessage("Cannot create the PepToProtein map file because the FASTA File Path is not defined");
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
                 if (!File.Exists(Options.FastaFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " + Options.FastaFilePath);
+                    SetErrorMessage("Cannot create the PepToProtein map file because the FASTA File was not found: " + Options.FastaFilePath);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
-                // Verify that the fasta file is not a DNA-sequence based fasta file
+                // Verify that the FASTA file is not a DNA-sequence based FASTA file
                 success = ValidateProteinFastaFile(Options.FastaFilePath);
                 if (!success)
                 {
@@ -2419,7 +2419,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!File.Exists(fastaFilePath))
                 {
                     Console.WriteLine();
-                    warningMessage = "Fasta file not found: " + fastaFilePath;
+                    warningMessage = "FASTA file not found: " + fastaFilePath;
                     return false;
                 }
 
@@ -2427,7 +2427,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!fastaFile.OpenFile(fastaFilePath))
                 {
                     Console.WriteLine();
-                    warningMessage = "Error opening the fasta file: " + fastaFilePath;
+                    warningMessage = "Error opening the FASTA file: " + fastaFilePath;
                     return false;
                 }
 
@@ -2456,7 +2456,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (validProteinCount < invalidProteinCount)
                 {
                     Console.WriteLine();
-                    warningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " + Path.GetFileName(fastaFilePath);
+                    warningMessage = "FASTA file contains Nucleic Acids, not Amino Acids: " + Path.GetFileName(fastaFilePath);
                     return false;
                 }
             }

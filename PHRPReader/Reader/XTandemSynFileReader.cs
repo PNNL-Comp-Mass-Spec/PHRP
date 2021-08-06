@@ -613,7 +613,7 @@ namespace PHRPReader.Reader
 
                             if (determineFastaFileNameUsingTaxonomyFile)
                             {
-                                // Open the taxonomy file to determine the fasta file used
+                                // Open the taxonomy file to determine the FASTA file used
                                 var setting = GetFastaFileFromTaxonomyFile(inputDirectoryPath, Path.GetFileName(kvSetting.Value), out errorMessage);
 
                                 if (!string.IsNullOrEmpty(setting))

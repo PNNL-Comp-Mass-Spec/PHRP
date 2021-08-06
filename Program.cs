@@ -247,7 +247,7 @@ namespace PeptideHitResultsProcRunner
 
             // ReSharper disable once StringLiteralTypo
             var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
-                "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
+                "F", "FASTA", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
                 "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn",
                 "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP", "DB",
                 "S", "A", "R", "L" };
@@ -300,7 +300,7 @@ namespace PeptideHitResultsProcRunner
                 if (parseCommandLine.RetrieveValueForParameter("F", out var fastaFilePath))
                     Options.FastaFilePath = fastaFilePath;
 
-                if (parseCommandLine.RetrieveValueForParameter("Fasta", out var fastaFilePath2))
+                if (parseCommandLine.RetrieveValueForParameter("FASTA", out var fastaFilePath2))
                     Options.FastaFilePath = fastaFilePath2;
 
                 if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
@@ -536,16 +536,16 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. " +
                                       "This requires that either an existing _PepToProtMapMTS.txt file exist, " +
-                                      "or that the Fasta file be defined using /F"));
+                                      "or that the FASTA file be defined using /F"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file " +
                                       "and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file " +
                                       "should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, " +
-                                      "or that the Fasta file be defined using /F"));
+                                      "or that the FASTA file be defined using /F"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /F to specify the path to the fasta file. When provided, the order of the proteins " +
+                                      "Use /F to specify the path to the FASTA file. When provided, the order of the proteins " +
                                       "in the FASTA file dictates which protein is listed for each peptide in the First Hits file"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(

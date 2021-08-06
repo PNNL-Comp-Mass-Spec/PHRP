@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Create protein mods file
         /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by FastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the FASTA file specified by FastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Use Existing MTS PepToProtein Map File
         /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by FastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the FASTA file specified by FastaFilePath</remarks>
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         /// <summary>
