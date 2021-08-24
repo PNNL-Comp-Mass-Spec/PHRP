@@ -43,7 +43,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "August 14, 2021";
+            FileDate = "August 16, 2021";
 
             Options = options;
 
@@ -1674,7 +1674,9 @@ namespace PeptideHitResultsProcessor.Processor
                     "FROM V_Dataset_Export " +
                     "WHERE dataset in ({0})", quotedDatasetNames);
 
-                var dbTools = DbToolsFactory.GetDBTools(Options.DMSConnectionString);
+                var connectionStringToUse = DbToolsFactory.AddApplicationNameToConnectionString(Options.DMSConnectionString, "PeptideHitResultsProcessor");
+
+                var dbTools = DbToolsFactory.GetDBTools(connectionStringToUse);
 
                 var success = dbTools.GetQueryResults(sqlQuery, out var results);
 
