@@ -64,7 +64,7 @@ namespace PHRPReader
         public const char TERMINUS_SYMBOL_XTANDEM_NTerminus = '[';
 
         /// <summary>
-        /// /// Peptide C-terminus symbol for X!Tandem
+        /// Peptide C-terminus symbol for X!Tandem
         /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_CTerminus = ']';
 
