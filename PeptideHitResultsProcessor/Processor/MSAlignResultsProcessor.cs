@@ -888,7 +888,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
         private bool ParseMSAlignResultsFileEntry(
             string lineIn,
             out MSAlignSearchResult udtSearchResult,

@@ -199,7 +199,6 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show the residue symbol and mod mass
             /// </summary>
-            /// <returns></returns>
             public override string ToString()
             {
                 return string.Format("{0}: {1:F2}", Residue, ModInfo.ModMassVal);
@@ -1105,13 +1104,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
         /// </summary>
+        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
         /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
         /// <param name="adjustPrecursorMassForC13">When true, adjust for correct for C13 isotopic selection errors</param>
         /// <returns>DelM, in ppm</returns>
-        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         private double ComputeDelMCorrectedPPM(
             double precursorErrorDa,
             double precursorMZ,
@@ -1128,8 +1127,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
-        /// <param name="searchResult"></param>
         /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
+        /// <param name="searchResult"></param>
         /// <returns>(M+H)+, as a string</returns>
         private string ComputeMH(MaxQuantSearchResult searchResult)
         {
@@ -2566,11 +2565,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read data from the peptides.txt file
         /// </summary>
-        /// <param name="inputDirectory"></param>
-        /// <param name="maxQuantPeptides">Keys are peptide sequence, values are the metadata for the peptide</param>
         /// <remarks>
         /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:peptidetable
         /// </remarks>
+        /// <param name="inputDirectory"></param>
+        /// <param name="maxQuantPeptides">Keys are peptide sequence, values are the metadata for the peptide</param>
         private void LoadPeptideInfo(FileSystemInfo inputDirectory, out Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides)
         {
             maxQuantPeptides = new Dictionary<string, MaxQuantPeptideInfo>();
@@ -2672,12 +2671,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Open the parameters.txt file and look for static mod names and precursor match tolerance
         /// </summary>
-        /// <param name="sourceFile"></param>
-        /// <param name="modList"></param>
         /// <remarks>
         /// The parameters.txt file does not list dynamic mods
         /// It also does not list isobaric mods (like TMT or iTRAQ)
         /// </remarks>
+        /// <param name="sourceFile"></param>
+        /// <param name="modList"></param>
         /// <returns>True if success, false if an error</returns>
         private bool LoadMaxQuantTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
@@ -3086,6 +3085,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MaxQuant results line while creating the MaxQuant synopsis file
         /// </summary>
+        /// <remarks>
+        /// This method is called while reading the msms.txt file
+        /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:msmstable
+        /// </remarks>
         /// <param name="maxQuantPeptides"></param>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
@@ -3094,10 +3097,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modList"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>
-        /// This method is called while reading the msms.txt file
-        /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:msmstable
-        /// </remarks>
         private bool ParseMaxQuantResultsFileEntry(
             IReadOnlyDictionary<string, MaxQuantPeptideInfo> maxQuantPeptides,
             string lineIn,
@@ -3916,8 +3915,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute FDR values, then assign QValues
         /// </summary>
-        /// <param name="searchResults"></param>
         /// <remarks>Assumes the data is sorted by descending score using MaxQuantSearchResultsComparerScoreScanChargePeptide</remarks>
+        /// <param name="searchResults"></param>
         private void ComputeQValues(IList<MaxQuantSearchResult> searchResults)
         {
             var forwardPeptideCount = 0;

@@ -309,10 +309,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Load the Peptide to Protein mapping using the specified PHRP result file
         /// </summary>
+        /// <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
         /// <param name="filePath"></param>
         /// <param name="pepToProteinMap">Peptide to protein mapping</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
         private bool LoadPepToProtMapData(string filePath, IDictionary<string, PepToProteinMapInfo> pepToProteinMap)
         {
             var linesRead = 0;

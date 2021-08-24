@@ -1,4 +1,4 @@
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 7, 2006
 //
@@ -761,12 +761,12 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Add any protein or peptide terminus static mods that are defined
         /// </summary>
-        /// <param name="allowDuplicateModOnTerminus">When false, only add the modification if the terminal residue does not already have the given modification associated with it</param>
-        /// <param name="updateModOccurrenceCounts"></param>
         /// <remarks>
         /// Peptide terminus static mods are always considered for a given peptide
         /// Protein terminus static mods are only considered if the peptide is at the appropriate terminus for the modification
         /// </remarks>
+        /// <param name="allowDuplicateModOnTerminus">When false, only add the modification if the terminal residue does not already have the given modification associated with it</param>
+        /// <param name="updateModOccurrenceCounts"></param>
         public void SearchResultAddStaticTerminusMods(bool allowDuplicateModOnTerminus, bool updateModOccurrenceCounts)
         {
             var residueLocInPeptide = 0;
@@ -929,12 +929,12 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Obtain the peptide sequence
         /// </summary>
-        /// <param name="returnSequenceWithMods">When true, include the mod symbols in the sequence</param>
-        /// <returns>Peptide, with prefix and suffix letters, e.g. K.PEPTIDER.S</returns>
         /// <remarks>
         /// If you want to guarantee that mod symbols are included in the peptide sequence,
         /// You must call ApplyModificationInformation before using this function
         /// </remarks>
+        /// <param name="returnSequenceWithMods">When true, include the mod symbols in the sequence</param>
+        /// <returns>Peptide, with prefix and suffix letters, e.g. K.PEPTIDER.S</returns>
         public string SequenceWithPrefixAndSuffix(bool returnSequenceWithMods)
         {
             string work;
@@ -1000,8 +1000,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Define custom RegEx specs used to find enzyme cleavage sites
         /// </summary>
-        /// <param name="udtEnzymeMatchSpec"></param>
         /// <remarks>Define standard RegEx values using SetStandardEnzymeMatchSpec</remarks>
+        /// <param name="udtEnzymeMatchSpec"></param>
         public void SetEnzymeMatchSpec(PeptideCleavageStateCalculator.EnzymeMatchSpecInfo udtEnzymeMatchSpec)
         {
             mPeptideCleavageStateCalculator.SetEnzymeMatchSpec(udtEnzymeMatchSpec.LeftResidueRegEx, udtEnzymeMatchSpec.RightResidueRegEx);
@@ -1050,8 +1050,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Define standard RegEx values for finding enzyme cleavage sites
         /// </summary>
-        /// <param name="standardCleavageAgent"></param>
         /// <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>
+        /// <param name="standardCleavageAgent"></param>
         public void SetStandardEnzymeMatchSpec(PeptideCleavageStateCalculator.StandardCleavageAgent standardCleavageAgent)
         {
             mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(standardCleavageAgent);

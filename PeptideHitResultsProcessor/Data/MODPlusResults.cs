@@ -44,12 +44,12 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="peptideMods"></param>
-        /// <param name="peptideSeqMassCalculator"></param>
         /// <remarks>
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
+        /// <param name="peptideMods"></param>
+        /// <param name="peptideSeqMassCalculator"></param>
         public MODPlusResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

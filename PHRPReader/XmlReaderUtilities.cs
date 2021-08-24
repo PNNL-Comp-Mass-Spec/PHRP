@@ -11,9 +11,9 @@ namespace PHRPReader
         /// Traverse an XML node hierarchy for the given element names
         /// If the final element is found, return its value, otherwise return an empty string
         /// </summary>
-        /// <param name="parentNode"></param>
-        /// /// <param name="elementNames"></param>
         /// <remarks>See also <see cref="TryGetElementValue"/></remarks>
+        /// <param name="parentNode"></param>
+        /// <param name="elementNames"></param>
         /// <returns>Value if found, or an empty string</returns>
         public static string GetElementValueOrDefault(XElement parentNode, params string[] elementNames)
         {
@@ -77,11 +77,11 @@ namespace PHRPReader
         /// If found, update elementValue with its value and return true
         /// Otherwise, return false
         /// </summary>
+        /// <remarks>See also <see cref="GetElementValueOrDefault"/></remarks>
         /// <param name="parentItem"></param>
         /// <param name="elementName"></param>
         /// <param name="elementValue"></param>
         /// <returns>True if found, otherwise false</returns>
-        /// <remarks>See also <see cref="GetElementValueOrDefault"/></remarks>
         public static bool TryGetElementValue(XElement parentItem, string elementName, out string elementValue)
         {
             var node = parentItem.Element(elementName);

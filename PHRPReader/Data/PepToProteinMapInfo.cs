@@ -55,10 +55,10 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add another peptide to protein mapping for a given peptide
         /// </summary>
+        /// <remarks>If an entry already exists for a protein at a given start position, the end position will be updated</remarks>
         /// <param name="proteinName">Protein name</param>
         /// <param name="residueStart">Location that a peptide starts in the protein</param>
         /// <param name="residueEnd">Location that a peptide ends in the protein</param>
-        /// <remarks>If an entry already exists for a protein at a given start position, the end position will be updated</remarks>
         public void AddProtein(string proteinName, int residueStart, int residueEnd)
         {
             if (ProteinMapInfo.TryGetValue(proteinName, out var locations))

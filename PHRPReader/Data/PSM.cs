@@ -342,8 +342,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add a new protein to associate with this peptide
         /// </summary>
-        /// <param name="proteinName"></param>
         /// <remarks>Does not update the ProteinDetails dictionary</remarks>
+        /// <param name="proteinName"></param>
         public void AddProtein(string proteinName)
         {
             if (!string.IsNullOrWhiteSpace(proteinName) && !mProteins.Contains(proteinName))
@@ -355,8 +355,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add detailed info of a protein associated with this peptide
         /// </summary>
-        /// <param name="proteinInfo"></param>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
+        /// <param name="proteinInfo"></param>
         public void AddProtein(ProteinInfo proteinInfo)
         {
             AddProteinDetail(proteinInfo);
@@ -365,8 +365,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add detailed info of a protein associated with this peptide
         /// </summary>
-        /// <param name="proteinInfo"></param>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
+        /// <param name="proteinInfo"></param>
         public void AddProteinDetail(ProteinInfo proteinInfo)
         {
             var proteinName = proteinInfo.ProteinName;
@@ -573,9 +573,9 @@ namespace PHRPReader.Data
         /// <summary>
         /// Update the peptide sequence, auto-determining the clean sequence if updateCleanSequence is true
         /// </summary>
+        /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
         /// <param name="peptideSequence">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="updateCleanSequence"></param>
-        /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
         public void SetPeptide(string peptideSequence, bool updateCleanSequence = true)
         {
             if (string.IsNullOrEmpty(peptideSequence))

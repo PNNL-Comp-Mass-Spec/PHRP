@@ -143,8 +143,8 @@ namespace PHRPReader
         /// <summary>
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
-        /// <param name="inputFilePath">Input file to read</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
+        /// <param name="inputFilePath">Input file to read</param>
         public clsPHRPReader(string inputFilePath)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
@@ -153,9 +153,9 @@ namespace PHRPReader
         /// <summary>
         /// Constructor where the PeptideHit result type is explicitly set
         /// </summary>
+        /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
         public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType)
             : this(inputFilePath, resultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
@@ -340,9 +340,9 @@ namespace PHRPReader
         /// <summary>
         /// Auto-determine the dataset name using the input file path
         /// </summary>
+        /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         /// <param name="filePath"></param>
         /// <returns>Dataset name</returns>
-        /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         [Obsolete("Superseded by ReaderFactory.AutoDetermineDatasetName")]
         public static string AutoDetermineDatasetName(string filePath)
         {
@@ -353,10 +353,10 @@ namespace PHRPReader
         /// <summary>
         /// Auto-determine the dataset name using the input file path and specified PeptideHit result type
         /// </summary>
+        /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         /// <param name="filePath"></param>
         /// <param name="resultType"></param>
         /// <returns>Dataset name</returns>
-        /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         [Obsolete("Superseded by ReaderFactory.AutoDetermineDatasetName")]
         public static string AutoDetermineDatasetName(string filePath, PeptideHitResultTypes resultType)
         {
@@ -608,8 +608,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
-        /// <param name="chChar">Character to examine</param>
         /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+        /// <param name="chChar">Character to examine</param>
         [Obsolete("Superseded by ReaderFactory.IsLetterAtoZ")]
         public static bool IsLetterAtoZ(char chChar)
         {
@@ -707,9 +707,9 @@ namespace PHRPReader
         /// <summary>
         /// Updates the column name to column index mapping in columnHeaders
         /// </summary>
+        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
         /// <param name="dataColumns">Column names read from the input file</param>
         /// <param name="columnHeaders">Column mapping dictionary object to update</param>
-        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
         [Obsolete("Superseded by ReaderFactory.ParseColumnHeaders")]
         public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
         {
@@ -719,8 +719,8 @@ namespace PHRPReader
         /// <summary>
         /// Reads the next line from a synopsis file or first hits file
         /// </summary>
-        /// <returns>True if a line was read, false if not more data is available</returns>
         /// <remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+        /// <returns>True if a line was read, false if not more data is available</returns>
         [Obsolete("Superseded by ReaderFactory.MoveNext")]
         public bool MoveNext()
         {

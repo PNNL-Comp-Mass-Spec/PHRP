@@ -1,4 +1,4 @@
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 3, 2006
 //
@@ -184,8 +184,8 @@ namespace PHRPReader
         /// <summary>
         /// Compute the monoisotopic mass of the given empirical formula
         /// </summary>
-        /// <param name="empiricalFormula"></param>
         /// <remarks>Throws an exception if an unknown symbol is encountered</remarks>
+        /// <param name="empiricalFormula"></param>
         public static double ComputeMonoisotopicMass(EmpiricalFormula empiricalFormula)
         {
             double monoisotopicMass = 0;
@@ -249,11 +249,11 @@ namespace PHRPReader
         /// <summary>
         /// Compute the mass of the peptide sequence (it cannot contain modification symbols)
         /// </summary>
-        /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
-        /// <returns>Monoisotopic mass, or -1 if an error</returns>
         /// <remarks>
         /// Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True
         /// If modification symbols are present, returns -1</remarks>
+        /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
+        /// <returns>Monoisotopic mass, or -1 if an error</returns>
         public double ComputeSequenceMass(string sequence)
         {
             var primarySequence = sequence;
@@ -311,11 +311,11 @@ namespace PHRPReader
         /// <summary>
         /// Compute the mass of the peptide sequence; uses the information in residueModificationInfo() to determine modification masses
         /// </summary>
+        /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         /// <param name="sequence"></param>
         /// <param name="modCount"></param>
         /// <param name="residueModificationInfo">Array of modified residues; index 0 to modCount-1</param>
         /// <returns>The computed mass, or -1 if an error</returns>
-        /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         [Obsolete("This version uses an array for modified residues; use the version that takes a list")]
         public double ComputeSequenceMass(string sequence, int modCount, ref PeptideSequenceModInfo[] residueModificationInfo)
         {
@@ -335,10 +335,10 @@ namespace PHRPReader
         /// <summary>
         /// Compute the mass of the peptide sequence; uses the information in modifiedResidues() to determine modification masses
         /// </summary>
+        /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers)</param>
         /// <param name="modifiedResidues">List of modified residues</param>
         /// <returns>The computed mass, or -1 if an error</returns>
-        /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         public double ComputeSequenceMass(string sequence, List<PeptideSequenceModInfo> modifiedResidues)
         {
             // Note that this call to ComputeSequenceMass will reset mErrorMessage
@@ -400,8 +400,8 @@ namespace PHRPReader
         ///  R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
         ///  K.Q-17.0265QIEESTSDYDKEK.L
         /// </summary>
-        /// <param name="sequence"></param>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+        /// <param name="sequence"></param>
         public double ComputeSequenceMassNumericMods(string sequence)
         {
             string primarySequence;
@@ -465,10 +465,10 @@ namespace PHRPReader
         /// <summary>
         /// Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
         /// </summary>
+        /// <remarks>Uses the charge carrier mass defined by ChargeCarrierMass</remarks>
         /// <param name="massMZ"></param>
         /// <param name="currentCharge"></param>
         /// <param name="desiredCharge"></param>
-        /// <remarks>Uses the charge carrier mass defined by ChargeCarrierMass</remarks>
         public double ConvoluteMass(double massMZ, int currentCharge, int desiredCharge = 1)
         {
             return ConvoluteMass(massMZ, currentCharge, desiredCharge, ChargeCarrierMass);
@@ -477,11 +477,11 @@ namespace PHRPReader
         /// <summary>
         /// Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
         /// </summary>
+        /// <remarks>To return the neutral mass, set desiredCharge to 0</remarks>
         /// <param name="massMZ">m/z</param>
         /// <param name="currentCharge">Current charge; if 0, assumes massMZ is the neutral, monoisotopic mass</param>
         /// <param name="desiredCharge">Desired charge</param>
         /// <param name="chargeCarrierMass">Charge carrier mass (Default is the mass of a proton)</param>
-        /// <remarks>To return the neutral mass, set desiredCharge to 0</remarks>
         public double ConvoluteMass(double massMZ, int currentCharge, int desiredCharge, double chargeCarrierMass)
         {
             double newMZ;
@@ -916,8 +916,8 @@ namespace PHRPReader
         /// <summary>
         /// Converts and MH mass to the uncharged (neutral) mass
         /// </summary>
-        /// <param name="mH"></param>
         /// <remarks>Equivalent to ConvoluteMass(mH, 1, 0)</remarks>
+        /// <param name="mH"></param>
         public double MHToMonoisotopicMass(double mH)
         {
             return ConvoluteMass(mH, 1, 0);
@@ -926,9 +926,9 @@ namespace PHRPReader
         /// <summary>
         /// Converts an uncharged (neutral) mass to the m/z value for the specified charge
         /// </summary>
+        /// <remarks>Equivalent to ConvoluteMass(monoisotopicMass, 0, desiredCharge)</remarks>
         /// <param name="monoisotopicMass"></param>
         /// <param name="desiredCharge"></param>
-        /// <remarks>Equivalent to ConvoluteMass(monoisotopicMass, 0, desiredCharge)</remarks>
         public double MonoisotopicMassToMZ(double monoisotopicMass, int desiredCharge)
         {
             return ConvoluteMass(monoisotopicMass, 0, desiredCharge);

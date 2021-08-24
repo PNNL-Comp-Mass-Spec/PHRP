@@ -117,7 +117,6 @@ namespace PeptideHitResultsProcessor.Data
         /// This method replaces those symbols with the format support by the Molecular Weight Calculator
         /// </summary>
         /// <param name="formula"></param>
-        /// <returns></returns>
         private static string ConvertFormulaNotation(string formula)
         {
             return formula.Replace("Cx", "^13.003355C").Replace("Nx", "^15.000109N").Replace("Ox", "^17.999161O").Replace("Hx", "D");

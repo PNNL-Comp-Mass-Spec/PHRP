@@ -575,13 +575,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the static mods defined in the MODPlus parameter file
         /// </summary>
-        /// <param name="modPlusParamFilePath"></param>
-        /// <param name="modList"></param>
-        /// <returns>True if successful, false if an error</returns>
         /// <remarks>
         /// We don't care about the dynamic mods because there are so many possible mods.
         /// We'll add each dynamic mod as we encounter it in the results
         /// </remarks>
+        /// <param name="modPlusParamFilePath"></param>
+        /// <param name="modList"></param>
+        /// <returns>True if successful, false if an error</returns>
         private bool ExtractModInfoFromMODPlusParamFile(string modPlusParamFilePath, out List<ModificationDefinition> modList)
         {
             modList = new List<ModificationDefinition>();
@@ -1520,8 +1520,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute FDR values, then assign QValues
         /// </summary>
-        /// <param name="searchResults"></param>
         /// <remarks>Assumes the data is sorted by descending score using MODPlusSearchResultsComparerScoreScanChargePeptide</remarks>
+        /// <param name="searchResults"></param>
         private void ComputeQValues(IList<MODPlusSearchResult> searchResults)
         {
             var forwardPeptideCount = 0;

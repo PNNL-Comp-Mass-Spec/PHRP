@@ -77,7 +77,6 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Return the tolerance, as a string
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             string units;

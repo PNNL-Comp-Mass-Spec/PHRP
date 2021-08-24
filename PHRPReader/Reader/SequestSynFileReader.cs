@@ -556,12 +556,12 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parse the data line read from a PHRP results file
         /// </summary>
+        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">Output: PSM details</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;

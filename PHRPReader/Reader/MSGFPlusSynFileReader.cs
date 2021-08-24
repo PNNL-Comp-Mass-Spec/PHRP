@@ -273,10 +273,10 @@ namespace PHRPReader.Reader
         /// If defined, update chargeCarrierMass with the associated mass value and return True
         /// Otherwise return false
         /// </summary>
+        /// <remarks>This function is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
         /// <param name="searchEngineParams"></param>
         /// <param name="chargeCarrierMass"></param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>This function is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
         public static bool GetCustomChargeCarrierMass(SearchEngineParameters searchEngineParams, out double chargeCarrierMass)
         {
             if (searchEngineParams.Parameters.TryGetValue(CHARGE_CARRIER_MASS_PARAM_NAME, out var value))
@@ -305,10 +305,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
+        /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
         /// <param name="includeLegacyNames"></param>
         /// <param name="includeExtraColumns"></param>
         /// <returns>Dictionary of header names and enum values</returns>
-        /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
         public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeLegacyNames, bool includeExtraColumns)
         {
             var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
@@ -618,12 +618,12 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parse the data line read from a PHRP results file
         /// </summary>
+        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">Output: PSM details</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;

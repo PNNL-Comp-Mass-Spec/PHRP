@@ -1,4 +1,4 @@
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 4, 2006
 //
@@ -222,8 +222,8 @@ namespace PHRPReader
         /// <summary>
         /// Determines the cleavage state of the specified peptide
         /// </summary>
-        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         public PeptideCleavageState ComputeCleavageState(string sequenceWithPrefixAndSuffix)
         {
             if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
@@ -237,10 +237,10 @@ namespace PHRPReader
         /// <summary>
         /// Determine the cleavage state of cleanSequence utilizing the rules specified in mEnzymeMatchSpec
         /// </summary>
+        /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         /// <param name="cleanSequence"></param>
         /// <param name="prefixResidues"></param>
         /// <param name="suffixResidues"></param>
-        /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         public PeptideCleavageState ComputeCleavageState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
             if (string.IsNullOrEmpty(cleanSequence))
@@ -318,8 +318,8 @@ namespace PHRPReader
         /// <summary>
         /// Count the number of missed cleavages in the peptide
         /// </summary>
-        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         public short ComputeNumberOfMissedCleavages(string sequenceWithPrefixAndSuffix)
         {
             short numMissedCleavages = 0;
@@ -355,8 +355,8 @@ namespace PHRPReader
         /// <summary>
         /// Determine the terminus state of the peptide
         /// </summary>
-        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         public PeptideTerminusState ComputeTerminusState(string sequenceWithPrefixAndSuffix)
         {
             if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
@@ -370,9 +370,9 @@ namespace PHRPReader
         /// <summary>
         /// Determine the terminus state given the prefix and suffix characters
         /// </summary>
+        /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
         /// <param name="prefix"></param>
         /// <param name="suffix"></param>
-        /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
         public PeptideTerminusState ComputeTerminusState(char prefix, char suffix)
         {
             PeptideTerminusState peptideTerminusState;
@@ -408,10 +408,10 @@ namespace PHRPReader
         /// <summary>
         /// Determine the terminus state of the peptide
         /// </summary>
+        /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         /// <param name="cleanSequence"></param>
         /// <param name="prefixResidues"></param>
         /// <param name="suffixResidues"></param>
-        /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         public PeptideTerminusState ComputeTerminusState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
             // Determine the terminus state of cleanSequence
@@ -629,15 +629,15 @@ namespace PHRPReader
         /// <summary>
         /// Examines sequenceIn and splits apart into prefix, primary sequence, and suffix
         /// </summary>
+        /// <remarks>If more than one character is present before the first period or after the last period, all characters are returned
+        /// If the peptide starts with ".." it is auto-changed to start with "."
+        /// If the peptide ends with ".." it is auto-changed to end with "."
+        /// </remarks>
         /// <param name="sequenceIn">Peptide sequence to examine</param>
         /// <param name="primarySequence">Output: Primary sequence</param>
         /// <param name="prefix">Output: Prefix residue</param>
         /// <param name="suffix">Output: Suffix residue</param>
         /// <returns> Returns True if success, False if prefix and suffix residues were not found</returns>
-        /// <remarks>If more than one character is present before the first period or after the last period, all characters are returned
-        /// If the peptide starts with ".." it is auto-changed to start with "."
-        /// If the peptide ends with ".." it is auto-changed to end with "."
-        /// </remarks>
         public static bool SplitPrefixAndSuffixFromSequence(string sequenceIn,
             out string primarySequence,
             out string prefix,

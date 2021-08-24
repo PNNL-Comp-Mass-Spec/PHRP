@@ -1,4 +1,4 @@
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 6, 2006
 //
@@ -1890,9 +1890,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Append an entry to the _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
+        /// <remarks>Call InitializeOutputFiles once prior to calling this method</remarks>
         /// <param name="searchResult"></param>
         /// <param name="updateResultToSeqMapFile">Set to True only for the first protein of each peptide in each group</param>
-        /// <remarks>Call InitializeOutputFiles once prior to calling this method</remarks>
         protected void SaveResultsFileEntrySeqInfo(SearchResultsBaseClass searchResult, bool updateResultToSeqMapFile)
         {
             // This ID is assigned using a SortedSet containing mPeptideCleanSequence and mPeptideModDescription

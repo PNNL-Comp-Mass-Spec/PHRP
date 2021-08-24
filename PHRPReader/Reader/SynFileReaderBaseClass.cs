@@ -198,14 +198,14 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Initialize the SynFileReader for the given dataset, input file, and result type
         /// </summary>
-        /// <param name="datasetName">Dataset Name</param>
-        /// <param name="inputFilePath">Input file path</param>
-        /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
-        /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>
         /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable,
         /// but data related methods will not be callable
         /// </remarks>
+        /// <param name="datasetName">Dataset Name</param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
+        /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         protected SynFileReaderBaseClass(
             string datasetName,
             string inputFilePath,
@@ -240,14 +240,14 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Initialize the SynFileReader for the given dataset, input file, and result type
         /// </summary>
-        /// <param name="datasetName">Dataset name</param>
-        /// <param name="inputFilePath">Input file path</param>
-        /// <param name="peptideHitResultType"></param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks>
         /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable,
         /// but data related methods will not be callable
         /// </remarks>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="peptideHitResultType"></param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
@@ -276,15 +276,15 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Initialize the SynFileReader for the given dataset and input file
         /// </summary>
-        /// <param name="datasetName">Dataset Name</param>
-        /// <param name="inputFilePath">Input file path</param>
-        /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
-        /// <param name="startupOptions">Startup options</param>
         /// <remarks>
         /// If inputFilePath is an empty string, the methods that solely depend on dataset name will be callable, but data related methods will not be callable
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
+        /// <param name="datasetName">Dataset Name</param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
+        /// <param name="startupOptions">Startup options</param>
         private void InitializeReader(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             if (string.IsNullOrWhiteSpace(datasetName))
@@ -402,8 +402,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Returns the appropriate SynFileReader class based on the input file name; assumes loadModsAndSeqInfo=True
         /// </summary>
-        /// <param name="inputFilePath">Input file path</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
+        /// <param name="inputFilePath">Input file path</param>
         public static SynFileReaderBaseClass GetReader(string inputFilePath)
         {
             return GetReader(inputFilePath, true);
@@ -412,9 +412,9 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Returns the appropriate SynFileReader class based on the input file name
         /// </summary>
+        /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
         public static SynFileReaderBaseClass GetReader(string inputFilePath, bool loadModsAndSeqInfo)
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
@@ -436,10 +436,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Returns the appropriate SynFileReader class based on the input file name
         /// </summary>
+        /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
         public static SynFileReaderBaseClass GetReader(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
@@ -506,12 +506,12 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parse the data line read from a PHRP results file
         /// </summary>
+        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">Output: PSM info</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
         public abstract bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode);
 
         /// <summary>
@@ -952,10 +952,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Splits text on text, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
         /// </summary>
+        /// <remarks>Automatically trims whitespace</remarks>
         /// <param name="text"></param>
         /// <param name="chDelimiter"></param>
         /// <returns>KeyValuePair with key and value from text; key and value will be empty if chDelimiter was not found</returns>
-        /// <remarks>Automatically trims whitespace</remarks>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string text, char chDelimiter)
         {
             return ParseKeyValueSetting(text, chDelimiter, string.Empty);
@@ -964,11 +964,11 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Splits text on text, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
         /// </summary>
+        /// <remarks>Automatically trims whitespace</remarks>
         /// <param name="text"></param>
         /// <param name="chDelimiter"></param>
         /// <param name="commentChar">If defined, looks for this character in the value portion of the setting and removes that character plus any text after it</param>
         /// <returns>KeyValuePair with key and value from text; key and value will be empty if chDelimiter was not found</returns>
-        /// <remarks>Automatically trims whitespace</remarks>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string text, char chDelimiter, string commentChar)
         {
             if (string.IsNullOrEmpty(text))

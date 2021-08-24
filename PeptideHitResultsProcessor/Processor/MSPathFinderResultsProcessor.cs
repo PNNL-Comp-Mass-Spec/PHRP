@@ -568,10 +568,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read mod info from the MSPathFinder parameter file
         /// </summary>
+        /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         /// <param name="msPathFinderParamFilePath"></param>
         /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
-        /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string msPathFinderParamFilePath,
             out List<MSGFPlusParamFileModExtractor.ModInfo> modList)

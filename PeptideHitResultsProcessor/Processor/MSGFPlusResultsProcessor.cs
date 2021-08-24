@@ -1,4 +1,4 @@
-// This class reads in an MS-GF+ results file (.txt format) and creates
+﻿// This class reads in an MS-GF+ results file (.txt format) and creates
 // a tab-delimited text file with the data.  It will insert modification symbols
 // into the peptide sequences for modified peptides.
 //
@@ -567,13 +567,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
         /// </summary>
+        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
         /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
         /// <param name="adjustPrecursorMassForC13"></param>
         /// <returns>DelM, in ppm</returns>
-        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         private double ComputeDelMCorrectedPPM(
             double precursorErrorDa,
             double precursorMZ,
@@ -2251,11 +2251,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing function
         /// </summary>
+        /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
         /// <param name="inputFilePath">MS-GF+ results file (Dataset.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file for data processing</param>
         /// <returns>True if successful, False if failure</returns>
-        /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;

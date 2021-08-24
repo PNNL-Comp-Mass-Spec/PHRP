@@ -660,10 +660,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read mod info from the TopPIC parameter file
         /// </summary>
+        /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         /// <param name="topPICParamFilePath"></param>
         /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
-        /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string topPICParamFilePath,
             out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
