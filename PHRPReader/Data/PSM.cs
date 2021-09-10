@@ -26,7 +26,7 @@ namespace PHRPReader.Data
 
         private string mDataLineText = string.Empty;
 
-        // Note: Be sure to update the Clone() function if you add new class-wide variables or properties
+        // Note: Be sure to update the Clone() method if you add new class-wide variables or properties
 
         private int mScanNumber;
 

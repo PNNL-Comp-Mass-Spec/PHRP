@@ -32,14 +32,14 @@ namespace PHRPReader
     ///   A.BCDEFGHIJK.L
     /// </para>
     /// <para>
-    /// Function ComputeCleavageState is overloaded to either except the peptide sequence with
+    /// Method ComputeCleavageState is overloaded to either except the peptide sequence with
     /// prefix and suffix letters (e.g. A.BCDEFGHIJK.L) or accept the primary peptide sequence,
     /// the prefix residue(s), and the suffix residue(s).
     /// </para>
     /// <para>Use EnzymeMatchSpec to specify the residues to match for cleavage</para>
     /// <para>The default cleavage specification is for trypsin: [KR]|[^P]</para>
     /// <para>
-    /// Note: Function SplitPrefixAndSuffixFromSequence will change peptides that look like:
+    /// Note: Method SplitPrefixAndSuffixFromSequence will change peptides that look like:
     ///      E.TGMLTQKFARSLGMLAVDNQARV..   to   E.TGMLTQKFARSLGMLAVDNQARV.
     ///   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
     /// </para>
