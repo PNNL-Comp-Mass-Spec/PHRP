@@ -13,20 +13,45 @@ namespace PeptideHitResultsProcessor.Data
 
         private static readonly Regex mNegativeCountMatcher = new(@"(?<Element>[a-z]+)\((?<ElementCount>-\d+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// Empirical formula
+        /// </summary>
         public string Composition { get; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// Monoisotopic mass
+        /// </summary>
         public double MonoisotopicMass { get; }
 
+        /// <summary>
+        /// Residues that this modification can apply to, tracked as a
+        /// space-free, comma-free list of one letter amino acid residue symbols
+        /// </summary>
         public string Residues { get; set; }
 
+        /// <summary>
+        /// Position in the peptide where this mod can occur
+        /// </summary>
         public MaxQuantModPosition Position { get; set; }
 
+        /// <summary>
+        /// Mod title, which traditionally has the mod name and affected residue, e.g. "Oxidation (M)"
+        /// </summary>
         public string Title { get; }
 
+        /// <summary>
+        /// Modification type
+        /// </summary>
         public MaxQuantModType ModType { get; set; }
 
+        /// <summary>
+        /// Terminus type
+        /// </summary>
         public MaxQuantTerminusType TerminusType { get; set; }
 
         /// <summary>
@@ -47,6 +72,12 @@ namespace PeptideHitResultsProcessor.Data
             MonoisotopicMass = ComputeMass(title, composition);
         }
 
+        /// <summary>
+        /// Parse the empirical formula to compute the modification mass
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="composition"></param>
+        /// <returns>Monoisotopic mass, in Da</returns>
         public static double ComputeMass(string title, string composition)
         {
             // Examples formulas for composition:
@@ -122,6 +153,9 @@ namespace PeptideHitResultsProcessor.Data
             return formula.Replace("Cx", "^13.003355C").Replace("Nx", "^15.000109N").Replace("Ox", "^17.999161O").Replace("Hx", "D");
         }
 
+        /// <summary>
+        /// Show the mod name and mass
+        /// </summary>
         public override string ToString()
         {
             return string.Format("{0}: {1} Da", Title, MonoisotopicMass);
