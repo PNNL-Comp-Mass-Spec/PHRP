@@ -1286,6 +1286,63 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Compute FDR values, then assign QValues
+        /// </summary>
+        /// <remarks>Assumes the data is sorted by descending score using MaxQuantSearchResultsComparerScoreScanChargePeptide</remarks>
+        /// <param name="searchResults"></param>
+        private void ComputeQValues(IList<MaxQuantSearchResult> searchResults)
+        {
+            var forwardPeptideCount = 0;
+            var reversePeptideCount = 0;
+
+            for (var index = 0; index < searchResults.Count; index++)
+            {
+                // Reverse should be true for reverse-hit peptides
+                // Alternative, the LeadingRazor protein field will start with REV__ for reverse-hit peptides
+
+                if (searchResults[index].Reverse || searchResults[index].LeadingRazorProtein.StartsWith("REV__"))
+                {
+                    reversePeptideCount++;
+                }
+                else
+                {
+                    forwardPeptideCount++;
+                }
+
+                double fdr = 1;
+
+                if (forwardPeptideCount > 0)
+                {
+                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                }
+
+                var udtResult = searchResults[index];
+                udtResult.FDR = fdr;
+
+                searchResults[index] = udtResult;
+            }
+
+            // Now compute Q-Values
+            // We step through the list, from the worst scoring result to the best result
+            // The first Q-Value is the FDR of the final entry
+            // The next Q-Value is the minimum of (QValue, CurrentFDR)
+
+            var qValue = searchResults.Last().FDR;
+            if (qValue > 1)
+                qValue = 1;
+
+            for (var index = searchResults.Count - 1; index >= 0; index += -1)
+            {
+                var udtResult = searchResults[index];
+
+                qValue = Math.Min(qValue, udtResult.FDR);
+                udtResult.QValue = qValue;
+
+                searchResults[index] = udtResult;
+            }
+        }
+
+        /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
         /// <param name="searchResult"></param>
@@ -3909,63 +3966,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
-            }
-        }
-
-        /// <summary>
-        /// Compute FDR values, then assign QValues
-        /// </summary>
-        /// <remarks>Assumes the data is sorted by descending score using MaxQuantSearchResultsComparerScoreScanChargePeptide</remarks>
-        /// <param name="searchResults"></param>
-        private void ComputeQValues(IList<MaxQuantSearchResult> searchResults)
-        {
-            var forwardPeptideCount = 0;
-            var reversePeptideCount = 0;
-
-            for (var index = 0; index < searchResults.Count; index++)
-            {
-                // Reverse should be true for reverse-hit peptides
-                // Alternative, the LeadingRazor protein field will start with REV__ for reverse-hit peptides
-
-                if (searchResults[index].Reverse || searchResults[index].LeadingRazorProtein.StartsWith("REV__"))
-                {
-                    reversePeptideCount++;
-                }
-                else
-                {
-                    forwardPeptideCount++;
-                }
-
-                double fdr = 1;
-
-                if (forwardPeptideCount > 0)
-                {
-                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
-                }
-
-                var udtResult = searchResults[index];
-                udtResult.FDR = fdr;
-
-                searchResults[index] = udtResult;
-            }
-
-            // Now compute Q-Values
-            // We step through the list, from the worst scoring result to the best result
-            // The first Q-Value is the FDR of the final entry
-            // The next Q-Value is the minimum of (QValue, CurrentFDR)
-
-            var qValue = searchResults.Last().FDR;
-            if (qValue > 1)
-                qValue = 1;
-
-            for (var index = searchResults.Count - 1; index >= 0; index += -1)
-            {
-                var udtResult = searchResults[index];
-
-                qValue = Math.Min(qValue, udtResult.FDR);
-                udtResult.QValue = qValue;
-
-                searchResults[index] = udtResult;
             }
         }
 
