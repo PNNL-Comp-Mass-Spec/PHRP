@@ -36,7 +36,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Default modification symbols
         /// </summary>
-        public const string DEFAULT_MODIFICATION_SYMBOLS = "*#@$&!%~����^`��+=��";         // A few other possibilities: ����
+        public const string DEFAULT_MODIFICATION_SYMBOLS = "*#@$&!%~†‡¤º^`×÷+=ø¢";         // A few other possibilities: €£¥§
 
         /// <summary>
         /// Digits of precision to round masses to when finding mass correction tags by mass
