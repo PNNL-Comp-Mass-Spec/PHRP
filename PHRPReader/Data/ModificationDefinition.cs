@@ -120,9 +120,10 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
+        /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
+        /// Otherwise, set to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
         /// </summary>
-        private char mModificationSymbol;
+        private char mAffectedAtom;
 
         /// <summary>
         /// Monoisotopic modification mass
@@ -130,25 +131,64 @@ namespace PHRPReader.Data
         private double mModificationMass;
 
         /// <summary>
-        /// Target residues, tracked as a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to
-        /// Use the *_SYMBOL_DMS constants for the peptide and protein termini symbols (&lt; and &gt; for the peptide termini; [ and ] for the protein termini)
+        /// One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
+        /// </summary>
+        private char mModificationSymbol;
+
+        /// <summary>
+        /// Only used with Isotopic modifications, indicating the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
         /// <remarks>
-        /// If this is empty, the given modification can apply to any residue or terminus
+        /// Set to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
+        /// (including terminus modifications)
         /// </remarks>
-        private string mTargetResidues;
+        public char AffectedAtom
+        {
+            get => mAffectedAtom;
+            set
+            {
+                if (value == default(char))
+                {
+                    mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+                }
+                else
+                {
+                    mAffectedAtom = value;
+                }
+            }
+        }
 
         /// <summary>
-        /// Name associated with the given ModificationMass; maximum length is 8 characters
+        /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
+        /// </summary>
+        /// <remarks>
+        /// <para>
         /// Cannot contain a colon, comma, or space
-        /// </summary>
-        private string mMassCorrectionTag;
+        /// </para>
+        /// <para>
+        /// Prior to 2020, was limited to 8 characters in length, but that restriction has been removed
+        /// </para>
+        /// </remarks>
+        public string MassCorrectionTag { get; set; }
 
         /// <summary>
-        /// Set to Nothing or to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
-        /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
+        /// Monoisotopic modification mass
         /// </summary>
-        private char mAffectedAtom;
+        public double ModificationMass
+        {
+            get => mModificationMass;
+            set
+            {
+                mModificationMass = value;
+                ModificationMassAsText = mModificationMass.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Modification mass, stored as text
+        /// </summary>
+        /// <remarks>Represents the original string value read from the data file</remarks>
+        public string ModificationMassAsText { get; set; }
 
         /// <summary>
         /// One letter symbol for this modification
@@ -174,81 +214,29 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Monoisotopic modification mass
-        /// </summary>
-        public double ModificationMass
-        {
-            get => mModificationMass;
-            set
-            {
-                mModificationMass = value;
-                ModificationMassAsText = mModificationMass.ToString(CultureInfo.InvariantCulture);
-            }
-        }
-
-        /// <summary>
-        /// Modification mass, stored as text
-        /// </summary>
-        /// <remarks>Represents the original string value read from the data file</remarks>
-        public string ModificationMassAsText { get; set; }
-
-        /// <summary>
-        /// Residues that this modification can apply to
-        /// </summary>
-        /// <remarks>
-        /// If an empty string, the modification can apply to any residue or terminus;
-        /// Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to.
-        /// Use the *_SYMBOL_DMS constants for the peptide and protein termini symbols
-        /// (less than and greater than signs for the peptide termini; [ and ] for the protein termini)
-        /// </remarks>
-        public string TargetResidues
-        {
-            get => mTargetResidues;
-            set => mTargetResidues = value ?? string.Empty;
-        }
-
-        /// <summary>
         /// Modification type
         /// </summary>
         public ResidueModificationType ModificationType { get; set; }
 
         /// <summary>
-        /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
-        /// </summary>
-        /// <remarks>Maximum length is 8 characters; cannot contain a colon, comma, or space</remarks>
-        public string MassCorrectionTag
-        {
-            get => mMassCorrectionTag;
-            set => mMassCorrectionTag = value ?? string.Empty;
-        }
-
-        /// <summary>
-        /// Only used with Isotopic modifications, indicating the atom affected (e.g. C, H, N, O, or S)
-        /// </summary>
-        /// <remarks>
-        /// Set to Nothing or to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
-        /// (including terminus modifications)
-        /// </remarks>
-        public char AffectedAtom
-        {
-            get => mAffectedAtom;
-            set
-            {
-                if (value == default(char))
-                {
-                    mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
-                }
-                else
-                {
-                    mAffectedAtom = value;
-                }
-            }
-        }
-
-        /// <summary>
         /// Number of times this modification was observed in the given dataset
         /// </summary>
         public int OccurrenceCount { get; set; }
+
+        /// <summary>
+        /// Residues that this modification can apply to, tracked as a
+        /// space-free, comma-free list of one letter amino acid residue symbols
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Use the *_SYMBOL_DMS constants for the peptide and protein termini symbols
+        /// (less than and greater than signs for the peptide termini; [ and ] for the protein termini)
+        /// </para>
+        /// <para>
+        /// If an empty string, the modification can apply to any residue or terminus
+        /// </para>
+        /// </remarks>
+        public string TargetResidues { get; set; }
 
         /// <summary>
         /// True if this was an unknown mass that was auto defined
@@ -338,14 +326,14 @@ namespace PHRPReader.Data
         /// </summary>
         public void Clear()
         {
-            mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
-            mModificationMass = 0;
+            AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+            MassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
+            ModificationMass = 0;
             ModificationMassAsText = "0";
-            mTargetResidues = string.Empty;
-            ModificationType = ModificationDefinition.ResidueModificationType.UnknownType;
-            mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
-            mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+            ModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
+            ModificationType = ResidueModificationType.UnknownType;
             OccurrenceCount = 0;
+            TargetResidues = string.Empty;
             UnknownModAutoDefined = false;
         }
 
@@ -501,7 +489,7 @@ namespace PHRPReader.Data
                 return true;
             }
 
-            foreach (var chChar in mTargetResidues)
+            foreach (var chChar in TargetResidues)
             {
                 if (terminalSymbols.Contains(chChar))
                 {
@@ -523,12 +511,12 @@ namespace PHRPReader.Data
                 return false;
             }
 
-            if (string.IsNullOrEmpty(mTargetResidues))
+            if (string.IsNullOrEmpty(TargetResidues))
             {
                 return true;
             }
 
-            foreach (var chChar in mTargetResidues)
+            foreach (var chChar in TargetResidues)
             {
                 if (!terminalSymbols.Contains(chChar))
                 {
