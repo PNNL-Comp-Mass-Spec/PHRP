@@ -55,7 +55,7 @@ namespace PeptideHitResultsProcessor.Data
         public MaxQuantTerminusType TerminusType { get; set; }
 
         /// <summary>
-        /// Constructor
+        /// Constructor that takes a mod name and empirical formula
         /// </summary>
         /// <param name="title"></param>
         /// <param name="composition"></param>
@@ -66,10 +66,24 @@ namespace PeptideHitResultsProcessor.Data
             Position = MaxQuantModPosition.Anywhere;
             ModType = MaxQuantModType.Standard;
             TerminusType = MaxQuantTerminusType.None;
-
             Residues = string.Empty;
-
             MonoisotopicMass = ComputeMass(title, composition);
+        }
+
+        /// <summary>
+        /// Constructor that takes a mod name and mass
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="monoisotopicMass"></param>
+        public MaxQuantModInfo(string title, double monoisotopicMass)
+        {
+            Title = title;
+            Composition = string.Empty;
+            Position = MaxQuantModPosition.Anywhere;
+            ModType = MaxQuantModType.Standard;
+            TerminusType = MaxQuantTerminusType.None;
+            Residues = string.Empty;
+            MonoisotopicMass = monoisotopicMass;
         }
 
         /// <summary>
