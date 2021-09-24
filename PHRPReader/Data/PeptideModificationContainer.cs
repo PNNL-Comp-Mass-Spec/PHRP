@@ -782,8 +782,6 @@ namespace PHRPReader.Data
             byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION,
             byte massDigitsOfPrecisionLoose = MASS_DIGITS_OF_PRECISION)
         {
-            ModificationDefinition modificationDefinition;
-
             existingModFound = false;
 
             var matchedMods = new List<KeyValuePair<double, ModificationDefinition>>();
@@ -918,7 +916,7 @@ namespace PHRPReader.Data
 
                     existingModFound = true;
 
-                    modificationDefinition = mStandardRefinementModifications[index];
+                    var modificationDefinition = mStandardRefinementModifications[index];
                     modificationDefinition.ModificationSymbol = ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
 
                     if (addToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
@@ -1037,7 +1035,6 @@ namespace PHRPReader.Data
             // If no match is found, looks for the first dynamic modification with the given mass, regardless of .TargetResidues
             // If no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
             // If chTargetResidue is nothing, follows similar logic, but skips defined modifications with defined .TargetResidues
-
             ModificationDefinition modificationDefinition;
 
             char modSymbol;
@@ -1143,7 +1140,7 @@ namespace PHRPReader.Data
 
                     existingModFound = true;
 
-                    modificationDefinition = mStandardRefinementModifications[index];
+                    var modificationDefinition = mStandardRefinementModifications[index];
                     modificationDefinition.ModificationSymbol = modSymbol;
                     modificationDefinition.ModificationType = modType;
 
