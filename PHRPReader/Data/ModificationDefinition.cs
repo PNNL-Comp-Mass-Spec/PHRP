@@ -270,7 +270,7 @@ namespace PHRPReader.Data
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
-        public ModificationDefinition(double modificationMass, string targetResidues, ModificationDefinition.ResidueModificationType modificationType)
+        public ModificationDefinition(double modificationMass, string targetResidues, ResidueModificationType modificationType)
         {
             Clear();
 
@@ -287,7 +287,7 @@ namespace PHRPReader.Data
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
-        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationDefinition.ResidueModificationType modificationType, string massCorrectionTag)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ResidueModificationType modificationType, string massCorrectionTag)
         {
             Clear();
 
@@ -308,7 +308,7 @@ namespace PHRPReader.Data
         /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
         /// <param name="unknownModAutoDefined"></param>
-        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationDefinition.ResidueModificationType modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ResidueModificationType modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
@@ -397,7 +397,7 @@ namespace PHRPReader.Data
                 }
                 else if (a.TargetResidues != null && b.TargetResidues != null)
                 {
-                    if (a.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod)
+                    if (a.ModificationType is ResidueModificationType.DynamicMod or ResidueModificationType.StaticMod)
                     {
                         // Matching dynamic or static modification definitions
                         // Make sure each of the residues in b.TargetResidues is present in .TargetResidues
@@ -484,7 +484,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType is ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
+            if (ModificationType is ResidueModificationType.ProteinTerminusStaticMod or ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return true;
             }
@@ -506,7 +506,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType is ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod or ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
+            if (ModificationType is ResidueModificationType.ProteinTerminusStaticMod or ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return false;
             }
@@ -547,21 +547,21 @@ namespace PHRPReader.Data
         /// Retrieve the modification type for the given modification type symbol
         /// </summary>
         /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
-        public static ModificationDefinition.ResidueModificationType ModificationSymbolToModificationType(char modificationTypeSymbol)
+        public static ResidueModificationType ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
             if (modificationTypeSymbol == default(char))
             {
-                return ModificationDefinition.ResidueModificationType.UnknownType;
+                return ResidueModificationType.UnknownType;
             }
 
             return modificationTypeSymbol switch
             {
-                'D' => ModificationDefinition.ResidueModificationType.DynamicMod,
-                'S' => ModificationDefinition.ResidueModificationType.StaticMod,
-                'T' => ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod,
-                'I' => ModificationDefinition.ResidueModificationType.IsotopicMod,
-                'P' => ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod,
-                _ => ModificationDefinition.ResidueModificationType.UnknownType
+                'D' => ResidueModificationType.DynamicMod,
+                'S' => ResidueModificationType.StaticMod,
+                'T' => ResidueModificationType.TerminalPeptideStaticMod,
+                'I' => ResidueModificationType.IsotopicMod,
+                'P' => ResidueModificationType.ProteinTerminusStaticMod,
+                _ => ResidueModificationType.UnknownType
             };
         }
 
@@ -570,7 +570,7 @@ namespace PHRPReader.Data
         /// </summary>
         /// <param name="modificationType"></param>
         /// <returns>D, S, T, I, or P</returns>
-        public static char ModificationTypeToModificationSymbol(ModificationDefinition.ResidueModificationType modificationType)
+        public static char ModificationTypeToModificationSymbol(ResidueModificationType modificationType)
         {
             return modificationType switch
             {
