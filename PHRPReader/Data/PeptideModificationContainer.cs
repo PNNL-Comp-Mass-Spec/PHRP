@@ -1355,9 +1355,22 @@ namespace PHRPReader.Data
                             headerNames.Add(MOD_SUMMARY_COLUMN_Mod_Name_UniMod);
                             headerNames.Add(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
 
+                            // _ModDefs.txt files    have Monoisotopic_Mass as the second column
+                            // _ModSummary.txt files have Modification_Mass as the second column
+                            // Add "Modification_Mass" just in case somebody manually copied headers over
+                            headerNames.Add(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass);
+
                             SynFileReaderBaseClass.DefineColumnHeaders(columnHeaders, headerNames);
 
                             ReaderFactory.ParseColumnHeaders(columns, columnHeaders);
+
+                            if (columnHeaders[MOD_SUMMARY_COLUMN_Monoisotopic_Mass] < 0 &&
+                                columnHeaders[PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass] >= 0)
+                            {
+                                // Update the column index for the monoisotopic mass column
+                                columnHeaders[MOD_SUMMARY_COLUMN_Monoisotopic_Mass] = columnHeaders[PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass];
+                            }
+
                             headerNamesFound = true;
                             continue;
                         }
