@@ -2856,22 +2856,22 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (parameterGroupNodes.Count > 1)
-                {
-                    OnWarningEvent("MaxQuant parameter file has more than one <parameterGroup> element; this is unexpected");
-                }
+                // If the <paramGroupIndices> element has multiple parameter groups, the parameter file will have multiple <parameterGroup> sections,
+                // Each section should have the same modifications and search tolerances defined
+                // Thus, just use the first one
+                var parameterGroupNode = parameterGroupNodes[0];
 
-                var fixedModNodes = parameterGroupNodes.Elements("fixedModifications").Elements("string").ToList();
+                var fixedModNodes = parameterGroupNode.Elements("fixedModifications").Elements("string").ToList();
 
-                var dynamicModNodes = parameterGroupNodes.Elements("variableModifications").Elements("string").ToList();
-                dynamicModNodes.AddRange(parameterGroupNodes.Elements("variableModificationsFirstSearch").Elements("string"));
+                var dynamicModNodes = parameterGroupNode.Elements("variableModifications").Elements("string").ToList();
+                dynamicModNodes.AddRange(parameterGroupNode.Elements("variableModificationsFirstSearch").Elements("string"));
 
-                var firstSearchToleranceNode = parameterGroupNodes.Elements("firstSearchTol").ToList();
-                var searchToleranceUnitNode = parameterGroupNodes.Elements("searchTolInPpm").ToList();
+                var firstSearchToleranceNode = parameterGroupNode.Elements("firstSearchTol").ToList();
+                var searchToleranceUnitNode = parameterGroupNode.Elements("searchTolInPpm").ToList();
 
                 // Check for isobaric mods, e.g. 6-plex or 10-plex TMT
-                var internalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
-                var terminalIsobaricLabelNodes = parameterGroupNodes.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
+                var internalIsobaricLabelNodes = parameterGroupNode.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("internalLabel").ToList();
+                var terminalIsobaricLabelNodes = parameterGroupNode.Elements("isobaricLabels").Elements("IsobaricLabelInfo").Elements("terminalLabel").ToList();
 
                 foreach (var fixedMod in fixedModNodes)
                 {
