@@ -2161,13 +2161,22 @@ namespace PeptideHitResultsProcessor.Processor
                 ModTypeInParameterFile = modType
             };
 
-            if (!mMaxQuantMods.TryGetValue(maxQuantModName, out var modInfo))
-            {
-                OnWarningEvent(string.Format(
-                    "The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file",
-                    maxQuantModName));
+            MaxQuantModInfo modInfo;
 
-                return modDef;
+            if (mMaxQuantMods.TryGetValue(maxQuantModName, out var candidateModInfo))
+            {
+                modInfo = candidateModInfo;
+            }
+            else
+            {
+                if (!TryGetMaxQuantMod(maxQuantModName, out modInfo))
+                {
+                    OnWarningEvent(string.Format(
+                        "The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file",
+                        maxQuantModName));
+
+                    return modDef;
+                }
             }
 
             modDef.ModName = modInfo.Title;
@@ -2435,7 +2444,7 @@ namespace PeptideHitResultsProcessor.Processor
                             "{0} or\n{1} or \n{2}",
                             inputDirectory.FullName, candidateFile1.FullName, candidateFile2.FullName));
 
-                        OnWarningEvent("Download the default modifications.xml file from ");
+                        OnWarningEvent("Download the default modifications.xml file from https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MaxQuant_Example");
                         return true;
                     }
                 }
@@ -4021,6 +4030,39 @@ namespace PeptideHitResultsProcessor.Processor
                     filteredSearchResults.Add(searchResults[index]);
                 }
             }
+        }
+
+        private bool TryGetMaxQuantMod(string maxQuantModName, out MaxQuantModInfo modInfo)
+        {
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var candidateMod in mPeptideMods.Modifications)
+            {
+                if (!candidateMod.MaxQuantModName.Equals(maxQuantModName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                modInfo = new MaxQuantModInfo(candidateMod.MaxQuantModName, candidateMod.ModificationMass)
+                {
+                    Residues = candidateMod.TargetResidues
+                };
+
+                if (candidateMod.TargetResidues.Equals(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString()))
+                    modInfo.Position = MaxQuantModPosition.AnyNterm;
+                else if (candidateMod.TargetResidues.Equals(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString()))
+                    modInfo.Position = MaxQuantModPosition.AnyCterm;
+                else if (candidateMod.TargetResidues.Equals(AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString()))
+                    modInfo.Position = MaxQuantModPosition.ProteinNterm;
+                else if (candidateMod.TargetResidues.Equals(AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString()))
+                    modInfo.Position = MaxQuantModPosition.ProteinCterm;
+                else
+                    modInfo.Position = MaxQuantModPosition.Anywhere;
+
+                return true;
+            }
+
+            modInfo = new MaxQuantModInfo(maxQuantModName, 0);
+            return false;
         }
 
         /// <summary>
