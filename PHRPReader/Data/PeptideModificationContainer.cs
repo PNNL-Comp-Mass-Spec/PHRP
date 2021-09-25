@@ -1210,9 +1210,12 @@ namespace PHRPReader.Data
             try
             {
                 // Open the mass correction tags file
-                // It should have 2 columns, separated by tabs
+                // Prior to September 2021, it did not have a header line
+
+                // It should have 3 columns, separated by tabs
                 // Column 1 is the mass correction tag name
                 // Column 2 is the monoisotopic mass for the mass correction (positive or negative number)
+                // Column 3 is the affected atom (only used for isotopic mods)
 
                 if (string.IsNullOrWhiteSpace(filePath))
                 {
@@ -1234,20 +1237,22 @@ namespace PHRPReader.Data
 
                 while (!massCorrectionTagsReader.EndOfStream)
                 {
-                    var lineIn = massCorrectionTagsReader.ReadLine();
-                    if (string.IsNullOrEmpty(lineIn))
+                    var dataLine = massCorrectionTagsReader.ReadLine();
+                    if (string.IsNullOrEmpty(dataLine) || dataLine.StartsWith("Mass_Correction_Tag"))
                         continue;
 
-                    var splitLine = lineIn.Split('\t');
+                    var splitLine = dataLine.Split('\t');
 
-                    if (splitLine.Length >= 2)
+                    if (splitLine.Length < 2)
                     {
-                        // See if the first column contains 1 or more characters and if the second column contains a number
-                        // Note that StoreMassCorrectionTag() will trim spaces from the end of the mass correction tag names
-                        if (splitLine[0].Trim().Length >= 1 && SynFileReaderBaseClass.IsNumber(splitLine[1]))
-                        {
-                            StoreMassCorrectionTag(splitLine[0], double.Parse(splitLine[1]));
-                        }
+                        continue;
+                    }
+
+                    // See if the first column contains 1 or more characters and if the second column contains a number
+                    // Note that StoreMassCorrectionTag() will trim spaces from the end of the mass correction tag names
+                    if (splitLine[0].Trim().Length >= 1 && SynFileReaderBaseClass.IsNumber(splitLine[1]))
+                    {
+                        StoreMassCorrectionTag(splitLine[0], double.Parse(splitLine[1]));
                     }
                 }
 
@@ -1276,14 +1281,21 @@ namespace PHRPReader.Data
             try
             {
                 // Open the modification file
+
                 // It should have 2 or more columns, separated by tabs
-                // Column 1 is the modification symbol
-                // Column 2 is the modification mass
-                // Column 3, which is optional, is the residues and/or termini that can be modified; if omitted, the modification can apply to any residues or termini
+                // It may or may not have a header line
+
+                // When no header line is defined, assume a fixed column order:
+                // Column 1: modification symbol
+                // Column 2: modification mass
+                // Column 3: residues and/or termini that can be modified; if omitted, the modification can apply to any residues or termini
                 //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continuous string, or can be separated by commas and/or spaces
                 //   For column 3, use the *_SYMBOL_DMS constants for the termini (< and > for the peptide termini; [ and ] for the protein termini)
-                // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to ModificationDefinition.ModificationTypeConstants)
-                // Column 5, which is optional, specifies the mass correction tag associated with the given modification
+                // Column 4: type of modification: D, S, T, I, or P (corresponding to ModificationDefinition.ModificationTypeConstants)
+                // Column 5: DMS-specific mass correction tag associated with the given modification
+                // Column 6: affected atom
+
+                // If a header line is present, column 6 could be Mod_Name_MaxQuant Mod_Name_UniMod for MSFragger searches
 
                 if (string.IsNullOrWhiteSpace(filePath))
                 {
@@ -1299,43 +1311,94 @@ namespace PHRPReader.Data
                     return false;
                 }
 
-                using var modFileReader = new StreamReader(filePath);
-
                 ClearModifications();
+
+                var headersDefined = false;
+                var headerNamesFound = false;
+
+                // Initialize the column mapping object
+                var columnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                const string MOD_SUMMARY_COLUMN_Monoisotopic_Mass = "Monoisotopic_Mass";
+                const string MOD_SUMMARY_COLUMN_Affected_Atom = "Affected_Atom";
+                const string MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant = "MaxQuant_Mod_Name";
+                const string MOD_SUMMARY_COLUMN_Mod_Name_UniMod = "UniMod_Mod_Name";
+
+                var headerNames = new List<string>
+                {
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
+                    MOD_SUMMARY_COLUMN_Monoisotopic_Mass,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
+                    MOD_SUMMARY_COLUMN_Affected_Atom
+                };
+
+                using var modFileReader = new StreamReader(filePath);
 
                 while (!modFileReader.EndOfStream)
                 {
-                    var lineIn = modFileReader.ReadLine();
-                    if (string.IsNullOrEmpty(lineIn))
+                    var dataLine = modFileReader.ReadLine();
+                    if (string.IsNullOrEmpty(dataLine))
                         continue;
 
-                    var splitLine = lineIn.Split('\t');
+                    var columns = dataLine.Split('\t');
 
-                    if (splitLine.Length < 2)
-                        continue;
+                    if (!headersDefined)
+                    {
+                        headersDefined = true;
 
-                    // See if the first column contains a single character and if the second column contains a number
+                        if (dataLine.StartsWith(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol))
+                        {
+                            // Add the optional header names
+                            headerNames.Add(MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant);
+                            headerNames.Add(MOD_SUMMARY_COLUMN_Mod_Name_UniMod);
+                            headerNames.Add(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
 
-                    if (splitLine[0].Trim().Length != 1 || !SynFileReaderBaseClass.IsNumber(splitLine[1]))
-                        continue;
+                            SynFileReaderBaseClass.DefineColumnHeaders(columnHeaders, headerNames);
 
-                    var modificationDefinition = new ModificationDefinition(splitLine[0].Trim()[0], double.Parse(splitLine[1]));
+                            ReaderFactory.ParseColumnHeaders(columns, columnHeaders);
+                            headerNamesFound = true;
+                            continue;
+                        }
 
-                    if (splitLine.Length >= 3)
+                        // Assume the default header order
+                        SynFileReaderBaseClass.DefineColumnHeaders(columnHeaders, headerNames);
+                    }
+
+                    if (!headerNamesFound)
+                    {
+                        if (columns.Length < 2)
+                            continue;
+
+                        // See if the first column contains a single character and if the second column contains a number
+                        if (columns[0].Trim().Length != 1 || !SynFileReaderBaseClass.IsNumber(columns[1]))
+                            continue;
+                    }
+
+                    var modificationSymbol = ReaderFactory.LookupColumnValue(columns, PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
+                    var modificationMass = ReaderFactory.LookupColumnValue(columns, MOD_SUMMARY_COLUMN_Monoisotopic_Mass, columnHeaders, 0.0);
+
+                    var modificationDefinition = new ModificationDefinition(modificationSymbol.Trim()[0], modificationMass);
+
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders,
+                        out var targetResidues))
                     {
                         // Parse the target residues list
-                        var residues = splitLine[2].Trim().ToUpper();
+                        var residues = targetResidues.Trim().ToUpper();
 
                         var residuesClean = string.Empty;
-                        foreach (var chChar in residues)
+                        foreach (var residue in residues)
                         {
-                            if (char.IsUpper(chChar))
+                            if (char.IsUpper(residue))
                             {
-                                residuesClean += chChar;
+                                residuesClean += residue;
                             }
-                            else if (chChar is AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+                            else if (residue is AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS or
+                                AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS or AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
                             {
-                                residuesClean += chChar;
+                                residuesClean += residue;
                             }
                         }
 
@@ -1343,38 +1406,44 @@ namespace PHRPReader.Data
                         {
                             modificationDefinition.TargetResidues = residuesClean;
                         }
+                    }
 
-                        if (splitLine.Length >= 4)
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders,
+                        out var modificationType))
+                    {
+                        // Store the modification type
+                        if (modificationType.Trim().Length == 1)
                         {
-                            // Store the modification type
-                            if (splitLine[3].Trim().Length == 1)
-                            {
-                                modificationDefinition.ModificationType = ModificationDefinition.ModificationSymbolToModificationType(splitLine[3].ToUpper().Trim()[0]);
-                            }
+                            var modTypeSymbol = modificationType.ToUpper().Trim()[0];
+                            modificationDefinition.ModificationType = ModificationDefinition.ModificationSymbolToModificationType(modTypeSymbol);
+                        }
 
-                            // If the .ModificationType is unknown, change it to Dynamic
-                            if (modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
-                            {
-                                modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
-                            }
+                        // If the .ModificationType is unknown, change it to Dynamic
+                        if (modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
+                        {
+                            modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
+                        }
+                    }
 
-                            if (splitLine.Length >= 5)
-                            {
-                                modificationDefinition.MassCorrectionTag = splitLine[4].Trim();
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders,
+                        out var massCorrectionTag))
+                    {
+                        modificationDefinition.MassCorrectionTag = massCorrectionTag.Trim();
+                    }
 
-                                if (splitLine.Length >= 6)
-                                {
-                                    splitLine[5] = splitLine[5].Trim();
-                                    if (splitLine[5].Length > 0)
-                                    {
-                                        modificationDefinition.AffectedAtom = splitLine[5][0];
-                                    }
-                                    else
-                                    {
-                                        modificationDefinition.AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
-                                    }
-                                }
-                            }
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, MOD_SUMMARY_COLUMN_Affected_Atom, columnHeaders,
+                        out var affectedAtom))
+                    {
+                        if (affectedAtom.Trim().Length > 0)
+                        {
+                            modificationDefinition.AffectedAtom = affectedAtom[0];
+                        }
+                        else
+                        {
+                            modificationDefinition.AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
                         }
                     }
 

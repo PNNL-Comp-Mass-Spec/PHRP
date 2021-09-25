@@ -2935,6 +2935,26 @@ namespace PHRPReader
             OnStatusEvent(message);
         }
 
+        /// <summary>
+        /// If the column exists, get the value for the column and return true
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <param name="columnName"></param>
+        /// <param name="columnHeaders"></param>
+        /// <param name="columnValue"></param>
+        /// <returns>True if the column exists, otherwise false</returns>
+        public static bool TryGetColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, out string columnValue)
+        {
+            if (ReaderFactory.LookupColumnIndex(columnName, columnHeaders) < 0)
+            {
+                columnValue = string.Empty;
+                return false;
+            }
+
+            columnValue = LookupColumnValue(columns, columnName, columnHeaders);
+            return true;
+        }
+
         private bool TryGetScanStats(int scanNumber,
             out ScanStatsInfo scanStatsInfo)
         {
