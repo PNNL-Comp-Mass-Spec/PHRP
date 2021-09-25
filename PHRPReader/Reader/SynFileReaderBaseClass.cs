@@ -471,7 +471,7 @@ namespace PHRPReader.Reader
                 PeptideHitResultTypes.XTandem => new XTandemSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
                 PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
                 PeptideHitResultTypes.MODPlus => new MODPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo),
-                _ => throw new Exception("Unrecognized value for PeptideHitResultType: " + peptideHitResultType.ToString())
+                _ => throw new Exception("Unrecognized value for PeptideHitResultType: " + peptideHitResultType)
             };
         }
 
