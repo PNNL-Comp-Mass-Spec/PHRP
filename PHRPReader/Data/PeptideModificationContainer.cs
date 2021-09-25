@@ -1447,6 +1447,13 @@ namespace PHRPReader.Data
                         }
                     }
 
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant, columnHeaders,
+                        out var maxQuantMod))
+                    {
+                        modificationDefinition.MaxQuantModName= maxQuantMod.Trim();
+                    }
+
                     // Check whether the modification type is Static and the .TargetResidues are one of: <>[]
                     // If so, update the modification type as needed
                     if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)

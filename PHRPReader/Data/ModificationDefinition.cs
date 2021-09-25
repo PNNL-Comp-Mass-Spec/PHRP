@@ -172,6 +172,11 @@ namespace PHRPReader.Data
         public string MassCorrectionTag { get; set; }
 
         /// <summary>
+        /// MaxQuant modification title
+        /// </summary>
+        public string MaxQuantModName { get; set; }
+
+        /// <summary>
         /// Monoisotopic modification mass
         /// </summary>
         public double ModificationMass
@@ -328,6 +333,7 @@ namespace PHRPReader.Data
         {
             AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
             MassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
+            MaxQuantModName = string.Empty;
             ModificationMass = 0;
             ModificationMassAsText = "0";
             ModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
