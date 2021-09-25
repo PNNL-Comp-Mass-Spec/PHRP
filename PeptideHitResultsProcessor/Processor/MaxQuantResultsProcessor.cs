@@ -3216,7 +3216,7 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
-                // Note that we replace NaN (not-a-number) with an empty string for several of the values
+                // Note that for several columns we use GetColumnValueCheckNaN() to replace NaN (not-a-number) with an empty string
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out searchResult.Length);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavageCount], out searchResult.MissedCleavageCount);

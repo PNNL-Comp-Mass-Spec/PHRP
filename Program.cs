@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa, txt
 
-        public const string PROGRAM_DATE = "August 14, 2021";
+        public const string PROGRAM_DATE = "September 23, 2021";
 
         private static readonly PHRPOptions Options = new();
 
@@ -559,8 +559,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /T to specify the file containing the mass correction tag info. This file " +
                                       "should be tab delimited, with the first column containing the mass correction tag name " +
-                                      "and the second column containing the mass (the name cannot contain commas or colons " +
-                                      "and can be, at most, 8 characters long)."));
+                                      "and the second column containing the mass (the name cannot contain commas or colons)."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /N to specify the parameter file provided to the search tool. " +
                                       "This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MODa, MODPlus, MSAlign, TopPIC, and InSpecT. " +
