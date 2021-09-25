@@ -31,7 +31,7 @@ namespace PHRPReader.Data
     /// </remarks>
     public class PeptideModificationContainer
     {
-        // Ignore Spelling: acetyl, deamidated, Sequest, UniMod
+        // Ignore Spelling: acetyl, deamidated, phospho, Sequest, UniMod
 
         /// <summary>
         /// Default modification symbols
@@ -411,7 +411,7 @@ namespace PHRPReader.Data
         /// Looks for the best match in mIntegerMassCorrectionTagLookup for modificationMass (which should be close to a integer value)
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <returns>The mass correction tag name if a match, otherwise nothing</returns>
+        /// <returns>The mass correction tag name if a match, otherwise an empty string</returns>
         private string GetBestIntegerBasedMassCorrectionTag(double modificationMass)
         {
             var closestMassCorrectionTag = string.Empty;
@@ -761,7 +761,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Looks for an existing modification with the given modification mass and target residues
         /// </summary>
-        /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         /// <param name="modificationMass"></param>
         /// <param name="chTargetResidue">
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
@@ -1008,7 +1008,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Looks for an existing modification with the given modification mass, modification type, and target residues
         /// </summary>
-        /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         /// <param name="modificationMass"></param>
         /// <param name="modType"></param>
         /// <param name="chTargetResidue">
@@ -1034,8 +1034,7 @@ namespace PHRPReader.Data
             // If no match is found, looks for the first modification with the given mass and no defined .TargetResidues
             // If no match is found, looks for the first dynamic modification with the given mass, regardless of .TargetResidues
             // If no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
-            // If chTargetResidue is nothing, follows similar logic, but skips defined modifications with defined .TargetResidues
-            ModificationDefinition modificationDefinition;
+            // If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar logic, but skips defined modifications with defined .TargetResidues
 
             char modSymbol;
             bool useNextAvailableModificationSymbol;
