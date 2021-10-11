@@ -56,9 +56,9 @@ DelM_PPM = 0.05 / (1500 / 1E6) = 33 ppm
 
 12. NTT
     * Number of tryptic terminii (or Unused, if no protease was specified). Note that the N- and C-terminus of a protein are both considered to be valid termini.
-    * 0 = Non tryptic 
-    * 1 = Partially tryptic 
-    * 2 = Fully tryptic 
+    * 0 = Non tryptic
+    * 1 = Partially tryptic
+    * 2 = Fully tryptic
     * For more information, including examples of various tryptic states, see the [Cleavage State](CleavageState.md) page.
 
 13. DeNovoScore
@@ -82,7 +82,7 @@ DelM_PPM = 0.05 / (1500 / 1E6) = 33 ppm
 
     * QValue is defined as the minimum false discovery rate (FDR) at which the test may be called significant
       * When computing QValue, data is sorted by SpecEValue.
-    * QValue is a spectrum-level FDR and is computed using the formula ReversePeptideCount ÷ ForwardPeptideCount
+    * QValue is a spectrum-level FDR and is computed using the formula ReversePeptideCount &divide; ForwardPeptideCount
     * Thus, if you filter on QValue &lt; 0.01 you are applying a 1% FDR filter
 
 19. PepQValue (for MSGF+, was previously PepFDR)
@@ -92,4 +92,3 @@ DelM_PPM = 0.05 / (1500 / 1E6) = 33 ppm
     * The same PepQValue value is given to all PSMs of the same peptide. Thus, even a low-quality PSM may get a good PepQValue (lower number) if the PSM has a high-quality "sibling" PSM.
       * Do not filter on PepQValue when counting the number of identified PSMs.
     * If comparing data to Sequest results filtered using a Target/Decoy approach, use QValue for filtering, not PepQValue
-

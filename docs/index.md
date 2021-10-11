@@ -21,8 +21,16 @@ Run PeptideHitResultsProcessor_Installer.msi to install the application.  This i
 
 Compressed file MSGFPlus_Example_Data.zip contains example data files and additional information on running MSGF+. You can find this file in the application folder (the folder with PeptideHitResultsProcRunner.exe). Simply unzip this file to a local directory on your computer to see the example data files.  This file is also available for download from this web page.
 
-* [MSGF+ Synopsis File Columns](SynopsisFileColumns_MSGFPlus)
 * [X!Tandem Synopsis File Columns](SynopsisFileColumns_XTandem)
+  Example X!Tandem XML Results File
+  ![Example X!Tandem XML Results File](PHRP_XTandemResultsFile.png)
+
+  Example Tab-Delimited Text Output File (X!Tandem Results)
+  ![Example Tab-Delimited Text Output File (X!Tandem Results)](PHRP_XTandem.png)
+
+* [MSGF+ Synopsis File Columns](SynopsisFileColumns_MSGFPlus)
+  Example Tab-Delimited Text Output File (MSGF+)
+  ![Example Tab-Delimited Text Output File (MSGF+)](PHRP_MSGFPlus.png)
 
 ### Acknowledgment
 
