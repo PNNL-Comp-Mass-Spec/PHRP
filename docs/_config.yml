@@ -2,3 +2,6 @@
 name: PHRP
 description: Converts a MSGF+ TSV file, X!Tandem results file (XML format), or a SEQUEST Synopsis/First Hits file to a series of tab-delimited text files summarizing the results.
 url: https://pnnl-comp-mass-spec.github.io/PHRP/
+
+# Google Analytics
+google_analytics: G-LXXKP1N66C
