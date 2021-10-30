@@ -667,8 +667,7 @@ namespace PHRPReader
                     break;
 
                 default:
-                    break;
-                // Unknown agent; leave unchanged
+                    throw new InvalidEnumArgumentException(nameof(standardCleavageAgent));
             }
 
             // ReSharper restore StringLiteralTypo
