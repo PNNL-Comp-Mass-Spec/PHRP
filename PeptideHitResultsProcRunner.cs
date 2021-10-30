@@ -141,69 +141,6 @@ namespace PeptideHitResultsProcRunner
             mPeptideHitResultsProcessor.Options.SearchToolParameterFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.SearchToolParameterFilePath);
         }
 
-        private bool LoadParameterFileSettings(string parameterFilePath)
-        {
-            const string OPTIONS_SECTION = "PeptideHitResultsProcRunner";
-
-            var settingsFile = new XmlSettingsFileAccessor();
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(parameterFilePath))
-                {
-                    // No parameter file specified; nothing to load
-                    return true;
-                }
-
-                if (!File.Exists(parameterFilePath))
-                {
-                    // See if parameterFilePath points to a file in the same directory as the application
-                    var appDirPath = GetAppDirectoryPath();
-                    if (string.IsNullOrWhiteSpace(appDirPath))
-                    {
-                        SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);
-                        return false;
-                    }
-
-                    parameterFilePath = Path.Combine(appDirPath, Path.GetFileName(parameterFilePath));
-                    if (!File.Exists(parameterFilePath))
-                    {
-                        SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);
-                        return false;
-                    }
-                }
-
-                if (settingsFile.LoadSettings(parameterFilePath))
-                {
-                    if (!settingsFile.SectionPresent(OPTIONS_SECTION))
-                    {
-                        ShowErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
-                        SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidParameterFile);
-                        return false;
-                    }
-
-                    mObtainModificationDefinitionsFromDMS = settingsFile.GetParam(OPTIONS_SECTION, "ObtainModificationDefinitionsFromDMS", mObtainModificationDefinitionsFromDMS);
-
-                    var value = settingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", Convert.ToInt32(mPeptideHitResultsFileFormat));
-                    try
-                    {
-                        mPeptideHitResultsFileFormat = (ResultsFileFormat)value;
-                    }
-                    catch (Exception)
-                    {
-                        mPeptideHitResultsFileFormat = ResultsFileFormat.AutoDetermine;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException("Error in LoadParameterFileSettings", ex);
-                return false;
-            }
-
-            return true;
-        }
-
         /// <summary>
         /// Log an additional message to the log file
         /// </summary>
@@ -228,18 +165,6 @@ namespace PeptideHitResultsProcRunner
             if (resetErrorCode)
             {
                 SetLocalErrorCode(ResultsProcessorErrorCodes.NoError);
-            }
-
-            if (!LoadParameterFileSettings(parameterFilePath))
-            {
-                var statusMessage = "Parameter file load error: " + parameterFilePath;
-                ShowErrorMessage(statusMessage);
-
-                if (ErrorCode == ProcessFilesErrorCodes.NoError)
-                {
-                    SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidParameterFile);
-                }
-                return false;
             }
 
             try
@@ -748,7 +673,7 @@ namespace PeptideHitResultsProcRunner
 
             if (ex != null)
             {
-                Console.WriteLine(PRISM.StackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
+                Console.WriteLine(StackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
             }
         }
 
