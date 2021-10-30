@@ -19,6 +19,8 @@ using System.Text.RegularExpressions;
 
 namespace PHRPReader
 {
+    // ReSharper disable CommentTypo
+
     /// <summary>
     /// This class will compute the cleavage state and terminus state of a given peptide sequence.
     /// It can also be used to remove modification symbols from a sequence using ExtractCleanSequenceFromSequenceWithMods
@@ -27,14 +29,13 @@ namespace PHRPReader
     /// <para>
     /// The sequence can simply contain single-letter amino acid symbols (capital letters) or a mix
     /// of amino acid symbols and modification symbols, for example:
-    ///   A.BCDEFGHIJK.L
-    ///   A.B*CDEFGHIJK.L
-    ///   A.BCDEFGHIJK*.L
-    ///   A.BCDEFGHIJK.L
+    ///   R.PEPTIDEK.L
+    ///   R.P*EPTIDEK.L
+    ///   R.PEPTIDEK*.L
     /// </para>
     /// <para>
     /// Method ComputeCleavageState is overloaded to either except the peptide sequence with
-    /// prefix and suffix letters (e.g. A.BCDEFGHIJK.L) or accept the primary peptide sequence,
+    /// prefix and suffix letters (e.g. R.PEPTIDEK.L) or accept the primary peptide sequence,
     /// the prefix residue(s), and the suffix residue(s).
     /// </para>
     /// <para>Use EnzymeMatchSpec to specify the residues to match for cleavage</para>
@@ -45,9 +46,10 @@ namespace PHRPReader
     ///   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
     /// </para>
     /// </remarks>
+    // ReSharper restore CommentTypo
     public class PeptideCleavageStateCalculator
     {
-        // Ignore Spelling: A-Za-z, tryptic, udt
+        // Ignore Spelling: A-Za-z, Arg, chymotrypsin, Glu, Lys, tryptic, udt
 
         /// <summary>
         /// Generic residue symbol
@@ -98,6 +100,8 @@ namespace PHRPReader
             Full = 2
         }
 
+        // ReSharper disable IdentifierTypo
+
         /// <summary>
         /// Peptide terminus state
         /// </summary>
@@ -129,19 +133,58 @@ namespace PHRPReader
         /// </summary>
         public enum StandardCleavageAgent
         {
-#pragma warning disable 1591
+            /// <summary>
+            /// Trypsin: cleave after K or R, unless followed by P
+            /// </summary>
             Trypsin = 0,
+
+            /// <summary>
+            /// Trypsin: cleave after any K or R
+            /// </summary>
             TrypsinWithoutProlineRule = 1,
+
+            /// <summary>
+            /// Cleave after K, R, F, Y, V, E, or L
+            /// </summary>
             TrypsinPlusFVLEY = 2,
+
+            /// <summary>
+            /// Chymotrypsin: cleave after F, W, Y, or L
+            /// </summary>
             Chymotrypsin = 3,
+
+            /// <summary>
+            /// Both trypsin and chymotrypsin: cleave after F, W, Y, L, K, or R
+            /// </summary>
             ChymotrypsinAndTrypsin = 4,
+
+            /// <summary>
+            /// Glu-C: cleave after E or D
+            /// </summary>
             GluC = 5,
+
+            /// <summary>
+            /// Cyanogen bromide: cleave after M
+            /// </summary>
             CyanBr = 6,
+
+            /// <summary>
+            /// Arg-C: cleave after R
+            /// </summary>
             EndoArgC = 7,
+
+            /// <summary>
+            /// Lys-C: cleave after K
+            /// </summary>
             EndoLysC = 8,
-            EndoAspN = 9,
-#pragma warning restore 1591
+
+            /// <summary>
+            /// Asp-N: cleave before D
+            /// </summary>
+            EndoAspN = 9
         }
+
+        // ReSharper restore IdentifierTypo
 
         /// <summary>
         /// Example RegEx match strings for EnzymeMatchSpecInfo:
@@ -579,20 +622,26 @@ namespace PHRPReader
         /// <param name="standardCleavageAgent"></param>
         public void SetStandardEnzymeMatchSpec(StandardCleavageAgent standardCleavageAgent)
         {
+            // ReSharper disable StringLiteralTypo
+
             switch (standardCleavageAgent)
             {
                 case StandardCleavageAgent.Trypsin:
                     SetEnzymeMatchSpec(TRYPSIN_LEFT_RESIDUE_REGEX, TRYPSIN_RIGHT_RESIDUE_REGEX);
                     break;
+
                 case StandardCleavageAgent.TrypsinWithoutProlineRule:
                     SetEnzymeMatchSpec("[KR]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.TrypsinPlusFVLEY:
                     SetEnzymeMatchSpec("[KRFYVEL]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.Chymotrypsin:
                     SetEnzymeMatchSpec("[FWYL]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.ChymotrypsinAndTrypsin:
                     SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]");
                     break;
@@ -604,19 +653,25 @@ namespace PHRPReader
                 case StandardCleavageAgent.CyanBr:
                     SetEnzymeMatchSpec("[M]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.EndoArgC:
                     SetEnzymeMatchSpec("[R]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.EndoLysC:
                     SetEnzymeMatchSpec("[K]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.EndoAspN:
                     SetEnzymeMatchSpec("[A-Z]", "[D]");
                     break;
+
                 default:
                     break;
                 // Unknown agent; leave unchanged
             }
+
+            // ReSharper restore StringLiteralTypo
         }
 
         /// <summary>
