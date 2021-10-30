@@ -83,6 +83,7 @@ namespace PeptideHitResultsProcRunner
         /// </remarks>
         public bool CreateProteinModsUsingPHRPDataFile { get; set; }
 
+        // ReSharper disable once UnusedMember.Global
         public ResultsProcessorErrorCodes LocalErrorCode => mLocalErrorCode;
 
         /// <summary>

@@ -528,6 +528,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <param name="modificationMass"></param>
         /// <param name="affectedAtom"></param>
         /// <returns>True if index is valid; otherwise, returns false</returns>
+        // ReSharper disable once UnusedMember.Global
         public bool GetSearchResultModDetailsByIndex(
             int index,
             out char residue,
@@ -1052,6 +1053,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>
         /// <param name="standardCleavageAgent"></param>
+        // ReSharper disable once UnusedMember.Global
         public void SetStandardEnzymeMatchSpec(PeptideCleavageStateCalculator.StandardCleavageAgent standardCleavageAgent)
         {
             mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(standardCleavageAgent);

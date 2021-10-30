@@ -182,6 +182,7 @@ namespace PHRPReader
         /// <summary>
         /// RegEx patterns for matching cleavage site residues
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public EnzymeMatchSpecInfo EnzymeMatchSpec
         {
             get => mEnzymeMatchSpec;

@@ -214,6 +214,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         public string ErrorMessage => GetErrorMessage();
 
+        // ReSharper disable once UnusedMember.Global
         public string FileVersion => GetVersionForExecutingAssembly();
 
         public string FileDate { get; protected set; }
@@ -225,11 +226,13 @@ namespace PeptideHitResultsProcessor.Processor
         // ProgressPercentComplete ranges from 0 to 100, but can contain decimal percentage values
         public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
 
+        // ReSharper disable once UnusedMember.Global
         public void AbortProcessingNow()
         {
             AbortProcessing = true;
         }
 
+        // ReSharper disable once UnusedMember.Global
         public static string AutoDefinePeptideHitResultsFilePath(
             ResultsFileFormat peptideHitResultFileFormat,
             string sourceDirectoryPath,
@@ -1713,6 +1716,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <returns>True if successful, False if failure</returns>
+        // ReSharper disable once UnusedMember.Global
         public bool ProcessFile(string inputFilePath, string outputDirectoryPath)
         {
             return ProcessFile(inputFilePath, outputDirectoryPath, string.Empty);
