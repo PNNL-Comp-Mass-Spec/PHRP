@@ -1464,7 +1464,13 @@ namespace PeptideHitResultsProcessor.Processor
             return false;
         }
 
-        protected virtual bool LoadParameterFileSettings(string parameterFilePath)
+
+        /// <summary>
+        /// Load settings from an XML-based parameter file
+        /// </summary>
+        /// <param name="parameterFilePath"></param>
+        /// <returns>True if parameters were loaded (or if parameterFilePath is an empty string), false if an error</returns>
+        private bool LoadParameterFileSettingsXML(string parameterFilePath)
         {
             const string OPTIONS_SECTION = "PeptideHitResultsProcessorOptions";
 
@@ -1538,15 +1544,15 @@ namespace PeptideHitResultsProcessor.Processor
                     Options.PeptideNTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", Options.PeptideNTerminusMassChange);
                     Options.PeptideCTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", Options.PeptideCTerminusMassChange);
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in LoadParameterFileSettings", ex);
+                SetErrorMessage("Error in LoadParameterFileSettingsXML", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
                 return false;
             }
-
-            return true;
         }
 
         /// <summary>
