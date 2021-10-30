@@ -1295,7 +1295,8 @@ namespace PHRPReader.Data
                 // Column 5: DMS-specific mass correction tag associated with the given modification
                 // Column 6: affected atom
 
-                // If a header line is present, column 6 could be Mod_Name_MaxQuant Mod_Name_UniMod for MSFragger searches
+                // If a header line is present, column 6 could be UniMod_Mod_Name
+                // For MaxQuant parameter files, column 7 will be MaxQuant_Mod_Name
 
                 if (string.IsNullOrWhiteSpace(filePath))
                 {
@@ -1321,8 +1322,8 @@ namespace PHRPReader.Data
 
                 const string MOD_SUMMARY_COLUMN_Monoisotopic_Mass = "Monoisotopic_Mass";
                 const string MOD_SUMMARY_COLUMN_Affected_Atom = "Affected_Atom";
-                const string MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant = "MaxQuant_Mod_Name";
-                const string MOD_SUMMARY_COLUMN_Mod_Name_UniMod = "UniMod_Mod_Name";
+                const string MOD_SUMMARY_COLUMN_UniMod_Mod_Name = "UniMod_Mod_Name";
+                const string MOD_SUMMARY_COLUMN_MaxQuant_Mod_Name = "MaxQuant_Mod_Name";
 
                 var headerNames = new List<string>
                 {
@@ -1351,8 +1352,8 @@ namespace PHRPReader.Data
                         if (dataLine.StartsWith(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol))
                         {
                             // Add the optional header names
-                            headerNames.Add(MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant);
-                            headerNames.Add(MOD_SUMMARY_COLUMN_Mod_Name_UniMod);
+                            headerNames.Add(MOD_SUMMARY_COLUMN_UniMod_Mod_Name);
+                            headerNames.Add(MOD_SUMMARY_COLUMN_MaxQuant_Mod_Name);
                             headerNames.Add(PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
 
                             // _ModDefs.txt files    have Monoisotopic_Mass as the second column
@@ -1461,7 +1462,14 @@ namespace PHRPReader.Data
                     }
 
                     if (ReaderFactory.TryGetColumnValue(
-                        columns, MOD_SUMMARY_COLUMN_Mod_Name_MaxQuant, columnHeaders,
+                        columns, MOD_SUMMARY_COLUMN_UniMod_Mod_Name, columnHeaders,
+                        out var uniModName))
+                    {
+                        modificationDefinition.UniModName = uniModName.Trim();
+                    }
+
+                    if (ReaderFactory.TryGetColumnValue(
+                        columns, MOD_SUMMARY_COLUMN_MaxQuant_Mod_Name, columnHeaders,
                         out var maxQuantMod))
                     {
                         modificationDefinition.MaxQuantModName= maxQuantMod.Trim();

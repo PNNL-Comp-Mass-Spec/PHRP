@@ -249,6 +249,14 @@ namespace PHRPReader.Data
         public bool UnknownModAutoDefined { get; set; }
 
         /// <summary>
+        /// UniMod name
+        /// </summary>
+        /// <remarks>
+        /// To see standard mod names, login as a guest to http://www.unimod.org/modifications_list.php?
+        /// </remarks>
+        public string UniModName { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public ModificationDefinition()
