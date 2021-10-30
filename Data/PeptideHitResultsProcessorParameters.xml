@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <sections>
-  <section name="PeptideHitResultsProcRunner">
-    <item key="DMSConnectionStringIntegrated" value="Data Source=gigasax;Initial Catalog=DMS5_T3;Integrated Security=SSPI;" />
-    <item key="DMSConnectionString" value="Data Source=gigasax;Initial Catalog=DMS5_T3;User=dmsreader;Password=dms4fun" />
-    <item key="ObtainModificationDefinitionsFromDMS" value="False" />
-    <item key="PeptideHitResultsFileFormat" value="0" />
-  </section>
   <section name="PeptideHitResultsProcessorOptions">
     <item key="CreateModificationSummaryFile" value="True" />
     
