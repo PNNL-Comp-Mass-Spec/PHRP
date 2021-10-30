@@ -1822,11 +1822,6 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
-        protected void ResetProgress()
-        {
-            ResetProgress(string.Empty);
-        }
-
         protected void ResetProgress(string progressStepDescription, bool echoToConsole = false)
         {
             mProgressStepDescription = progressStepDescription;
@@ -2056,11 +2051,6 @@ namespace PeptideHitResultsProcessor.Processor
             var udtItem = pepToProteinMapping[index];
             udtItem.Peptide = peptide;
             pepToProteinMapping[index] = udtItem;
-        }
-
-        protected void UpdateProgress(string progressStepDescription)
-        {
-            UpdateProgress(progressStepDescription, mProgressPercentComplete);
         }
 
         protected void UpdateProgress(float percentComplete)
@@ -2552,34 +2542,6 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     Console.WriteLine(" PeptideToProteinMapper is {0:0}% complete", percentComplete);
                 }
-            }
-        }
-
-        protected class ISearchOptionModificationInfoComparer : IComparer<SearchOptionModificationInfo>
-        {
-            public int Compare(SearchOptionModificationInfo x, SearchOptionModificationInfo y)
-            {
-                if (x.SortOrder > y.SortOrder)
-                {
-                    return 1;
-                }
-
-                if (x.SortOrder < y.SortOrder)
-                {
-                    return -1;
-                }
-
-                if (x.ModificationMass > y.ModificationMass)
-                {
-                    return 1;
-                }
-
-                if (x.ModificationMass < y.ModificationMass)
-                {
-                    return -1;
-                }
-
-                return 0;
             }
         }
 

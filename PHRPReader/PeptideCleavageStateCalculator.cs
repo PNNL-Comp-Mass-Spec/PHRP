@@ -212,15 +212,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Converts Cleavage State to 0, 1, or 2
-        /// </summary>
-        /// <param name="cleavageState"></param>
-        public static short CleavageStateToShort(PeptideCleavageState cleavageState)
-        {
-            return (short)cleavageState;
-        }
-
-        /// <summary>
         /// Determines the cleavage state of the specified peptide
         /// </summary>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>

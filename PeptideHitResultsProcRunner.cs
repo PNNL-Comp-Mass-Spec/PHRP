@@ -56,8 +56,6 @@ namespace PeptideHitResultsProcRunner
 
         protected ResultsFileFormat mPeptideHitResultsFileFormat;
 
-        protected bool mObtainModificationDefinitionsFromDMS;
-
         protected bool mUseExistingMTSPepToProteinMapFile;
 
         private PHRPBaseClass mPeptideHitResultsProcessor;
@@ -136,52 +134,11 @@ namespace PeptideHitResultsProcRunner
 
         private void InitializePeptideHitResultsProcessor(string inputFilePath)
         {
-            if (mObtainModificationDefinitionsFromDMS)
-            {
-                LoadModificationInfoFromDMS();
-            }
-
             var sourceFile = new FileInfo(inputFilePath);
 
             mPeptideHitResultsProcessor.Options.MassCorrectionTagsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.MassCorrectionTagsFilePath);
             mPeptideHitResultsProcessor.Options.ModificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.ModificationDefinitionsFilePath);
             mPeptideHitResultsProcessor.Options.SearchToolParameterFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.SearchToolParameterFilePath);
-        }
-
-        private void LoadModificationInfoFromDMS()
-        {
-            // ToDo: Contact DMS to get the modification information
-            // The results of this query will need to be filtered to get the info for just this analysis job
-
-            // ReSharper disable CommentTypo
-
-            //SELECT D.Dataset_Num,
-            //    AJ.AJ_jobID, PFMI.Local_Symbol,
-            //    PFMI.Monoisotopic_Mass, PFMI.Residue_Symbol,
-            //    PFMI.Mod_Type_Symbol, PFMI.Mass_Correction_Tag
-            //FROM dbo.T_Analysis_Job AJ INNER JOIN
-            //    dbo.T_Dataset D ON
-            //    AJ.AJ_datasetID = D.Dataset_ID LEFT
-            //     OUTER JOIN
-            //    dbo.V_Param_File_Mass_Mod_Info PFMI ON
-            //    AJ.AJ_parmFileName = PFMI.Param_File_Name
-            //WHERE (D.Dataset_Num = 'QC_05_2_a_24Oct05_Doc_0508-08')
-            //ORDER BY AJ.AJ_jobID, PFMI.Local_Symbol
-
-            //SELECT D.Dataset_Num,
-            //    AJ.AJ_jobID, PFMI.Local_Symbol,
-            //    PFMI.Monoisotopic_Mass, PFMI.Residue_Symbol,
-            //    PFMI.Mod_Type_Symbol, PFMI.Mass_Correction_Tag
-            //FROM dbo.T_Analysis_Job AJ INNER JOIN
-            //    dbo.T_Dataset D ON
-            //    AJ.AJ_datasetID = D.Dataset_ID LEFT
-            //     OUTER JOIN
-            //    dbo.V_Param_File_Mass_Mod_Info PFMI ON
-            //    AJ.AJ_parmFileName = PFMI.Param_File_Name
-            //WHERE (AJ.AJ_jobID = 47703)
-            //ORDER BY AJ.AJ_jobID, PFMI.Local_Symbol
-
-            // ReSharper restore CommentTypo
         }
 
         private bool LoadParameterFileSettings(string parameterFilePath)
