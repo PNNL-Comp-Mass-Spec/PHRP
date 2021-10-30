@@ -355,8 +355,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
-                if (proteinName == null)
-                    proteinName = string.Empty;
+                proteinName ??= string.Empty;
 
                 var key = uniqueSeqID + UNIQUE_SEQ_TO_PROTEIN_MAP_SEP + proteinName;
 
@@ -1781,8 +1780,7 @@ namespace PeptideHitResultsProcessor.Processor
             var originalExtension = originalFile.Extension;
 
             // Make sure newSuffix is not nothing
-            if (newSuffix == null)
-                newSuffix = string.Empty;
+            newSuffix ??= string.Empty;
 
             // Obtain the filename, without its extension
             var newFileBaseName = Path.GetFileNameWithoutExtension(originalFile.Name);
@@ -2595,11 +2593,9 @@ namespace PeptideHitResultsProcessor.Processor
                     return -1;
                 }
 
-                if (x.ModName == null)
-                    x.ModName = string.Empty;
+                x.ModName ??= string.Empty;
 
-                if (y.ModName == null)
-                    y.ModName = string.Empty;
+                y.ModName ??= string.Empty;
 
                 return string.CompareOrdinal(x.ModName, y.ModName);
             }
