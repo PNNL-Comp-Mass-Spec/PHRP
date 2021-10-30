@@ -1464,6 +1464,36 @@ namespace PeptideHitResultsProcessor.Processor
             return false;
         }
 
+        /// <summary>
+        /// Load settings from either a Key=Value parameter file or an XML-based parameter file
+        /// </summary>
+        /// <param name="parameterFilePath"></param>
+        /// <returns>True if parameters were loaded (or if parameterFilePath is an empty string), false if an error</returns>
+        protected bool LoadParameterFileSettings(string parameterFilePath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(parameterFilePath))
+                {
+                    // No parameter file specified; nothing to load
+                    return true;
+                }
+
+                var parameterFile = new FileInfo(parameterFilePath);
+
+                if (parameterFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                    return LoadParameterFileSettingsXML(parameterFilePath);
+
+                // ToDo: Read settings from a Key=Value parameter file
+                throw new NotImplementedException("Read settings from a Key=Value parameter file");
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in LoadParameterFileSettings", ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
+                return false;
+            }
+        }
 
         /// <summary>
         /// Load settings from an XML-based parameter file
