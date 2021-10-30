@@ -335,7 +335,7 @@ namespace PeptideHitResultsProcessor.Processor
                     mProteinNameOrder.Add(proteinName, proteinNumber);
                 }
 
-                OnStatusEvent(string.Format("Cached {0:N0} proteins", mProteinNameOrder.Count));
+                OnStatusEvent("Cached {0:N0} proteins", mProteinNameOrder.Count);
 
                 return true;
             }

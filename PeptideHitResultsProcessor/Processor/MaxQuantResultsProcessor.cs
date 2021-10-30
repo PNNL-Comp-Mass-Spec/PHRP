@@ -1450,17 +1450,13 @@ namespace PeptideHitResultsProcessor.Processor
                     continue;
                 }
 
-                OnWarningEvent(string.Format(
-                    "Did not find modification name {0} in modified sequence {1}; also tried {2}",
-                    modWithParentheses, searchResult.ModifiedSequence, altModNameWithParentheses));
+                OnWarningEvent("Did not find modification name {0} in modified sequence {1}; also tried {2}", modWithParentheses, searchResult.ModifiedSequence, altModNameWithParentheses);
             }
 
             // Assure that there are no parentheses remaining in the masked sequence
             if (maskedModifiedSequence.IndexOfAny(new[] { '(', ')' }) >= 0)
             {
-                OnWarningEvent(string.Format(
-                    "Masked modified sequence still has parentheses: {0} for {1}",
-                    maskedModifiedSequence, searchResult.ModifiedSequence));
+                OnWarningEvent("Masked modified sequence still has parentheses: {0} for {1}", maskedModifiedSequence, searchResult.ModifiedSequence);
             }
 
             // Populate a dictionary mapping character index in maskedModifiedSequence to residue number
@@ -1477,9 +1473,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (currentResidueNumber != searchResult.Length)
             {
-                OnWarningEvent(string.Format(
-                    "Final residue number determined for peptide does not match amino acid count: {0} instead of {1} for {2}, originally {3}",
-                    currentResidueNumber, searchResult.Length, maskedModifiedSequence, searchResult.ModifiedSequence));
+                OnWarningEvent("Final residue number determined for peptide does not match amino acid count: {0} instead of {1} for {2}, originally {3}", currentResidueNumber, searchResult.Length, maskedModifiedSequence, searchResult.ModifiedSequence);
             }
 
             // This list holds modification names and affected residue number, separated by a space
@@ -1522,9 +1516,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (charIndex + matchedModNameWithParentheses.Length >= charIndexResidueNumberMap.Count)
                         {
-                            OnWarningEvent(string.Format(
-                                "{0} found at the end of ModifiedSequence {1}; this is unexpected",
-                                matchedModNameWithParentheses, searchResult.ModifiedSequence));
+                            OnWarningEvent("{0} found at the end of ModifiedSequence {1}; this is unexpected", matchedModNameWithParentheses, searchResult.ModifiedSequence);
                             residueNumber = searchResult.Length;
                         }
                         else
@@ -1535,9 +1527,7 @@ namespace PeptideHitResultsProcessor.Processor
                     else if (charIndex == 0)
                     {
                         // This shouldn't happen, but we'll check for it
-                        OnWarningEvent(string.Format(
-                            "{0} found at the start of ModifiedSequence {1}; this is unexpected",
-                            matchedModNameWithParentheses, searchResult.ModifiedSequence));
+                        OnWarningEvent("{0} found at the start of ModifiedSequence {1}; this is unexpected", matchedModNameWithParentheses, searchResult.ModifiedSequence);
                         residueNumber = 0;
                     }
                     else
@@ -1562,10 +1552,8 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         if (!maxQuantModName.Equals(modificationNameToCompare))
                         {
-                            OnWarningEvent(string.Format(
-                                "Multiple MaxQuant modifications have the same short modification name (with the residue removed); " +
-                                "short name {0} resolves to both {1} and {2}",
-                                shortModName, modificationNameToCompare, maxQuantModName));
+                            OnWarningEvent("Multiple MaxQuant modifications have the same short modification name (with the residue removed); " +
+                                           "short name {0} resolves to both {1} and {2}", shortModName, modificationNameToCompare, maxQuantModName);
                         }
                     }
                     else
@@ -1596,7 +1584,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (!existingModFound)
                     {
-                        OnWarningEvent(string.Format("Modification {0} not found in modList; this is unexpected", maxQuantModName));
+                        OnWarningEvent("Modification {0} not found in modList; this is unexpected", maxQuantModName);
                         var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod, maxQuantModName);
                         modList.Add(modDef);
                     }
@@ -2148,7 +2136,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
-            OnWarningEvent(string.Format("Modification {0} not found in modList or mMaxQuantMods", modName));
+            OnWarningEvent("Modification {0} not found in modList or mMaxQuantMods", modName);
             modMass = 0;
             return false;
         }
@@ -2171,9 +2159,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (!TryGetMaxQuantMod(maxQuantModName, out modInfo))
                 {
-                    OnWarningEvent(string.Format(
-                        "The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file",
-                        maxQuantModName));
+                    OnWarningEvent("The MaxQuant modifications.xml file does not have a mod named '{0}'; unrecognized mod name in the MaxQuant parameter file", maxQuantModName);
 
                     return modDef;
                 }
@@ -2438,11 +2424,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        OnWarningEvent(string.Format(
-                            "MaxQuant modifications file not found; cannot add modification symbols to peptides in the synopsis file. " +
-                            "File modifications.xml should either be in the input directory or in the default MaxQuant directory: \n" +
-                            "{0} or\n{1} or \n{2}",
-                            inputDirectory.FullName, candidateFile1.FullName, candidateFile2.FullName));
+                        OnWarningEvent("MaxQuant modifications file not found; cannot add modification symbols to peptides in the synopsis file. " +
+                                       "File modifications.xml should either be in the input directory or in the default MaxQuant directory: \n" +
+                                       "{0} or\n{1} or \n{2}", inputDirectory.FullName, candidateFile1.FullName, candidateFile2.FullName);
 
                         OnWarningEvent("Download the default modifications.xml file from https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MaxQuant_Example");
                         return true;
@@ -2504,9 +2488,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (mMaxQuantMods.ContainsKey(modTitle))
                     {
-                        OnWarningEvent(string.Format(
-                            "MaxQuant modifications file has a duplicate definition for the modification titled '{0}'",
-                            modTitle));
+                        OnWarningEvent("MaxQuant modifications file has a duplicate definition for the modification titled '{0}'", modTitle);
 
                         continue;
                     }
@@ -2533,9 +2515,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        OnWarningEvent(string.Format(
-                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'position' element",
-                            maxQuantMod.Title));
+                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'position' element", maxQuantMod.Title);
                     }
 
                     if (XmlReaderUtilities.TryGetElementValue(modificationNode, "type", out var modTypeText))
@@ -2554,9 +2534,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        OnWarningEvent(string.Format(
-                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element",
-                            maxQuantMod.Title));
+                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element", maxQuantMod.Title);
                     }
 
                     if (XmlReaderUtilities.TryGetElementValue(modificationNode, "terminus_type", out var terminusTypeText))
@@ -2570,17 +2548,13 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        OnWarningEvent(string.Format(
-                            "Modification node '{0}' in the MaxQuant modifications file is missing the 'terminus_type' element",
-                            maxQuantMod.Title));
+                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'terminus_type' element", maxQuantMod.Title);
                     }
 
                     var modificationSiteNodes = modificationNode.Elements("modification_site").ToList();
                     if (modificationSiteNodes.Count == 0)
                     {
-                        OnWarningEvent(string.Format(
-                            "Modification node '{0}' in the MaxQuant modifications file 'modification_site' elements",
-                            maxQuantMod.Title));
+                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file 'modification_site' elements", maxQuantMod.Title);
 
                         continue;
                     }
@@ -2591,18 +2565,14 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             if (string.IsNullOrWhiteSpace(modificationSite))
                             {
-                                OnWarningEvent(string.Format(
-                                    "Modification node '{0}' in the MaxQuant modifications file has a modification_site element with an empty string for the 'site' attribute",
-                                    maxQuantMod.Title));
+                                OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file has a modification_site element with an empty string for the 'site' attribute", maxQuantMod.Title);
                             }
                             else
                             {
                                 var residue = modificationSite[0];
                                 if (maxQuantMod.Residues.Contains(residue))
                                 {
-                                    OnWarningEvent(string.Format(
-                                        "Modification node '{0}' in the MaxQuant modifications file has multiple modification_site elements with the same 'site' attribute value",
-                                        maxQuantMod.Title));
+                                    OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file has multiple modification_site elements with the same 'site' attribute value", maxQuantMod.Title);
                                     continue;
                                 }
 
@@ -2611,9 +2581,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                         else
                         {
-                            OnWarningEvent(string.Format(
-                                "Modification node '{0}' in the MaxQuant modifications file is missing the 'site' attribute for the modification_site element",
-                                maxQuantMod.Title));
+                            OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'site' attribute for the modification_site element", maxQuantMod.Title);
                         }
                     }
                 }
@@ -2688,8 +2656,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (!GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Id], out var peptideId, -1))
                     {
-                        OnWarningEvent(string.Format(
-                            "Line {0} in file {1} does not have an integer in the id column", lineNumber, inputFile.Name));
+                        OnWarningEvent("Line {0} in file {1} does not have an integer in the id column", lineNumber, inputFile.Name);
                         continue;
                     }
 
@@ -2699,8 +2666,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (string.IsNullOrWhiteSpace(peptideInfo.Sequence))
                     {
-                        OnWarningEvent(string.Format(
-                            "Line {0} in file {1} does not have a peptide in the Sequence column", lineNumber, inputFile.Name));
+                        OnWarningEvent("Line {0} in file {1} does not have a peptide in the Sequence column", lineNumber, inputFile.Name);
                         continue;
                     }
 
@@ -2782,9 +2748,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (lineParts.Length < 2)
                     {
-                        OnWarningEvent(string.Format(
-                            "Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected",
-                            lineNumber));
+                        OnWarningEvent("Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected", lineNumber);
 
                         continue;
                     }
@@ -3282,7 +3246,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else if (reverseFlag.Length > 0)
                 {
-                    OnWarningEvent(string.Format("Unexpected symbol in the Reverse column, line {0}: {1}", lineNumber, reverseFlag));
+                    OnWarningEvent("Unexpected symbol in the Reverse column, line {0}: {1}", lineNumber, reverseFlag);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out searchResult.MsMsID);
@@ -3323,9 +3287,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        OnWarningEvent(string.Format(
-                            "Calculated monoisotopic mass differs from the value reported by MaxQuant on line {0} for {1}, {2} Da; delta mass: {3:F3} Da",
-                            lineNumber, searchResult.Sequence, searchResult.CalculatedMonoMassValue, deltaMassVsMaxQuant));
+                        OnWarningEvent("Calculated monoisotopic mass differs from the value reported by MaxQuant on line {0} for {1}, {2} Da; delta mass: {3:F3} Da", lineNumber, searchResult.Sequence, searchResult.CalculatedMonoMassValue, deltaMassVsMaxQuant);
                     }
                 }
 

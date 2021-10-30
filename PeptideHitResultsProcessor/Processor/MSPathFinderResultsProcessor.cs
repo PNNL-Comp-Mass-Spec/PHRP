@@ -1310,9 +1310,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // (which results in PSMs associated with decoy proteins)
                         Options.IgnorePeptideToProteinMapperErrors = true;
 
-                        OnDebugEvent(string.Format(
-                            "Set IgnorePeptideToProteinMapperErrors to true since NumMatchesPerSpec is {0} in the MSPathFinder parameter file",
-                            numMatchesPerSpec));
+                        OnDebugEvent("Set IgnorePeptideToProteinMapperErrors to true since NumMatchesPerSpec is {0} in the MSPathFinder parameter file", numMatchesPerSpec);
                     }
 
                     // Define the base output filename using inputFilePath

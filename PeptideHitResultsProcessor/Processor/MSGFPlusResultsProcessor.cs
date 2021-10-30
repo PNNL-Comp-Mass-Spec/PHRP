@@ -1122,12 +1122,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
                     {
-                        OnWarningEvent(string.Format(
-                                          "Could not find parameter {0} or {1} in parameter file {2}; " +
-                                          "cannot determine the precursor mass tolerance",
-                                          MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME,
-                                          MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM,
-                                          Path.GetFileName(searchEngineParams.SearchEngineParamFilePath)));
+                        OnWarningEvent("Could not find parameter {0} or {1} in parameter file {2}; " +
+                                       "cannot determine the precursor mass tolerance", MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME, MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, Path.GetFileName(searchEngineParams.SearchEngineParamFilePath));
 
                         return new PrecursorMassTolerance();
                     }
@@ -1354,7 +1350,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Parse the ChargeCarrierMass setting
             if (MSGFPlusSynFileReader.GetCustomChargeCarrierMass(searchEngineParams, out var customChargeCarrierMass))
             {
-                OnStatusEvent(string.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass));
+                OnStatusEvent("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass);
                 mPeptideSeqMassCalculator.ChargeCarrierMass = customChargeCarrierMass;
             }
 
