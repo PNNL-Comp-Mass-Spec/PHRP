@@ -135,12 +135,11 @@ namespace PHRPReader
             TrypsinPlusFVLEY = 2,
             Chymotrypsin = 3,
             ChymotrypsinAndTrypsin = 4,
-            V8_aka_GluC = 5,
+            GluC = 5,
             CyanBr = 6,
             EndoArgC = 7,
             EndoLysC = 8,
             EndoAspN = 9,
-            V8 = 10
 #pragma warning restore 1591
         }
 
@@ -596,11 +595,12 @@ namespace PHRPReader
                     break;
                 case StandardCleavageAgent.ChymotrypsinAndTrypsin:
                     SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]");
-
                     break;
-                case StandardCleavageAgent.V8_aka_GluC:
+
+                case StandardCleavageAgent.GluC:
                     SetEnzymeMatchSpec("[ED]", "[A-Z]");
                     break;
+
                 case StandardCleavageAgent.CyanBr:
                     SetEnzymeMatchSpec("[M]", "[A-Z]");
                     break;
