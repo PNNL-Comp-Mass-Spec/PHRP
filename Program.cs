@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa, txt
 
-        public const string PROGRAM_DATE = "September 23, 2021";
+        public const string PROGRAM_DATE = "October 4, 2021";
 
         private static readonly PHRPOptions Options = new();
 
@@ -495,6 +495,7 @@ namespace PeptideHitResultsProcRunner
                                       "  MSAlign results file ({2}.txt)\n" +
                                       "  MODa results file ({3}.txt)\n" +
                                       "  MODPlus results file ({4}.txt)\n" +
+                                      "  MsFragger results file (_psm.tsv)\n" +
                                       "  MSPathFinder results file ({5}.txt)\n" +
                                       "  InSpecT results file ({6}.txt)\n" +
                                       "  SEQUEST Synopsis File ({7}.txt)\n" +
