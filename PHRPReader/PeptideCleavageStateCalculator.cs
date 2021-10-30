@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
@@ -635,8 +636,6 @@ namespace PHRPReader
             out string prefix,
             out string suffix)
         {
-            var success = false;
-
             prefix = string.Empty;
             suffix = string.Empty;
             primarySequence = string.Empty;
@@ -660,111 +659,107 @@ namespace PHRPReader
 
             // See if sequenceIn contains two periods
             var periodLoc1 = sequenceIn.IndexOf('.');
-            if (periodLoc1 >= 0)
-            {
-                var periodLoc2 = sequenceIn.LastIndexOf('.');
 
-                if (periodLoc2 > periodLoc1 + 1)
+            if (periodLoc1 < 0)
+            {
+                return false;
+            }
+
+            var periodLoc2 = sequenceIn.LastIndexOf('.');
+
+            if (periodLoc2 > periodLoc1 + 1)
+            {
+                // ReSharper disable CommentTypo
+
+                // Sequence contains two periods with letters between the periods,
+                // For example, R.PEPTIDEK.L or RPEP.TIDESEQK.L
+                // Extract out the text between the periods
+
+                primarySequence = sequenceIn.Substring(periodLoc1 + 1, periodLoc2 - periodLoc1 - 1);
+                if (periodLoc1 > 0)
                 {
-                    // Sequence contains two periods with letters between the periods,
-                    // For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
-                    // Extract out the text between the periods
-                    primarySequence = sequenceIn.Substring(periodLoc1 + 1, periodLoc2 - periodLoc1 - 1);
+                    prefix = sequenceIn.Substring(0, periodLoc1);
+                }
+                suffix = sequenceIn.Substring(periodLoc2 + 1);
+
+                // ReSharper restore CommentTypo
+
+                return true;
+            }
+
+            if (periodLoc2 == periodLoc1 + 1)
+            {
+                // Peptide contains two periods in a row
+                if (periodLoc1 <= 1)
+                {
+                    primarySequence = string.Empty;
+
                     if (periodLoc1 > 0)
                     {
                         prefix = sequenceIn.Substring(0, periodLoc1);
                     }
                     suffix = sequenceIn.Substring(periodLoc2 + 1);
 
-                    success = true;
+                    return true;
                 }
-                else if (periodLoc2 == periodLoc1 + 1)
-                {
-                    // Peptide contains two periods in a row
-                    if (periodLoc1 <= 1)
-                    {
-                        primarySequence = string.Empty;
 
-                        if (periodLoc1 > 0)
-                        {
-                            prefix = sequenceIn.Substring(0, periodLoc1);
-                        }
-                        suffix = sequenceIn.Substring(periodLoc2 + 1);
-
-                        success = true;
-                    }
-                    else
-                    {
-                        // Leave the sequence unchanged
-                        primarySequence = sequenceIn;
-                        success = false;
-                    }
-                }
-                else if (periodLoc1 == periodLoc2)
-                {
-                    // Peptide only contains one period
-                    if (periodLoc1 == 0)
-                    {
-                        primarySequence = sequenceIn.Substring(1);
-                        success = true;
-                    }
-                    else if (periodLoc1 == sequenceIn.Length - 1)
-                    {
-                        primarySequence = sequenceIn.Substring(0, periodLoc1);
-                        success = true;
-                    }
-                    else if (periodLoc1 == 1 && sequenceIn.Length > 2)
-                    {
-                        primarySequence = sequenceIn.Substring(periodLoc1 + 1);
-                        prefix = sequenceIn.Substring(0, periodLoc1);
-                        success = true;
-                    }
-                    else if (periodLoc1 == sequenceIn.Length - 2)
-                    {
-                        primarySequence = sequenceIn.Substring(0, periodLoc1);
-                        suffix = sequenceIn.Substring(periodLoc1 + 1);
-                        success = true;
-                    }
-                    else
-                    {
-                        // Leave the sequence unchanged
-                        primarySequence = sequenceIn;
-                    }
-                }
+                // Leave the sequence unchanged
+                primarySequence = sequenceIn;
+                return false;
             }
 
-            return success;
+            if (periodLoc1 != periodLoc2)
+            {
+                return false;
+            }
+
+            // Peptide only contains one period
+            if (periodLoc1 == 0)
+            {
+                primarySequence = sequenceIn.Substring(1);
+                return true;
+            }
+
+            if (periodLoc1 == sequenceIn.Length - 1)
+            {
+                primarySequence = sequenceIn.Substring(0, periodLoc1);
+                return true;
+            }
+
+            if (periodLoc1 == 1 && sequenceIn.Length > 2)
+            {
+                primarySequence = sequenceIn.Substring(periodLoc1 + 1);
+                prefix = sequenceIn.Substring(0, periodLoc1);
+                return true;
+            }
+
+            if (periodLoc1 == sequenceIn.Length - 2)
+            {
+                primarySequence = sequenceIn.Substring(0, periodLoc1);
+                suffix = sequenceIn.Substring(periodLoc1 + 1);
+                return true;
+            }
+
+            // Leave the sequence unchanged
+            primarySequence = sequenceIn;
+
+            return false;
         }
 
         /// <summary>
         /// Examines the two residues to see if they represent an expected cleavage point
         /// </summary>
-        /// <param name="chLeftChar"></param>
-        /// <param name="chRightChar"></param>
+        /// <param name="leftChar"></param>
+        /// <param name="rightChar"></param>
         /// <returns>True if the characters match the currently defined cleavage rule</returns>
-        public bool TestCleavageRule(char chLeftChar, char chRightChar)
+        public bool TestCleavageRule(char leftChar, char rightChar)
         {
             if (mUsingStandardTrypsinRules)
             {
-                if (chLeftChar is 'K' or 'R')
-                {
-                    if (chRightChar != 'P')
-                    {
-                        return true;
-                    }
-                }
-                return false;
+                return leftChar is 'K' or 'R' && rightChar != 'P';
             }
 
-            if (mLeftRegEx.Match(chLeftChar.ToString()).Success)
-            {
-                if (mRightRegEx.Match(chRightChar.ToString()).Success)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return mLeftRegEx.Match(leftChar.ToString()).Success && mRightRegEx.Match(rightChar.ToString()).Success;
         }
     }
 }
