@@ -1,5 +1,5 @@
-Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag
-*	15.9949	M	D	Plus1Oxy
-#	42.0106	<	D	Acetyl
-&	-17.026549	Q	D	NH3_Loss
-$	-18.0106	E	D	MinusH2O
+Modification_Symbol	Monoisotopic_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	UniMod_Mod_Name
+*	15.9949	M	D	Plus1Oxy	Oxidation
+#	42.0106	<	D	Acetyl	Acetyl
+&	-17.026549	Q	D	NH3_Loss	Gln->pyro-Glu
+$	-18.0106	E	D	MinusH2O	Dehydrated
