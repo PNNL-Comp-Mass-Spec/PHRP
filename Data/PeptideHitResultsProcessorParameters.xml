@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <sections>
+	<!-----------------------------------------
+	-- Notice: 
+	-- 
+	-- This parameter file format is deprecated
+	-- for Peptide Hit Results Processor 3.1 or newer
+	-- (released November 2021)
+	--
+	-- See instead the Key=Value parameter files at
+	-- https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data
+	-- including PHRP_Options.conf
+	------------------------------------------>
+
   <section name="PeptideHitResultsProcessorOptions">
     <item key="CreateModificationSummaryFile" value="True" />
     
