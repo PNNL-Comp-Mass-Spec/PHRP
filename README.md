@@ -40,8 +40,9 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
  [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]
  [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] 
  [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]
- [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]
- [/SynProb:0.05] [/MaxQScore:50] [/MaxQPEP:0.01]
+ [/FHT:True|False] [/Syn:True|False]
+ [/SynProb:0.05] [/SynPValue:0.95] 
+ [/MaxQScore:50] [/MaxQPEP:0.01]
  [/DB:DatabaseConnectionString]
  [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] 
  [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]
@@ -66,7 +67,7 @@ The input file should be one of the following:
 The output directory switch is optional
 * If omitted, the output file will be created in the same directory as the input file
 
-Optionally used `/P` to supply a parameter file with processing options
+Optionally use `/P` to supply a parameter file with processing options
 * This can either be a Key=Value parameter file
   * [PHRP_Options.conf](https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/PHRP_Options.conf)
 * Or an XML-based parameter file
@@ -76,7 +77,7 @@ Use `/M` to specify the file containing the modification definitions.
 * This file should be tab delimited, with the first column containing the modification
 symbol, the second column containing the modification mass, plus optionally a
 third column listing the residues that can be modified with the given mass
-* For the third column, use 1 letter residue symbols, no need to separate with commas or spaces).
+* For the third column, use 1 letter residue symbols (no need to separate with commas or spaces)
 
 Use `/ProteinMods` to indicate that the _ProteinMods.txt file should be created
 * This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined using `/F`
@@ -105,19 +106,22 @@ Use `/N` to specify the parameter file provided to the search tool
 When processing an MS-GF+ results file, use `/MSGFPlusSpecEValue` and `/MSGFPlusEValue` to customize the thresholds used to determine which peptides are written to the synopsis file
 * Defaults are `/MSGFPlusSpecEValue:5E-07` and `/MSGFPlusEValue:0.75`
 
-When processing an Inspect results file, use `/SynPValue` to customize the PValue threshold used to determine which peptides are written to the synopsis file
-* The default is `/SynPValue:0.2` 
-* Note that peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be included in the synopsis file
+Use `/FHT:True` or `/FHT:False` to control the creation of a first-hits file (_fht.txt)
+* The default is `/FHT:True`
 
-Use `/InsFHT:True` or `/InsFHT:False` to toggle the creation of a first-hits file (_fht.txt)
-* The default is /InsFHT:True
+Use `/Syn:True` or `/Syn:False` to toggle the creation of a synopsis file (_syn.txt)
+* The default is `/Syn:True`
 
-Use `/InsSyn:True` or `/InsSyn:False` to toggle the creation of a synopsis file (_syn.txt)
-* The default is /InsSyn:True
-
-When processing a MODPlus or MODa results file, use `/SynProb` to customize the Probability threshold used to determine which peptides are written to the synopsis file
+When processing a MODPlus or MODa results file, use `/SynProb` to customize the probability threshold used to determine which peptides are written to the synopsis file
 * The default is `/SynProb:0.05`
+* Higher probability values are higher confidence results
+  * 0.05 is a very loose filter
 
+When processing a MODPlus or MODa results file, use `/SynPValue` to customize the p-value threshold used to determine which peptides are written to the synopsis file
+* The default is `/SynPValue:0.95`
+* Lower p-values are higher confidence results
+  * 0.95 is a very loose filter
+  
 When processing a MaxQuant results file, use `/MaxQScore` to customize the Andromeda score threshold used to determine which peptides are written to the synopsis file
 * A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
 * The default is `/MaxQScore:50`
