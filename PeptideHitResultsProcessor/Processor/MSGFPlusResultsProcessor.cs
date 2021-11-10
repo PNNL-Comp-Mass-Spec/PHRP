@@ -88,13 +88,13 @@ namespace PeptideHitResultsProcessor.Processor
         public const string C_TERMINUS_SYMBOL_MSGFPlus = "._";
 
         /// <summary>
-        /// Filter passing peptides have MS-GF+ less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
+        /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
         /// This filter is also used by MSPathFinder
         /// </summary>
         public const float DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD = 5E-07f;
 
         /// <summary>
-        /// Filter passing peptides have MS-GF+ less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
+        /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
         /// This filter is also used by MSPathFinder
         /// </summary>
         public const float DEFAULT_SYN_FILE_EVALUE_THRESHOLD = 0.75f;
