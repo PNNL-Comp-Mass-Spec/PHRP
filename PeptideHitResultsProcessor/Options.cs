@@ -434,6 +434,10 @@ namespace PeptideHitResultsProcessor
             EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(mEnzymeMatchSpecLeftResidue, mEnzymeMatchSpecRightResidue);
         }
 
+        public bool Validate()
+        {
+            ConsoleMsgUtils.ShowWarning("Need to implement code in method PHRPOptions.Validate");
+            return true;
         }
     }
 }
