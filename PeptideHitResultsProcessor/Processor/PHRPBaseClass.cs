@@ -34,16 +34,18 @@ namespace PeptideHitResultsProcessor.Processor
     /// <summary>
     /// This class can be used as a base class for peptide hit results processor classes
     /// </summary>
-    public abstract class PHRPBaseClass : PRISM.EventNotifier
+    public abstract class PHRPBaseClass : EventNotifier
     {
         // Ignore Spelling: A-Za-z, Da, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
+
+        public const string PROGRAM_DATE = "November 9, 2021";
 
         /// <summary>
         /// Constructor
         /// </summary>
         protected PHRPBaseClass(PHRPOptions options)
         {
-            FileDate = "August 16, 2021";
+            FileDate = PROGRAM_DATE;
 
             Options = options;
 
@@ -1212,6 +1214,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return pepToProteinMapIndex;
+        }
+
+        public static string GetAppVersion()
+        {
+            return ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
         protected string GetCleanSequence(string sequenceWithMods)

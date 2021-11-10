@@ -37,8 +37,10 @@ namespace PeptideHitResultsProcRunner
         /// </summary>
         public PeptideHitResultsProcRunner(PHRPOptions options)
         {
-            mFileDate = Program.PROGRAM_DATE;
+            mFileDate = PHRPBaseClass.PROGRAM_DATE;
             Options = options;
+
+            UpdateLogFileOptions();
 
             mPeptideHitResultsFileFormat = ResultsFileFormat.AutoDetermine;
             mUseExistingMTSPepToProteinMapFile = false;
@@ -54,9 +56,11 @@ namespace PeptideHitResultsProcRunner
             UnspecifiedError = -1
         }
 
-        protected ResultsFileFormat mPeptideHitResultsFileFormat;
+        private bool mFilePathsShown;
 
-        protected bool mUseExistingMTSPepToProteinMapFile;
+        private bool mLogFileOptionsUpdated;
+
+        protected ResultsFileFormat mPeptideHitResultsFileFormat;
 
         private PHRPBaseClass mPeptideHitResultsProcessor;
 
@@ -64,7 +68,7 @@ namespace PeptideHitResultsProcRunner
 
         private bool mOptionsDisplayed;
 
-        private bool mFilePathsShown;
+        protected bool mUseExistingMTSPepToProteinMapFile;
 
         /// <summary>
         /// Processing options
@@ -161,6 +165,11 @@ namespace PeptideHitResultsProcRunner
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {
             var success = false;
+
+            if (!mLogFileOptionsUpdated)
+            {
+                UpdateLogFileOptions();
+            }
 
             if (resetErrorCode)
             {
@@ -658,6 +667,19 @@ namespace PeptideHitResultsProcRunner
                 HandleException("Error calling ProcessFile in StartPHRP", ex);
                 return false;
             }
+        }
+
+        private void UpdateLogFileOptions()
+        {
+            LogMessagesToFile = Options.LogMessagesToFile;
+
+            if (Options.LogMessagesToFile)
+            {
+                LogFilePath = Options.LogFilePath;
+                LogDirectoryPath = Options.LogDirectoryPath;
+            }
+
+            mLogFileOptionsUpdated = true;
         }
 
         private void PeptideHitResultsProcessor_ErrorOccurred(string message, Exception ex)

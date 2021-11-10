@@ -71,8 +71,8 @@ namespace PHRPReader
         /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_CTerminus = ']';
 
-        private const string TRYPSIN_LEFT_RESIDUE_REGEX = "[KR]";
-        private const string TRYPSIN_RIGHT_RESIDUE_REGEX = "[^P]";
+        public const string TRYPSIN_LEFT_RESIDUE_REGEX = "[KR]";
+        public const string TRYPSIN_RIGHT_RESIDUE_REGEX = "[^P]";
 
         /// <summary>
         /// Peptide cleavage state
@@ -543,10 +543,11 @@ namespace PHRPReader
         /// </summary>
         public static EnzymeMatchSpecInfo GetDefaultEnzymeMatchSpec()
         {
-            var udtEnzymeMatchSpec = default(EnzymeMatchSpecInfo);
-            udtEnzymeMatchSpec.LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX;
-            udtEnzymeMatchSpec.RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX;
-            return udtEnzymeMatchSpec;
+            return new EnzymeMatchSpecInfo
+            {
+                LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX,
+                RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX
+            };
         }
 
         private void InitializeRegExObjects()

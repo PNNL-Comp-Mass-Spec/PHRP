@@ -1,8 +1,7 @@
-﻿// This program processes search results from several LC-MS/MS search engines to
-// determine the modifications present, determine the cleavage and terminus state
-// of each peptide, and compute the monoisotopic mass of each peptide. See
-// SequestSynopsisFileProcessor and XTandemResultsConverter for
-// additional information
+﻿// This program converts search results from various MS/MS identification tools
+// into a series of tab-delimited text files summarizing the results.
+// It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign,
+// MSPathFinder, TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -14,7 +13,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -26,35 +24,7 @@ namespace PeptideHitResultsProcRunner
 {
     internal static class Program
     {
-        // Ignore Spelling: Prot, MaxQuant, MODa, txt
-
-        public const string PROGRAM_DATE = "October 4, 2021";
-
-        private static readonly PHRPOptions Options = new();
-
-        private static string mInputFilePath;
-        private static string mOutputDirectoryPath;                      // Optional
-        private static string mParameterFilePath;                        // Optional
-
-        // Setting this to true assumes the input file is a valid PHRP data file
-        // Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-        private static bool mCreateProteinModsUsingPHRPDataFile;
-
-        private static string mOutputDirectoryAlternatePath;                // Optional
-        private static bool mRecreateDirectoryHierarchyInAlternatePath;     // Optional
-
-        private static bool mRecurseDirectories;
-        private static int mMaxLevelsToRecurse;
-
-        private static bool mLogMessagesToFile;
-        private static string mLogFilePath = string.Empty;
-
-        /// <summary>
-        /// Log directory path (ignored if LogFilePath is rooted)
-        /// </summary>
-        private static string mLogDirectoryPath = string.Empty;
-
-        private static PeptideHitResultsProcRunner mPeptideHitResultsProcRunner;
+        // Ignore Spelling: conf, Prot, MaxQuant, MODa, txt
 
         private static DateTime mLastProgressReportTime;
         private static int mLastProgressReportValue;
@@ -65,90 +35,118 @@ namespace PeptideHitResultsProcRunner
         /// Program entry point
         /// </summary>
         /// <returns>0 if no error, error code if an error</returns>
-        public static int Main()
+        public static int Main(string[] args)
         {
-            var parseCommandLine = new clsParseCommandLine();
+            var exeName = Assembly.GetEntryAssembly()?.GetName().Name;
 
-            mInputFilePath = string.Empty;
-            mOutputDirectoryPath = string.Empty;
-            mParameterFilePath = string.Empty;
+            var cmdLineParser = new CommandLineParser<PHRPOptions>(exeName, PHRPBaseClass.GetAppVersion())
+            {
+                ProgramInfo = "This program converts search results from various MS/MS identification tools " +
+                              "into a series of tab-delimited text files summarizing the results.  " +
+                              "It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign,  " +
+                              "MSPathFinder, TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.",
+                ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA)" + Environment.NewLine +
+                              "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
+                              "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics"
+            };
 
-            mCreateProteinModsUsingPHRPDataFile = false;
+            cmdLineParser.UsageExamples.Add(string.Format(
+                "The input file should be one of the following:\n" +
+                "  MaxQuant results files (msms.txt and peptides.txt)\n" +
+                "  MS-GF+ results file ({0}.tsv or {1}.tsv or .tsv)\n" +
+                "  MSGF-DB results file ({1}.txt)\n" +
+                "  MSAlign results file ({2}.txt)\n" +
+                "  MODa results file ({3}.txt)\n" +
+                "  MODPlus results file ({4}.txt)\n" +
+                "  MsFragger results file (_psm.tsv)\n" +
+                "  MSPathFinder results file ({5}.txt)\n" +
+                "  InSpecT results file ({6}.txt)\n" +
+                "  SEQUEST Synopsis File ({7}.txt)\n" +
+                "  SEQUEST First Hits file ({8}.txt)\n" +
+                "  TopPIC results file ({9}.txt)\n" +
+                "  X!Tandem Results file (_xt.xml)",
+                MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE,
+                MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE,
+                MSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE,
+                MODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE,
+                MODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE,
+                MSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE,
+                InSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE,
+                SequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE,
+                SequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE,
+                TopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE
+                ));
 
-            mMaxLevelsToRecurse = 0;
+            // The default argument name for parameter files is /ParamFile or -ParamFile
+            // Also allow /Conf or /P
+            cmdLineParser.AddParamFileKey("Conf");
+            cmdLineParser.AddParamFileKey("P");
 
-            mLogMessagesToFile = false;
-            mLogFilePath = string.Empty;
-            mLogDirectoryPath = string.Empty;
-
-            Options.WarnMissingParameterFileSection = true;
+            var result = cmdLineParser.ParseArgs(args);
+            var options = result.ParsedResults;
+            if (!result.Success || !options.Validate())
+            {
+                // Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+                Thread.Sleep(750);
+                return -1;
+            }
 
             try
             {
-                var proceed = false;
-                if (parseCommandLine.ParseCommandLine())
+                if (InvalidParameterFile(cmdLineParser.ParameterFilePath))
+                    return -1;
+
+                var peptideHitResultsProcessor = new PeptideHitResultsProcRunner(options);
+
+                peptideHitResultsProcessor.DebugEvent += PeptideHitResultsProcRunner_DebugEvent;
+                peptideHitResultsProcessor.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
+                peptideHitResultsProcessor.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
+                peptideHitResultsProcessor.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
+                peptideHitResultsProcessor.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
+                peptideHitResultsProcessor.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
+
+                if (options.LogMessagesToFile && args.Length > 0)
                 {
-                    if (SetOptionsUsingCommandLineParameters(parseCommandLine))
-                        proceed = true;
+                    // Append the command line arguments to the log file
+                    peptideHitResultsProcessor.SkipConsoleWriteIfNoStatusListener = true;
+                    peptideHitResultsProcessor.LogAdditionalMessage(string.Join(" ", args));
+                    peptideHitResultsProcessor.SkipConsoleWriteIfNoStatusListener = false;
                 }
 
-                if (!proceed ||
-                    parseCommandLine.NeedToShowHelp ||
-                    parseCommandLine.ParameterCount + parseCommandLine.NonSwitchParameterCount == 0 ||
-                    string.IsNullOrWhiteSpace(mInputFilePath))
-                {
-                    ShowProgramHelp();
-                    return  -1;
-                }
 
-                // Note: Most of the options will get overridden if defined in the parameter file
-                mPeptideHitResultsProcRunner = new PeptideHitResultsProcRunner(Options)
-                {
-                    LogMessagesToFile = mLogMessagesToFile,
-                    LogFilePath = mLogFilePath,
-                    LogDirectoryPath = mLogDirectoryPath,
-                    CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
-                };
-
-                var commandLineArgs = GetCommandLineArgs();
-                if (mLogMessagesToFile && !string.IsNullOrEmpty(commandLineArgs))
-                {
-                    mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = true;
-                    mPeptideHitResultsProcRunner.LogAdditionalMessage(commandLineArgs);
-                    mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = false;
-                }
-
-                mPeptideHitResultsProcRunner.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
-                mPeptideHitResultsProcRunner.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
-                mPeptideHitResultsProcRunner.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
-                mPeptideHitResultsProcRunner.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
-                mPeptideHitResultsProcRunner.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
 
                 int returnCode;
-                if (mRecurseDirectories)
+                if (options.RecurseDirectories)
                 {
                     Console.WriteLine("Recursively processing files in the input file's directory and below");
 
-                    if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseDirectories(mInputFilePath, mOutputDirectoryPath, mOutputDirectoryAlternatePath,
-                        mRecreateDirectoryHierarchyInAlternatePath, mParameterFilePath,
-                        mMaxLevelsToRecurse))
+                    if (peptideHitResultsProcessor.ProcessFilesAndRecurseDirectories(
+                        options.InputFilePath,
+                        options.OutputDirectoryPath,
+                        string.Empty,           // options.OutputDirectoryAlternatePath
+                        false,        // options.RecreateDirectoryHierarchyInAlternatePath
+                        options.ParameterFilePath,
+                        options.MaxLevelsToRecurse))
                     {
                         returnCode = 0;
                     }
                     else
                     {
-                        returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                        returnCode = (int)peptideHitResultsProcessor.ErrorCode;
                     }
                 }
                 else
                 {
-                    if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputDirectoryPath, mParameterFilePath))
+                    if (peptideHitResultsProcessor.ProcessFilesWildcard(
+                        options.InputFilePath,
+                        options.OutputDirectoryPath,
+                        options.ParameterFilePath))
                     {
                         returnCode = 0;
                     }
                     else
                     {
-                        var errorCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                        var errorCode = (int)peptideHitResultsProcessor.ErrorCode;
                         if (errorCode == 0)
                         {
                             returnCode = -1;
@@ -157,7 +155,7 @@ namespace PeptideHitResultsProcRunner
                         else
                         {
                             returnCode = errorCode;
-                            ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
+                            ShowErrorMessage("Error while processing: " + peptideHitResultsProcessor.GetErrorMessage());
                         }
                     }
                 }
@@ -186,64 +184,18 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine();
         }
 
-        private static string GetAppVersion()
+        private static bool InvalidParameterFile(string parameterFilePath)
         {
-            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
-        }
-
-        /// <summary>
-        /// Obtain the command line arguments, excluding the Exe
-        /// </summary>
-        private static string GetCommandLineArgs()
-        {
-            var commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs.Length <= 1)
-                return string.Empty;
-
-            return string.Join(" ", commandLineArgs.Skip(1));
-        }
-
-        /// <summary>
-        /// Parse out True/False or Yes/No or T/F or Y/N or 1/0 from value
-        /// </summary>
-        /// <param name="valueText">Text to parse</param>
-        /// <param name="value">Output parameter</param>
-        /// <returns>True if successfully parsed value; the result of the parse is in value</returns>
-        private static bool ParseBoolean(string valueText, out bool value)
-        {
-            if (string.IsNullOrEmpty(valueText))
-            {
-                value = false;
+            if (string.IsNullOrWhiteSpace(parameterFilePath))
                 return false;
-            }
-
-            if (bool.TryParse(valueText, out value))
-            {
-                return true;
-            }
-
-            switch (valueText.ToUpper()[0])
-            {
-                case 'T':
-                case 'Y':
-                case '1':
-                    // True or Yes or 1
-                    value = true;
-                    return true;
-                case 'F':
-                case 'N':
-                case '0':
-                    // False or No or 0
-                    value = false;
-                    return true;
-            }
-
-            return false;
-        }
 
         private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parseCommandLine)
         {
             // Returns True if no problems; otherwise, returns false
+            // Assure that the user did not provide an old-style XML-based parameter file
+            var paramFile = new FileInfo(parameterFilePath);
+            if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                return false;
 
             // ReSharper disable once StringLiteralTypo
             var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
@@ -251,8 +203,11 @@ namespace PeptideHitResultsProcRunner
                 "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn",
                 "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP", "DB",
                 "S", "A", "R", "L" };
+            using var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
             try
+            var linesRead = 0;
+            while (!paramFileReader.EndOfStream && linesRead < 5)
             {
                 // Make sure no invalid parameters are present
                 if (parseCommandLine.InvalidParametersPresent(validParameters))
@@ -377,6 +332,9 @@ namespace PeptideHitResultsProcRunner
                         Options.MODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
                     }
                 }
+                var dataLine = paramFileReader.ReadLine();
+                if (string.IsNullOrWhiteSpace(dataLine))
+                    continue;
 
                 if (parseCommandLine.RetrieveValueForParameter("MaxQScore", out var andromedaScoreThreshold))
                 {
@@ -385,14 +343,25 @@ namespace PeptideHitResultsProcRunner
                         Options.MaxQuantAndromedaScoreThreshold = threshold;
                     }
                 }
+                linesRead++;
 
                 // ReSharper disable once StringLiteralTypo
                 if (parseCommandLine.RetrieveValueForParameter("MaxQPEP", out var posteriorErrorProbabilityThreshold))
+                var trimmedLine = dataLine.Trim();
+                if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
+                    trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
                 {
                     if (float.TryParse(posteriorErrorProbabilityThreshold, out var floatValue))
                     {
                         Options.MaxQuantPosteriorErrorProbabilityThreshold = floatValue;
                     }
+                    ConsoleMsgUtils.ShowWarning(
+                        "PeptideHitResultsProcRunner v3.1 uses Key=Value parameter files\n" +
+                        "{0} is an XML file\n" +
+                        "For an example parameter file, see file PHRP_Options.conf at {1}",
+                        paramFile.Name, "https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data");
+                    ConsoleMsgUtils.ShowWarning("Aborting");
+                    return true;
                 }
 
                 if (parseCommandLine.RetrieveValueForParameter("DB", out var connectionString))
@@ -447,19 +416,14 @@ namespace PeptideHitResultsProcRunner
             ConsoleMsgUtils.ShowError(message, ex);
         }
 
-        private static void ShowErrorMessage(string title, IEnumerable<string> errorMessages)
-        {
-            ConsoleMsgUtils.ShowErrors(title, errorMessages);
-        }
-
         private static void ShowProgramHelp()
         {
             try
             {
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "This program reads in a result file from a variety of MS/MS identification tools including " +
-                                      "MS-GF+, X!Tandem, MaxQuant, MSAlign, ModPlus, and MSPathFinder, " +
-                                      "then creates a tab-delimited text file with the data in a standard format used at PNNL."));
+                                      "This program converts search results from various MS/MS identification tools into a series of tab-delimited text files summarizing the results. " +
+                                      "It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder, " +
+                                      "TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files."));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "It will insert modification symbols into the peptide sequences for modified peptides. " +
@@ -481,8 +445,10 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]");
                 Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]");
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
-                Console.WriteLine(" [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
-                Console.WriteLine(" [/SynProb:0.05] [/MaxQScore:50] [/MaxQPEP:0.01]");
+                // Console.WriteLine(" [/InsSynPValue:0.2]");
+                Console.WriteLine(" [/FHT:True|False] [/Syn:True|False]");
+                Console.WriteLine(" [/SynProb:0.05] [/SynPValue:0.95]");
+                Console.WriteLine(" [/MaxQScore:50] [/MaxQPEP:0.01]");
                 Console.WriteLine(" [/DB:DatabaseConnectionString]");
                 Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R]");
                 Console.WriteLine(" [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
@@ -578,25 +544,30 @@ namespace PeptideHitResultsProcRunner
                                       MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
                                       " and /MSGFPlusEValue:" +
                                       MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
-                Console.WriteLine();
+                //Console.WriteLine();
+                //Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                //                      "When processing an InSpecT results file, use /InsSynPValue to customize " +
+                //                      "the PValue threshold used to determine which peptides are written to the synopsis file. " +
+                //                      "The default is /InsSynPValue:0.2  Note that peptides with a " +
+                //                      "TotalPRMScore >= " + InSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
+                //                      " or an FScore >= " + InSpecTResultsProcessor.FSCORE_THRESHOLD +
+                //                      " will also be included in the synopsis file."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "When processing an InSpecT results file, use /SynPValue to customize " +
-                                      "the PValue threshold used to determine which peptides are written to the synopsis file. " +
-                                      "The default is /SynPValue:0.2  Note that peptides with a " +
-                                      "TotalPRMScore >= " + InSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
-                                      " or an FScore >= " + InSpecTResultsProcessor.FSCORE_THRESHOLD +
-                                      " will also be included in the synopsis file."));
+                                      "Use /FHT:True or /FHT:False to control the creation of a first-hits file (_fht.txt) " +
+                                      "when processing results from MS-GF+, MaxQuant, MSFragger, etc. (default is /FHT:True)"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) " +
-                                      "when processing InSpecT or MS-GF+ results (default is /InsFHT:True)"));
-                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) " +
-                                      "when processing InSpecT or MS-GF+ results (default is /InsSyn:True)"));
+                                      "Use /Syn:True or /Syn:False to control the creation of a synopsis file (_syn.txt) " +
+                                      "when processing results from MS-GF+, MaxQuant, MSFragger, etc. (default is /Syn:True)"));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing a MODPlus or MODa results file, use /SynProb to customize " +
-                                      "the Probability threshold used to determine which peptides are written to the synopsis file. " +
+                                      "the probability threshold used to determine which peptides are written to the synopsis file. " +
                                       "The default is /SynProb:0.05"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                    "When processing a MODPlus or MODa results file, use /SynPValue to customize " +
+                    "the p-value threshold used to determine which peptides are written to the synopsis file. " +
+                    "The default is /SynPValue:0.95"));
 
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
@@ -632,7 +603,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006");
-                Console.WriteLine("Version: " + GetAppVersion());
+                Console.WriteLine("Version: " + PHRPBaseClass.GetAppVersion());
 
                 Console.WriteLine();
 
@@ -647,6 +618,11 @@ namespace PeptideHitResultsProcRunner
             {
                 ShowErrorMessage("Error displaying the program syntax: " + ex.Message);
             }
+        }
+
+        private static void PeptideHitResultsProcRunner_DebugEvent(string message)
+        {
+            ConsoleMsgUtils.ShowDebug(message);
         }
 
         private static void PeptideHitResultsProcRunner_ErrorEvent(string message, Exception ex)

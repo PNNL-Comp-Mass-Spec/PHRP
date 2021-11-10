@@ -1,11 +1,13 @@
-﻿using PeptideHitResultsProcessor.Processor;
+﻿using System;
+using PeptideHitResultsProcessor.Processor;
 using PHRPReader;
+using PRISM;
 
 namespace PeptideHitResultsProcessor
 {
     public class PHRPOptions
     {
-        // Ignore Spelling: MaxQuant, MODa
+        // Ignore Spelling: conf, MaxQuant, MODa, txt
 
         /// <summary>
         /// Default database connection string
@@ -13,67 +15,251 @@ namespace PeptideHitResultsProcessor
         public const string DMS_CONNECTION_STRING = "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun";
 
         /// <summary>
+        /// Input file path
+        /// </summary>
+        /// <remarks>This path can contain wildcard characters, e.g. C:\*.raw</remarks>
+        [Option("InputFilePath", "InputDataFilePath", "I",
+            ArgPosition = 1, Required = true, HelpShowsDefault = false, IsInputFilePath = true,
+            HelpText = "The name of a file or directory to process; the path can contain the wildcard character *\n" +
+                       "Either define this at the command line using /I or in a parameter file")]
+        public string InputFilePath { get; set; }
+
+        /// <summary>
+        /// Output directory path
+        /// </summary>
+        [Option("OutputDirectoryPath", "OutputDirectory", "O", HelpShowsDefault = false,
+            HelpText = "Output directory name (or full path)\n" +
+                       "If omitted, the output files will be created in the program directory")]
+        public string OutputDirectoryPath { get; set; }
+
+        /// <summary>
+        /// Typically a Key=Value parameter file path, but can also be a legacy XML-based parameter file
+        /// </summary>
+        /// <remarks>
+        /// This property is intended for use when using PeptideToProteinMapEngine.dll along with a parameter file
+        /// For PeptideHitResultsProcRunner.exe, specify the Key=Value parameter file using /Conf or /P
+        /// </remarks>
+        public string ParameterFilePath { get; set; }
+
+        /// <summary>
+        /// When true, recurse subdirectories
+        /// </summary>
+        /// <remarks>
+        /// This will be auto-set to true if MaxLevelsToRecurse is defined in the parameter file or if /S is used at the command line
+        /// This functionality is enabled by the ArgExistsProperty option
+        /// </remarks>
+        public bool RecurseDirectories { get; set; }
+
+        /// <summary>
+        /// Process files in subdirectories
+        /// </summary>
+        [Option("MaxLevelsToRecurse", "S", ArgExistsProperty = nameof(RecurseDirectories),
+            HelpShowsDefault = false, SecondaryArg = true,
+            HelpText = "If supplied, process all valid files in the input directory and subdirectories\n" +
+                       "Include a number after /S (like /S:2) to limit the level of subdirectories to examine (0 means to recurse infinitely)\n" +
+                       "The equivalent notation in a parameter file is MaxLevelsToRecurse=2")]
+        public int MaxLevelsToRecurse { get; set; }
+
+        private string mLogFilePath;
+
+        [Option("LogFilePath", "LogFile", "L", HelpShowsDefault = false,
+            HelpText = "File path for logging messages")]
+        public string LogFilePath
+        {
+            get => mLogFilePath;
+            set
+            {
+                mLogFilePath = value;
+                LogMessagesToFile = !string.IsNullOrWhiteSpace(mLogFilePath);
+            }
+        }
+
+        [Option("LogDirectoryPath", HelpShowsDefault = false,
+            HelpText = "Directory to create log files")]
+        public string LogDirectoryPath { get; set; }
+
+        [Option("LogMessagesToFile",
+            HelpShowsDefault = false, SecondaryArg = true,
+            HelpText = "Set to true to log messages to a file\n" +
+                       "If LogFilePath is empty, the log file name will be auto-defined using the current date\n" +
+                       "If LogFilePath has a filename, LogMessagesToFile will be auto-set to true")]
+        public bool LogMessagesToFile { get; set; }
+
+        /// <summary>
+        /// Mass correction tags file path
+        /// </summary>
+        [Option("MassCorrectionTagsFile", "MassCorrectionTags", "T",
+            HelpShowsDefault = false, IsInputFilePath = true,
+            HelpText = "Tab-delimited text file that lists modification names and masses. " +
+                       "The first column has the modification name (aka mass correction tag name), " +
+                       "the second column has the monoisotopic mass, and the optional third column shows the affected atom (for isotopic mods). " +
+                       "An example file is at https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/Mass_Correction_Tags.txt")]
+        public string MassCorrectionTagsFilePath { get; set; }
+
+        /// <summary>
+        /// Modification definitions file path (DMS mod names)
+        /// </summary>
+        [Option("ModificationDefinitionsFile", "ModDefsFile", "M",
+            HelpShowsDefault = false, IsInputFilePath = true,
+            HelpText = "Tab-delimited text file that defines modification symbols, mod masses, and mod names. " +
+                       "The first column has the modification symbol, the second column shows the modification mass, " +
+                       "and the optional third column lists the residues that can be modified with the given mass " +
+                       "(1 letter residue symbols, no need to separate with commas or spaces). " +
+                       "If the file has a header line, it can also include columns listing the modification type, " +
+                       "mass correction tag name, UniMod name, and MaxQuant mod name. " +
+                       "An example file is at https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/Example_ModDefs.txt")]
+        public string ModificationDefinitionsFilePath { get; set; }
+
+        /// <summary>
+        /// Search tool parameter file path (aka SearchEngineParamFileName)
+        /// </summary>
+        /// <remarks>Used by MSGFPlusResultsProcessor, MaxQuantResultsProcessor, and others</remarks>
+        [Option("SearchToolParameterFile", "ToolParamFile", "N",
+            HelpShowsDefault = false, IsInputFilePath = true,
+            HelpText = "The parameter file provided to the search tool. " +
+                       "This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MODa, MODPlus, MSAlign, MSFragger, TopPIC, and InSpecT. " +
+                       "For MaxQuant, provide either an XML-based parameter file (root element is <MaxQuantParams>) " +
+                       "or provide the parameters.txt file created in the txt results directory. " +
+                       "The XML-based parameter file is preferred, since it is required to allow PHRP " +
+                       "to accurately compute monoisotopic masses of peptides identified by MaxQuant.")]
+        public string SearchToolParameterFilePath { get; set; }
+
+        /// <summary>
+        /// FASTA file path
+        /// </summary>
+        [Option("FastaFile", "FASTA", "F",
+            HelpShowsDefault = false, IsInputFilePath = true,
+            HelpText = "FASTA file path. The order of the proteins in the FASTA file " +
+                       "dictates which protein is listed for each peptide in the First Hits file")]
+        public string FastaFilePath { get; set; }
+
+        /// <summary>
         /// Create modification summary file
         /// </summary>
+        [Option("CreateModificationSummaryFile",
+            HelpText = "When true, create the _ModSummary.txt file")]
         public bool CreateModificationSummaryFile { get; set; }
-
-        /// <summary>
-        /// Create first hits file
-        /// </summary>
-        public bool CreateFirstHitsFile { get; set; }
-
-        /// <summary>
-        /// Create synopsis file
-        /// </summary>
-        public bool CreateSynopsisFile { get; set; }
 
         /// <summary>
         /// Create protein mods file
         /// </summary>
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the FASTA file specified by FastaFilePath</remarks>
+        [Option("ProteinMods",
+            HelpText = "When true, create the _ProteinMods.txt file. " +
+                       "This requires that either an existing _PepToProtMapMTS.txt file exists, " +
+                       "or that the FASTA file be defined using /F")]
         public bool CreateProteinModsFile { get; set; }
+
+        [Option("ProteinModsFileIncludesReversedProteins", "ProteinModsIncludeReversed",
+            HelpText = "Set this to true if an existing _ProteinMods.txt file has reversed protein sequences, " +
+                       "or if the FASTA file has reversed proteins. " +
+                       "If true, will skip reversed proteins when creating the _ProteinMods.txt file")]
+        public bool ProteinModsFileIncludesReversedProteins { get; set; }
+
+        // ToDo: Figure out if this needs to be implemented
+        //       Need to check an old commit
+        public bool ProteinModsViaPHRP { get; set; }
+
+        /// <summary>
+        /// Use Existing MTS PepToProtein Map File
+        /// </summary>
+        [Option("UseExistingMTSPepToProteinMapFile",
+            HelpText = "When true, look for an existing _PepToProtMap.txt file; if not found, it will be created using the FASTA file")]
+        public bool UseExistingMTSPepToProteinMapFile { get; set; }
+
+        /// <summary>
+        /// Create first hits file
+        /// </summary>
+        [Option("CreateFirstHitsFile", "FHT",
+            HelpText = "When true, create the first hits file (_fht.txt)")]
+        public bool CreateFirstHitsFile { get; set; }
+
+        /// <summary>
+        /// Create synopsis file
+        /// </summary>
+        [Option("CreateSynopsisFile", "Syn",
+            HelpText = "When true, create the synopsis file (_syn.txt)")]
+        public bool CreateSynopsisFile { get; set; }
 
         /// <summary>
         /// DMS database connection string (only used if the computer is on the pnl.gov domain)
         /// </summary>
         /// <remarks>Set this to an empty string or to "false" to disable contacting DMS</remarks>
+        [Option("DMSConnectionString", "DB",
+            HelpText = "DMS database connection string. Set this to an empty string or to 'false' to disable contacting DMS")]
         public string DMSConnectionString { get; set; }
 
         /// <summary>
         /// Enzyme match specification
         /// </summary>
-        public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
+        public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; internal set; }
+
+        private string mEnzymeMatchSpecLeftResidue;
+        private string mEnzymeMatchSpecRightResidue;
+
+        [Option("EnzymeMatchSpecLeftResidue",
+            HelpText = "RegEx for the residue to the left of cleavage points for the given enzyme")]
+        public string EnzymeMatchSpecLeftResidue
+        {
+            get => mEnzymeMatchSpecLeftResidue;
+            set
+            {
+                mEnzymeMatchSpecLeftResidue = value;
+                UpdateEnzymeMatchSpecIfDefined();
+            }
+        }
+
+        [Option("EnzymeMatchSpecRightResidue",
+            HelpText = "RegEx for the residue to the right of cleavage points for the given enzyme")]
+        public string EnzymeMatchSpecRightResidue
+        {
+            get => mEnzymeMatchSpecRightResidue;
+            set
+            {
+                mEnzymeMatchSpecRightResidue = value;
+                UpdateEnzymeMatchSpecIfDefined();
+            }
+        }
 
         /// <summary>
-        /// FASTA file path
+        /// Mass to add to the N-terminus of peptides
         /// </summary>
-        public string FastaFilePath { get; set; }
+        /// <remarks>Typical non-zero value is 1.0078246</remarks>
+        [Option("PeptideNTerminusMassChange",
+            HelpText = "Peptide N-terminus mass to add to peptides; ignored if 0")]
+        public double PeptideNTerminusMassChange { get; set; }
 
         /// <summary>
-        /// When true, ignore peptide to protein mapper errors
+        /// Mass to add to the C-terminus of peptides
+        /// </summary>
+        /// <remarks>Typical non-zero value is 17.0027387</remarks>
+        [Option("PeptideCTerminusMassChange",
+            HelpText = "Peptide C-terminus mass to add to peptides; ignored if 0")]
+        public double PeptideCTerminusMassChange { get; set; }
+
+        /// <summary>
+        /// When true, ignore peptide to protein mapping errors
         /// </summary>
         /// <remarks>
         /// Example error that may be reported if this is false:
         /// 0.43% of the entries (96 / 22,127) in the peptide to protein map file (Dataset_maxq_syn_PepToProtMap.txt)
         /// did not match to a protein in the FASTA file (Proteins_2020-10-21.fasta)
         /// </remarks>
+        [Option("IgnorePepToProtMapErrors",
+            HelpText = "When true, ignore peptide to protein mapping errors")]
         public bool IgnorePeptideToProteinMapperErrors { get; set; }
 
         /// <summary>
         /// InSpecT synopsis file p-value threshold
         /// </summary>
-        /// <remarks>Lower p-values are higher confidence results</remarks>
+        /// <remarks>
+        /// Lower p-values are higher confidence results
+        /// Peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be included in the synopsis file
+        /// </remarks>
+        [Option("InspectSynopsisFilePValueThreshold", "InsSynPValue",
+            HelpText = "When processing InSpecT results, the PValue threshold used to determine which peptides are written to the synopsis file",
+            Hidden = true)]
         public float InspectSynopsisFilePValueThreshold { get; set; }
-
-        /// <summary>
-        /// Mass correction tags file path
-        /// </summary>
-        public string MassCorrectionTagsFilePath { get; set; }
-
-        /// <summary>
-        /// Modification definitions file path (DMS mod names)
-        /// </summary>
-        public string ModificationDefinitionsFilePath { get; set; }
 
         /// <summary>
         /// MaxQuant Andromeda score threshold to use when creating the synopsis file
@@ -81,6 +267,9 @@ namespace PeptideHitResultsProcessor
         /// <remarks>
         /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
         /// </remarks>
+        [Option("MaxQuantAndromedaScoreThreshold", "MaxQScore",
+            HelpText = "When processing MaxQuant results, the Andromeda score threshold used to determine which peptides are written to the synopsis file. " +
+                       "A PSM is stored if its Andromeda score is above the MaxQScore threshold, or if its PEP score is below the MaxQPEP threshold.")]
         public int MaxQuantAndromedaScoreThreshold { get; set; }
 
         /// <summary>
@@ -89,80 +278,57 @@ namespace PeptideHitResultsProcessor
         /// <remarks>
         /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
         /// </remarks>
+        [Option("MaxQuantPosteriorErrorProbabilityThreshold", "MaxQPEP",
+            HelpText = "When processing MaxQuant results, the Posterior Error Probability (PEP) score threshold used to determine which peptides are written to the synopsis file. " +
+                       "A PSM is stored if its Andromeda score is above the MaxQScore threshold, or if its PEP score is below the MaxQPEP threshold.")]
         public float MaxQuantPosteriorErrorProbabilityThreshold { get; set; }
 
         /// <summary>
         /// Used by MODaResultsProcessor and MODPlusResultsProcessor
         /// </summary>
-        /// <remarks>Higher probability are higher confidence results</remarks>
+        /// <remarks>Higher probability values are higher confidence results</remarks>
+        [Option("MODaMODPlusSynopsisFileProbabilityThreshold", "SynProb",
+            HelpText = "When processing a MODPlus or MODa results, the probability threshold used to determine which peptides are written to the synopsis file. " +
+                       "Higher probability values are higher confidence results, thus the default of 0.05 is a very loose filter")]
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
 
         /// <summary>
         /// Used by MSAlign and TopPIC
         /// </summary>
         /// <remarks>Lower p-values are higher confidence results</remarks>
+        [Option("MSAlignAndTopPICSynopsisFilePValueThreshold", "SynPValue",
+            HelpText = "When processing a MODPlus or MODa results, the p-value threshold used to determine which peptides are written to the synopsis file. " +
+                       "Lower p-values are higher confidence results, thus the default of 0.95 is a very loose filter")]
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
         /// Used by MSGFPlusResultsProcessor
         /// </summary>
         /// <remarks>Lower E-values are higher confidence results</remarks>
+        [Option("MSGFPlusSynopsisFileEValueThreshold", "MSGFPlusEValue",
+            HelpText = "When processing an MS-GF+ results, the E-value threshold used to determine which peptides are written to the synopsis file. " +
+                       "Lower E-values are higher confidence results. " +
+                       "Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%")]
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
         /// MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
         /// </summary>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
+        [Option("MSGFPlusSynopsisFileSpecEValueThreshold", "MSGFPlusSpecEValue",
+            HelpText = "When processing an MS-GF+ results, the spec E-value threshold used to determine which peptides are written to the synopsis file. " +
+                       "Lower spec E-values are higher confidence results")]
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
-
-        /// <summary>
-        /// Typical non-zero value is 17.0027387
-        /// </summary>
-        /// <remarks>Ignored if equal to 0</remarks>
-        public double PeptideCTerminusMassChange { get; set; }
-
-        /// <summary>
-        /// Typical non-zero value is 1.0078246
-        /// </summary>
-        /// <remarks>Ignored if equal to 0</remarks>
-        public double PeptideNTerminusMassChange { get; set; }
-
-        /// <summary>
-        /// True if the protein mods file includes reversed proteins
-        /// </summary>
-        public bool ProteinModsFileIncludesReversedProteins { get; set; }
-
-        /// <summary>
-        /// Search tool parameter file path (aka SearchEngineParamFileName)
-        /// </summary>
-        /// <remarks>Used by MSGFPlusResultsProcessor, MaxQuantResultsProcessor, and others</remarks>
-        public string SearchToolParameterFilePath { get; set; }
-
-        /// <summary>
-        /// Use Existing MTS PepToProtein Map File
-        /// </summary>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the FASTA file specified by FastaFilePath</remarks>
-        public bool UseExistingMTSPepToProteinMapFile { get; set; }
-
-        /// <summary>
-        /// Warn if an expected section is missing from the parameter file
-        /// </summary>
-        public bool WarnMissingParameterFileSection { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public PHRPOptions()
         {
-            ResetToDefaults();
-        }
-
-        /// <summary>
-        /// Reset options to defaults
-        /// </summary>
-        public void ResetToDefaults()
-        {
-            WarnMissingParameterFileSection = false;
+            MassCorrectionTagsFilePath = string.Empty;
+            ModificationDefinitionsFilePath = string.Empty;
+            SearchToolParameterFilePath = string.Empty;
+            FastaFilePath = string.Empty;
 
             CreateModificationSummaryFile = true;
 
@@ -175,12 +341,20 @@ namespace PeptideHitResultsProcessor
 
             DMSConnectionString = DMS_CONNECTION_STRING;
 
-            FastaFilePath = string.Empty;
-            IgnorePeptideToProteinMapperErrors = false;
+            EnzymeMatchSpecLeftResidue = PeptideCleavageStateCalculator.TRYPSIN_LEFT_RESIDUE_REGEX;
+            EnzymeMatchSpecRightResidue = PeptideCleavageStateCalculator.TRYPSIN_RIGHT_RESIDUE_REGEX;
 
-            MassCorrectionTagsFilePath = string.Empty;
-            ModificationDefinitionsFilePath = string.Empty;
-            SearchToolParameterFilePath = string.Empty;
+            // Note that updating EnzymeMatchSpecLeftResidue and EnzymeMatchSpecRightResidue will result in EnzymeMatchSpec being auto-defined
+            // Thus, this should always evaluate to false
+            if (string.IsNullOrWhiteSpace(EnzymeMatchSpec.LeftResidueRegEx) || string.IsNullOrWhiteSpace(EnzymeMatchSpec.RightResidueRegEx))
+            {
+                EnzymeMatchSpec = PeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
+            }
+
+            PeptideNTerminusMassChange = PeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE;
+            PeptideCTerminusMassChange = PeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
+
+            IgnorePeptideToProteinMapperErrors = false;
 
             InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
@@ -193,11 +367,19 @@ namespace PeptideHitResultsProcessor
 
             MSGFPlusSynopsisFileEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
             MSGFPlusSynopsisFileSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+        }
 
-            EnzymeMatchSpec = PeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 
-            PeptideNTerminusMassChange = PeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE;
-            PeptideCTerminusMassChange = PeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
+        private void UpdateEnzymeMatchSpecIfDefined()
+        {
+            if (string.IsNullOrWhiteSpace(mEnzymeMatchSpecLeftResidue) || string.IsNullOrWhiteSpace(mEnzymeMatchSpecRightResidue))
+            {
+                return;
+            }
+
+            EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(mEnzymeMatchSpecLeftResidue, mEnzymeMatchSpecRightResidue);
+        }
+
         }
     }
 }
