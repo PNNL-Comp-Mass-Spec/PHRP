@@ -25,6 +25,7 @@ using PeptideToProteinMapEngine;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
+using PRISM;
 using PRISM.FileProcessor;
 using PRISMDatabaseUtils;
 using ProteinCoverageSummarizer;
@@ -1461,6 +1462,7 @@ namespace PeptideHitResultsProcessor.Processor
                 return true;
             }
 
+            // ReSharper disable once ConvertIfStatementToReturnStatement
             if (proteinName.EndsWith(":reversed", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by X!Tandem
@@ -1490,8 +1492,34 @@ namespace PeptideHitResultsProcessor.Processor
                 if (parameterFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
                     return LoadParameterFileSettingsXML(parameterFilePath);
 
-                // ToDo: Read settings from a Key=Value parameter file
-                throw new NotImplementedException("Read settings from a Key=Value parameter file");
+                // Read settings from a Key=Value parameter file
+
+                var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+
+                var cmdLineParser = new CommandLineParser<PHRPOptions>(assemblyName, GetAppVersion())
+                {
+                    ProgramInfo = "This program converts search results from various MS/MS identification tools " +
+                                  "into a series of tab-delimited text files summarizing the results.",
+                    ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2006"
+                };
+
+                var args = new List<string>
+                {
+                    "-ParamFile:" +PathUtils.PossiblyQuotePath(parameterFile.FullName)
+                };
+
+                var result = cmdLineParser.ParseArgs(args.ToArray());
+                var options = result.ParsedResults;
+                if (!result.Success || !options.Validate())
+                {
+                    SetErrorMessage(string.Format("Error in LoadParameterFileSettings reading settings from parameter file {0}", parameterFile.FullName));
+                    SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
+                    return false;
+                }
+
+                Options.UpdateAll(options);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -1542,14 +1570,10 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (!settingsFile.SectionPresent(OPTIONS_SECTION))
                     {
-                        // Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
-                        if (Options.WarnMissingParameterFileSection)
-                        {
-                            SetErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
-                            SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
-                            return false;
-                        }
-                        return true;
+                        // Section OPTIONS_SECTION was not found in the parameter file
+                        SetErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
+                        SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
+                        return false;
                     }
 
                     Options.MassCorrectionTagsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", Options.MassCorrectionTagsFilePath);
@@ -1769,7 +1793,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
-        /// <param name="parameterFilePath">Parameter file</param>
+        /// <param name="parameterFilePath">Parameter file (either legacy XML-based or Key=Value)</param>
         /// <returns>True if successful, False if failure</returns>
         public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
 

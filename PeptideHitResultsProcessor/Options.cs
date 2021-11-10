@@ -369,6 +369,60 @@ namespace PeptideHitResultsProcessor
             MSGFPlusSynopsisFileSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
         }
 
+        /// <summary>
+        /// Copy options from sourceOptions to the current instance of PHRPOptions
+        /// </summary>
+        /// <param name="sourceOptions"></param>
+        public void UpdateAll(PHRPOptions sourceOptions)
+        {
+            InputFilePath = sourceOptions.InputFilePath;
+            OutputDirectoryPath = sourceOptions.OutputDirectoryPath;
+            ParameterFilePath = sourceOptions.ParameterFilePath;
+
+            RecurseDirectories = sourceOptions.RecurseDirectories;
+            MaxLevelsToRecurse = sourceOptions.MaxLevelsToRecurse;
+
+            LogFilePath = sourceOptions.LogFilePath;
+            LogDirectoryPath = sourceOptions.LogDirectoryPath;
+            LogMessagesToFile = sourceOptions.LogMessagesToFile;
+
+            MassCorrectionTagsFilePath = sourceOptions.MassCorrectionTagsFilePath;
+            ModificationDefinitionsFilePath = sourceOptions.ModificationDefinitionsFilePath;
+            SearchToolParameterFilePath = sourceOptions.SearchToolParameterFilePath;
+            FastaFilePath = sourceOptions.FastaFilePath;
+
+            CreateModificationSummaryFile = sourceOptions.CreateModificationSummaryFile;
+
+            CreateProteinModsFile = sourceOptions.CreateProteinModsFile;
+            ProteinModsFileIncludesReversedProteins = sourceOptions.ProteinModsFileIncludesReversedProteins;
+            UseExistingMTSPepToProteinMapFile = sourceOptions.UseExistingMTSPepToProteinMapFile;
+
+            CreateFirstHitsFile = sourceOptions.CreateFirstHitsFile;
+            CreateSynopsisFile = sourceOptions.CreateSynopsisFile;
+
+            DMSConnectionString = sourceOptions.DMSConnectionString;
+
+            EnzymeMatchSpecLeftResidue = sourceOptions.EnzymeMatchSpecLeftResidue;
+            EnzymeMatchSpecRightResidue = sourceOptions.EnzymeMatchSpecLeftResidue;
+
+            PeptideNTerminusMassChange = sourceOptions.PeptideNTerminusMassChange;
+            PeptideCTerminusMassChange = sourceOptions.PeptideCTerminusMassChange;
+
+            IgnorePeptideToProteinMapperErrors = sourceOptions.IgnorePeptideToProteinMapperErrors;
+
+            InspectSynopsisFilePValueThreshold = sourceOptions.InspectSynopsisFilePValueThreshold;
+
+            MaxQuantAndromedaScoreThreshold = sourceOptions.MaxQuantAndromedaScoreThreshold;
+            MaxQuantPosteriorErrorProbabilityThreshold = sourceOptions.MaxQuantPosteriorErrorProbabilityThreshold;
+
+            MODaMODPlusSynopsisFileProbabilityThreshold = sourceOptions.MODaMODPlusSynopsisFileProbabilityThreshold;
+
+            MSAlignAndTopPICSynopsisFilePValueThreshold = sourceOptions.MSAlignAndTopPICSynopsisFilePValueThreshold;
+
+            MSGFPlusSynopsisFileEValueThreshold = sourceOptions.MSGFPlusSynopsisFileEValueThreshold;
+
+            MSGFPlusSynopsisFileSpecEValueThreshold = sourceOptions.MSGFPlusSynopsisFileSpecEValueThreshold;
+        }
 
         private void UpdateEnzymeMatchSpecIfDefined()
         {
