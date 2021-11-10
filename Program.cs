@@ -189,172 +189,26 @@ namespace PeptideHitResultsProcRunner
             if (string.IsNullOrWhiteSpace(parameterFilePath))
                 return false;
 
-        private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parseCommandLine)
-        {
-            // Returns True if no problems; otherwise, returns false
             // Assure that the user did not provide an old-style XML-based parameter file
             var paramFile = new FileInfo(parameterFilePath);
             if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            // ReSharper disable once StringLiteralTypo
-            var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
-                "F", "FASTA", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn",
-                "InsFHT", "InsSyn", "SynProb", "MaxQScore", "MaxQPEP", "DB",
-                "S", "A", "R", "L" };
             using var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
-            try
             var linesRead = 0;
             while (!paramFileReader.EndOfStream && linesRead < 5)
             {
-                // Make sure no invalid parameters are present
-                if (parseCommandLine.InvalidParametersPresent(validParameters))
-                {
-                    ShowErrorMessage("Invalid command line parameters",
-                        (from item in parseCommandLine.InvalidParameters(validParameters) select "/" + item).ToList());
-                    return false;
-                }
-
-                // Query parseCommandLine to see if various parameters are present
-                if (parseCommandLine.RetrieveValueForParameter("I", out var inputFilePath))
-                {
-                    mInputFilePath = inputFilePath;
-                }
-                else if (parseCommandLine.NonSwitchParameterCount > 0)
-                {
-                    mInputFilePath = parseCommandLine.RetrieveNonSwitchParameter(0);
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("O", out var outputDirectoryPath))
-                    mOutputDirectoryPath = outputDirectoryPath;
-
-                if (parseCommandLine.RetrieveValueForParameter("P", out var parameterFilePath))
-                    mParameterFilePath = parameterFilePath;
-
-                if (parseCommandLine.RetrieveValueForParameter("M", out var modDefsFilePath))
-                    Options.ModificationDefinitionsFilePath = modDefsFilePath;
-
-                if (parseCommandLine.RetrieveValueForParameter("T", out var massCorrectionTagsFilePath))
-                    Options.MassCorrectionTagsFilePath = massCorrectionTagsFilePath;
-
-                if (parseCommandLine.RetrieveValueForParameter("N", out var searchToolParameterFilePath))
-                    Options.SearchToolParameterFilePath = searchToolParameterFilePath;
-
-                if (parseCommandLine.IsParameterPresent("ProteinMods"))
-                {
-                    Options.CreateProteinModsFile = true;
-                }
-
-                if (parseCommandLine.IsParameterPresent("ProteinModsViaPHRP"))
-                {
-                    mCreateProteinModsUsingPHRPDataFile = true;
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("F", out var fastaFilePath))
-                    Options.FastaFilePath = fastaFilePath;
-
-                if (parseCommandLine.RetrieveValueForParameter("FASTA", out var fastaFilePath2))
-                    Options.FastaFilePath = fastaFilePath2;
-
-                if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
-                    Options.IgnorePeptideToProteinMapperErrors = true;
-
-                if (parseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
-                    Options.ProteinModsFileIncludesReversedProteins = true;
-
-                if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
-                    Options.UseExistingMTSPepToProteinMapFile = true;
-
-                if (parseCommandLine.RetrieveValueForParameter("FHT", out var createFirstHitsFile))
-                {
-                    if (ParseBoolean(createFirstHitsFile, out var createFirstHits))
-                    {
-                        Options.CreateFirstHitsFile = createFirstHits;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("Syn", out var createSynopsisFile))
-                {
-                    if (ParseBoolean(createSynopsisFile, out var createSynFile))
-                    {
-                        Options.CreateSynopsisFile = createSynFile;
-                    }
-                }
-
-                // InsFHT is a synonym for command line argument /FHT
-                if (parseCommandLine.RetrieveValueForParameter("InsFHT", out var createFirstHitsFile2))
-                {
-                    if (ParseBoolean(createFirstHitsFile2, out var createFirstHits))
-                    {
-                        Options.CreateFirstHitsFile = createFirstHits;
-                    }
-                }
-
-                // InsSyn is a synonym for command line argument /Syn
-                if (parseCommandLine.RetrieveValueForParameter("InsSyn", out var createSynopsisFile2))
-                {
-                    if (ParseBoolean(createSynopsisFile2, out var createSynFile))
-                    {
-                        Options.CreateSynopsisFile = createSynFile;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out var msgfPlusEValue))
-                {
-                    if (float.TryParse(msgfPlusEValue, out var floatValue))
-                    {
-                        Options.MSGFPlusSynopsisFileEValueThreshold = floatValue;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out var msgfPlusSpecEValue))
-                {
-                    if (float.TryParse(msgfPlusSpecEValue, out var floatValue))
-                    {
-                        Options.MSGFPlusSynopsisFileSpecEValueThreshold = floatValue;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("SynPValue", out var synPValue))
-                {
-                    if (float.TryParse(synPValue, out var floatValue))
-                    {
-                        Options.InspectSynopsisFilePValueThreshold = floatValue;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("SynProb", out var synProb))
-                {
-                    if (float.TryParse(synProb, out var floatValue))
-                    {
-                        Options.MODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
-                    }
-                }
                 var dataLine = paramFileReader.ReadLine();
                 if (string.IsNullOrWhiteSpace(dataLine))
                     continue;
 
-                if (parseCommandLine.RetrieveValueForParameter("MaxQScore", out var andromedaScoreThreshold))
-                {
-                    if (int.TryParse(andromedaScoreThreshold, out var threshold))
-                    {
-                        Options.MaxQuantAndromedaScoreThreshold = threshold;
-                    }
-                }
                 linesRead++;
 
-                // ReSharper disable once StringLiteralTypo
-                if (parseCommandLine.RetrieveValueForParameter("MaxQPEP", out var posteriorErrorProbabilityThreshold))
                 var trimmedLine = dataLine.Trim();
                 if (trimmedLine.StartsWith("<?xml", StringComparison.OrdinalIgnoreCase) ||
                     trimmedLine.StartsWith("<sections", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (float.TryParse(posteriorErrorProbabilityThreshold, out var floatValue))
-                    {
-                        Options.MaxQuantPosteriorErrorProbabilityThreshold = floatValue;
-                    }
                     ConsoleMsgUtils.ShowWarning(
                         "PeptideHitResultsProcRunner v3.1 uses Key=Value parameter files\n" +
                         "{0} is an XML file\n" +
@@ -363,49 +217,6 @@ namespace PeptideHitResultsProcRunner
                     ConsoleMsgUtils.ShowWarning("Aborting");
                     return true;
                 }
-
-                if (parseCommandLine.RetrieveValueForParameter("DB", out var connectionString))
-                    Options.DMSConnectionString = connectionString;
-
-                if (parseCommandLine.RetrieveValueForParameter("S", out var recurseDirectories))
-                {
-                    mRecurseDirectories = true;
-                    if (int.TryParse(recurseDirectories, out var maxLevelsToRecurse))
-                    {
-                        mMaxLevelsToRecurse = maxLevelsToRecurse;
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("A", out var alternateOutputPath))
-                    mOutputDirectoryAlternatePath = alternateOutputPath;
-
-                if (parseCommandLine.IsParameterPresent("R"))
-                    mRecreateDirectoryHierarchyInAlternatePath = true;
-
-                if (parseCommandLine.RetrieveValueForParameter("L", out var logFilePath))
-                {
-                    mLogMessagesToFile = true;
-
-                    if (!string.IsNullOrEmpty(logFilePath))
-                    {
-                        mLogFilePath = logFilePath.Trim('"');
-                    }
-                }
-
-                if (parseCommandLine.RetrieveValueForParameter("LogDir", out var logDirectoryPath))
-                {
-                    mLogMessagesToFile = true;
-                    if (!string.IsNullOrEmpty(logDirectoryPath))
-                    {
-                        mLogDirectoryPath = logDirectoryPath;
-                    }
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage("Error parsing the command line parameters: " + Environment.NewLine + ex.Message);
             }
 
             return false;
