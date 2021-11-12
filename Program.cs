@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcRunner
                               "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics"
             };
 
-            cmdLineParser.UsageExamples.Add(string.Format(
+            parser.UsageExamples.Add(string.Format(
                 "The input file should be one of the following:\n" +
                 "  MaxQuant results files (msms.txt and peptides.txt)\n" +
                 "  MS-GF+ results file ({0}.tsv or {1}.tsv or .tsv)\n" +
@@ -78,21 +78,28 @@ namespace PeptideHitResultsProcRunner
 
             // The default argument name for parameter files is /ParamFile or -ParamFile
             // Also allow /Conf or /P
-            cmdLineParser.AddParamFileKey("Conf");
-            cmdLineParser.AddParamFileKey("P");
+            parser.AddParamFileKey("Conf");
+            parser.AddParamFileKey("P");
 
-            var result = cmdLineParser.ParseArgs(args);
+            var result = parser.ParseArgs(args);
             var options = result.ParsedResults;
+
             if (!result.Success || !options.Validate())
             {
+                if (parser.CreateParamFileProvided)
+                {
+                    return 0;
+                }
+
                 // Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
                 Thread.Sleep(750);
+
                 return -1;
             }
 
             try
             {
-                if (InvalidParameterFile(cmdLineParser.ParameterFilePath))
+                if (InvalidParameterFile(parser.ParameterFilePath))
                     return -1;
 
                 var peptideHitResultsProcessor = new PeptideHitResultsProcRunner(options);
@@ -111,8 +118,6 @@ namespace PeptideHitResultsProcRunner
                     peptideHitResultsProcessor.LogAdditionalMessage(string.Join(" ", args));
                     peptideHitResultsProcessor.SkipConsoleWriteIfNoStatusListener = false;
                 }
-
-
 
                 int returnCode;
                 if (options.RecurseDirectories)
