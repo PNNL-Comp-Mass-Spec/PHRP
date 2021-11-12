@@ -1,10 +1,10 @@
 # Peptide Hit Results Processor
 
-The Peptide Hit Results Processor (PHRP) can be used to convert a MS-GF+ .tsv 
-search result file or an X!Tandem results file (XML format) into a series 
-of tab-delimited text files summarizing the results. It also supports 
-result files from MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder, and TopPIC,
-along with SEQUEST Synopsis/First Hits files.
+The Peptide Hit Results Processor (PHRP) converts search results from various 
+MS/MS identification tools into a series of tab-delimited text files
+that organize the data in a similar format for each tool. It supports 
+MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder, 
+TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.
 
 PHRP will insert modification symbols into the peptide sequences for modified peptides.
 Parallel files are created containing sequence information, modification details,
@@ -24,28 +24,35 @@ to convert the .mzid file to a tab-delimited .tsv file.
 ## Example Command line 
 
 ```
-PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFPlus_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFPlus_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.revCat.fasta
+PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFPlus_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFPlus_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:H_sapiens_UniProt_SPROT_2021-03-07.fasta
 ```
 
 ## Command Line Syntax
 
 PHRP is a console application, and must be run from the Windows command prompt.
+* On Linux, use [Mono](https://www.mono-project.com/download/stable/#download-lin) to run the program, 
+for example `mono PeptideHitResultsProcRunner.exe`
 
 ```
-PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
+PeptideHitResultsProcRunner.exe 
+ InputFilePath [/O:OutputDirectoryPath]
+ [/S:[MaxLevel]]
  [/P:ParameterFilePath]
- [/M:ModificationDefinitionFilePath]
- [/ProteinMods] [/F:FastaFilePath]
- [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]
- [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]
- [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] 
- [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]
- [/FHT:True|False] [/Syn:True|False]
- [/SynProb:0.05] [/SynPValue:0.95] 
- [/MaxQScore:50] [/MaxQPEP:0.01]
- [/DB:DatabaseConnectionString]
- [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] 
  [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]
+ [/T:MassCorrectionTagsFilePath]
+ [/M:ModificationDefinitionFilePath]
+ [/N:SearchToolParameterFilePath] 
+ [/F:FastaFilePath]
+ [/CreateModSummaryFile:True|False] 
+ [/ProteinMods] [/ProteinModsIncludeReversed]
+ [/UseExistingPepToProteinMapFile]
+ [/CreateProteinModsViaPHRP] 
+ [/IgnorePepToProtMapErrors]
+ [/FHT:True|False] [/Syn:True|False]
+ [/MaxQScore:50] [/MaxQPEP:0.01]
+ [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]
+ [/SynProb:0.05] [/SynPValue:0.95] 
+ [/DB:DatabaseConnectionString]
 ```
 
 The input file should be one of the following:
@@ -64,53 +71,71 @@ The input file should be one of the following:
   * SEQUEST Synopsis File (_syn.txt)
   * SEQUEST First Hits file (_fht.txt)
 
-The output directory switch is optional
+Optionally use `/O` to specify the output directory
 * If omitted, the output file will be created in the same directory as the input file
+
+Use `/S` to process all valid files in the input directory and subdirectories
+* Include a number after `/S` (like `/S:2`) to limit the level of subdirectories to examine
 
 Optionally use `/P` to supply a parameter file with processing options
 * This can either be a Key=Value parameter file
   * [PHRP_Options.conf](https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/PHRP_Options.conf)
 * Or an XML-based parameter file
   * [PeptideHitResultsProcessorParameters.xml](https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/PeptideHitResultsProcessorParameters.xml)
-  
+
+Use `/L` to specify that a log file should be created
+* Use `/L:LogFilePath` to specify the name (or full path) for the log file
+* Use /LogDir to specify the directory to create the log file (ignored if the LogFilePath is rooted)
+
+Use `/T` to specify the file containing the mass correction tag info
+* This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons)
+
 Use `/M` to specify the file containing the modification definitions.
 * This file should be tab delimited, with the first column containing the modification
 symbol, the second column containing the modification mass, plus optionally a
 third column listing the residues that can be modified with the given mass
 * For the third column, use 1 letter residue symbols (no need to separate with commas or spaces)
 
-Use `/ProteinMods` to indicate that the _ProteinMods.txt file should be created
-* This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined using `/F`
-
-Use `/ProteinModsViaPHRP` to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the
-_ProteinMods.txt file should be created
-* This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined using `/F`
-
-Use `/F` to specify the path to the FASTA file
-* When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file
-
-Use `/IgnorePepToProtMapErrors` to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file
-
-Use `/ProteinModsIncludeReversed` to include Reversed proteins in the _ProteinMods.txt file
-
-Use `/UseExistingPepToProteinMapFile` to use an existing _PepToProtMapMTS.txt file if it exists
-
-Use `/T` to specify the file containing the mass correction tag info
-* This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons)
-
 Use `/N` to specify the parameter file provided to the search tool
 * This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, TopPIC, and InSpecT
 * For MaxQuant, provide either an XML-based parameter file (root element is <MaxQuantParams>) or provide the parameters.txt file created in the txt results directory
   * The XML-based parameter file is preferred, since it is required to allow PHRP to accurately compute monoisotopic masses of peptides identified by MaxQuant
 
-When processing an MS-GF+ results file, use `/MSGFPlusSpecEValue` and `/MSGFPlusEValue` to customize the thresholds used to determine which peptides are written to the synopsis file
-* Defaults are `/MSGFPlusSpecEValue:5E-07` and `/MSGFPlusEValue:0.75`
+Use `/F` to specify the path to the FASTA file
+* When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file
+
+A modification summary file with extension _ModSummary.txt is created by default
+* To disable, use `/CreateModSummaryFile:False`
+
+Use `/ProteinMods` to indicate that the _ProteinMods.txt file should be created
+* This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined using `/F`
+
+Use `/ProteinModsIncludeReversed` if an existing _ProteinMods.txt file has reversed protein sequences, or if the FASTA file has reversed proteins
+* If false, will skip reversed proteins when creating the _ProteinMods.txt file
+
+Use `/UseExistingPepToProteinMapFile` to use an existing _PepToProtMapMTS.txt file if it exists
+
+Use `/CreateProteinModsViaPHRP` to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the
+_ProteinMods.txt file should be created
+* This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined using `/F`
+
+Use `/IgnorePepToProtMapErrors` to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file
 
 Use `/FHT:True` or `/FHT:False` to control the creation of a first-hits file (_fht.txt)
 * The default is `/FHT:True`
 
 Use `/Syn:True` or `/Syn:False` to toggle the creation of a synopsis file (_syn.txt)
 * The default is `/Syn:True`
+
+When processing a MaxQuant results file, use `/MaxQScore` to customize the Andromeda score threshold used to determine which peptides are written to the synopsis file
+* A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
+* The default is `/MaxQScore:50`
+
+When processing a MaxQuant results file, use `/MaxQPEP` to customize the Posterior Error Probability (PEP) score threshold used to determine which peptides are written to the synopsis file
+* The default is `/MaxQPEP:0.01`
+
+When processing an MS-GF+ results file, use `/MSGFPlusSpecEValue` and `/MSGFPlusEValue` to customize the thresholds used to determine which peptides are written to the synopsis file
+* Defaults are `/MSGFPlusSpecEValue:5E-07` and `/MSGFPlusEValue:0.75`
 
 When processing a MODPlus or MODa results file, use `/SynProb` to customize the probability threshold used to determine which peptides are written to the synopsis file
 * The default is `/SynProb:0.05`
@@ -122,28 +147,10 @@ When processing a MODPlus or MODa results file, use `/SynPValue` to customize th
 * Lower p-values are higher confidence results
   * 0.95 is a very loose filter
   
-When processing a MaxQuant results file, use `/MaxQScore` to customize the Andromeda score threshold used to determine which peptides are written to the synopsis file
-* A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
-* The default is `/MaxQScore:50`
-
-When processing a MaxQuant results file, use `/MaxQPEP` to customize the Posterior Error Probability (PEP) score threshold used to determine which peptides are written to the synopsis file
-* The default is `/MaxQPEP:0.01`
-
 When processing MaxQuant results using a computer on the pnl.gov domain, the DMS database is contacted to lookup dataset IDs by dataset name, where dataset name comes from the 'Raw file' column in the msms.txt file
 * Optionally use `/DB` to override the default connection info
 * The default is `/DB:"Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun"`
 * To disable contacting DMS, use `/DB:""` or `/DB:false`
-
-Use `/S` to process all valid files in the input directory and subdirectories
-* Include a number after `/S` (like `/S:2`) to limit the level of subdirectories to examine
-
-When using `/S`, you can redirect the output of the results using `/A`
-
-When using `/S`, you can use `/R` to re-create the input directory hierarchy in the alternate output directory (if defined)
-
-Use `/L` to specify that a log file should be created
-* Use `/L:LogFilePath` to specify the name (or full path) for the log file
-* Use /LogDir to specify the directory to create the log file (ignored if the LogFilePath is rooted)
 
 ## Contacts
 
