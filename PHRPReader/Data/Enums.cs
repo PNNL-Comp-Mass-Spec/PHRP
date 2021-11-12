@@ -1,6 +1,4 @@
-﻿using System;
-
-// ReSharper disable UnusedMember.Global
+﻿// ReSharper disable UnusedMember.Global
 
 namespace PHRPReader.Data
 {
@@ -1040,7 +1038,4 @@ namespace PHRPReader.Data
         /// </summary>
         DelMPPM = 16
     }
-
-#pragma warning restore 1591
-
 }
