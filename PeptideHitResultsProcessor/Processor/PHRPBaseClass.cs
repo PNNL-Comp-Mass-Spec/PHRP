@@ -1499,8 +1499,8 @@ namespace PeptideHitResultsProcessor.Processor
                 var cmdLineParser = new CommandLineParser<PHRPOptions>(assemblyName, GetAppVersion())
                 {
                     ProgramInfo = "This program converts search results from various MS/MS identification tools " +
-                                  "into a series of tab-delimited text files summarizing the results.",
-                    ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA) in 2006"
+                                  "into a series of tab-delimited text files that organize the data in a similar format for each tool.",
+                    ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA)"
                 };
 
                 var args = new List<string>
