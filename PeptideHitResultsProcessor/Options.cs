@@ -168,6 +168,13 @@ namespace PeptideHitResultsProcessor
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         /// <summary>
+        /// Create protein mods using existing PHRP data file
+        /// </summary>
+        [Option("CreateProteinModsUsingPHRPDataFile", "CreateProteinModsViaPHRP",
+            HelpText = "When true, create the _ProteinMods.txt file using existing PHRP data files.\n" +
+                       "This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined")]
+        public bool CreateProteinModsUsingPHRPDataFile { get; set; }
+        /// <summary>
         /// Create first hits file
         /// </summary>
         [Option("CreateFirstHitsFile", "FHT",
@@ -335,6 +342,8 @@ namespace PeptideHitResultsProcessor
             CreateProteinModsFile = false;
             ProteinModsFileIncludesReversedProteins = false;
             UseExistingMTSPepToProteinMapFile = false;
+            CreateProteinModsUsingPHRPDataFile = false;
+
 
             CreateFirstHitsFile = true;
             CreateSynopsisFile = true;

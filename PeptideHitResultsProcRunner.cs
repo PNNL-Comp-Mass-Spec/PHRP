@@ -75,16 +75,6 @@ namespace PeptideHitResultsProcRunner
         /// </summary>
         public PHRPOptions Options { get; }
 
-        /// <summary>
-        /// Create Protein Mods Using PHRP Data File
-        /// </summary>
-        /// <remarks>
-        /// Setting this to true assumes the input file is a valid PHRP data file
-        /// Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-        /// When this is True, mCreateProteinModsFile is assumed to be true
-        /// </remarks>
-        public bool CreateProteinModsUsingPHRPDataFile { get; set; }
-
         // ReSharper disable once UnusedMember.Global
         public ResultsProcessorErrorCodes LocalErrorCode => mLocalErrorCode;
 
@@ -200,7 +190,7 @@ namespace PeptideHitResultsProcRunner
                         UpdateProgress("Parsing " + Path.GetFileName(inputFilePath));
                         ResetProgress();
 
-                        if (CreateProteinModsUsingPHRPDataFile)
+                        if (Options.CreateProteinModsUsingPHRPDataFile)
                         {
                             success = StartCreateProteinModsViaPHRPData(inputFilePath, outputDirectoryPath);
                         }
