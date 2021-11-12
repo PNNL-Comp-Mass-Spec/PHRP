@@ -1,7 +1,7 @@
-﻿// This program converts search results from various MS/MS identification tools
-// into a series of tab-delimited text files summarizing the results.
-// It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign,
-// MSPathFinder, TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.
+﻿// This program converts search results from various MS/MS identification tools into a series
+// of tab-delimited text files that organize the data in a similar format for each tool.
+// It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder,
+// TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -38,11 +38,11 @@ namespace PeptideHitResultsProcRunner
         {
             var exeName = Assembly.GetEntryAssembly()?.GetName().Name;
 
-            var cmdLineParser = new CommandLineParser<PHRPOptions>(exeName, PHRPBaseClass.GetAppVersion())
+            var parser = new CommandLineParser<PHRPOptions>(exeName, PHRPBaseClass.GetAppVersion())
             {
                 ProgramInfo = "This program converts search results from various MS/MS identification tools " +
-                              "into a series of tab-delimited text files summarizing the results.  " +
-                              "It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign,  " +
+                              "into a series of tab-delimited text files that organize the data in a similar format for each tool. " +
+                              "It supports MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, " +
                               "MSPathFinder, TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.",
                 ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA)" + Environment.NewLine +
                               "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
