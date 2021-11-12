@@ -71,7 +71,14 @@ namespace PHRPReader
         /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_CTerminus = ']';
 
+        /// <summary>
+        /// Regular expression for the residue to the left of cleavage points for the given enzyme
+        /// </summary>
         public const string TRYPSIN_LEFT_RESIDUE_REGEX = "[KR]";
+
+        /// <summary>
+        /// Regular expression for the residue to the right of cleavage points for the given enzyme
+        /// </summary>
         public const string TRYPSIN_RIGHT_RESIDUE_REGEX = "[^P]";
 
         /// <summary>
