@@ -2793,7 +2793,7 @@ namespace PeptideHitResultsProcessor.Processor
         private static readonly Regex ProteinInfoMatcher = new(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
-        /// Examines proteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
+        /// Examines proteinList to look for a semicolon separated list of proteins and terminus symbols, for example
         /// AT1G26570.1(pre=K,post=N);AT3G29360.1(pre=K,post=N);AT3G29360.2(pre=K,post=N)
         /// </summary>
         /// <param name="proteinList">Protein list to examine</param>

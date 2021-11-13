@@ -368,7 +368,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                 Console.WriteLine("Program syntax:");
                 Console.WriteLine(Path.GetFileName(Assembly.GetExecutingAssembly().Location) + " InputFilePath [/O:OutputFilePath]");
                 Console.WriteLine();
-                Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006");
+                Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)");
                 Console.WriteLine("Version: " + GetAppVersion());
                 Console.WriteLine();
                 Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
