@@ -2161,6 +2161,47 @@ namespace PHRPReader
             return false;
         }
 
+        /// <summary>
+        /// Examine the filename to see if it ends with one of the known suffixes for synopsis and first hits files created by PeptideHitResultsProcRunner
+        /// </summary>
+        /// <param name="fileNameOrPath"></param>
+        /// <returns>True if the name ends with a known suffix, otherwise false</returns>
+        public static bool IsSynopsisOrFirstHitsFile(string fileNameOrPath)
+        {
+            try
+            {
+                var suffixesToCheck = new List<string>
+                {
+                    InspectSynFileReader.FILENAME_SUFFIX_SYN,
+                    MaxQuantSynFileReader.FILENAME_SUFFIX_FHT,
+                    MaxQuantSynFileReader.FILENAME_SUFFIX_SYN,
+                    MODaSynFileReader.FILENAME_SUFFIX_SYN,
+                    MODPlusSynFileReader.FILENAME_SUFFIX_FHT,
+                    MODPlusSynFileReader.FILENAME_SUFFIX_SYN,
+                    MSAlignSynFileReader.FILENAME_SUFFIX_FHT,
+                    MSAlignSynFileReader.FILENAME_SUFFIX_SYN,
+                    // Future: MSFraggerSynFileReader.FILENAME_SUFFIX_FHT,
+                    // Future: MSFraggerSynFileReader.FILENAME_SUFFIX_SYN,
+                    MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT,
+                    MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN,
+                    MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT,
+                    MSPathFinderSynFileReader.FILENAME_SUFFIX_SYN,
+                    TopPICSynFileReader.FILENAME_SUFFIX_FHT,
+                    TopPICSynFileReader.FILENAME_SUFFIX_SYN,
+                    XTandemSynFileReader.FILENAME_SUFFIX_SYN
+                };
+
+                var dataFile = new FileInfo(fileNameOrPath);
+
+                return suffixesToCheck.Any(suffix => dataFile.Name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception ex)
+            {
+                ConsoleMsgUtils.ShowWarning("Error in IsSynopsisOrFirstHitsFile {0}", ex.Message);
+                return false;
+            }
+        }
+
         private static bool LineContainsValues(string dataLine, params string[] valuesToFind)
         {
             var matchCount = 0;

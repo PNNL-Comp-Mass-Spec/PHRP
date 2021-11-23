@@ -522,20 +522,43 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 ResultsFileFormat peptideHitResultsFormat;
+                bool inputFileIsSynOrFht;
+
                 if (mPeptideHitResultsFileFormat == ResultsFileFormat.AutoDetermine)
                 {
-                    peptideHitResultsFormat = PHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
+                    inputFileIsSynOrFht = ReaderFactory.IsSynopsisOrFirstHitsFile(inputFilePath);
+                    if (inputFileIsSynOrFht)
+                    {
+                        var fileType = inputFilePath.EndsWith("fht.txt", StringComparison.OrdinalIgnoreCase)
+                            ? "first hits"
+                            : "synopsis";
+
+                        ShowWarning(string.Format(
+                            "Invalid file format for PHRP; the input file is already a {0} file: {1}",
+                            fileType, inputFilePath));
+
+                        peptideHitResultsFormat = ResultsFileFormat.AutoDetermine;
+                    }
+                    else
+                    {
+
+                        peptideHitResultsFormat = PHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
+                    }
                 }
                 else
                 {
                     peptideHitResultsFormat = mPeptideHitResultsFileFormat;
+                    inputFileIsSynOrFht = false;
                 }
 
-                if (peptideHitResultsFormat == ResultsFileFormat.AutoDetermine)
+                if (inputFileIsSynOrFht || peptideHitResultsFormat == ResultsFileFormat.AutoDetermine)
                 {
                     // If peptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 
-                    ShowErrorMessage("Could not determine the format of the input file.");
+                    if (!inputFileIsSynOrFht)
+                    {
+                        ShowErrorMessage("Could not determine the format of the input file.");
+                    }
 
                     Console.WriteLine();
                     ShowMessage(
