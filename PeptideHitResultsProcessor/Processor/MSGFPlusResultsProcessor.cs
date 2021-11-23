@@ -1118,15 +1118,16 @@ namespace PeptideHitResultsProcessor.Processor
         {
             try
             {
-                if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME, out var value))
+                if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME, out var value) &&
+                    !searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
                 {
-                    if (!searchEngineParams.Parameters.TryGetValue(MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
-                    {
-                        OnWarningEvent("Could not find parameter {0} or {1} in parameter file {2}; " +
-                                       "cannot determine the precursor mass tolerance", MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME, MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, Path.GetFileName(searchEngineParams.SearchEngineParamFilePath));
+                    OnWarningEvent(
+                        "Could not find parameter {0} or {1} in parameter file {2}; cannot determine the precursor mass tolerance",
+                        MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME,
+                        MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM,
+                        Path.GetFileName(searchEngineParams.SearchEngineParamFilePath));
 
-                        return new PrecursorMassTolerance();
-                    }
+                    return new PrecursorMassTolerance();
                 }
 
                 // Parent ion tolerance line found

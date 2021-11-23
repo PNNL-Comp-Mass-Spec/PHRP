@@ -1286,12 +1286,10 @@ namespace PHRPReader
                     break;
             }
 
-            if (string.IsNullOrEmpty(datasetName))
+            if (string.IsNullOrEmpty(datasetName) && AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
             {
-                if (AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
-                {
-                    datasetName = AutoDetermineDatasetName(filePathTrimmed, resultType);
-                }
+                // ReSharper disable once TailRecursiveCall
+                return AutoDetermineDatasetName(filePathTrimmed, resultType);
             }
 
             return datasetName;
