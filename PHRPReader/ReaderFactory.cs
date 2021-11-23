@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using PHRPReader.Data;
 using PHRPReader.Reader;
+using PRISM;
 
 // ReSharper disable UnusedMember.Global
 
@@ -30,7 +31,7 @@ namespace PHRPReader
     /// And, it integrates scan stats values (to determine elution time)
     /// </para>
     /// </summary>
-    public class ReaderFactory : PRISM.EventNotifier, IDisposable
+    public class ReaderFactory : EventNotifier, IDisposable
     {
         // Ignore Spelling: A-Za-z, DA, fht, kv, moda, MODa, modp, modplus, msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt
 
@@ -1717,7 +1718,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                PRISM.ConsoleMsgUtils.ShowWarning("Exception in FindModSummaryFile: {0}", ex.Message);
+                ConsoleMsgUtils.ShowWarning("Exception in FindModSummaryFile: {0}", ex.Message);
             }
 
             return string.Empty;
