@@ -2508,31 +2508,34 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
-            if (success)
-            {
-                if (inputFile.Directory == null)
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                }
-                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                    // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.MSGFPlus);
-                }
-            }
-
             if (!success)
             {
                 // Do not treat this as a fatal error
                 return true;
+            }
+
+            if (inputFile.Directory == null)
+            {
+                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+            }
+            else if (string.IsNullOrWhiteSpace(synOutputFilePath))
+            {
+                OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+            }
+            else
+            {
+                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
+
+                // Create the Protein Mods file
+                var modsFileCreated = CreateProteinModDetailsFile(
+                    synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PeptideHitResultTypes.MSGFPlus);
+
+                if (!modsFileCreated)
+                {
+                    // Do not treat this as a fatal error
+                    return true;
+                }
             }
 
             return true;
