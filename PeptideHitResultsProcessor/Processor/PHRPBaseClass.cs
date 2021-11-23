@@ -1505,7 +1505,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var args = new List<string>
                 {
-                    "-ParamFile:" +PathUtils.PossiblyQuotePath(parameterFile.FullName)
+                    "-ParamFile:" + PathUtils.PossiblyQuotePath(parameterFile.FullName)
                 };
 
                 var result = cmdLineParser.ParseArgs(args.ToArray());

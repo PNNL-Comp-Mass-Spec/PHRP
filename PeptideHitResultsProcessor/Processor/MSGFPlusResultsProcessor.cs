@@ -2333,7 +2333,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                         modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-                        MSGFPlusSynFileReader.UpdateMassCalculatorMasses(Options.SearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator,
+                        MSGFPlusSynFileReader.UpdateMassCalculatorMasses(
+                            Options.SearchToolParameterFilePath,
+                            modFileProcessor,
+                            mPeptideSeqMassCalculator,
                             out var localErrorMsg);
 
                         if (!string.IsNullOrWhiteSpace(localErrorMsg) && string.IsNullOrWhiteSpace(mErrorMessage))
