@@ -903,6 +903,10 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Read the newly created file and append new entries to mtsPepToProteinMapFilePath
+
+                    // This tracks the number of non-empty lines read
+                    var linesRead = 0;
+
                     using (var reader = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
                         while (!reader.EndOfStream)
@@ -912,9 +916,17 @@ namespace PeptideHitResultsProcessor.Processor
                             if (string.IsNullOrWhiteSpace(lineIn))
                                 continue;
 
-                            var splitLine = lineIn.Split(new[] { '\t' }, 2);
+                            linesRead++;
+
+                            var splitLine = lineIn.Split(new[] { '\t' }, 3);
                             if (splitLine.Length < 2)
                                 continue;
+
+                            if (linesRead == 1 && splitLine[0].Equals("Peptide") && splitLine[1].Equals("Protein"))
+                            {
+                                // Header line; skip it
+                                continue;
+                            }
 
                             var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
 
@@ -1173,7 +1185,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (File.Exists(filePath))
                 {
-                    Thread.Sleep(200);
+                    Thread.Sleep(100);
                     File.Delete(filePath);
                 }
             }
