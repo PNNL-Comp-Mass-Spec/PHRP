@@ -2461,9 +2461,13 @@ namespace PeptideHitResultsProcessor.Processor
             string outputDirectoryPath,
             string mtsPepToProteinMapFilePath)
         {
-            var success = true;
+            bool success;
 
-            if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath) || !File.Exists(mtsPepToProteinMapFilePath))
+            if (!string.IsNullOrEmpty(mtsPepToProteinMapFilePath) && File.Exists(mtsPepToProteinMapFilePath))
+            {
+                success = true;
+            }
+            else
             {
                 // MTSPepToProteinMap file not found; auto-create it
 
