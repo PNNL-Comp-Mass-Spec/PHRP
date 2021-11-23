@@ -60,7 +60,7 @@ namespace PeptideHitResultsProcessor.Data
         public PrecursorMassTolerance(double toleranceLeft, double toleranceRight, bool isPPM)
         {
             ToleranceLeft = toleranceLeft;
-            ToleranceLeft = toleranceRight;
+            ToleranceRight = toleranceRight;
             IsPPM = isPPM;
         }
 
