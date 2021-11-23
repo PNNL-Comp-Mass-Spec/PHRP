@@ -1138,15 +1138,19 @@ namespace PeptideHitResultsProcessor.Processor
                 // ReSharper disable once ConvertIfStatementToSwitchStatement
                 if (splitLine.Length == 1 && ParseParentMassTolerance(splitLine[0], out var tolerance, out var isPPM))
                 {
+                    // Tolerance does not contain a comma
                     return new PrecursorMassTolerance(tolerance, isPPM);
                 }
 
                 if (splitLine.Length <= 1)
                 {
+                    // Tolerance does not contain a comma and does not contain a valid number
+                    OnWarningEvent("Invalid parent ion tolerance format: {0}; should be 20ppm or 1.5Da or 20ppm,30ppm", value);
                     return new PrecursorMassTolerance();
                 }
 
-                // ReSharper disable once InvertIf
+                // Tolerance line does contain a comma
+
                 if (ParseParentMassTolerance(splitLine[0], out var leftTolerance, out var leftToleranceIsPPM))
                 {
                     // ReSharper disable once ConvertIfStatementToReturnStatement
@@ -1158,6 +1162,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return new PrecursorMassTolerance(leftTolerance, leftTolerance, leftToleranceIsPPM);
                 }
 
+                OnWarningEvent("Invalid parent ion tolerance format: {0}; should be 0.5Da,2.5Da", value);
                 return new PrecursorMassTolerance();
             }
             catch (Exception ex)
