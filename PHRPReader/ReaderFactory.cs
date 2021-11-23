@@ -71,27 +71,11 @@ namespace PHRPReader
         // For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
         private const string PARENT_ION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
 
-        private string mInputFilePath;
+        private string mCachedLine;
 
-        private string mInputDirectoryPath;
+        private bool mCachedLineAvailable;
 
-        private readonly StartupOptions mStartupOptions;
-
-        private bool mInitialized;
-
-        /// <summary>
-        /// When set to true, calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
-        /// </summary>
-        /// <remarks>If the peptide is a peptide of interest, you must call FinalizeCurrentPSM after calling .MoveNext()</remarks>
-        private bool mFastReadMode;
-
-        private StreamReader mSourceFile;
-
-        private int mSourceFileLineCount;
-
-        private int mSourceFileLinesRead;
-
-        private readonly PeptideMassCalculator mPeptideMassCalculator;
+        private PSM mCachedPSM;
 
         /// <summary>
         /// Keys in this dictionary are mod symbols
@@ -105,6 +89,39 @@ namespace PHRPReader
         /// </summary>
         private readonly SortedDictionary<string, List<ModificationDefinition>> mStaticMods;
 
+
+        private ScanStatsExInfo mExtendedScanStatsInfo;
+
+        private bool mExtendedScanStatsValid;
+
+        /// <summary>
+        /// When set to true, calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
+        /// </summary>
+        /// <remarks>If the peptide is a peptide of interest, you must call FinalizeCurrentPSM after calling .MoveNext()</remarks>
+        private bool mFastReadMode;
+
+        private bool mHeaderLineParsed;
+
+        private bool mInitialized;
+
+        private string mInputFilePath;
+
+        private string mInputDirectoryPath;
+
+        /// <summary>
+        /// RegEx to extract parent ions from filter strings that do not have Full msx
+        /// </summary>
+        /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
+        private static readonly Regex mFindParentIonOnlyNonMsx = new(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// RegEx to extract parent ions from filter strings that have Full msx
+        /// </summary>
+        /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
+        private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private PHRPReaderErrorCodes mLocalErrorCode;
+
         /// <summary>
         /// Dictionary of cached MSGF values
         /// </summary>
@@ -113,6 +130,14 @@ namespace PHRPReader
         /// Values are MSGFSpecEValue (stored as string to preserve formatting)
         /// </remarks>
         private Dictionary<int, string> mMSGFCachedResults;
+
+        private readonly StringBuilder mNewPeptide = new();
+
+        private readonly PeptideMassCalculator mPeptideMassCalculator;
+
+        private PSM mPSMCurrent;
+
+        private bool mPSMCurrentFinalized;
 
         /// <summary>
         /// Dictionary of cached scan stats data, in particular elution time
@@ -132,30 +157,13 @@ namespace PHRPReader
         /// </remarks>
         private Dictionary<int, ScanStatsExInfo> mScanStatsEx;
 
-        private PSM mPSMCurrent;
-        private bool mPSMCurrentFinalized;
+        private StreamReader mSourceFile;
 
-        private bool mExtendedScanStatsValid;
-        private ScanStatsExInfo mExtendedScanStatsInfo;
+        private int mSourceFileLineCount;
 
-        private bool mHeaderLineParsed;
-        private bool mCachedLineAvailable;
-        private string mCachedLine;
-        private PSM mCachedPSM;
+        private int mSourceFileLinesRead;
 
-        private PHRPReaderErrorCodes mLocalErrorCode;
-
-        /// <summary>
-        /// RegEx to extract parent ions from filter strings that do not have Full msx
-        /// </summary>
-        /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mFindParentIonOnlyNonMsx = new(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        /// <summary>
-        /// RegEx to extract parent ions from filter strings that have Full msx
-        /// </summary>
-        /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private readonly StartupOptions mStartupOptions;
 
         /// <summary>
         /// Returns True if the input file was successfully opened and data remains to be read
@@ -263,14 +271,14 @@ namespace PHRPReader
         public float PercentComplete => mSourceFileLineCount > 0 ? mSourceFileLinesRead / (float)mSourceFileLineCount * 100f : 0;
 
         /// <summary>
-        /// Returns the PHRP SynFileReader object
-        /// </summary>
-        public SynFileReaderBaseClass SynFileReader { get; private set; }
-
-        /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
         /// </summary>
         public SortedList<int, int> ResultToSeqMap => SynFileReader == null ? new SortedList<int, int>() : SynFileReader.ResultToSeqMap;
+
+        /// <summary>
+        /// Returns the PHRP SynFileReader object
+        /// </summary>
+        public SynFileReaderBaseClass SynFileReader { get; private set; }
 
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
@@ -1413,8 +1421,6 @@ namespace PHRPReader
 
             return false;
         }
-
-        private readonly StringBuilder mNewPeptide = new();
 
         /// <summary>
         /// Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
