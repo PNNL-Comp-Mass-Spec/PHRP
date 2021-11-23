@@ -293,6 +293,8 @@ namespace PeptideHitResultsProcRunner
         private void ShowProcessingOptions(PHRPBaseClass resultsProcessor)
         {
             Console.WriteLine();
+
+            // Processing options for MSGFPlus results processor
             LogMessage("Processing options for " + resultsProcessor);
 
             LogMessage(string.Format("{0,-45} {1}",
@@ -400,7 +402,7 @@ namespace PeptideHitResultsProcRunner
 
                     case ResultsFileFormat.MSGFPlusTXTFile:
                         PeptideHitResultType = PeptideHitResultTypes.MSGFPlus;
-                        LogMessage("Detected MSGF+ results file");
+                        LogMessage("Detected MS-GF+ results file");
                         break;
 
                     case ResultsFileFormat.MSAlignTXTFile:
@@ -603,7 +605,7 @@ namespace PeptideHitResultsProcRunner
 
                     case ResultsFileFormat.MSGFPlusTXTFile:
                         mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor(Options);
-                        LogMessage("Detected MSGF+ results file");
+                        LogMessage("Detected MS-GF+ results file");
                         break;
 
                     case ResultsFileFormat.MSAlignTXTFile:
