@@ -95,15 +95,12 @@ namespace PeptideHitResultsProcRunner
 
         public override IList<string> GetDefaultExtensionsToParse()
         {
-            var extensionsToParse = new string[2];
-
-            // Note: If mPeptideHitResultsFileFormat = .AutoDetermine
-            //  then this class will only parse .txt files if they match
-            // PeptideHitResultsProcessor.SequestResultsProcessor.FIRST_HITS_FILE_SUFFIX or
-            // PeptideHitResultsProcessor.SequestResultsProcessor.SYNOPSIS_FILE_SUFFIX
-
-            extensionsToParse[0] = ".txt";
-            extensionsToParse[1] = ".xml";
+            var extensionsToParse = new List<string>
+            {
+                ".txt",
+                ".xml",
+                ".tsv"
+            };
 
             return extensionsToParse;
         }
