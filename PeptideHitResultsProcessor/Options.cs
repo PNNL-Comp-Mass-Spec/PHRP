@@ -141,7 +141,7 @@ namespace PeptideHitResultsProcessor
         [Option("ProteinMods",
             HelpText = "When true, create the _ProteinMods.txt file.\n" +
                        "This requires that either an existing _PepToProtMapMTS.txt file exists, " +
-                       "or that the FASTA file be defined using /F")]
+                       "or that the FASTA file be defined using /F or FastaFilePath")]
         public bool CreateProteinModsFile { get; set; }
 
         [Option("ProteinModsFileIncludesReversedProteins", "ProteinModsIncludeReversed",
@@ -162,7 +162,8 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         [Option("CreateProteinModsUsingPHRPDataFile", "CreateProteinModsViaPHRP",
             HelpText = "When true, create the _ProteinMods.txt file using existing PHRP data files.\n" +
-                       "This requires that either an existing _PepToProtMapMTS.txt file exist, or that the FASTA file be defined")]
+                       "This requires that either an existing _PepToProtMapMTS.txt file exist, " +
+                       "or that the FASTA file be defined using /F or FastaFilePath")]
         public bool CreateProteinModsUsingPHRPDataFile { get; set; }
 
         /// <summary>
