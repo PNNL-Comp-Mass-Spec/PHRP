@@ -140,7 +140,7 @@ namespace PeptideHitResultsProcessor
         /// Create protein mods file
         /// </summary>
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the FASTA file specified by FastaFilePath</remarks>
-        [Option("ProteinMods",
+        [Option("CreateProteinModsFile", "ProteinMods",
             HelpText = "When true, create the _ProteinMods.txt file.\n" +
                        "This requires that either an existing _PepToProtMapMTS.txt file exists, " +
                        "or that the FASTA file be defined using /F or FastaFilePath.")]
