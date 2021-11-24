@@ -70,8 +70,10 @@ namespace PeptideHitResultsProcessor
 
         [Option("LogFilePath", "LogFile", "Log", "L",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
-            HelpText = "Log messages to a file. Optionally provide a file path, " +
-                       "otherwise the log file name will be auto-defined using the current date")]
+            HelpText = "Log file path.\n" +
+                       "Use /L at the command line to log messages to a file whose name is auto-defined using the current date, " +
+                       "or use /L:LogFileName.txt to specify the name.\n" +
+                       "In a Key=Value parameter file, define a file name or path to enable logging to a file.")]
         public string LogFilePath { get; set; }
 
         [Option("LogDirectoryPath", "LogDirectory", "LogDir",
@@ -124,7 +126,7 @@ namespace PeptideHitResultsProcessor
         [Option("FastaFile", "FASTA", "F",
             HelpShowsDefault = false, IsInputFilePath = true,
             HelpText = "FASTA file path. The order of the proteins in the FASTA file " +
-                       "dictates which protein is listed for each peptide in the First Hits file")]
+                       "dictates which protein is listed for each peptide in the First Hits file.")]
         public string FastaFilePath { get; set; }
 
         /// <summary>
@@ -141,20 +143,20 @@ namespace PeptideHitResultsProcessor
         [Option("ProteinMods",
             HelpText = "When true, create the _ProteinMods.txt file.\n" +
                        "This requires that either an existing _PepToProtMapMTS.txt file exists, " +
-                       "or that the FASTA file be defined using /F or FastaFilePath")]
+                       "or that the FASTA file be defined using /F or FastaFilePath.")]
         public bool CreateProteinModsFile { get; set; }
 
         [Option("ProteinModsFileIncludesReversedProteins", "ProteinModsIncludeReversed",
             HelpText = "Set this to true if an existing _ProteinMods.txt file has reversed protein sequences, " +
                        "or if the FASTA file has reversed proteins.\n" +
-                       "If false, will skip reversed proteins when creating the _ProteinMods.txt file")]
+                       "If false, will skip reversed proteins when creating the _ProteinMods.txt file.")]
         public bool ProteinModsFileIncludesReversedProteins { get; set; }
 
         /// <summary>
         /// Use existing MTS PepToProtein map file
         /// </summary>
         [Option("UseExistingPepToProteinMapFile",
-            HelpText = "When true, look for an existing _PepToProtMap.txt file; if not found, it will be created using the FASTA file")]
+            HelpText = "When true, look for an existing _PepToProtMap.txt file; if not found, it will be created using the FASTA file.")]
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         /// <summary>
@@ -163,7 +165,7 @@ namespace PeptideHitResultsProcessor
         [Option("CreateProteinModsUsingPHRPDataFile", "CreateProteinModsViaPHRP",
             HelpText = "When true, create the _ProteinMods.txt file using existing PHRP data files.\n" +
                        "This requires that either an existing _PepToProtMapMTS.txt file exist, " +
-                       "or that the FASTA file be defined using /F or FastaFilePath")]
+                       "or that the FASTA file be defined using /F or FastaFilePath.")]
         public bool CreateProteinModsUsingPHRPDataFile { get; set; }
 
         /// <summary>
@@ -219,8 +221,8 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
         [Option("MSGFPlusSynopsisFileSpecEValueThreshold", "MSGFPlusSpecEValue",
-            HelpText = "When processing an MS-GF+ results, the spec E-value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Lower spec E-values are higher confidence results")]
+            HelpText = "When processing MS-GF+ results, the spec E-value threshold used to determine which peptides are written to the synopsis file.\n" +
+                       "Lower spec E-values are higher confidence results.")]
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
 
         /// <summary>
@@ -228,9 +230,9 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <remarks>Lower E-values are higher confidence results</remarks>
         [Option("MSGFPlusSynopsisFileEValueThreshold", "MSGFPlusEValue",
-            HelpText = "When processing an MS-GF+ results, the E-value threshold used to determine which peptides are written to the synopsis file.\n" +
+            HelpText = "When processing MS-GF+ results, the E-value threshold used to determine which peptides are written to the synopsis file.\n" +
                        "Lower E-values are higher confidence results.\n" +
-                       "Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%")]
+                       "Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%.")]
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
@@ -239,7 +241,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks>Higher probability values are higher confidence results</remarks>
         [Option("MODaMODPlusSynopsisFileProbabilityThreshold", "SynProb",
             HelpText = "When processing a MODPlus or MODa results, the probability threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Higher probability values are higher confidence results, thus the default of 0.05 is a very loose filter")]
+                       "Higher probability values are higher confidence results, thus the default of 0.05 is a very loose filter.")]
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
 
         /// <summary>
@@ -248,7 +250,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks>Lower p-values are higher confidence results</remarks>
         [Option("MSAlignAndTopPICSynopsisFilePValueThreshold", "SynPValue",
             HelpText = "When processing a MODPlus or MODa results, the p-value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Lower p-values are higher confidence results, thus the default of 0.95 is a very loose filter")]
+                       "Lower p-values are higher confidence results, thus the default of 0.95 is a very loose filter.")]
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
