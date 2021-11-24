@@ -20,6 +20,6 @@ del TestData\MSG201205081554_Auto838496_Compare\PHRP_LogFile.txt
 
 xcopy \\gigasax\DMS_FASTA_File_Archive\dynamic\forward\ID_004208_295531A4.fasta TestData\FASTA\ /D
 del TestData\MSG201802011337_Auto1547784_Compare\PHRP_LogFile.txt
-%ExePath% TestData\MSG201802011337_Auto1547784\MCF-7_pSTY_2_OldGr_15Mar17_Merry__IntEmtr_msgfplus.tsv /O:TestData\MSG201802011337_Auto1547784_Compare\ /M:TestData\MSG201802011337_Auto1547784\MSGFPlus_Tryp_DynSTYPhos_Stat_CysAlk_20ppmParTol_ModDefs.txt /T:TestData\MSG201802011337_Auto1547784\Mass_Correction_Tags.txt /N:TestData\MSG201802011337_Auto1547784\MSGFPlus_Tryp_DynSTYPhos_Stat_CysAlk_20ppmParTol.txt /SynPvalue:0.2  /SynProb:0.05  /L:TestData\MSG201802011337_Auto1547784_Compare\PHRP_LogFile.txt /ProteinMods /F:TestData\FASTA\ID_004208_295531A4.fasta
+%ExePath% TestData\MSG201802011337_Auto1547784\MCF-7_pSTY_2_OldGr_15Mar17_Merry__IntEmtr_msgfplus.tsv /O:TestData\MSG201802011337_Auto1547784_Compare\ /M:TestData\MSG201802011337_Auto1547784\MSGFPlus_Tryp_DynSTYPhos_Stat_CysAlk_20ppmParTol_ModDefs.txt /T:TestData\MSG201802011337_Auto1547784\Mass_Correction_Tags.txt /N:TestData\MSG201802011337_Auto1547784\MSGFPlus_Tryp_DynSTYPhos_Stat_CysAlk_20ppmParTol.txt /SynPvalue:0.2  /SynProb:0.05  /L:TestData\MSG201802011337_Auto1547784_Compare\PHRP_LogFile.txt /ProteinMods /F:TestData\FASTA\ID_004208_295531A4_decoy.fasta
 
 :Done
