@@ -2373,6 +2373,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                     string fhtOutputFilePath;
 
+                    if (!Options.CreateFirstHitsFile && !Options.CreateSynopsisFile)
+                    {
+                        OnWarningEvent("Both 'CreateFirstHitsFile' and 'CreateSynopsisFile' are false; aborting since nothing to do");
+                        return true;
+                    }
+
                     if (Options.CreateFirstHitsFile)
                     {
                         // Read the FASTA file to cache the protein names in memory
