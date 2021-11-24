@@ -78,10 +78,8 @@ Use `/S` to process all valid files in the input directory and subdirectories
 * Include a number after `/S` (like `/S:2`) to limit the level of subdirectories to examine
 
 Optionally use `/P` to supply a parameter file with processing options
-* This can either be a Key=Value parameter file
+* This must be a Key=Value parameter file, for example:
   * [PHRP_Options.conf](https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/PHRP_Options.conf)
-* Or an XML-based parameter file
-  * [PeptideHitResultsProcessorParameters.xml](https://github.com/PNNL-Comp-Mass-Spec/PHRP/blob/master/Data/PeptideHitResultsProcessorParameters.xml)
 
 Use `/L` to specify that a log file should be created
 * Use `/L:LogFilePath` to specify the name (or full path) for the log file
