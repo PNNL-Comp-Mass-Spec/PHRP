@@ -2972,7 +2972,7 @@ namespace PHRPReader
         /// <returns>True if the column exists, otherwise false</returns>
         public static bool TryGetColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, out string columnValue)
         {
-            if (ReaderFactory.LookupColumnIndex(columnName, columnHeaders) < 0)
+            if (LookupColumnIndex(columnName, columnHeaders) < 0)
             {
                 columnValue = string.Empty;
                 return false;
