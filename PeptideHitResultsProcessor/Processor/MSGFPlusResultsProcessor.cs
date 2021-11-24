@@ -1252,11 +1252,28 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
+                    // The analysis manager creates file Dataset_msgfplus_PepToProtMap.txt after running MS-GF+
+                    // See MSGFPlusUtils.CreatePeptideToProteinMapping
+
                     Console.WriteLine();
-                    OnWarningEvent("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
-                    OnStatusEvent(
-                        "The PepToProteinMap file is created by Protein Coverage Summarizer. " +
-                        "Proteins associated with each peptide will be based on data in the input file");
+
+                    // If the .FASTA file was defined (and exists), this program will use it to define the peptide to protein mapping
+                    if (!string.IsNullOrWhiteSpace(Options.FastaFilePath) && File.Exists(Options.FastaFilePath))
+                    {
+                        OnDebugEvent(
+                            "The PepToProteinMap file does not exist ({0}), but the FASTA file does exist ({1}); " +
+                            "it will be used to determine the peptide to protein mapping",
+                            Path.GetFileName(pepToProteinMapFilePath),
+                            Path.GetFileName(Options.FastaFilePath));
+                    }
+                    else
+                    {
+                        OnWarningEvent("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
+                        OnStatusEvent(
+                            "The PepToProteinMap file is typically created by the Protein Coverage Summarizer. " +
+                            "Proteins associated with each peptide will be based on protein names in the input file");
+                    }
+
                     return false;
                 }
 
