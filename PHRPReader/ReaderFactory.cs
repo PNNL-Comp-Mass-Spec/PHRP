@@ -1857,7 +1857,7 @@ namespace PHRPReader
         /// </summary>
         public static List<string> GetPHRPAuxiliaryFileSuffixes()
         {
-            var auxSuffixes = new List<string>
+            return new List<string>
             {
                 "_ResultToSeqMap.txt",
                 "_SeqToProteinMap.txt",
@@ -1868,8 +1868,6 @@ namespace PHRPReader
                 "_ModDetails.txt",
                 "_ModSummary.txt"
             };
-
-            return auxSuffixes;
         }
 
         private static SynFileReaderBaseClass mCachedReader;
@@ -1914,9 +1912,7 @@ namespace PHRPReader
         public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var phrpResultsFileName = reader.PHRPFirstHitsFileName;
-
-            return phrpResultsFileName;
+            return reader.PHRPFirstHitsFileName;
         }
 
         /// <summary>
@@ -1928,9 +1924,7 @@ namespace PHRPReader
         public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var phrpModSummaryFileName = reader.PHRPModSummaryFileName;
-
-            return phrpModSummaryFileName;
+            return reader.PHRPModSummaryFileName;
         }
 
         /// <summary>
@@ -1942,9 +1936,7 @@ namespace PHRPReader
         public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var pepToProteinMapFileName = reader.PHRPPepToProteinMapFileName;
-
-            return pepToProteinMapFileName;
+            return reader.PHRPPepToProteinMapFileName;
         }
 
         /// <summary>
@@ -1956,9 +1948,7 @@ namespace PHRPReader
         public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var proteinModsFileName = reader.PHRPProteinModsFileName;
-
-            return proteinModsFileName;
+            return reader.PHRPProteinModsFileName;
         }
 
         /// <summary>
@@ -1970,9 +1960,7 @@ namespace PHRPReader
         public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var phrpResultsFileName = reader.PHRPSynopsisFileName;
-
-            return phrpResultsFileName;
+            return reader.PHRPSynopsisFileName;
         }
 
         /// <summary>
@@ -1984,9 +1972,7 @@ namespace PHRPReader
         public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var resultToSeqMapFilename = reader.PHRPResultToSeqMapFileName;
-
-            return resultToSeqMapFilename;
+            return reader.PHRPResultToSeqMapFileName;
         }
 
         /// <summary>
@@ -1998,9 +1984,7 @@ namespace PHRPReader
         public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var seqInfoFilename = reader.PHRPSeqInfoFileName;
-
-            return seqInfoFilename;
+            return reader.PHRPSeqInfoFileName;
         }
 
         /// <summary>
@@ -2012,9 +1996,7 @@ namespace PHRPReader
         public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var reader = GetPHRPFileFreeReader(resultType, datasetName);
-            var seqToProteinMapFileName = reader.PHRPSeqToProteinMapFileName;
-
-            return seqToProteinMapFileName;
+            return reader.PHRPSeqToProteinMapFileName;
         }
 
         /// <summary>
@@ -2613,8 +2595,7 @@ namespace PHRPReader
             {
                 var parentIonMzText = match.Groups["ParentMZ"].Value;
 
-                var success = double.TryParse(parentIonMzText, out parentIonMz);
-                return success;
+                return double.TryParse(parentIonMzText, out parentIonMz);
             }
 
             parentIonMz = 0;
