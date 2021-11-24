@@ -684,11 +684,22 @@ namespace PeptideHitResultsProcRunner
 
         private void UpdateLogFileOptions()
         {
+            if (Options.LogFilePath != null && Options.LogFilePath.Equals("False", StringComparison.OrdinalIgnoreCase))
+            {
+                Options.LogMessagesToFile = false;
+                Options.LogFilePath = string.Empty;
+            }
+
             LogMessagesToFile = Options.LogMessagesToFile;
 
             if (Options.LogMessagesToFile)
             {
-                LogFilePath = Options.LogFilePath;
+                LogFilePath = Options.LogFilePath == null ||
+                              Options.LogFilePath.Equals("True", StringComparison.OrdinalIgnoreCase) ||
+                              Options.LogFilePath.Equals(".")
+                    ? string.Empty
+                    : Options.LogFilePath;
+
                 LogDirectoryPath = Options.LogDirectoryPath;
             }
 
