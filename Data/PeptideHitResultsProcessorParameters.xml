@@ -13,14 +13,21 @@
 	------------------------------------------>
 
   <section name="PeptideHitResultsProcessorOptions">
+    <item key="MassCorrectionTagsFilePath" value="" />
+    <item key="ModificationDefinitionsFilePath" value="" />
+    <item key="SearchToolParameterFilePath" value="" />
+    <item key="FastaFilePath" value="" />
+
     <item key="CreateModificationSummaryFile" value="True" />
+    <item key="CreateProteinModsFile" value="True" />
+
+    <item key="ProteinModsFileIncludesReversedProteins" value="False" />
+    <item key="UseExistingMTSPepToProteinMapFile" value="False" />
     
     <item key="EnzymeMatchSpecLeftResidue" value="[KR]" />
     <item key="EnzymeMatchSpecRightResidue" value="[^P]" />
-    
-    <item key="MassCorrectionTagsFilePath_SetViaCode" value="" />
-    <item key="ModificationDefinitionsFilePath_SetViaCode" value="" />
+
     <item key="PeptideNTerminusMassChange_UseDefaultInCode" value="1.0078246" />
-    <item key="PeptideCTerminusMassChange_UseDefaultInCode" value="17.0027387" />
+    <item key="PeptideCTerminusMassChange_UseDefaultInCode" value="17.0027387" />    
   </section>
 </sections>
