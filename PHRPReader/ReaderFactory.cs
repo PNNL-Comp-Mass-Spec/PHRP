@@ -90,7 +90,6 @@ namespace PHRPReader
         /// </summary>
         private readonly SortedDictionary<string, List<ModificationDefinition>> mStaticMods;
 
-
         private ScanStatsExInfo mExtendedScanStatsInfo;
 
         private bool mExtendedScanStatsValid;

@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: A-Za-z, Da, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
 
-        public const string PROGRAM_DATE = "November 23, 2021";
+        public const string PROGRAM_DATE = "November 24, 2021";
 
         /// <summary>
         /// Constructor

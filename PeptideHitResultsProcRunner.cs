@@ -269,6 +269,8 @@ namespace PeptideHitResultsProcRunner
 
         private void ShowCurrentFilePaths(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
+            Console.WriteLine();
+
             LogMessage(string.Format("{0,-45} {1}",
                 "Input file:", PathUtils.CompactPathString(inputFilePath, 110)));
 
@@ -540,7 +542,6 @@ namespace PeptideHitResultsProcRunner
                     }
                     else
                     {
-
                         peptideHitResultsFormat = PHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
                     }
                 }
