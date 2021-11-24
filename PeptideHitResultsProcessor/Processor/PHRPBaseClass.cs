@@ -685,6 +685,14 @@ namespace PeptideHitResultsProcessor.Processor
             var alternatePepToProteinMapFilePath = Path.Combine(outputDirectoryPath, pepToProteinMapFileName);
             var alternatePepToProteinMapFile = new FileInfo(alternatePepToProteinMapFilePath);
 
+            if (!Options.UseExistingMTSPepToProteinMapFile)
+            {
+                return alternatePepToProteinMapFile.FullName;
+            }
+
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            // ReSharper disable once ConvertIfStatementToSwitchExpression
+
             if (pepToProteinMapFile.Exists && !alternatePepToProteinMapFile.Exists)
             {
                 return pepToProteinMapFile.FullName;
@@ -696,12 +704,12 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             if (pepToProteinMapFile.Exists && alternatePepToProteinMapFile.Exists &&
-                alternatePepToProteinMapFile.LastWriteTime > pepToProteinMapFile.LastWriteTime)
+                pepToProteinMapFile.LastWriteTime > alternatePepToProteinMapFile.LastWriteTime)
             {
-                return alternatePepToProteinMapFile.FullName;
+                return pepToProteinMapFile.FullName;
             }
 
-            return pepToProteinMapFile.FullName;
+            return alternatePepToProteinMapFile.FullName;
         }
 
         protected string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts, List<string> suffixesToFind, int charsToRemove)
