@@ -2273,7 +2273,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
         /// <param name="inputFilePath">MS-GF+ results file (Dataset.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
-        /// <param name="parameterFilePath">Parameter file for data processing</param>
+        /// <param name="parameterFilePath">
+        /// Parameter file for data processing
+        /// <para>
+        /// This is an empty string if being called from the .exe and no parameter file was used or a Key=Value parameter file was provided
+        /// </para>
+        /// <para>
+        /// If hidden command line argument /XmlParamFile was used, this will be an XML-based parameter file
+        /// </para>
+        /// <para>
+        /// If calling this method from the DLL, this can be an empty string, a Key=Value parameter file, or an XML-based parameter file
+        /// </para>
+        /// </param>
         /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {

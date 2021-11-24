@@ -129,7 +129,7 @@ namespace PeptideHitResultsProcRunner
                         options.OutputDirectoryPath,
                         string.Empty,           // options.OutputDirectoryAlternatePath
                         false,        // options.RecreateDirectoryHierarchyInAlternatePath
-                        options.ParameterFilePath,
+                        options.XmlParameterFile,
                         options.MaxLevelsToRecurse))
                     {
                         returnCode = 0;
@@ -144,7 +144,7 @@ namespace PeptideHitResultsProcRunner
                     if (peptideHitResultsProcessor.ProcessFilesWildcard(
                         options.InputFilePath,
                         options.OutputDirectoryPath,
-                        options.ParameterFilePath))
+                        options.XmlParameterFile))
                     {
                         returnCode = 0;
                     }

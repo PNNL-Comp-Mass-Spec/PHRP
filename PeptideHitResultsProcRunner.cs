@@ -299,6 +299,12 @@ namespace PeptideHitResultsProcRunner
             // Processing options for MSGFPlus results processor
             LogMessage("Processing options for " + resultsProcessor);
 
+            if (!string.IsNullOrWhiteSpace(resultsProcessor.Options.XmlParameterFile))
+            {
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Legacy XML parameter file:", PathUtils.CompactPathString(resultsProcessor.Options.XmlParameterFile, 110)));
+            }
+
             LogMessage(string.Format("{0,-45} {1}",
                 "Search Tool Parameter File:", FilePathOrText(resultsProcessor.Options.SearchToolParameterFilePath, "Not defined")));
 

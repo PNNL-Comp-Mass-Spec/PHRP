@@ -325,6 +325,11 @@ namespace PeptideHitResultsProcessor
             Hidden = true)]
         public float InspectSynopsisFilePValueThreshold { get; set; }
 
+        [Option("XmlParameterFile", "XmlParamFile",
+            HelpText = "Legacy XML-based parameter file; deprecated with Peptide Hit Results Processor 3.1",
+            Hidden = true)]
+        public string XmlParameterFile { get; set; }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -373,6 +378,8 @@ namespace PeptideHitResultsProcessor
             PeptideCTerminusMassChange = PeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
 
             InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+
+            XmlParameterFile = string.Empty;
         }
 
         /// <summary>
@@ -417,6 +424,7 @@ namespace PeptideHitResultsProcessor
             IgnorePeptideToProteinMapperErrors = sourceOptions.IgnorePeptideToProteinMapperErrors;
 
             InspectSynopsisFilePValueThreshold = sourceOptions.InspectSynopsisFilePValueThreshold;
+            XmlParameterFile = sourceOptions.XmlParameterFile;
 
             MaxQuantAndromedaScoreThreshold = sourceOptions.MaxQuantAndromedaScoreThreshold;
             MaxQuantPosteriorErrorProbabilityThreshold = sourceOptions.MaxQuantPosteriorErrorProbabilityThreshold;
