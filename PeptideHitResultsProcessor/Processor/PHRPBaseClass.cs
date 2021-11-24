@@ -822,6 +822,7 @@ namespace PeptideHitResultsProcessor.Processor
                 peptideToProteinMapper.SkipConsoleWriteIfNoProgressListener = true;
 
                 using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+                var headerWritten = false;
 
                 foreach (var inputFilePath in sourcePHRPDataFiles)
                 {
@@ -922,10 +923,35 @@ namespace PeptideHitResultsProcessor.Processor
                             if (splitLine.Length < 2)
                                 continue;
 
-                            if (linesRead == 1 && splitLine[0].Equals("Peptide") && splitLine[1].Equals("Protein"))
+                            if (linesRead == 1)
                             {
-                                // Header line; skip it
-                                continue;
+                                if (splitLine[0].Equals("Peptide") && splitLine[1].Equals("Protein"))
+                                {
+                                    // Header line; write to disk if no results have been written yet
+                                    if (!headerWritten)
+                                    {
+                                        writer.WriteLine(lineIn);
+                                        headerWritten = true;
+                                    }
+
+                                    continue;
+                                }
+
+                                if (!headerWritten)
+                                {
+                                    // Write the default header line
+
+                                    var headerLine = string.Format(
+                                        "Peptide\tProtein{0}",
+                                        splitLine.Length == 2 ? string.Empty : "\tResidue_Start\tResidue_End");
+
+                                    OnWarningEvent(
+                                        "Input file {0} does not have the expected header line; using the default:\n{1}",
+                                        resultsFilePath, headerLine);
+
+                                    writer.WriteLine(headerLine);
+                                    headerWritten = true;
+                                }
                             }
 
                             var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
