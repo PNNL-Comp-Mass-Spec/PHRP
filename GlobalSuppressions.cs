@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Allowed name", Scope = "type", Target = "~T:PeptideHitResultsProcRunner.PeptideHitResultsProcRunner")]
+[assembly: SuppressMessage("Usage", "RCS1146:Use conditional access.", Justification = "Leave as-is for readability", Scope = "member", Target = "~M:PeptideHitResultsProcRunner.PeptideHitResultsProcRunner.UpdateLogFileOptions")]
