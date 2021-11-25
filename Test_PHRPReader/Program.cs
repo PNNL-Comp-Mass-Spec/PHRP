@@ -310,7 +310,7 @@ namespace Test_PHRPReader
 
                 var strFlattened = FlattenList(lstValues);
 
-                if (intPSMsRead % 1000 == 0)
+                if (intPSMsRead % 10000 == 0)
                 {
                     Console.WriteLine(strFlattened);
                 }
