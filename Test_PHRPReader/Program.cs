@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -144,9 +143,18 @@ namespace Test_PHRPReader
 
             Console.WriteLine("Mono mass of PEPT*IDE: " + monoMassModified.ToString("0.0000"));
 
-            Debug.Assert(Math.Abs(monoMass - 799.359926865) < 1E-07);
+            const double MONO_MASS_EXPECTED = 799.359926865;
+            const double MODIFIED_MONO_MASS_EXPECTED = 879.325926865;
 
-            Debug.Assert(Math.Abs(monoMassModified - 879.325926865) < 1E-07);
+            if (Math.Abs(monoMass - MONO_MASS_EXPECTED) > 1E-07)
+            {
+                PRISM.ConsoleMsgUtils.ShowWarning("Computed mass of {0:F6} does not match the expected mass, {1:F6}", monoMass, MONO_MASS_EXPECTED);
+            }
+
+            if (Math.Abs(monoMassModified - MODIFIED_MONO_MASS_EXPECTED) > 1E-07)
+            {
+                PRISM.ConsoleMsgUtils.ShowWarning("Modified computed mass of {0:F6} does not match the expected mass, {1:F6}", monoMassModified, MODIFIED_MONO_MASS_EXPECTED);
+            }
         }
 
         private static void TestPHRPReader(string synOrFhtFile, bool blnSkipDuplicates)
