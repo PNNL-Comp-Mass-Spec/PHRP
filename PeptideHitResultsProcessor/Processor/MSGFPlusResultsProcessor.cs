@@ -78,25 +78,47 @@ namespace PeptideHitResultsProcessor.Processor
             mNumericModErrors = 0;
         }
 
+        /// <summary>
+        /// MS-GF+ tool name
+        /// </summary>
         public const string TOOL_NAME = "MSGFPlus";
 
+        /// <summary>
+        /// MSGF-DB results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MSGFDB_FILE = "_msgfdb";
+
+        /// <summary>
+        /// MS-GF+ results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MSGFPLUS_FILE = "_msgfplus";
 
+        /// <summary>
+        /// N-terminus symbol used by MS-GF+
+        /// </summary>
         public const string N_TERMINUS_SYMBOL_MSGFPlus = "_.";
 
+        /// <summary>
+        /// C-terminus symbol used by MS-GF+
+        /// </summary>
         public const string C_TERMINUS_SYMBOL_MSGFPlus = "._";
 
         /// <summary>
+        /// Default synopsis file Spec E-Value threshold
+        /// </summary>
+        /// <remarks>
         /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
         /// This filter is also used by MSPathFinder
-        /// </summary>
+        /// </remarks>
         public const float DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD = 5E-07f;
 
         /// <summary>
+        /// Default synopsis file E-value threshold
+        /// </summary>
+        /// <remarks>
         /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
         /// This filter is also used by MSPathFinder
-        /// </summary>
+        /// </remarks>
         public const float DEFAULT_SYN_FILE_EVALUE_THRESHOLD = 0.75f;
 
         private const string SEARCH_ENGINE_NAME = "MS-GF+";
@@ -602,6 +624,13 @@ namespace PeptideHitResultsProcessor.Processor
             return mass;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

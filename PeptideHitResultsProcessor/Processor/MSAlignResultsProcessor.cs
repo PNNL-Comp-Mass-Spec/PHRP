@@ -13,7 +13,7 @@ namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in an MSAlign results file (txt format) and creates
-    /// a tab-delimited text file with the data.
+    /// a tab-delimited text file with the data
     /// </summary>
     /// <remarks>
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -24,20 +24,39 @@ namespace PeptideHitResultsProcessor.Processor
         // Ignore Spelling: Cysteine, Da, Defs, enums, Evalue, fht, Frag, histone, IodoAcet, IodoAcid
         // Ignore Spelling: methylation, monoisotopic, Prsm, pvalue, txt
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 27, 2021";
             InitializeLocalVariables();
         }
 
+        /// <summary>
+        /// MSAlign tool name
+        /// </summary>
         public const string TOOL_NAME = "MSAlign";
 
+        /// <summary>
+        /// MSAlign results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MSALIGN_FILE = "_MSAlign_ResultTable";
 
+        /// <summary>
+        /// N-terminus symbol used by MSAlign
+        /// </summary>
         public const string N_TERMINUS_SYMBOL_MSALIGN = ".";
 
+        /// <summary>
+        /// C-terminus symbol used by MSAlign
+        /// </summary>
         public const string C_TERMINUS_SYMBOL_MSALIGN = ".";
 
+        /// <summary>
+        /// Default synopsis file p-value threshold
+        /// </summary>
         public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.95f;
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
@@ -465,6 +484,13 @@ namespace PeptideHitResultsProcessor.Processor
             return totalModMass;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

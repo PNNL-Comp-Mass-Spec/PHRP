@@ -29,6 +29,9 @@
         NTerminus = 1
     }
 
+    /// <summary>
+    /// PHRP Error code
+    /// </summary>
     public enum PHRPErrorCode
     {
         /// <summary>
@@ -97,6 +100,9 @@
         UnspecifiedError = -1
     }
 
+    /// <summary>
+    /// MS/MS search tool results file format
+    /// </summary>
     public enum ResultsFileFormat
     {
         /// <summary>

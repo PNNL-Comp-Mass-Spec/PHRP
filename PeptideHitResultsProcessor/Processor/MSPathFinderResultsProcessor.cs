@@ -25,8 +25,8 @@ using PRISM.AppSettings;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
-    /// a tab-delimited text file with the data.
+    /// This class reads a MSPathFinder results file (_IcTda.tsv) and creates
+    /// a tab-delimited text file with the data
     /// </summary>
     /// <remarks>
     /// <para>
@@ -68,13 +68,25 @@ namespace PeptideHitResultsProcessor.Processor
             FileDate = "September 28, 2020";
         }
 
+        /// <summary>
+        /// MSPathFinder tool name
+        /// </summary>
         public const string TOOL_NAME = "MSPathFinder";
 
+        /// <summary>
+        /// MSPathFinder results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MSPathFinder_FILE = "_IcTda";
 
+        /// <summary>
+        /// N-terminus symbol used by MSPathFinder
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MSPATHFINDER = "-";
 
+        /// <summary>
+        /// C-terminus symbol used by MSPathFinder
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MSPATHFINDER = "-";
 

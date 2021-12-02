@@ -22,26 +22,51 @@ using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor.Processor
 {
+    /// <summary>
+    /// This class reads in MODPlus results files (_modp.id) and creates
+    /// a tab-delimited text file with the data
+    /// </summary>
     public class MODPlusResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: Da, fht, massdiff, methylation, MODa, ModDefs, modp, tda, tryptic, udt
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public MODPlusResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "May 3, 2021";
         }
 
+        /// <summary>
+        /// MODPlus tool name
+        /// </summary>
         public const string TOOL_NAME = "ModPlus";
 
+        /// <summary>
+        /// MODPlus results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MODPlus_FILE = "_modp.id";
 
+        /// <summary>
+        /// N-terminus symbol used by MODPlus
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MODPlus = "-";
 
+        /// <summary>
+        /// C-terminus symbol used by MODPlus
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MODPlus = "-";
 
-        // This is used for filtering both MODa and MODPlus results
+        /// <summary>
+        /// Default synopsis file probability threshold
+        /// </summary>
+        /// <remarks>
+        /// This is used for filtering both MODa and MODPlus results
+        /// </remarks>
         public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = 0.05f;
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
@@ -446,6 +471,13 @@ namespace PeptideHitResultsProcessor.Processor
             return totalModMass;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

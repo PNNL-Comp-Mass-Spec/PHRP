@@ -4,6 +4,9 @@ using PRISM;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// PHRP Options
+    /// </summary>
     public class PHRPOptions
     {
         // Ignore Spelling: conf, MaxQuant, MODa, txt
@@ -68,6 +71,9 @@ namespace PeptideHitResultsProcessor
         /// </remarks>
         public bool LogMessagesToFile { get; set; }
 
+        /// <summary>
+        /// Log file path
+        /// </summary>
         [Option("LogFilePath", "LogFile", "Log", "L",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
             HelpText = "Log file path.\n" +
@@ -76,6 +82,9 @@ namespace PeptideHitResultsProcessor
                        "In a Key=Value parameter file, define a file name or path to enable logging to a file.")]
         public string LogFilePath { get; set; }
 
+        /// <summary>
+        /// Log directory path
+        /// </summary>
         [Option("LogDirectoryPath", "LogDirectory", "LogDir",
             ArgExistsProperty = nameof(LogMessagesToFile), HelpShowsDefault = false,
             HelpText = "The directory where the log file should be written")]
@@ -146,6 +155,9 @@ namespace PeptideHitResultsProcessor
                        "or that the FASTA file be defined using /F or FastaFilePath.")]
         public bool CreateProteinModsFile { get; set; }
 
+        /// <summary>
+        /// If true, assume that the _ProteinMods.txt file has reversed protein sequences
+        /// </summary>
         [Option("ProteinModsFileIncludesReversedProteins", "ProteinModsIncludeReversed",
             HelpText = "Set this to true if an existing _ProteinMods.txt file has reversed protein sequences, " +
                        "or if the FASTA file has reversed proteins.\n" +
@@ -269,6 +281,9 @@ namespace PeptideHitResultsProcessor
         private string mEnzymeMatchSpecLeftResidue;
         private string mEnzymeMatchSpecRightResidue;
 
+        /// <summary>
+        /// RegEx for the residue to the left of a cleavage point
+        /// </summary>
         [Option("EnzymeMatchSpecLeftResidue",
             HelpText = "Regular expression for the residue to the left of cleavage points for the given enzyme",
             SecondaryArg = true)]
@@ -282,6 +297,9 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// RegEx for the residue to the right of a cleavage point
+        /// </summary>
         [Option("EnzymeMatchSpecRightResidue",
             HelpText = "Regular expression for the residue to the right of cleavage points for the given enzyme",
             SecondaryArg = true)]
@@ -325,6 +343,9 @@ namespace PeptideHitResultsProcessor
             Hidden = true)]
         public float InspectSynopsisFilePValueThreshold { get; set; }
 
+        /// <summary>
+        /// Legacy XML-based parameter file
+        /// </summary>
         [Option("XmlParameterFile", "XmlParamFile",
             HelpText = "Legacy XML-based parameter file; deprecated with Peptide Hit Results Processor 3.1",
             Hidden = true)]
@@ -448,6 +469,10 @@ namespace PeptideHitResultsProcessor
             EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(mEnzymeMatchSpecLeftResidue, mEnzymeMatchSpecRightResidue);
         }
 
+        /// <summary>
+        /// Verify that an input file is defined
+        /// </summary>
+        /// <returns>True if options are valid, otherwise false</returns>
         public bool Validate()
         {
             if (string.IsNullOrWhiteSpace(InputFilePath))

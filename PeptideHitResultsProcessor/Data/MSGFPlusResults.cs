@@ -26,8 +26,14 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: tda, terminii, tryptic
 
+        /// <summary>
+        /// Fragmentation method for the given MS/MS spectrum
+        /// </summary>
         public string FragMethod { get; set; }
 
+        /// <summary>
+        /// Spectrum index
+        /// </summary>
         public string SpecIndex { get; set; }
 
         /// <summary>
@@ -35,8 +41,14 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string PrecursorMZ { get; set; }
 
+        /// <summary>
+        /// Mass error value computed by MS-GF+
+        /// </summary>
         public string MSGFPlusComputedDelM { get; set; }
 
+        /// <summary>
+        /// Ppm-based mass error value computed by MS-GF+
+        /// </summary>
         public string MSGFPlusComputedDelMPPM { get; set; }
 
         /// <summary>
@@ -44,8 +56,14 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string NTT { get; set; }
 
+        /// <summary>
+        /// De novo score
+        /// </summary>
         public string DeNovoScore { get; set; }
 
+        /// <summary>
+        /// MSGF Score
+        /// </summary>
         public string MSGFScore { get; set; }
 
         /// <summary>
@@ -110,6 +128,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

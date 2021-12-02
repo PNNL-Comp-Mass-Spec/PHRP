@@ -23,7 +23,7 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in a synopsis or first hits file (tab-delimited representation
+    /// This class reads a SEQUEST synopsis or first hits file (tab-delimited representation
     /// of the out file data, created from STARSuite Extractor) and creates a new file
     /// containing columns for cleavage and terminus state, modification information, and
     /// the monoisotopic mass of each peptide.  The data in the new file is linked to the
@@ -35,15 +35,29 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: fht, methylation, sequest
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
+        /// <summary>
+        /// SEQUEST tool name
+        /// </summary>
         public const string TOOL_NAME = "SEQUEST";
 
+        /// <summary>
+        /// First hits file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_FIRST_HITS_FILE = "_fht";
+
+        /// <summary>
+        /// Synopsis file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SYNOPSIS_FILE = "_syn";
 
         private const int SEQUEST_SYN_FILE_MIN_COL_COUNT = 5;
@@ -162,6 +176,13 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

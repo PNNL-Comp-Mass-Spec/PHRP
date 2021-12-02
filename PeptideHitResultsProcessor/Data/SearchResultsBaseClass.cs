@@ -131,7 +131,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Number of the first residue of a protein; typically always 1
         /// </summary>
-        /// <remarks>Initialized to 0 (unknown) then later changed 1 when ProteinSeqResidueNumberEnd is defined </remarks>
+        /// <remarks>
+        /// Initialized to 0 (unknown) then later changed 1 when ProteinSeqResidueNumberEnd is defined
+        /// </remarks>
         public int ProteinSeqResidueNumberStart { get; set; }
 
         /// <summary>
@@ -887,7 +889,8 @@ namespace PeptideHitResultsProcessor.Data
         }
 
         /// <summary>
-        /// Updates the N-Terminal mass applied to peptides when computing their mass if it is significantly different than the currently defined N-terminal peptide mass
+        /// Updates the N-Terminal mass applied to peptides when computing their mass
+        /// if significantly different than the currently defined N-terminal peptide mass
         /// </summary>
         /// <param name="nTerminalMassChange"></param>
         public void UpdatePeptideNTerminusMass(double nTerminalMassChange)
@@ -899,7 +902,8 @@ namespace PeptideHitResultsProcessor.Data
         }
 
         /// <summary>
-        /// Updates the C-Terminal mass applied to peptides when computing their mass if significantly different than the currently defined C-terminal peptide mass
+        /// Updates the C-Terminal mass applied to peptides when computing their mass
+        /// if significantly different than the currently defined C-terminal peptide mass
         /// </summary>
         /// <param name="cTerminalMassChange"></param>
         public void UpdatePeptideCTerminusMass(double cTerminalMassChange)
@@ -910,6 +914,10 @@ namespace PeptideHitResultsProcessor.Data
             }
         }
 
+        /// <summary>
+        /// Update the enzyme and terminus info for the search result tracked by this class
+        /// </summary>
+        /// <param name="options"></param>
         public void UpdateSearchResultEnzymeAndTerminusInfo(PHRPOptions options)
         {
             // options.EnzymeMatchSpec, options.PeptideNTerminusMassChange, options.PeptideCTerminusMassChange

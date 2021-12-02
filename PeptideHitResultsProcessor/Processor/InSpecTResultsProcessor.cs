@@ -26,7 +26,7 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in an InSpecT results file (txt format) and creates
+    /// This class reads an InSpecT results file (txt format) and creates
     /// a tab-delimited text file with the data.  It will insert modification symbols
     /// into the peptide sequences for modified peptides.
     /// </summary>
@@ -35,28 +35,56 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: cterminal, Da, Daltons, fht, methylation, ModDefs, nterminal, phos, phosphorylation, Pos, txt
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public InSpecTResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
+        /// <summary>
+        /// Tool name
+        /// </summary>
         public const string TOOL_NAME = "InSpecT";
 
+        /// <summary>
+        /// InSpecT results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_INSPECT_FILE = "_inspect";
 
         private const int INSPECT_SYN_FILE_MIN_COL_COUNT = 5;
 
+        /// <summary>
+        /// N-terminus symbol used by InSpecT
+        /// </summary>
         public const string N_TERMINUS_SYMBOL_INSPECT = "*.";
 
+        /// <summary>
+        /// C-terminus symbol used by InSpecT
+        /// </summary>
         public const string C_TERMINUS_SYMBOL_INSPECT = ".*";
 
         private const char UNKNOWN_INSPECT_MOD_SYMBOL = '?';
 
         // When writing the synopsis file, we keep data that passes any of these thresholds (thus, it's an OR comparison, not an AND comparison)
         // pValue <= 0.2 Or TotalPRMScore >= 50 or FScore >= 0
+
+        /// <summary>
+        /// Default synopsis file p-value threshold
+        /// </summary>
         public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.2f;
+
+        /// <summary>
+        /// Default synopsis file TotalPRMScore threshold
+        /// </summary>
         public const float TOTALPRMSCORE_THRESHOLD = 50;
+
+        /// <summary>
+        /// Default synopsis file FScore threshold
+        /// </summary>
         public const float FSCORE_THRESHOLD = 0;
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
@@ -212,6 +240,9 @@ namespace PeptideHitResultsProcessor.Processor
             public string ModSymbol;
         }
 
+        /// <summary>
+        /// When true, sort identifications by score when writing to first hits and synopsis files
+        /// </summary>
         public bool SortFHTAndSynFiles { get; set; }
 
         private void AddCurrentRecordToSearchResults(ref int currentScanResultsCount,
@@ -623,6 +654,13 @@ namespace PeptideHitResultsProcessor.Processor
             return peptideMH;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

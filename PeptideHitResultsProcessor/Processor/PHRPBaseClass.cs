@@ -39,7 +39,10 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // Ignore Spelling: A-Za-z, Da, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
 
-        public const string PROGRAM_DATE = "November 24, 2021";
+        /// <summary>
+        /// Program date
+        /// </summary>
+        public const string PROGRAM_DATE = "December 1, 2021";
 
         /// <summary>
         /// Constructor
@@ -73,46 +76,142 @@ namespace PeptideHitResultsProcessor.Processor
         private const string UNIQUE_SEQ_TO_PROTEIN_MAP_SEP = "_";
 
         private const string COLUMN_NAME_UNIQUE_SEQ_ID = "Unique_Seq_ID";
+
         private const string COLUMN_NAME_PROTEIN_NAME = "Protein_Name";
+
+        /// <summary>
+        /// ResultID column
+        /// </summary>
         protected const string COLUMN_NAME_RESULTID = "ResultID";
+
+        /// <summary>
+        /// Peptide column
+        /// </summary>
         protected const string COLUMN_NAME_PEPTIDE = "Peptide";
+
         private const string COLUMN_NAME_RESIDUE = "Residue";
+
         private const string COLUMN_NAME_PROTEIN_RESIDUE_NUMBER = "Protein_Residue_Num";
+
         private const string COLUMN_NAME_RESIDUE_MOD_NAME = "Mod_Name";
+
         private const string COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER = "Peptide_Residue_Num";
+
         private const string COLUMN_NAME_MSGF_SPECPROB = "MSGF_SpecProb";
 
+        /// <summary>
+        /// X!Tandem results file suffix
+        /// </summary>
         public const string XTANDEM_RESULTS_FILE_SUFFIX = "_xt.xml";
+
+        /// <summary>
+        /// Synopsis file suffix
+        /// </summary>
         public const string SYNOPSIS_FILE_SUFFIX = "_syn.txt";
+
+        /// <summary>
+        /// First-hits file suffix
+        /// </summary>
         public const string FIRST_HITS_FILE_SUFFIX = "_fht.txt";
 
+        /// <summary>
+        /// Inspect results file suffix
+        /// </summary>
         public const string INSPECT_RESULTS_FILE_SUFFIX = "_inspect.txt";
+
+        /// <summary>
+        /// Inspect TotalPRMScore-filtered first hits file suffix
+        /// </summary>
         public const string INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX = "_fht.txt";
+
+        /// <summary>
+        /// Inspect FScore filtered first hits file suffix
+        /// </summary>
         public const string INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX = "_Fscore_fht.txt";
 
+        /// <summary>
+        /// MSGFDB results file suffix
+        /// </summary>
         public const string MSGFDB_RESULTS_FILE_SUFFIX = "_msgfdb.txt";
 
+        /// <summary>
+        /// MSAlign results file suffix
+        /// </summary>
         public const string MSALIGN_RESULTS_FILE_SUFFIX = "_MSAlign_ResultTable.txt";
 
+        /// <summary>
+        /// MODa results file suffix
+        /// </summary>
         public const string MODa_RESULTS_FILE_SUFFIX = "_moda.id.txt";
+
+        /// <summary>
+        /// MODPlus results file suffix
+        /// </summary>
         public const string MODPlus_RESULTS_FILE_SUFFIX = "_modp.id.txt";
+
+        /// <summary>
+        /// MSPathFinder results file suffix
+        /// </summary>
         public const string MSPathFinder_RESULTS_FILE_SUFFIX = "_IcTda.tsv";
+
+        /// <summary>
+        /// TopPIC results file suffix
+        /// </summary>
         public const string TopPIC_RESULTS_FILE_SUFFIX = "_TopPIC_PrSMs.txt";
 
+        /// <summary>
+        /// Result to sequence map file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_RESULT_TO_SEQ_MAP = "_ResultToSeqMap.txt";
+
+        /// <summary>
+        /// Sequence to protein map file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP = "_SeqToProteinMap.txt";
 
+        /// <summary>
+        /// Sequence info file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_SEQ_INFO = "_SeqInfo.txt";
+
+        /// <summary>
+        /// Modification details file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MOD_DETAILS = "_ModDetails.txt";
+
+        /// <summary>
+        /// Modification summary file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MOD_SUMMARY = "_ModSummary.txt";
 
+        /// <summary>
+        /// Peptide to protein map file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING = "_PepToProtMap";
+
+        /// <summary>
+        /// Protein modifications file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_PROTEIN_MODS = "_ProteinMods.txt";
+
+        /// <summary>
+        /// MSGF score file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_MSGF = "_MSGF.txt";
 
+        /// <summary>
+        /// Progress percent value at the start of peptide to protein mapping
+        /// </summary>
         protected const float PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE = 90;
+
+        /// <summary>
+        /// Progress percent value at the start of creating the protein modifications file
+        /// </summary>
         private const float PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE = 95;
 
+        /// <summary>
+        /// Protein name to use when a peptide does not match any of the loaded proteins
+        /// </summary>
         private const string PROTEIN_NAME_NO_MATCH = "__NoMatch__";
 
         /// <summary>
@@ -120,11 +219,29 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public const string WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION = "Skipping creation of the ProteinMods file";
 
+        /// <summary>
+        /// Search options for finding modifications
+        /// </summary>
         protected struct SearchOptionModificationInfo
         {
+            /// <summary>
+            /// Sort order
+            /// </summary>
             public int SortOrder;
+
+            /// <summary>
+            /// Modification mass to find
+            /// </summary>
             public double ModificationMass;
+
+            /// <summary>
+            /// Target residues to match
+            /// </summary>
             public string TargetResidues;
+
+            /// <summary>
+            /// Modification type to match
+            /// </summary>
             public ModificationDefinition.ResidueModificationType ModificationType;
 
             /// <summary>
@@ -161,26 +278,71 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Class for tracking the location of a peptide in a protein
+        /// </summary>
         protected struct PepToProteinMapping
         {
+            /// <summary>
+            /// peptide sequence
+            /// </summary>
             public string Peptide;
+
+            /// <summary>
+            /// Protein name
+            /// </summary>
             public string Protein;
+
+            /// <summary>
+            /// Location in the protein sequence where the peptide starts
+            /// </summary>
             public int ResidueStart;
+
+            /// <summary>
+            /// Location in the protein sequence where the peptide ends
+            /// </summary>
             public int ResidueEnd;
 
+            /// <summary>
+            /// Show the peptide sequence and protein name
+            /// </summary>
             public override string ToString()
             {
                 return Peptide + ", " + Protein;
             }
         }
 
+        /// <summary>
+        /// Error code
+        /// </summary>
         protected PHRPErrorCode mErrorCode;
+
+        /// <summary>
+        /// Error message
+        /// </summary>
         protected string mErrorMessage;
 
+        /// <summary>
+        /// Peptide sequence mass calculator
+        /// </summary>
         protected readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
+        /// <summary>
+        /// Tracks peptide modifications
+        /// </summary>
         protected readonly PeptideModificationContainer mPeptideMods;
+
+        /// <summary>
+        /// Tracks unique sequences
+        /// </summary>
         private readonly UniqueSequencesContainer mUniqueSequences;
+
+        /// <summary>
+        /// Tracks unique sequence IDs and corresponding protein names
+        /// </summary>
+        /// <remarks>
+        /// Data is stored as UniqueSequenceID_ProteinName
+        /// </remarks>
         private readonly SortedSet<string> mSeqToProteinMap;
 
         private StreamWriter mResultToSeqMapFile;
@@ -198,12 +360,29 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly Regex mReplaceSymbols;
 
+        /// <summary>
+        /// Progress reset event
+        /// </summary>
         public event ProgressResetEventHandler ProgressReset;
+
+        /// <summary>
+        /// Progress reset event handler
+        /// </summary>
         public delegate void ProgressResetEventHandler();
 
+        /// <summary>
+        /// Progress complete event
+        /// </summary>
         public event ProgressCompleteEventHandler ProgressComplete;
+
+        /// <summary>
+        /// Progress complete event handler
+        /// </summary>
         public delegate void ProgressCompleteEventHandler();
 
+        /// <summary>
+        /// Progress step description
+        /// </summary>
         protected string mProgressStepDescription = string.Empty;
 
         /// <summary>
@@ -211,30 +390,65 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         protected float mProgressPercentComplete;
 
+        /// <summary>
+        /// The calling procedure can set this to true to request that processing should be aborted
+        /// </summary>
         public bool AbortProcessing { get; set; }
 
+        /// <summary>
+        /// Error code enum
+        /// </summary>
         public PHRPErrorCode ErrorCode => mErrorCode;
 
+        /// <summary>
+        /// Error message
+        /// </summary>
         public string ErrorMessage => GetErrorMessage();
 
+        /// <summary>
+        /// Version of the executing assembly
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public string FileVersion => GetVersionForExecutingAssembly();
 
+        /// <summary>
+        /// File date
+        /// </summary>
         public string FileDate { get; protected set; }
 
+        /// <summary>
+        /// Processing options
+        /// </summary>
         public PHRPOptions Options { get; }
 
+        /// <summary>
+        /// Description of the current processing step
+        /// </summary>
         public string ProgressStepDescription => mProgressStepDescription;
 
-        // ProgressPercentComplete ranges from 0 to 100, but can contain decimal percentage values
+        /// <summary>
+        /// Overall processing percent complete (value between 0 and 100)
+        /// </summary>
         public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
 
+        /// <summary>
+        /// The calling procedure can call this method to request that processing should be aborted
+        /// </summary>
+        /// <remarks>
+        /// Sets property AbortProcessing to true
+        /// </remarks>
         // ReSharper disable once UnusedMember.Global
         public void AbortProcessingNow()
         {
             AbortProcessing = true;
         }
 
+        /// <summary>
+        /// Construct the peptide hit results file path for the given results file format
+        /// </summary>
+        /// <param name="peptideHitResultFileFormat"></param>
+        /// <param name="sourceDirectoryPath"></param>
+        /// <param name="baseName"></param>
         // ReSharper disable once UnusedMember.Global
         public static string AutoDefinePeptideHitResultsFilePath(
             ResultsFileFormat peptideHitResultFileFormat,
@@ -261,10 +475,16 @@ namespace PeptideHitResultsProcessor.Processor
             };
         }
 
+        /// <summary>
+        /// Auto-define the peptide hit results file path by looking for a file with a known suffix in the given directory
+        /// </summary>
+        /// <remarks>
+        /// Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in directory sourceDirectoryPath
+        /// </remarks>
+        /// <param name="sourceDirectoryPath"></param>
+        /// <returns>The first matching file found, or an empty string</returns>
         public static string AutoDefinePeptideHitResultsFilePath(string sourceDirectoryPath)
         {
-            // Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in directory sourceDirectoryPath
-            // Returns the first matching file found
 
             var matchSpec = string.Empty;
 
@@ -298,6 +518,9 @@ namespace PeptideHitResultsProcessor.Processor
             return string.Empty;
         }
 
+        /// <summary>
+        /// Cache the protein names defined by Options.FastaFilepath
+        /// </summary>
         protected bool CacheProteinNamesFromFasta()
         {
             if (string.IsNullOrWhiteSpace(Options.FastaFilePath))
@@ -349,10 +572,17 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Check whether the sequence to protein map is defined in mSeqToProteinMap, adding it if missing
+        /// </summary>
+        /// <param name="uniqueSeqID">Unique sequence ID</param>
+        /// <param name="proteinName">Protein name</param>
+        /// <returns>
+        /// True if the sequence to protein map was already defined;
+        /// False if the mapping was not defined (will also update mSeqToProteinMap)
+        /// </returns>
         protected bool CheckSeqToProteinMapDefined(int uniqueSeqID, string proteinName)
         {
-            // Returns True if the sequence to protein map was already defined
-            // Returns False if the mapping was not defined (will also update mSeqToProteinMap)
 
             bool existingMapFound;
 
@@ -543,6 +773,9 @@ namespace PeptideHitResultsProcessor.Processor
             return ResultsFileFormat.AutoDetermine;
         }
 
+        /// <summary>
+        /// Close the result to sequence map file and the sequence info file
+        /// </summary>
         protected void CloseSequenceOutputFiles()
         {
             try
@@ -598,6 +831,27 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Compute a pseudo peptide location in a protein
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method is used when a peptide is associated with a protein for which we do not know the protein's sequence
+        /// </para>
+        /// <para>
+        /// Peptides at the N-terminus of a protein will have
+        /// searchResult.PeptideLocInProteinStart = 1 and PeptideLocInProteinEnd updated accordingly
+        /// </para>
+        /// <para>
+        /// Peptides at the C-terminus of a protein will have
+        /// searchResult.PeptideLocInProteinEnd = 10000 and PeptideLocInProteinStart updated accordingly
+        /// </para>
+        /// <para>
+        /// Peptides not at the N- or C- terminus of a protein will have
+        /// searchResult.PeptideLocInProteinStart = 2 and PeptideLocInProteinEnd updated accordingly
+        /// </para>
+        /// </remarks>
+        /// <param name="searchResult"></param>
         protected void ComputePseudoPeptideLocInProtein(SearchResultsBaseClass searchResult)
         {
             // Set these to 1 and 10000 since MSGFDB, SEQUEST, and InSpecT results files do not contain protein sequence information
@@ -652,6 +906,13 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             return ConstructPepToProteinMapFilePathWork(inputFilePath, outputDirectoryPath, mts);
@@ -712,7 +973,21 @@ namespace PeptideHitResultsProcessor.Processor
             return alternatePepToProteinMapFile.FullName;
         }
 
-        protected string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts, List<string> suffixesToFind, int charsToRemove)
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <param name="suffixesToFind">Filename suffixes to find</param>
+        /// <param name="charsToRemove">Number of characters to remove from the base name</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
+        protected string ConstructPepToProteinMapFilePath(
+            string inputFilePath,
+            string outputDirectoryPath,
+            bool mts,
+            List<string> suffixesToFind,
+            int charsToRemove)
         {
             var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
             if (string.IsNullOrEmpty(baseName))
@@ -1021,6 +1296,14 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Create the protein modification details file
+        /// </summary>
+        /// <param name="phrpDataFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <param name="phrpResultType"></param>
+        /// <returns>True if successful, false if an error</returns>
         public bool CreateProteinModDetailsFile(
             string phrpDataFilePath,
             string outputDirectoryPath,
@@ -1213,6 +1496,10 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Delete the file, ignoring any errors
+        /// </summary>
+        /// <param name="filePath"></param>
         protected void DeleteFileIgnoreErrors(string filePath)
         {
             try
@@ -1229,6 +1516,16 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Expand the capacity of the list if required
+        /// </summary>
+        /// <remarks>
+        /// If the list has fewer than largeListThreshold items, the capacity is left unchanged
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="countToAdd"></param>
+        /// <param name="largeListThreshold"></param>
         protected void ExpandListIfRequired<T>(List<T> items, int countToAdd, int largeListThreshold = 1000000)
         {
             if (items.Count > largeListThreshold && items.Count + countToAdd > items.Capacity)
@@ -1241,6 +1538,12 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly IComparer<PepToProteinMapping> peptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
 
+        /// <summary>
+        /// Look for the peptide in the peptide to protein map list
+        /// </summary>
+        /// <param name="pepToProteinMapping"></param>
+        /// <param name="peptideToFind"></param>
+        /// <returns>Index of the match if found, otherwise a negative number (based on a bitwise complement calculation)</returns>
         protected int FindFirstMatchInPepToProteinMapping(List<PepToProteinMapping> pepToProteinMapping, string peptideToFind)
         {
             // Use binary search to find this peptide in pepToProteinMapping
@@ -1263,16 +1566,29 @@ namespace PeptideHitResultsProcessor.Processor
             return pepToProteinMapIndex;
         }
 
+        /// <summary>
+        /// Return the application version (including the program date)
+        /// </summary>
         public static string GetAppVersion()
         {
             return ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
+        /// <summary>
+        /// Remove the prefix and suffix residues from the given peptide sequence and return the result
+        /// </summary>
+        /// <param name="sequenceWithMods"></param>
         protected string GetCleanSequence(string sequenceWithMods)
         {
             return GetCleanSequence(sequenceWithMods, out _, out _);
         }
 
+        /// <summary>
+        /// Remove the prefix and suffix residues from the given peptide sequence and return the result
+        /// </summary>
+        /// <param name="sequenceWithMods"></param>
+        /// <param name="prefix">Output: prefix residue</param>
+        /// <param name="suffix">Output: suffix residue</param>
         protected string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix)
         {
             if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
@@ -1470,6 +1786,14 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
+        /// <summary>
+        /// Return true if the protein name starts with or ends with a known reversed protein name tag
+        /// </summary>
+        /// <param name="proteinName"></param>
+        /// <returns>
+        /// True if the protein starts with reversed_, REV_, scrambled_, xxx_, or REV__, or if it ends with :reversed
+        /// Otherwise, false
+        /// </returns>
         protected bool IsReversedProtein(string proteinName)
         {
             if (proteinName.StartsWith("reversed_", StringComparison.OrdinalIgnoreCase))
@@ -1817,6 +2141,9 @@ namespace PeptideHitResultsProcessor.Processor
             return datasetIDs;
         }
 
+        /// <summary>
+        /// Raise event ProgressComplete
+        /// </summary>
         protected void OperationComplete()
         {
             ProgressComplete?.Invoke();
@@ -1878,6 +2205,12 @@ namespace PeptideHitResultsProcessor.Processor
                 : Path.Combine(originalFile.DirectoryName, newFileName);
         }
 
+        /// <summary>
+        /// Report an error by raising event ErrorEvent; store the error in mErrorMessage
+        /// </summary>
+        /// <param name="errMsg"></param>
+        /// <param name="throwException">If True, throw an exception</param>
+        /// <param name="ex"></param>
         protected void ReportError(string errMsg, bool throwException = false, Exception ex = null)
         {
             SetErrorMessage(errMsg, ex);
@@ -1893,6 +2226,13 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Reset the mass correction tags and modification definitions
+        /// </summary>
+        /// <remarks>
+        /// Reads data from Options.MassCorrectionTagsFilePath or Options.ModificationDefinitionsFilePath if defined,
+        /// otherwise, resets to default values
+        /// </remarks>
         public bool ResetMassCorrectionTagsAndModificationDefinitions()
         {
             var fileNotFound = false;
@@ -1930,6 +2270,11 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Reset percent complete to 0 and update mProgressStepDescription to the given description
+        /// </summary>
+        /// <param name="progressStepDescription"></param>
+        /// <param name="echoToConsole"></param>
         protected void ResetProgress(string progressStepDescription, bool echoToConsole = false)
         {
             mProgressStepDescription = progressStepDescription;
@@ -1959,6 +2304,10 @@ namespace PeptideHitResultsProcessor.Processor
             return PRISM.StringUtilities.DblToString(value, digitsAfterDecimal, 0.00001);
         }
 
+        /// <summary>
+        /// Create the modification summary file
+        /// </summary>
+        /// <param name="modificationSummaryFilePath"></param>
         protected void SaveModificationSummaryFile(string modificationSummaryFilePath)
         {
             using var writer = new StreamWriter(modificationSummaryFilePath, false);
@@ -2093,11 +2442,20 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Update the error code stored in mErrorCode
+        /// </summary>
+        /// <param name="newErrorCode"></param>
         protected void SetErrorCode(PHRPErrorCode newErrorCode)
         {
             SetErrorCode(newErrorCode, false);
         }
 
+        /// <summary>
+        /// Update the error code stored in mErrorCode
+        /// </summary>
+        /// <param name="newErrorCode"></param>
+        /// <param name="leaveExistingErrorCodeUnchanged">If true and mErrorCode is already non-zero, leave unchanged</param>
         protected void SetErrorCode(PHRPErrorCode newErrorCode, bool leaveExistingErrorCodeUnchanged)
         {
             if (leaveExistingErrorCodeUnchanged && mErrorCode != PHRPErrorCode.NoError)
@@ -2110,6 +2468,14 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Update the error message stored in mErrorMessage
+        /// </summary>
+        /// <remarks>
+        /// If ex is not null, appends the exception message to the error message (if not already present)
+        /// </remarks>
+        /// <param name="message"></param>
+        /// <param name="ex"></param>
         protected void SetErrorMessage(string message, Exception ex = null)
         {
             message ??= string.Empty;
@@ -2127,6 +2493,13 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Show a warning periodically
+        /// </summary>
+        /// <param name="warningCount">Number of times this warning has been encountered</param>
+        /// <param name="thresholdCountAlwaysShow">Always show the warning up to this many times</param>
+        /// <param name="warningMessage">Warning message</param>
+        /// <remarks>As the warning count surpasses, 1000, 10000, etc., the warning is shown less frequently</remarks>
         protected void ShowPeriodicWarning(int warningCount, int thresholdCountAlwaysShow, string warningMessage)
         {
             if (warningCount <= thresholdCountAlwaysShow ||
@@ -2154,6 +2527,12 @@ namespace PeptideHitResultsProcessor.Processor
             return proteinNameAndDescription;
         }
 
+        /// <summary>
+        /// Update the peptide to protein mapping at the given index
+        /// </summary>
+        /// <param name="pepToProteinMapping"></param>
+        /// <param name="index"></param>
+        /// <param name="peptide"></param>
         protected void UpdatePepToProteinMapPeptide(List<PepToProteinMapping> pepToProteinMapping, int index, string peptide)
         {
             var udtItem = pepToProteinMapping[index];
@@ -2161,11 +2540,20 @@ namespace PeptideHitResultsProcessor.Processor
             pepToProteinMapping[index] = udtItem;
         }
 
+        /// <summary>
+        /// Update the progress percent complete
+        /// </summary>
+        /// <param name="percentComplete">Value between 0 and 100</param>
         protected void UpdateProgress(float percentComplete)
         {
             UpdateProgress(ProgressStepDescription, percentComplete);
         }
 
+        /// <summary>
+        /// Update the progress percent complete
+        /// </summary>
+        /// <param name="progressStepDescription">Current processing step description</param>
+        /// <param name="percentComplete">Value between 0 and 100</param>
         protected void UpdateProgress(string progressStepDescription, float percentComplete)
         {
             mProgressStepDescription = progressStepDescription;
@@ -2445,6 +2833,12 @@ namespace PeptideHitResultsProcessor.Processor
             return peptideCount;
         }
 
+        /// <summary>
+        /// Assures that the _MSGF.txt file exists in the output directory, provided it exists in the input directory
+        /// </summary>
+        /// <remarks>Copies the file to the output directory if missing</remarks>
+        /// <param name="phrpDataFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
         protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputDirectoryPath)
         {
             try
@@ -2483,6 +2877,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="fastaFilePath"></param>
+        /// <returns></returns>
         protected bool ValidateProteinFastaFile(string fastaFilePath)
         {
             var success = ValidateProteinFastaFile(fastaFilePath, out var warningMessage);
@@ -2495,6 +2894,23 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Verify that the FASTA file exists and has amino acid based proteins
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Proteins where at least 10% of the residues are not A, T, C, or G are considered valid proteins
+        /// </para>
+        /// <para>
+        /// Proteins where over 95% of the residues are A, T, C, or G are considered invalid proteins
+        /// </para>
+        /// <para>
+        /// After examining the first 500 proteins, if there are more invalid proteins than valid proteins, returns false
+        /// </para>
+        /// </remarks>
+        /// <param name="fastaFilePath"></param>
+        /// <param name="warningMessage"></param>
+        /// <returns>True if found and valid, otherwise false</returns>
         public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage)
         {
             // This RegEx looks for standard amino acids, skipping A, T, C, and G
@@ -2675,8 +3091,14 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Peptide to protein map item comparer
+        /// </summary>
         protected class PepToProteinMappingComparer : IComparer<PepToProteinMapping>
         {
+            /// <summary>
+            /// Compare to peptide to protein map values, sorting first on peptide sequence and then on protein name
+            /// </summary>
             public int Compare(PepToProteinMapping x, PepToProteinMapping y)
             {
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);

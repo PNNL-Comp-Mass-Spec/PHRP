@@ -25,27 +25,46 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in a TopPIC results file (txt format) and creates
-    /// a tab-delimited text file with the data.
+    /// This class reads a TopPIC results file (txt format) and creates
+    /// a tab-delimited text file with the data
     /// </summary>
     public class TopPICResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: acetyl, Cysteine, Da, enums, fht, Frag, methylation, monoisotopic, Proteoform, Prsm, Pvalue, syn, toppic, txt
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="options"></param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 
+        /// <summary>
+        /// TopPIC tool name
+        /// </summary>
         public const string TOOL_NAME = "TopPIC";
 
+        /// <summary>
+        /// TopPIC proteoforms file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_TopPIC_PROTEOFORMS_FILE = "_TopPIC_Proteoforms";
 
+        /// <summary>
+        /// TopPIC results file suffix
+        /// </summary>
         public const string FILENAME_SUFFIX_TopPIC_PRSMs_FILE = "_TopPIC_PrSMs";
 
+        /// <summary>
+        /// N-terminus symbol used by TopPIC
+        /// </summary>
         public const string N_TERMINUS_SYMBOL_TopPIC = ".";
 
+        /// <summary>
+        /// C-terminus symbol used by TopPIC
+        /// </summary>
         public const string C_TERMINUS_SYMBOL_TopPIC = ".";
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
@@ -532,6 +551,13 @@ namespace PeptideHitResultsProcessor.Processor
             return totalModMass;
         }
 
+        /// <summary>
+        /// Construct the peptide to protein map file path
+        /// </summary>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mts">If true, the map file will end with MTS.txt; otherwise, just .txt</param>
+        /// <returns>_PepToProtMap file that corresponds to the input file</returns>
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var suffixesToFind = new List<string> {

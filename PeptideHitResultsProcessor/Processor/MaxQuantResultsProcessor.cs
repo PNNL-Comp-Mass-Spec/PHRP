@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in MaxQuant results files msms.txt and peptides.txt and creates
-    /// a tab-delimited text file with the data.
+    /// a tab-delimited text file with the data
     /// </summary>
     /// <remarks>
     /// <para>
@@ -79,14 +79,23 @@ namespace PeptideHitResultsProcessor.Processor
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
 
+        /// <summary>
+        /// MaxQuant tool name
+        /// </summary>
         public const string TOOL_NAME = "MaxQuant";
 
+        /// <summary>
+        /// MaxQuant results file suffix
+        /// </summary>
         public const string MSMS_FILE_NAME = "msms.txt";
 
+        /// <summary>
+        /// MaxQuant peptide info file suffix
+        /// </summary>
         public const string PEPTIDES_FILE_NAME = "peptides.txt";
 
         /// <summary>
-        /// Andromeda score threshold to use when creating the synopsis file
+        /// Default Andromeda score threshold to use when creating the synopsis file
         /// </summary>
         /// <remarks>
         /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
@@ -94,16 +103,22 @@ namespace PeptideHitResultsProcessor.Processor
         public const int DEFAULT_ANDROMEDA_SCORE_THRESHOLD = 50;
 
         /// <summary>
-        /// PEP score threshold to use when creating the synopsis file
+        /// Default PEP score threshold to use when creating the synopsis file
         /// </summary>
         /// <remarks>
         /// A PSM is stored if its Andromeda score is over the threshold, or if its PEP score is below the threshold
         /// </remarks>
         public const float DEFAULT_PEP_THRESHOLD = 0.01f;
 
+        /// <summary>
+        /// N-terminus symbol used by MaxQuant
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MaxQuant = "_";
 
+        /// <summary>
+        /// C-terminus symbol used by MaxQuant
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MaxQuant = "_";
 

@@ -27,7 +27,7 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in an X!Tandem results file (XML format) and creates
+    /// This class reads an X!Tandem results file (XML format) and creates
     /// a tab-delimited text file with the data.  It will insert modification symbols
     /// into the peptide sequences for modified peptides.  The user can optionally provide
     /// a modification definition file which specifies the symbol to use for each
@@ -1643,6 +1643,11 @@ namespace PeptideHitResultsProcessor.Processor
             writer.WriteLine(StringUtilities.CollapseList(data));
         }
 
+        /// <summary>
+        /// Return the text up to (but not including) the first space in proteinNameAndDescription
+        /// </summary>
+        /// <remarks>Optionally looks for the reversed protein sequence indicator</remarks>
+        /// <param name="proteinNameAndDescription"></param>
         protected override string TruncateProteinName(string proteinNameAndDescription)
         {
             var isReversed = false;
