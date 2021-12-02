@@ -1918,7 +1918,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             const string OPTIONS_SECTION = "PeptideHitResultsProcessorOptions";
 
-            var settingsFile = new PRISM.XmlSettingsFileAccessor();
+            var settingsFile = new XmlSettingsFileAccessor();
 
             try
             {
@@ -2571,15 +2571,19 @@ namespace PeptideHitResultsProcessor.Processor
         protected void UpdateProgress(string progressStepDescription, float percentComplete)
         {
             mProgressStepDescription = progressStepDescription;
+
             if (percentComplete < 0)
             {
-                percentComplete = 0;
+                mProgressPercentComplete = 0;
             }
             else if (percentComplete > 100)
             {
-                percentComplete = 100;
+                mProgressPercentComplete = 100;
             }
-            mProgressPercentComplete = percentComplete;
+            else
+            {
+                mProgressPercentComplete = percentComplete;
+            }
 
             OnProgressUpdate(ProgressStepDescription, ProgressPercentComplete);
         }
@@ -2871,12 +2875,9 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(msgfFileName))
                     return;
 
-                string sourcePath;
-
-                if (string.IsNullOrWhiteSpace(phrpDataFile.DirectoryName))
-                    sourcePath = msgfFileName;
-                else
-                    sourcePath = Path.Combine(phrpDataFile.DirectoryName, msgfFileName);
+                var sourcePath = string.IsNullOrWhiteSpace(phrpDataFile.DirectoryName)
+                    ? msgfFileName
+                    : Path.Combine(phrpDataFile.DirectoryName, msgfFileName);
 
                 var targetPath = Path.Combine(outputDirectory.FullName, msgfFileName);
 
