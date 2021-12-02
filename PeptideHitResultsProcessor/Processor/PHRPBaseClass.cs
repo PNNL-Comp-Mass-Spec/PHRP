@@ -1536,7 +1536,10 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private readonly IComparer<PepToProteinMapping> peptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
+        /// <summary>
+        /// Peptide to protein map results comparer
+        /// </summary>
+        private readonly IComparer<PepToProteinMapping> mPeptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
 
         /// <summary>
         /// Look for the peptide in the peptide to protein map list
@@ -1552,7 +1555,7 @@ namespace PeptideHitResultsProcessor.Processor
                 Peptide = peptideToFind
             };
 
-            var pepToProteinMapIndex = pepToProteinMapping.BinarySearch(udtItemToFind, peptideSearchComparer);
+            var pepToProteinMapIndex = pepToProteinMapping.BinarySearch(udtItemToFind, mPeptideSearchComparer);
 
             if (pepToProteinMapIndex > 0)
             {
