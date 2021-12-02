@@ -485,20 +485,17 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>The first matching file found, or an empty string</returns>
         public static string AutoDefinePeptideHitResultsFilePath(string sourceDirectoryPath)
         {
-
-            var matchSpec = string.Empty;
-
             try
             {
                 for (var index = 0; index <= 3; index++)
                 {
-                    matchSpec = index switch
+                    var matchSpec = index switch
                     {
                         0 => "*" + SYNOPSIS_FILE_SUFFIX,
                         1 => "*" + FIRST_HITS_FILE_SUFFIX,
                         2 => "*" + XTANDEM_RESULTS_FILE_SUFFIX,
                         3 => "*" + INSPECT_RESULTS_FILE_SUFFIX,
-                        _ => matchSpec
+                        _ => throw new ArgumentOutOfRangeException()
                     };
 
                     var sourceDirectory = new DirectoryInfo(sourceDirectoryPath);
