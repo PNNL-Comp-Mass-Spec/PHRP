@@ -1551,9 +1551,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Look for non-reverse proteins
                 for (var indexCheck = index; indexCheck <= indexEnd; indexCheck++)
                 {
-                    var proteinList = searchResults[indexCheck].ProteinList.Split(';');
-
-                    foreach (var proteinEntry in proteinList)
+                    foreach (var proteinEntry in searchResults[indexCheck].ProteinList.Split(';'))
                     {
                         if (!IsReversedProtein(proteinEntry))
                         {

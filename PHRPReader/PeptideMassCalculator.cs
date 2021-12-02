@@ -817,7 +817,7 @@ namespace PHRPReader
         /// </summary>
         private static Dictionary<string, double> GetElementMonoMasses()
         {
-            var elementMonoMasses = new Dictionary<string, double> {
+            return new Dictionary<string, double> {
                 {"H", MASS_HYDROGEN}, {"He", 4.0026029}, {"Li", 7.016005}, {"Be", 9.012183},
                 {"B", 11.009305}, {"C", 12}, {"N", 14.003074}, {"O", MASS_OXYGEN},
                 {"F", 18.9984032}, {"Ne", 19.992439}, {"Na", 22.98977}, {"Mg", 23.98505},
@@ -845,8 +845,6 @@ namespace PHRPReader
                 {"Bk", 247}, {"Cf", 251}, {"Es", 252}, {"Fm", 257},
                 {"Md", 258}, {"No", 269}, {"Lr", 260}
             };
-
-            return elementMonoMasses;
         }
 
         /// <summary>
@@ -992,8 +990,7 @@ namespace PHRPReader
         public bool SetAminoAcidAtomCounts(char chAminoAcidSymbol, Dictionary<string, int> elementalComposition)
         {
             var empiricalFormula = new EmpiricalFormula(elementalComposition);
-            var success = SetAminoAcidAtomCounts(chAminoAcidSymbol, empiricalFormula);
-            return success;
+            return SetAminoAcidAtomCounts(chAminoAcidSymbol, empiricalFormula);
         }
 
         /// <summary>

@@ -220,9 +220,7 @@ namespace PHRPReader.Reader
 
             // Parent mass tolerance
             // Might contain two values, separated by a comma
-            var toleranceSplit = tolerance.Split(',');
-
-            foreach (var item in toleranceSplit)
+            foreach (var item in tolerance.Split(','))
             {
                 if (item.Trim().StartsWith("#"))
                     continue;

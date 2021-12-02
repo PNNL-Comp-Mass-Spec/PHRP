@@ -695,8 +695,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private new string GetCleanSequence(string sequenceWithMods)
         {
-            var primarySequence = GetCleanSequence(sequenceWithMods, out _, out _, out _);
-            return primarySequence;
+            return GetCleanSequence(sequenceWithMods, out _, out _, out _);
         }
 
         private string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix, out string primarySequenceWithMods)

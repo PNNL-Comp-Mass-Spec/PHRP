@@ -1000,8 +1000,7 @@ namespace PHRPReader.Reader
                 value = string.Empty;
             }
 
-            var kvSetting = new KeyValuePair<string, string>(key, value);
-            return kvSetting;
+            return new KeyValuePair<string, string>(key, value);
         }
 
         /// <summary>
@@ -1435,9 +1434,7 @@ namespace PHRPReader.Reader
             }
 
             // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
-            var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList();
-
-            foreach (var proteinName in additionalProteins1)
+            foreach (var proteinName in currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList())
             {
                 if (MaxProteinsPerPSM > 0 && currentPSM.ProteinDetails.Count > MaxProteinsPerPSM)
                 {

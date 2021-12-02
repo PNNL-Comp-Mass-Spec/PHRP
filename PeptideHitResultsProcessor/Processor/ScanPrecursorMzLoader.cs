@@ -117,9 +117,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var reader = new PrecursorInfoFileReader();
                 RegisterEvents(reader);
 
-                var precursorInfoDataDictionary = reader.ReadPrecursorInfoFile(precursorInfoFile.FullName);
-
-                foreach (var precursor in precursorInfoDataDictionary)
+                foreach (var precursor in reader.ReadPrecursorInfoFile(precursorInfoFile.FullName))
                 {
                     precursorsByScan.Add(precursor.Key, precursor.Value.PrecursorMz);
                 }

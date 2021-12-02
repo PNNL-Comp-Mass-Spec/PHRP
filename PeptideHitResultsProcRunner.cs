@@ -95,14 +95,12 @@ namespace PeptideHitResultsProcRunner
 
         public override IList<string> GetDefaultExtensionsToParse()
         {
-            var extensionsToParse = new List<string>
+            return new List<string>
             {
                 ".txt",
                 ".xml",
                 ".tsv"
             };
-
-            return extensionsToParse;
         }
 
         /// <summary>

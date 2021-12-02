@@ -650,9 +650,7 @@ namespace PeptideHitResultsProcessor.Processor
             modMassFound = 0;
             containsStaticMod = false;
 
-            var matches = mModMassRegEx.Matches(modDigits);
-
-            foreach (Match match in matches)
+            foreach (Match match in mModMassRegEx.Matches(modDigits))
             {
                 var modMassText = match.Value;
 

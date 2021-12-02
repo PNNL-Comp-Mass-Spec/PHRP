@@ -132,7 +132,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public SearchOptionModificationInfo Clone()
             {
-                return new()
+                return new SearchOptionModificationInfo
                 {
                     SortOrder = SortOrder,
                     ModificationMass = ModificationMass,
@@ -1873,12 +1873,9 @@ namespace PeptideHitResultsProcessor.Processor
                 newFileName = newFileBaseName + newSuffix + originalExtension;
             }
 
-            if (string.IsNullOrWhiteSpace(originalFile.DirectoryName))
-                return newFileName;
-
-            var newFilePath = Path.Combine(originalFile.DirectoryName, newFileName);
-
-            return newFilePath;
+            return string.IsNullOrWhiteSpace(originalFile.DirectoryName)
+                ? newFileName
+                : Path.Combine(originalFile.DirectoryName, newFileName);
         }
 
         protected void ReportError(string errMsg, bool throwException = false, Exception ex = null)

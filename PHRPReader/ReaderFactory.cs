@@ -376,14 +376,12 @@ namespace PHRPReader
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
         {
-            var startupOptions = new StartupOptions
+            mStartupOptions = new StartupOptions
             {
                 LoadModsAndSeqInfo = loadModsAndSeqInfo,
                 LoadMSGFResults = loadMSGFResults,
                 LoadScanStatsData = loadScanStats
             };
-
-            mStartupOptions = startupOptions;
 
             mMSGFCachedResults = new Dictionary<int, string>();
 
@@ -1406,9 +1404,7 @@ namespace PHRPReader
         private static bool AutoTrimExtraSuffix(string filePath, out string filePathTrimmed)
         {
             // Check whether filePath ends in other known PHRP extensions
-            var extraSuffixes = GetPHRPAuxiliaryFileSuffixes();
-
-            foreach (var suffix in extraSuffixes)
+            foreach (var suffix in GetPHRPAuxiliaryFileSuffixes())
             {
                 if (filePath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
                 {

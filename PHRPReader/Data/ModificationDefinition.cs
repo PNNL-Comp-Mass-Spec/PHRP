@@ -369,13 +369,11 @@ namespace PHRPReader.Data
         /// <returns>True if the items are equivalent</returns>
         public bool EquivalentMassTypeTagAndAtom(ModificationDefinition a, ModificationDefinition b)
         {
-            var equivalent =
+            return
                 Math.Abs(Math.Round(a.ModificationMass - b.ModificationMass, PeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
                 a.ModificationType == b.ModificationType &&
                 a.MassCorrectionTag == b.MassCorrectionTag &&
                 a.AffectedAtom == b.AffectedAtom;
-
-            return equivalent;
         }
 
         /// <summary>
@@ -546,15 +544,13 @@ namespace PHRPReader.Data
         /// </summary>
         public static SortedSet<char> GetTerminalSymbols()
         {
-            var terminalSymbols = new SortedSet<char>
+            return new SortedSet<char>
             {
                 AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS,
                 AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS,
                 AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS,
                 AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
             };
-
-            return terminalSymbols;
         }
 
         /// <summary>

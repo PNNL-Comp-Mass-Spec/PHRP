@@ -312,8 +312,7 @@ namespace PHRPReader.Reader
         {
             searchEngineParams = new SearchEngineParameters(MAXQUANT_SEARCH_ENGINE_NAME);
 
-            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
-            return success;
+            return ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
         }
 
         /// <summary>

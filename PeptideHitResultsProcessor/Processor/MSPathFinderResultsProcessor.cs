@@ -337,9 +337,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             double totalModMass = 0;
-            var mods = modificationList.Split(',');
-
-            foreach (var modEntry in mods)
+            foreach (var modEntry in modificationList.Split(','))
             {
                 // Convert the mod name to a mass value
                 var matchFound = false;
