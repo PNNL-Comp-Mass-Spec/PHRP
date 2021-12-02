@@ -381,6 +381,7 @@ namespace PHRPReader.Data
         /// </summary>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
+        // ReSharper disable once UnusedMember.Global
         public bool EquivalentMassTypeTagAtomAndResidues(ModificationDefinition b)
         {
             return EquivalentMassTypeTagAtomAndResidues(this, b);
@@ -492,6 +493,7 @@ namespace PHRPReader.Data
         /// Returns True if this modification can affect the peptide or protein terminus
         /// </summary>
         /// <remarks>Note that some modifications can affect either peptide termini or internal residues</remarks>
+        // ReSharper disable once UnusedMember.Global
         public bool CanAffectPeptideOrProteinTerminus()
         {
             var terminalSymbols = GetTerminalSymbols();
@@ -508,12 +510,14 @@ namespace PHRPReader.Data
                     return true;
                 }
             }
+
             return false;
         }
 
         /// <summary>
         /// Returns true if this modification can affect peptide residues
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public bool CanAffectPeptideResidues()
         {
             var terminalSymbols = GetTerminalSymbols();

@@ -829,6 +829,8 @@ namespace PHRPReader.Data
 
                         if (!existingModFound && residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
                         {
+                            // ReSharper disable once CommentTypo
+
                             // Note that MaxQuant allows N-terminal protein mods to occur at either the true N-terminal residue, or one residue to the right
                             // For this reason, the _ModSummary.txt file will have entries like this:
                             // Symbol  Mass       TargetResidues  ModType  MassCorrectionTag  Occurrence_Count

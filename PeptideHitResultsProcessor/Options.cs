@@ -475,6 +475,7 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if options are valid, otherwise false</returns>
         public bool Validate()
         {
+            // ReSharper disable once InvertIf
             if (string.IsNullOrWhiteSpace(InputFilePath))
             {
                 ConsoleMsgUtils.ShowWarning("Input file not defined; cannot continue");

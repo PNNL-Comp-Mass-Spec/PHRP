@@ -228,6 +228,7 @@ namespace PeptideHitResultsProcessor.Processor
                         modMassDigits = character.ToString();
                         parsingModMass = true;
                     }
+                    // ReSharper disable once RedundantIfElseBlock
                     else
                     {
                         // Unrecognized symbol; ignore it
@@ -691,6 +692,7 @@ namespace PeptideHitResultsProcessor.Processor
             mSpectrumIndexToScanMap = new Dictionary<int, int>();
         }
 
+        // ReSharper disable once UnusedMethodReturnValue.Local
         private bool LoadMGFIndexToScanMapFile(FileInfo inputFile)
         {
             var indexToScanMapFilePath = string.Empty;

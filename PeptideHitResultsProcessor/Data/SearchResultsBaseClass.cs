@@ -810,6 +810,7 @@ namespace PeptideHitResultsProcessor.Data
                         }
                         addModification = true;
                     }
+                    // ReSharper disable once RedundantIfElseBlock
                     else
                     {
                         // Invalid target residue for a peptide terminus static mod; do not add the modification
@@ -836,6 +837,7 @@ namespace PeptideHitResultsProcessor.Data
                             addModification = true;
                         }
                     }
+                    // ReSharper disable once RedundantIfElseBlock
                     else
                     {
                         // Invalid target residue for a protein terminus static mod; do not add the modification
@@ -934,6 +936,8 @@ namespace PeptideHitResultsProcessor.Data
                 UpdatePeptideCTerminusMass(options.PeptideCTerminusMassChange);
             }
         }
+
+        // ReSharper disable once CommentTypo
 
         /// <summary>
         /// Obtain the peptide sequence
