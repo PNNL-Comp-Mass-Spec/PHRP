@@ -1562,13 +1562,15 @@ namespace PeptideHitResultsProcessor.Processor
 
             var pepToProteinMapIndex = pepToProteinMapping.BinarySearch(udtItemToFind, mPeptideSearchComparer);
 
-            if (pepToProteinMapIndex > 0)
+            if (pepToProteinMapIndex <= 0)
             {
-                // Step Backward until the first match is found
-                while (pepToProteinMapIndex > 0 && pepToProteinMapping[pepToProteinMapIndex - 1].Peptide == peptideToFind)
-                {
-                    pepToProteinMapIndex--;
-                }
+                return pepToProteinMapIndex;
+            }
+
+            // Step Backward until the first match is found
+            while (pepToProteinMapIndex > 0 && pepToProteinMapping[pepToProteinMapIndex - 1].Peptide == peptideToFind)
+            {
+                pepToProteinMapIndex--;
             }
 
             return pepToProteinMapIndex;
@@ -2223,15 +2225,17 @@ namespace PeptideHitResultsProcessor.Processor
         {
             SetErrorMessage(errMsg, ex);
 
-            if (throwException)
+            if (!throwException)
             {
-                if (ex == null)
-                {
-                    throw new Exception(errMsg);
-                }
-
-                throw new Exception(errMsg, ex);
+                return;
             }
+
+            if (ex == null)
+            {
+                throw new Exception(errMsg);
+            }
+
+            throw new Exception(errMsg, ex);
         }
 
         /// <summary>
@@ -2289,12 +2293,14 @@ namespace PeptideHitResultsProcessor.Processor
             mProgressPercentComplete = 0;
             ProgressReset?.Invoke();
 
-            if (echoToConsole)
+            if (!echoToConsole)
             {
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine(ProgressStepDescription);
+                return;
             }
+
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine(ProgressStepDescription);
         }
 
         /// <summary>
