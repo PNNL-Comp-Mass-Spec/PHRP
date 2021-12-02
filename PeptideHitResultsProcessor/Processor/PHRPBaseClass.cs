@@ -1370,15 +1370,20 @@ namespace PeptideHitResultsProcessor.Processor
                 using var writer = new StreamWriter(new FileStream(proteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
                 // Write the header line
-                writer.WriteLine(COLUMN_NAME_RESULTID + "\t" +
-                                 COLUMN_NAME_PEPTIDE + "\t" +
-                                 COLUMN_NAME_UNIQUE_SEQ_ID + "\t" +
-                                 COLUMN_NAME_PROTEIN_NAME + "\t" +
-                                 COLUMN_NAME_RESIDUE + "\t" +
-                                 COLUMN_NAME_PROTEIN_RESIDUE_NUMBER + "\t" +
-                                 COLUMN_NAME_RESIDUE_MOD_NAME + "\t" +
-                                 COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
-                                 COLUMN_NAME_MSGF_SPECPROB);
+                var headerNames = new List<string>
+                {
+                    COLUMN_NAME_RESULTID,
+                    COLUMN_NAME_PEPTIDE,
+                    COLUMN_NAME_UNIQUE_SEQ_ID,
+                    COLUMN_NAME_PROTEIN_NAME,
+                    COLUMN_NAME_RESIDUE,
+                    COLUMN_NAME_PROTEIN_RESIDUE_NUMBER,
+                    COLUMN_NAME_RESIDUE_MOD_NAME,
+                    COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER,
+                    COLUMN_NAME_MSGF_SPECPROB
+                };
+
+                writer.WriteLine(string.Join("\t", headerNames));
 
                 var loadMSGFResults = phrpResultType != PeptideHitResultTypes.MSGFPlus;
 
@@ -3000,6 +3005,8 @@ namespace PeptideHitResultsProcessor.Processor
             int pepToProteinMapIndex,
             ref int psmCountSkippedSinceReversedOrScrambledProtein)
         {
+            var dataValues = new List<string>();
+
             foreach (var mod in reader.CurrentPSM.ModifiedResidues)
             {
                 var residueLocInProtein = pepToProteinMapping[pepToProteinMapIndex].ResidueStart + mod.ResidueLocInPeptide - 1;
@@ -3036,15 +3043,19 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    writer.WriteLine(reader.CurrentPSM.ResultID + "\t" +
-                                     reader.CurrentPSM.Peptide + "\t" +
-                                     reader.CurrentPSM.SeqID + "\t" +
-                                     pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
-                                     residue + "\t" +
-                                     residueLocInProtein + "\t" +
-                                     mod.ModDefinition.MassCorrectionTag + "\t" +
-                                     mod.ResidueLocInPeptide + "\t" +
-                                     reader.CurrentPSM.MSGFSpecEValue);
+                    dataValues.Clear();
+
+                    dataValues.Add(reader.CurrentPSM.ResultID.ToString());
+                    dataValues.Add(reader.CurrentPSM.Peptide);
+                    dataValues.Add(reader.CurrentPSM.SeqID.ToString());
+                    dataValues.Add(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                    dataValues.Add(residue);
+                    dataValues.Add(residueLocInProtein.ToString());
+                    dataValues.Add(mod.ModDefinition.MassCorrectionTag);
+                    dataValues.Add(mod.ResidueLocInPeptide.ToString());
+                    dataValues.Add(reader.CurrentPSM.MSGFSpecEValue);
+
+                    writer.WriteLine(string.Join("\t", dataValues));
                 }
             }
         }
