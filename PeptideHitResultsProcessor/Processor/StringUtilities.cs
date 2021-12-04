@@ -133,9 +133,7 @@ namespace PeptideHitResultsProcessor.Processor
             if (string2.Length < string1.Length)
             {
                 // Swap strings so that string2 has the longer string
-                var temp = string1;
-                string1 = string2;
-                string2 = temp;
+                (string1, string2) = (string2, string1);
             }
 
             for (var length = string1.Length; length > 0; length--)
