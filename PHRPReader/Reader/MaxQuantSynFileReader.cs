@@ -551,7 +551,7 @@ namespace PHRPReader.Reader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                //var firstSearchPrecursorTolerancePPM = XmlReaderUtilities.GetElementValueOrDefault(
+                // var firstSearchPrecursorTolerancePPM = XmlReaderUtilities.GetElementValueOrDefault(
                 //    doc.Root,
                 //    "parameterGroups", "parameterGroup", "firstSearchTol");
 

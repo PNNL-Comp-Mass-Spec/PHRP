@@ -965,8 +965,11 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (firstHitPeptide.CleanSequence.Equals(
                                     GetCleanSequence(searchResultsCurrentScan[0].Peptide, out var newPrefix, out var newSuffix)))
                                 {
-                                    var bestProtein = GetBestProteinName(firstHitPeptide.ProteinName, firstHitPeptide.ProteinNumber,
+                                    var bestProtein = GetBestProteinName(
+                                        firstHitPeptide.ProteinName,
+                                        firstHitPeptide.ProteinNumber,
                                         searchResultsCurrentScan[0].Protein);
+
                                     if (bestProtein.Value < firstHitPeptide.ProteinNumber)
                                     {
                                         firstHitPeptide.ProteinName = bestProtein.Key;

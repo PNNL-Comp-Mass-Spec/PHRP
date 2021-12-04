@@ -794,7 +794,7 @@ namespace PHRPReader
                         break;
 
                     default:
-                        //Should never get here; invalid result type specified
+                        // Should never get here; invalid result type specified
                         ReportError("Invalid PeptideHit ResultType specified: " + resultType);
                         success = false;
                         break;
