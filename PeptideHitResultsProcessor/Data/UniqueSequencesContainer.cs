@@ -78,10 +78,9 @@ namespace PeptideHitResultsProcessor.Data
 
             try
             {
-                if (sequence == null)
-                    sequence = string.Empty;
-                if (modDescription == null)
-                    modDescription = string.Empty;
+                sequence ??= string.Empty;
+
+                modDescription ??= string.Empty;
 
                 var key = sequence + SEQUENCE_MOD_DESC_SEP + modDescription;
 
