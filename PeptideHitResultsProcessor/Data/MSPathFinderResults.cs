@@ -25,6 +25,10 @@ namespace PeptideHitResultsProcessor.Data
     public class MSPathFinderResults : SearchResultsBaseClass
     {
         // Ignore Spelling: Dehydro
+
+        /// <summary>
+        /// Most abundance isotope m/z
+        /// </summary>
         public string MostAbundantIsotopeMz { get; set; }
 
         /// <summary>
@@ -108,7 +112,7 @@ namespace PeptideHitResultsProcessor.Data
         }
 
         /// <summary>
-        /// Reset properties to empty strings
+        /// Clear stored values
         /// </summary>
         public override void Clear()
         {

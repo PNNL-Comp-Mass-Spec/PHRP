@@ -354,7 +354,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         /// <summary>
         /// Tracks the protein names in the order that they are listed in the FASTA file
-        /// Keys are protein names, values are a sequentially assigned integer
+        /// Keys are protein names, values are a sequentially assigned integer (starting with 1)
         /// </summary>
         protected readonly Dictionary<string, int> mProteinNameOrder;
 
@@ -580,7 +580,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// </returns>
         protected bool CheckSeqToProteinMapDefined(int uniqueSeqID, string proteinName)
         {
-
             bool existingMapFound;
 
             try
@@ -2890,10 +2889,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        ///
+        /// Verify that the FASTA file exists and has amino acid based proteins
         /// </summary>
         /// <param name="fastaFilePath"></param>
-        /// <returns></returns>
+        /// <returns>True if found and valid, otherwise false</returns>
         protected bool ValidateProteinFastaFile(string fastaFilePath)
         {
             var success = ValidateProteinFastaFile(fastaFilePath, out var warningMessage);

@@ -27,19 +27,75 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class SequestResults : SearchResultsBaseClass
     {
+
+        /// <summary>
+        /// NumScans
+        /// </summary>
         public string NumScans { get; set; }
+
+        /// <summary>
+        /// DeltaCn (score difference)
+        /// </summary>
         public string PeptideDeltaCn { get; set; }
+
+        /// <summary>
+        /// DeltaCn2
+        /// </summary>
         public string PeptideDeltaCn2 { get; set; }
+
+        /// <summary>
+        /// MScore
+        /// </summary>
         public string PeptideMScore { get; set; }
+
+        /// <summary>
+        /// Number of tryptic termini
+        /// </summary>
         public string PeptideNTT { get; set; }
+
+        /// <summary>
+        /// PassFilt score
+        /// </summary>
         public string PeptidePassFilt { get; set; }
+
+        /// <summary>
+        /// Rank SP
+        /// </summary>
         public string PeptideRankSP { get; set; }
+
+        /// <summary>
+        /// Rank XC
+        /// </summary>
         public string PeptideRankXC { get; set; }
+
+        /// <summary>
+        /// Sp
+        /// </summary>
         public string PeptideSp { get; set; }
+
+        /// <summary>
+        /// XCorr
+        /// </summary>
         public string PeptideXCorr { get; set; }
+
+        /// <summary>
+        /// XcRatio
+        /// </summary>
         public string PeptideXcRatio { get; set; }
+
+        /// <summary>
+        /// Ions Observed
+        /// </summary>
         public string IonsObserved { get; set; }
+
+        /// <summary>
+        /// Ions Expected
+        /// </summary>
         public string IonsExpected { get; set; }
+
+        /// <summary>
+        /// DelM PPM
+        /// </summary>
         public string DelMPPM { get; set; }
 
         /// <summary>
@@ -61,6 +117,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

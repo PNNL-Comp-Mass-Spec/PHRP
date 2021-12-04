@@ -38,11 +38,20 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string IntensityMultiplier { get; set; }
 
+        /// <summary>
+        /// E-value
+        /// </summary>
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
         public string PeptideExpectationValue { get; set; }
 
+        /// <summary>
+        /// X!Tandem hyperscore
+        /// </summary>
         public string PeptideHyperscore { get; set; }
 
+        /// <summary>
+        /// Score of the second best matching peptide
+        /// </summary>
         public string PeptideNextScore
         {
             get => mPeptideNextScore;
@@ -53,20 +62,44 @@ namespace PeptideHitResultsProcessor.Data
             }
         }
 
+        /// <summary>
+        /// DeltaCn2
+        /// </summary>
         public float PeptideDeltaCn2 { get; set; }
 
+        /// <summary>
+        /// Y ions score
+        /// </summary>
         public string PeptideYScore { get; set; }
 
+        /// <summary>
+        /// Y ion count
+        /// </summary>
         public string PeptideYIons { get; set; }
 
+        /// <summary>
+        /// B ions score
+        /// </summary>
         public string PeptideBScore { get; set; }
 
+        /// <summary>
+        /// B ion count
+        /// </summary>
         public string PeptideBIons { get; set; }
 
+        /// <summary>
+        /// Peptide intensity
+        /// </summary>
         public string PeptideIntensity { get; set; }
 
+        /// <summary>
+        /// Maximum peptide intensity
+        /// </summary>
         public string PeptideIntensityMax { get; set; }
 
+        /// <summary>
+        /// Delta Mass (in ppm), corrected for isotope envelope errors
+        /// </summary>
         public double PeptideDeltaMassCorrectedPpm { get; set; }
 
         /// <summary>
@@ -83,6 +116,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();
@@ -105,6 +141,9 @@ namespace PeptideHitResultsProcessor.Data
             PeptideDeltaMassCorrectedPpm = 0;
         }
 
+        /// <summary>
+        /// Compute the corrected mass error value
+        /// </summary>
         public void ComputeDelMCorrectedXT()
         {
             double precursorMonoMass = 0;

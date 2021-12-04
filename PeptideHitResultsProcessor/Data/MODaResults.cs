@@ -26,6 +26,9 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: MODa
 
+        /// <summary>
+        /// Spectrum index
+        /// </summary>
         public string Spectrum_Index { get; set; }
 
         /// <summary>
@@ -33,11 +36,24 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string Precursor_mz { get; set; }
 
+        /// <summary>
+        /// Mass error, as computed by MODa
+        /// </summary>
         public string MODaComputedDelM { get; set; }
+
+        /// <summary>
+        /// Mass error (in ppm), as computed by MODa
+        /// </summary>
         public string MODaComputedDelMPPM { get; set; }
 
+        /// <summary>
+        /// MODa Score
+        /// </summary>
         public string MODaScore { get; set; }
 
+        /// <summary>
+        /// Probability
+        /// </summary>
         public string Probability { get; set; }
 
         /// <summary>
@@ -54,6 +70,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

@@ -30,6 +30,9 @@ namespace PeptideHitResultsProcessor.Data
 
         private int mNextUniqueSeqID;
 
+        /// <summary>
+        /// Unique sequence count
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         public int UniqueSequenceCount => mMasterSequences.Count;
 
@@ -42,11 +45,18 @@ namespace PeptideHitResultsProcessor.Data
             Clear();
         }
 
+        /// <summary>
+        /// Clear stored sequences, resetting the initial sequence ID to 1
+        /// </summary>
         public void Clear()
         {
             Clear(DEFAULT_INITIAL_SEQ_ID);
         }
 
+        /// <summary>
+        /// Clear stored sequences, resetting the initial sequence ID to the given value
+        /// </summary>
+        /// <param name="initialSeqID"></param>
         public void Clear(int initialSeqID)
         {
             // Clears mMasterSequences and resets mNextUniqueSeqID to initialSeqID
@@ -54,6 +64,12 @@ namespace PeptideHitResultsProcessor.Data
             mNextUniqueSeqID = initialSeqID;
         }
 
+        /// <summary>
+        /// Look for the given sequence in the master sequence list, returning the sequence ID if found, or adding it if missing
+        /// </summary>
+        /// <param name="sequence"></param>
+        /// <param name="modDescription"></param>
+        /// <param name="existingSequenceFound"></param>
         public int GetNextUniqueSequenceID(string sequence, string modDescription, out bool existingSequenceFound)
         {
             int uniqueSeqID;

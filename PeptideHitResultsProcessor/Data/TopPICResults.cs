@@ -65,6 +65,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

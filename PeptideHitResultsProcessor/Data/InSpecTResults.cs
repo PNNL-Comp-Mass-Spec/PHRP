@@ -29,27 +29,114 @@ namespace PeptideHitResultsProcessor.Data
         // Annotation: aka Peptide, which is tracked by the base class
         // Protein: tracked by the base class
 
+        /// <summary>
+        /// Spectrum file name
+        /// </summary>
         public string SpectrumFile { get; set; }
+
+        /// <summary>
+        /// MQScore
+        /// </summary>
         public string MQScore { get; set; }
+
+        /// <summary>
+        /// Length
+        /// </summary>
         public string Length { get; set; }
+
+        /// <summary>
+        /// TotalPRMScore
+        /// </summary>
         public string TotalPRMScore { get; set; }
+
+        /// <summary>
+        /// MedianPRMScore
+        /// </summary>
         public string MedianPRMScore { get; set; }
+
+        /// <summary>
+        /// FractionY
+        /// </summary>
         public string FractionY { get; set; }
+
+        /// <summary>
+        /// FractionB
+        /// </summary>
         public string FractionB { get; set; }
+
+        /// <summary>
+        /// Intensity
+        /// </summary>
         public string Intensity { get; set; }
+
+        /// <summary>
+        /// Number of tryptic termini
+        /// </summary>
         public string NTT { get; set; }
+
+        /// <summary>
+        /// PValue
+        /// </summary>
         public string PValue { get; set; }
+
+        /// <summary>
+        /// FScore
+        /// </summary>
         public string FScore { get; set; }
+
+        /// <summary>
+        /// DeltaScore
+        /// </summary>
         public string DeltaScore { get; set; }
+
+        /// <summary>
+        /// DeltaScoreOther
+        /// </summary>
         public string DeltaScoreOther { get; set; }
+
+        /// <summary>
+        /// DeltaNormMQScore
+        /// </summary>
         public string DeltaNormMQScore { get; set; }
+
+        /// <summary>
+        /// DeltaNormTotalPRMScore
+        /// </summary>
         public string DeltaNormTotalPRMScore { get; set; }
+
+        /// <summary>
+        /// RankTotalPRMScore
+        /// </summary>
         public string RankTotalPRMScore { get; set; }
+
+        /// <summary>
+        /// RankFScore
+        /// </summary>
         public string RankFScore { get; set; }
+
+        /// <summary>
+        /// RecordNumber
+        /// </summary>
         public string RecordNumber { get; set; }
+
+        /// <summary>
+        /// DBFilePos
+        /// </summary>
         public string DBFilePos { get; set; }
+
+        /// <summary>
+        /// SpecFilePos
+        /// </summary>
         public string SpecFilePos { get; set; }
+
+        /// <summary>
+        /// PrecursorMz
+        /// </summary>
         public string PrecursorMz { get; set; }
+
+        /// <summary>
+        /// PrecursorError
+        /// </summary>
         public string PrecursorError { get; set; }
 
         /// <summary>
@@ -66,6 +153,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

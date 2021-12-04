@@ -24,6 +24,9 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MODPlusResults : SearchResultsBaseClass
     {
+        /// <summary>
+        /// Spectrum index
+        /// </summary>
         public string Spectrum_Index { get; set; }
 
         /// <summary>
@@ -31,14 +34,29 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string Precursor_mz { get; set; }
 
+        /// <summary>
+        /// Mass error, as computed by MODPlus
+        /// </summary>
         public string MODPlusComputedDelM { get; set; }
 
+        /// <summary>
+        /// Mass error (in ppm), as computed by MODPlus
+        /// </summary>
         public string MODPlusComputedDelMPPM { get; set; }
 
+        /// <summary>
+        /// MODPlus score
+        /// </summary>
         public string MODPlusScore { get; set; }
 
+        /// <summary>
+        /// Probability
+        /// </summary>
         public string Probability { get; set; }
 
+        /// <summary>
+        /// Peptide position
+        /// </summary>
         public string PeptidePosition { get; set; }
 
         /// <summary>
@@ -55,6 +73,9 @@ namespace PeptideHitResultsProcessor.Data
         {
         }
 
+        /// <summary>
+        /// Clear stored values
+        /// </summary>
         public override void Clear()
         {
             base.Clear();

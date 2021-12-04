@@ -4,12 +4,20 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace PeptideHitResultsProcessor.Processor
 {
+    /// <summary>
+    /// String utilities
+    /// </summary>
     public static class StringUtilities
     {
         // Ignore Spelling: A-Za-z
 
         private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Convert an integer to a string, returning a default value if the conversion fails
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="defaultValue"></param>
         public static int CIntSafe(string value, int defaultValue)
         {
             try
@@ -25,6 +33,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Convert a double to a string, returning a default value if the conversion fails
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="defaultValue"></param>
         public static double CDblSafe(string value, double defaultValue)
         {
             try
@@ -38,6 +51,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        /// <summary>
+        /// Convert a float to a string, returning a default value if the conversion fails
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="defaultValue"></param>
         public static float CSngSafe(string value, float defaultValue)
         {
             try
@@ -73,6 +91,11 @@ namespace PeptideHitResultsProcessor.Processor
             return RegexIsLetter.IsMatch(character.ToString());
         }
 
+        /// <summary>
+        /// Find the longest string of letters in common at the start of the items
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="caseSensitive"></param>
         public static string LongestCommonStringFromStart(List<string> items, bool caseSensitive = false)
         {
             if (items.Count == 0)
@@ -99,6 +122,12 @@ namespace PeptideHitResultsProcessor.Processor
             return longestCommonString;
         }
 
+        /// <summary>
+        /// Find the longest string of letters in common between string1 and string 2
+        /// </summary>
+        /// <param name="string1"></param>
+        /// <param name="string2"></param>
+        /// <param name="comparisonType"></param>
         public static string LongestCommonStringFromStart(string string1, string string2, StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
         {
             if (string2.Length < string1.Length)
@@ -121,6 +150,11 @@ namespace PeptideHitResultsProcessor.Processor
             return string.Empty;
         }
 
+        /// <summary>
+        /// Find the longest string of letters in common at the start of the items (verbose algorithm)
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="caseSensitive"></param>
         public static string LongestCommonStringFromStartVerbose(List<string> items, bool caseSensitive = false)
         {
             if (items.Count == 0)
@@ -174,6 +208,11 @@ namespace PeptideHitResultsProcessor.Processor
             return shortestItem.Substring(0, charCount - 1);
         }
 
+        /// <summary>
+        /// Convert a mass error to a string, rounding to either 5 or 6 decimal places
+        /// </summary>
+        /// <remarks>Returns "0" if zero</remarks>
+        /// <param name="massErrorDa"></param>
         public static string MassErrorToString(double massErrorDa)
         {
             if (Math.Abs(massErrorDa) < 0.000001)
