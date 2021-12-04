@@ -27,6 +27,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class SequestResults : SearchResultsBaseClass
     {
+        // Ignore Spelling: tryptic
 
         /// <summary>
         /// NumScans
@@ -142,6 +143,7 @@ namespace PeptideHitResultsProcessor.Data
             PeptideXCorrNext = string.Empty;
         }
 
+        // ReSharper disable once UnusedMember.Local
         private void ComputePeptideXCorrNext()
         {
             try

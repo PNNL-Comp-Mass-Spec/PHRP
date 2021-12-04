@@ -46,6 +46,8 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string PrecursorMZ { get; set; }
 
+        // ReSharper disable CommentTypo
+
         /// <summary>
         /// Precursor ion m/z (theoretical value, not observed value), as reported by MaxQuant
         /// </summary>
@@ -94,6 +96,8 @@ namespace PeptideHitResultsProcessor.Data
         /// </para>
         /// </remarks>
         public string PrecursorMZ_MaxQuant { get; set; }
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// Mass error, in Da, as computed by PHRP
