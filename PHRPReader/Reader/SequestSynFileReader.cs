@@ -206,7 +206,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, SequestSynopsisFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, SequestSynopsisFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "HitNum", SequestSynopsisFileColumns.RowIndex },
                 { "ScanNum", SequestSynopsisFileColumns.Scan },

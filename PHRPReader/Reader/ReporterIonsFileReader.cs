@@ -194,7 +194,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, ReporterIonsFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, ReporterIonsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Dataset", ReporterIonsFileColumns.Dataset },
                 { "ScanNumber", ReporterIonsFileColumns.ScanNumber },

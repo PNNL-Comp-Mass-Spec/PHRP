@@ -159,7 +159,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MSAlignSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, MSAlignSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "ResultID", MSAlignSynFileColumns.ResultID },
                 { "Scan", MSAlignSynFileColumns.Scan },

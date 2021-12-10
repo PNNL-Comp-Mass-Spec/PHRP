@@ -76,7 +76,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, SICStatsFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, SICStatsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Dataset", SICStatsFileColumns.Dataset },
                 { "ParentIonIndex", SICStatsFileColumns.ParentIonIndex },

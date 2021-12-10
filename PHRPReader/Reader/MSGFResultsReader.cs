@@ -73,7 +73,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MSGFFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, MSGFFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Result_ID", MSGFFileColumns.ResultID },
                 { "Scan", MSGFFileColumns.Scan },

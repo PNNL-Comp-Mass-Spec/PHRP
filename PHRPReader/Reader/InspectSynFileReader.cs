@@ -168,7 +168,7 @@ namespace PHRPReader.Reader
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, InspectSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            return new(StringComparer.OrdinalIgnoreCase)
+            return new SortedDictionary<string, InspectSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "ResultID", InspectSynFileColumns.ResultID },
                 { "Scan", InspectSynFileColumns.Scan },
