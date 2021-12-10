@@ -776,7 +776,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var validSearchResult = ParseMODPlusSynFileEntry(
                             lineIn, searchResult, errorMessages,
-                            resultsProcessed, columnMapping, out _);
+                            resultsProcessed, columnMapping);
 
                         resultsProcessed++;
                         if (!validSearchResult)
@@ -1162,8 +1162,7 @@ namespace PeptideHitResultsProcessor.Processor
             MODPlusResults searchResult,
             ICollection<string> errorMessages,
             int resultsProcessed,
-            IDictionary<MODPlusSynFileColumns, int> columnMapping,
-            out string peptideSequenceWithMods)
+            IDictionary<MODPlusSynFileColumns, int> columnMapping)
         {
             // Parses an entry from the MODPlus Synopsis file
 
@@ -1171,7 +1170,6 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Reset searchResult
             searchResult.Clear();
-            peptideSequenceWithMods = string.Empty;
 
             try
             {
@@ -1200,7 +1198,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MODPlusSynFileColumns.Peptide], out string peptideSequenceWithMods))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {

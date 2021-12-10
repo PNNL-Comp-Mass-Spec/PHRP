@@ -665,8 +665,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var validSearchResult = ParseMSPathFinderSynFileEntry(
                             lineIn, searchResult, errorMessages,
-                            resultsProcessed, columnMapping,
-                            out _);
+                            resultsProcessed, columnMapping);
 
                         resultsProcessed++;
                         if (!validSearchResult)
@@ -1044,21 +1043,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
-        /// <param name="peptideSequence"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
             MSPathFinderResults searchResult,
             ICollection<string> errorMessages,
             int resultsProcessed,
-            IDictionary<MSPathFinderSynFileColumns, int> columnMapping,
-            out string peptideSequence)
+            IDictionary<MSPathFinderSynFileColumns, int> columnMapping)
         {
             string[] splitLine = null;
 
             // Reset searchResult
             searchResult.Clear();
-            peptideSequence = string.Empty;
 
             try
             {
@@ -1087,7 +1083,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileColumns.Sequence], out peptideSequence))
+                if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileColumns.Sequence], out string peptideSequence))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {

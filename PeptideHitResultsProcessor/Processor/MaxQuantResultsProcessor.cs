@@ -2303,7 +2303,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var validSearchResult = ParseMaxQuantSynFileEntry(
                             lineIn, searchResult, errorMessages,
-                            resultsProcessed, columnMapping, out _);
+                            resultsProcessed, columnMapping);
 
                         resultsProcessed++;
                         if (!validSearchResult)
@@ -2807,21 +2807,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorMessages"></param>
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
-        /// <param name="peptideSequence"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantSynFileEntry(
             string lineIn,
             MaxQuantResults searchResult,
             ICollection<string> errorMessages,
             int resultsProcessed,
-            IDictionary<MaxQuantSynFileColumns, int> columnMapping,
-            out string peptideSequence)
+            IDictionary<MaxQuantSynFileColumns, int> columnMapping)
         {
             string[] splitLine = null;
 
             // Reset searchResult
             searchResult.Clear();
-            peptideSequence = string.Empty;
 
             try
             {
@@ -2856,7 +2853,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out peptideSequence))
+                if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out string peptideSequence))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
