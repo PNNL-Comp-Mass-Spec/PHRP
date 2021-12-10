@@ -490,6 +490,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
                 }
+                // ReSharper disable once RedundantIfElseBlock
                 else
                 {
                     // We found a modification symbol but mostRecentLetter is not a letter
@@ -1379,6 +1380,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return new KeyValuePair<string, int>(candidateProteinName, proteinNumber);
                 }
             }
+            // ReSharper disable once RedundantIfElseBlock
             else
             {
                 // Protein not found in mProteinNameOrder

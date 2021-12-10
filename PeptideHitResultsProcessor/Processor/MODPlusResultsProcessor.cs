@@ -250,6 +250,7 @@ namespace PeptideHitResultsProcessor.Processor
                         modMassDigits = character.ToString();
                         parsingModMass = true;
                     }
+                    // ReSharper disable once RedundantIfElseBlock
                     else
                     {
                         // Unrecognized symbol; ignore it

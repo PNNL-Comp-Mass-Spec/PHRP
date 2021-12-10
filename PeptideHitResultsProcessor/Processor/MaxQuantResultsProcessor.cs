@@ -2368,6 +2368,8 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        // ReSharper disable once CommentTypo
+
         /// <summary>
         /// Parse a MaxQuant results line while creating the MaxQuant synopsis file
         /// </summary>
@@ -2639,6 +2641,8 @@ namespace PeptideHitResultsProcessor.Processor
                     OnWarningEvent("Intensity column not found in the MaxQuant peptides.txt file");
                     return true;
                 }
+
+                // ReSharper disable once CommentTypo
 
                 // The columns after the "Intensity" column list peptide intensity, by experiment
                 // If only a single dataset was searched, there will be only one column
