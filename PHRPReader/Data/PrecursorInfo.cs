@@ -33,7 +33,7 @@
         }
 
         /// <summary>
-        /// Precursor m/z
+        /// Precursor ion m/z
         /// </summary>
         /// <remarks>
         /// For MS3 spectra, this is the m/z of the preceding MS2 scan

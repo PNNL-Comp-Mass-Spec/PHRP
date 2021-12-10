@@ -16,12 +16,12 @@
         public int ParentIonIndex { get; }
 
         /// <summary>
-        /// Precursor m/z
+        /// Precursor ion m/z value
         /// </summary>
         public double MZ { get; set; }
 
         /// <summary>
-        /// Precursor m/z
+        /// Precursor ion m/z
         /// </summary>
         public string MzText { get; set; }
 

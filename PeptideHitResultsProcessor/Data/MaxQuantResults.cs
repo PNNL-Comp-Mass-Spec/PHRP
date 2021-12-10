@@ -42,7 +42,7 @@ namespace PeptideHitResultsProcessor.Data
         public string SpecIndex { get; set; }
 
         /// <summary>
-        /// Precursor m/z (observed value, read from a _PrecursorInfo.txt file by PHRP)
+        /// Precursor ion m/z (observed value, read from a _PrecursorInfo.txt file by PHRP)
         /// </summary>
         public string PrecursorMZ { get; set; }
 
@@ -138,9 +138,9 @@ namespace PeptideHitResultsProcessor.Data
         /// Comma-separated list of dynamic modification names and affected residue number
         /// </summary>
         /// <remarks>
-        /// Examples:
-        /// Oxidation 7
-        /// Acetyl 1,Oxidation 4
+        /// Example values:
+        ///   Oxidation 7
+        ///   Acetyl 1,Oxidation 4
         /// </remarks>
         public string Modifications { get; set; }
 
@@ -180,7 +180,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Andromeda score for the best MS/MS spectrum with this peptide
         /// </summary>
         /// <remarks>
-        /// Higher scores are better
+        /// Larger values are better
         /// </remarks>
         public string Score { get; set; }
 
@@ -224,10 +224,10 @@ namespace PeptideHitResultsProcessor.Data
         ///   MULTI - labeling cluster.
         /// </para>
         /// <para>
-        /// Examples:
-        /// MULTI-MSMS
-        /// MULTI-SECPEP
-        /// MSMS
+        /// Example values:
+        ///   MULTI-MSMS
+        ///   MULTI-SECPEP
+        ///   MSMS
         /// </para>
         /// </remarks>
         public string PrecursorType { get; set; }

@@ -72,6 +72,9 @@ namespace PeptideHitResultsProcessor.Data
             Clear();
         }
 
+        /// <summary>
+        /// Reset stored values to empty strings
+        /// </summary>
         public void Clear()
         {
             Sequence = string.Empty;

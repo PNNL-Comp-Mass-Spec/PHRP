@@ -161,7 +161,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Peptide sequence, including any modification symbols that were assigned by the search engine
         /// Peptide sequence, with or without prefix and suffix residues; may contain mod symbols
-        /// Example, R.AAS*PQDLAGGYTSSLACHR.A
+        /// Example: R.AAS*PQDLAGGYTSSLACHR.A
         /// </summary>
         public string Peptide { get; private set; }
 

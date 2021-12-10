@@ -9,7 +9,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class PHRPOptions
     {
-        // Ignore Spelling: conf, MaxQuant, MODa, txt
+        // Ignore Spelling: conf, Hyperscore, MaxQuant, MODa, txt
 
         /// <summary>
         /// Default database connection string
@@ -206,6 +206,33 @@ namespace PeptideHitResultsProcessor
             HelpText = "When true, create the synopsis file (_syn.txt)")]
         public bool CreateSynopsisFile { get; set; }
 
+        // Default filter thresholds, by tool
+
+        // | Tool         | Filter Rules                 |
+        // |--------------|------------------------------|
+        // | MaxQuant     | Keep if Andromeda Score > 50 |
+        // |              |      or PepValue < 0.01      |
+        // |--------------|------------------------------|
+        // | MSFragger    | Keep if E-Value < 0.75       |
+        // |              |      or Hyperscore > 20      |
+        // |--------------|------------------------------|
+        // | MODa and     | Keep if probability > 0.05   |
+        // | MODPlus      |                              |
+        // |--------------|------------------------------|
+        // | MSGFPlus     | Keep if Spec_E-value < 5E-7  |
+        // |              |      or E-Value < 0.75       |
+        // |              |      or Q-Value < 0.01  (1%) |
+        // |--------------|------------------------------|
+        // | MSPathFinder | Keep if SpecEValue < 5E-07   |
+        // |              |      or QValue < 0.10        |
+        // |--------------|------------------------------|
+        // | TopPIC       | Keep if p-value < 0.95       |
+        // |              |      or E-value < 0.95       |
+        // |--------------|------------------------------|
+        // |  X!Tandem    | Keep all results             |
+        // |              |                              |
+        // |--------------|------------------------------|
+
         /// <summary>
         /// MaxQuant Andromeda score threshold to use when creating the synopsis file
         /// </summary>
@@ -228,41 +255,42 @@ namespace PeptideHitResultsProcessor
                        "A PSM is stored if its Andromeda score is above the MaxQScore threshold, or if its PEP score is below the MaxQPEP threshold.")]
         public float MaxQuantPosteriorErrorProbabilityThreshold { get; set; }
 
+
         /// <summary>
         /// MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
         /// </summary>
-        /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
+        /// <remarks>Smaller SpecEValue values are higher confidence results</remarks>
         [Option("MSGFPlusSynopsisFileSpecEValueThreshold", "MSGFPlusSpecEValue",
             HelpText = "When processing MS-GF+ results, the spec E-value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Lower spec E-values are higher confidence results.")]
+                       "Smaller spec E-values are higher confidence results.")]
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
 
         /// <summary>
         /// Used by MSGFPlusResultsProcessor
         /// </summary>
-        /// <remarks>Lower E-values are higher confidence results</remarks>
+        /// <remarks>Smaller E-values are higher confidence results</remarks>
         [Option("MSGFPlusSynopsisFileEValueThreshold", "MSGFPlusEValue",
             HelpText = "When processing MS-GF+ results, the E-value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Lower E-values are higher confidence results.\n" +
-                       "Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%.")]
+                       "Smaller E-values are higher confidence results.\n" +
+                       "Filter passing peptides have Spec E-value less than 5E-7 or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%.")]
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
         /// Used by MODaResultsProcessor and MODPlusResultsProcessor
         /// </summary>
-        /// <remarks>Higher probability values are higher confidence results</remarks>
+        /// <remarks>Larger probability values are higher confidence results</remarks>
         [Option("MODaMODPlusSynopsisFileProbabilityThreshold", "SynProb",
             HelpText = "When processing a MODPlus or MODa results, the probability threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Higher probability values are higher confidence results, thus the default of 0.05 is a very loose filter.")]
+                       "Larger probability values are higher confidence results, thus the default of 0.05 is a very loose filter.")]
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
 
         /// <summary>
         /// Used by MSAlign and TopPIC
         /// </summary>
-        /// <remarks>Lower p-values are higher confidence results</remarks>
+        /// <remarks>Smaller p-values are higher confidence results</remarks>
         [Option("MSAlignAndTopPICSynopsisFilePValueThreshold", "SynPValue",
             HelpText = "When processing a MODPlus or MODa results, the p-value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "Lower p-values are higher confidence results, thus the default of 0.95 is a very loose filter.")]
+                       "Smaller p-values are higher confidence results, thus the default of 0.95 is a very loose filter.")]
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
@@ -335,7 +363,7 @@ namespace PeptideHitResultsProcessor
         /// InSpecT synopsis file p-value threshold
         /// </summary>
         /// <remarks>
-        /// Lower p-values are higher confidence results
+        /// Smaller p-values are higher confidence results
         /// Peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be included in the synopsis file
         /// </remarks>
         [Option("InspectSynopsisFilePValueThreshold", "InsSynPValue",

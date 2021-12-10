@@ -160,6 +160,9 @@ namespace PeptideHitResultsProcessor.Processor
             public string Qvalue;
             public string Proteoform_QValue;
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -199,6 +202,9 @@ namespace PeptideHitResultsProcessor.Processor
                 Proteoform_QValue = string.Empty;
             }
 
+            /// <summary>
+            /// Show scan, proteoform, and p-value
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, Proteoform, PValue);

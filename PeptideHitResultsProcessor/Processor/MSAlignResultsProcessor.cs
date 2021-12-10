@@ -57,6 +57,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Default synopsis file p-value threshold
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Smaller p-values are higher confidence results, thus the default of 0.95 is a very loose filter
+        /// </para>
+        /// </remarks>
         public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.95f;
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
@@ -134,6 +139,9 @@ namespace PeptideHitResultsProcessor.Processor
             public string FragMethod;                   // Only present in MSAlign_Histone results
             public int RankPValue;
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -167,6 +175,9 @@ namespace PeptideHitResultsProcessor.Processor
                 RankPValue = 0;
             }
 
+            /// <summary>
+            /// Show scan, peptide, and E-value
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, EValue {2}", ScanNum, Peptide, EValue);

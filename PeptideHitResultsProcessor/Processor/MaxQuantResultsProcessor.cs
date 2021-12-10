@@ -63,8 +63,8 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: AaSubstitution, acetyl, Carbamidomethyl, conf, Cterm, Crosslink, Da, Dehydro, Desc, diff, diffs, DimethNter
-        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, Orbitrap, plex, pyro, struct, structs, terminii, tryptic, txt
+        // Ignore Spelling: AaSubstitution, Acetyl, Carbamidomethyl, conf, Cterm, Crosslink, Da, Dehydro, Desc, diff, diffs, DimethNter
+        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, plex, pyro, struct, structs, terminii, tryptic, txt
 
         // ReSharper restore CommentTypo
 
@@ -86,12 +86,12 @@ namespace PeptideHitResultsProcessor.Processor
         public const string TOOL_NAME = "MaxQuant";
 
         /// <summary>
-        /// MaxQuant results file suffix
+        /// MaxQuant results file name
         /// </summary>
         public const string MSMS_FILE_NAME = "msms.txt";
 
         /// <summary>
-        /// MaxQuant peptide info file suffix
+        /// MaxQuant peptide info file name
         /// </summary>
         public const string PEPTIDES_FILE_NAME = "peptides.txt";
 
@@ -420,7 +420,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all of the data is from the same scan)
         /// </summary>
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
@@ -1120,7 +1120,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Examine the Raw File names in filteredSearchResults
+        /// Examine the dataset names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
         /// <param name="filteredSearchResults"></param>
@@ -2681,9 +2681,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMaxQuantResultsFileHeaderLine(string lineIn, IDictionary<MaxQuantResultsFileColumns, int> columnMapping)
         {
-            // The expected column order from MaxQuant:
-            //   Raw file	Dataset_ID	Scan number	Scan index	Sequence	Length	Missed cleavages	Modifications	Modified sequence	Oxidation (M) Probabilities	Oxidation (M) Score diffs	Acetyl (Protein N-term)	Oxidation (M)	Proteins	Charge	Fragmentation	Mass analyzer	Type	Scan event number	Isotope index	m/z	Mass	etc.
-
             var columnNames = new SortedDictionary<string, MaxQuantResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"Raw file", MaxQuantResultsFileColumns.RawFile},

@@ -213,7 +213,7 @@ namespace PHRPReader.Data
         /// Andromeda score for the best MS/MS spectrum with this peptide
         /// </summary>
         /// <remarks>
-        /// Higher scores are better
+        /// Larger values are better
         /// </remarks>
         Score = 21,
 
@@ -520,7 +520,7 @@ namespace PHRPReader.Data
         Charge = 4,
 
         /// <summary>
-        /// Precursor m/z
+        /// Precursor ion m/z
         /// </summary>
         PrecursorMZ = 5,
 

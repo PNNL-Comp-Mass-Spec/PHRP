@@ -35,9 +35,9 @@ namespace PeptideHitResultsProcessor.Data
         /// Comma-separated list of modification names and affected residue number
         /// </summary>
         /// <remarks>
-        /// Examples:
-        /// Oxidation 7,Dehydro 16
-        /// Dehydro 1,Dehydro 4,Dehydro 7
+        /// Example values:
+        ///   Oxidation 7,Dehydro 16
+        ///   Dehydro 1,Dehydro 4,Dehydro 7
         /// </remarks>
         public string Modifications { get; set; }
 

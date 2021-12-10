@@ -21,7 +21,7 @@ using PHRPReader.Data;
 namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
-    /// This class is used to track the peptide details for a given MS/MS search result.
+    /// This class is used to track the peptide details for a given MS/MS search result, loaded from a _syn.txt file
     /// It can track peptide residue level modifications and static, peptide-wide modifications.
     /// </summary>
     /// <remarks>
@@ -242,7 +242,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
         /// </summary>
         /// <remarks>
-        /// Examples:
+        /// Example values:
         ///   Acetyl:1
         ///   MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
         /// </remarks>
@@ -1101,7 +1101,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Accessible via PeptideModDescription
         /// </summary>
         /// <remarks>
-        /// Examples:
+        /// Example values:
         ///   Acetyl:1
         ///   MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
         /// </remarks>

@@ -154,9 +154,12 @@ namespace PeptideHitResultsProcessor.Processor
             public string PepQValue;                    // FDR, at the peptide level
 
             // The following are typically defined for other search engines, but are not used for MSPathFinder
-            //   Public DelM As String                   ' Computed using Precursor_mass - CalculatedMonoMass
-            //   Public DelM_PPM As String               ' Computed using DelM and CalculatedMonoMass
+            //   public string DelM;                    // Computed using Precursor_mass - CalculatedMonoMass
+            //   public string DelM_PPM;                //  Computed using DelM and CalculatedMonoMass
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 Scan = string.Empty;
@@ -188,6 +191,9 @@ namespace PeptideHitResultsProcessor.Processor
                 // Unused at present: DelM_PPM = string.Empty
             }
 
+            /// <summary>
+            /// Show scan, peptide, and E-value
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, SpecEValue {2}", Scan, Sequence, SpecEValue);
@@ -896,9 +902,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<MSPathFinderResultsFileColumns, int> columnMapping)
         {
-            // The expected column order from MSPathFinder:
-            //   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
-
             var columnNames = new SortedDictionary<string, MSPathFinderResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"Scan", MSPathFinderResultsFileColumns.Scan},
@@ -1349,7 +1352,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Now store the matches that pass the filters
             //  Either SpecEValue < 5E-07 (0.0000005)
-            //  or     QValue < 10
+            //  or     QValue < 0.10
             for (var index = startIndex; index <= endIndex; index++)
             {
                 if (searchResults[index].SpecEValueNum <= Options.MSGFPlusSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)

@@ -647,12 +647,14 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private bool ParseSequestSynFileHeaderLine(
-            string lineIn,
-            IDictionary<SequestSynopsisFileColumns, int> columnMapping)
+        /// <summary>
+        /// Parse the header line of a SEQUEST _syn.txt file, populating columnMapping
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool ParseSequestSynFileHeaderLine(string lineIn, IDictionary<SequestSynopsisFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = SequestSynFileReader.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();

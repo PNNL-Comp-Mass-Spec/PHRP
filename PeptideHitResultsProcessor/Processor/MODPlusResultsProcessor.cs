@@ -65,7 +65,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// Default synopsis file probability threshold
         /// </summary>
         /// <remarks>
+        /// <para>
         /// This is used for filtering both MODa and MODPlus results
+        /// </para>
+        /// <para>
+        /// Larger probability values are higher confidence results, thus the default of 0.05 is a very loose filter
+        /// </para>
         /// </remarks>
         public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = 0.05f;
 
@@ -121,8 +126,8 @@ namespace PeptideHitResultsProcessor.Processor
             public string DelM_PPM;                 // Computed by this class using DelM and CalculatedMonoMass
             public string Score;
             public double ScoreNum;
-            public string Probability;              // Higher values are better
-            public double ProbabilityNum;           // Higher values are better
+            public string Probability;              // Larger values are better
+            public double ProbabilityNum;           // Larger values are better
             public int RankScore;
             public string Peptide;
             public string NTT;                      // Number of Tryptic Termini
@@ -131,6 +136,9 @@ namespace PeptideHitResultsProcessor.Processor
             public double FDR;                      // Computed by this class
             public double QValue;                   // Computed by this class
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -158,6 +166,9 @@ namespace PeptideHitResultsProcessor.Processor
                 QValue = 0;
             }
 
+            /// <summary>
+            /// Show scan, peptide, and probability
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, Probability {2}", ScanNum, Peptide, Probability);
@@ -328,7 +339,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all of the data is from the same scan)
         /// </summary>
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
@@ -1030,9 +1041,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMODPlusResultsFileHeaderLine(string lineIn, IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
-            // The expected column order from MODPlus:
-            //   SpectrumFile   Index   ScanNo   ObservedMW   Charge   CalculatedMW   DeltaMass   Score   Probability   Peptide   NTT    Protein   ModificationAnnotation
-
             var columnNames = new SortedDictionary<string, MODPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"SpectrumFile", MODPlusResultsFileColumns.SpectrumFileName},

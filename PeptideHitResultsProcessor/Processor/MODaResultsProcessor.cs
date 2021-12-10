@@ -115,14 +115,17 @@ namespace PeptideHitResultsProcessor.Processor
             public string DelM;                     // Computed using Precursor_mass - CalculatedMonoMass
             public string DelM_PPM;                 // Computed using DelM and CalculatedMonoMass
             public string Score;
-            public string Probability;              // Higher values are better
-            public double ProbabilityNum;           // Higher values are better
+            public string Probability;              // Larger values are better
+            public double ProbabilityNum;           // Larger values are better
             public int RankProbability;
             public string Peptide;
             public string Protein;
             public string PeptidePosition;          // Protein start/stop residues of the peptide, e.g. 108~115
             public double QValue;                   // Computed by this class
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -147,6 +150,9 @@ namespace PeptideHitResultsProcessor.Processor
                 QValue = 0;
             }
 
+            /// <summary>
+            /// Show scan, peptide, and probability
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, Probability {2}", ScanNum, Peptide, Probability);
@@ -1151,9 +1157,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMODaResultsFileHeaderLine(string lineIn, IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
-            // The expected column order from MODa:
-            //   SpectrumFile	Index	ObservedMonoMass	Charge	CalculatedMonoMass	DeltaMass	Score	Probability	Peptide	Protein	PeptidePosition
-
             var columnNames = new SortedDictionary<string, MODaResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"SpectrumFile", MODaResultsFileColumns.SpectrumFileName},

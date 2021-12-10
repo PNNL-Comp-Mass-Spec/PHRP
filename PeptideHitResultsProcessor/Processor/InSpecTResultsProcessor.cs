@@ -159,19 +159,19 @@ namespace PeptideHitResultsProcessor.Processor
             public string Protein;
             public string Charge;
             public short ChargeNum;
-            public string MQScore;                  // Higher values are better scores; note that MQScore can be negative
+            public string MQScore;                  // Larger values are better scores; note that MQScore can be negative
             public float MQScoreNum;                // Store the value of the string for quick reference when sorting
             public int Length;
-            public string TotalPRMScore;            // Higher values are better scores
+            public string TotalPRMScore;            // Larger values are better scores
             public float TotalPRMScoreNum;          // We store the value of the string for quick reference when sorting
             public string MedianPRMScore;
             public string FractionY;
             public string FractionB;
             public string Intensity;
             public int NTT;
-            public string PValue;                   // Lower values are better scores
+            public string PValue;                   // Smaller values are better scores
             public float PValueNum;                 // Store the value of the string for quick reference when sorting
-            public string FScore;                   // Higher values are better scores
+            public string FScore;                   // Larger values are better scores
             public float FScoreNum;                 // Store the value of the string for quick reference when sorting
             public string DeltaScore;
             public string DeltaScoreOther;
@@ -187,6 +187,9 @@ namespace PeptideHitResultsProcessor.Processor
             public string PrecursorError;           // Precursor error in; units are m/z (NOT Daltons)
             public string DelMPPM;                  // Computed by this application
 
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -225,6 +228,9 @@ namespace PeptideHitResultsProcessor.Processor
                 DelMPPM = string.Empty;
             }
 
+            /// <summary>
+            /// Show scan, peptide, and p-value
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, PeptideAnnotation, PValue);
@@ -913,10 +919,14 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        /// <summary>
+        /// Parse the header line of an Inspect _syn.txt file, populating columnMapping
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectSynFileHeaderLine(string lineIn, IDictionary<InspectSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = InspectSynFileReader.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();

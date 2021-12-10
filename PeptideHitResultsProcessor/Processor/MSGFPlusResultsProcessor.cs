@@ -107,8 +107,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// Default synopsis file Spec E-Value threshold
         /// </summary>
         /// <remarks>
-        /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
+        /// <para>
+        /// Filter passing peptides have Spec_E-value less than 5E-7 or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
+        /// </para>
+        /// <para>
         /// This filter is also used by MSPathFinder
+        /// </para>
         /// </remarks>
         public const float DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD = 5E-07f;
 
@@ -116,8 +120,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// Default synopsis file E-value threshold
         /// </summary>
         /// <remarks>
-        /// Filter passing peptides have Spec E-value less than 5E-7 Or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
-        /// This filter is also used by MSPathFinder
+        /// <para>
+        /// Filter passing peptides have Spec_E-value less than 5E-7 or E-Value (EValue) less than 0.75 or Q-Value (QValue) less than 1%
+        /// </para>
+        /// <para>
+        /// This filter is also used by MSFragger
+        /// </para>
         /// </remarks>
         public const float DEFAULT_SYN_FILE_EVALUE_THRESHOLD = 0.75f;
 
@@ -182,34 +190,173 @@ namespace PeptideHitResultsProcessor.Processor
         private struct MSGFPlusSearchResult
         {
             // ReSharper disable once NotAccessedField.Local
-            public string SpectrumFileName;
-            public string SpecIndex;
-            public string Scan;
-            public int ScanNum;
-            public string FragMethod;
-            public string PrecursorMZ;
-            public string PMErrorDa;                // Corresponds to PMError(Da); MS-GF+ stores this value as Observed - Theoretical
-            public string PMErrorPPM;               // Corresponds to PMError(ppm); MS-GF+ stores this value as Observed - Theoretical
-            public string MH;
-            public string Charge;
-            public short ChargeNum;
-            public string Peptide;                  // Peptide sequence, including prefix, suffix, and any mod symbols or mod masses
-            public string Protein;
-            public string NTT;
-            public string DeNovoScore;
-            public string MSGFScore;
-            public string SpecEValue;               // Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MS-GF+ renamed this from SpecProb to SpecEValue
-            public double SpecEValueNum;
-            public string EValue;                   // Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MS-GF+ renamed this from PValue to EValue
-            public double EValueNum;
-            public string QValue;                   // Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MS-GF+
-            public double QValueNum;                // Numeric equivalent of QValue
-            public string PepQValue;                // Only used when target/decoy search was used; holds PepQValue for MS-GF+
-            public int RankSpecEValue;
-            public int IMSScan;
-            public string IMSDriftTime;
-            public int IsotopeError;                // Only used by MS-GF+
 
+            /// <summary>
+            /// Spectrum file name
+            /// </summary>
+            public string SpectrumFileName;
+
+            /// <summary>
+            /// Spectrum index
+            /// </summary>
+            public string SpecIndex;
+
+            /// <summary>
+            /// Scan number
+            /// </summary>
+            public string Scan;
+
+            /// <summary>
+            /// Numeric value of Scan
+            /// </summary>
+            public int ScanNum;
+
+            /// <summary>
+            /// Fragmentation method
+            /// </summary>
+            public string FragMethod;
+
+            /// <summary>
+            /// Precursor ion m/z (observed value)
+            /// </summary>
+            public string PrecursorMZ;
+
+            /// <summary>
+            /// Precursor mass error, in Da
+            /// </summary>
+            /// <remarks>
+            /// From column "PMError(Da)"; MS-GF+ stores this value as Observed - Theoretical
+            /// </remarks>
+            public string PMErrorDa;
+
+            /// <summary>
+            /// Precursor mass error, in ppm
+            /// </summary>
+            /// <remarks>
+            /// From column "PMError(ppm)"; MS-GF+ stores this value as Observed - Theoretical
+            /// </remarks>
+            public string PMErrorPPM;
+
+            /// <summary>
+            /// Peptide M+H value
+            /// </summary>
+            public string MH;
+
+            /// <summary>
+            /// Charge state
+            /// </summary>
+            public string Charge;
+
+            /// <summary>
+            /// Numeric value of Charge
+            /// </summary>
+            public short ChargeNum;
+
+            /// <summary>
+            /// Peptide sequence, including prefix, suffix, and any mod symbols or mod masses
+            /// </summary>
+            public string Peptide;
+
+            /// <summary>
+            /// Protein name
+            /// </summary>
+            public string Protein;
+
+            /// <summary>
+            /// Number of tolerable termini
+            /// </summary>
+            public string NTT;
+
+            /// <summary>
+            /// De-novo score
+            /// </summary>
+            public string DeNovoScore;
+
+            /// <summary>
+            /// MSGF score
+            /// </summary>
+            public string MSGFScore;
+
+            /// <summary>
+            /// Spec E-value
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Smaller values are better scores (e.g. 1E-9 is better than 1E-6)
+            /// </para>
+            /// <para>
+            /// Renamed from SpecProb to SpecEValue when MSGF-DB was renamed to MS-GF+
+            /// </para>
+            /// </remarks>
+            public string SpecEValue;
+
+            /// <summary>
+            /// Spec E-value rank
+            /// </summary>
+            public double SpecEValueNum;
+
+            /// <summary>
+            /// E-value
+            /// </summary>
+            /// <remarks>
+            /// <para>Smaller values are better scores (e.g. 1E-7 is better than 1E-3)</para>
+            /// <para>
+            /// Renamed from PValue to EValue when MSGF-DB was renamed to MS-GF+
+            /// </para>
+            /// </remarks>
+            public string EValue;
+
+            /// <summary>
+            /// Numeric value of EValue
+            /// </summary>
+            public double EValueNum;
+
+            /// <summary>
+            /// Holds FDR when a target/decoy search was used;
+            /// Holds EFDR when a non-decoy search was used;
+            /// Holds QValue for MS-GF+
+            /// </summary>
+            public string QValue;
+
+            /// <summary>
+            /// Numeric value of QValue
+            /// </summary>
+            public double QValueNum;
+
+            /// <summary>
+            /// Pep Q-value
+            /// </summary>
+            /// <remarks>
+            /// Only used when target/decoy search was used; holds PepQValue for MS-GF+
+            /// </remarks>
+            public string PepQValue;
+
+            /// <summary>
+            /// Rank Spec E-value
+            /// </summary>
+            public int RankSpecEValue;
+
+            /// <summary>
+            /// IMS Scan
+            /// </summary>
+            public int IMSScan;
+
+            /// <summary>
+            /// IMS drift time
+            /// </summary>
+            public string IMSDriftTime;
+
+            /// <summary>
+            /// Isotope error
+            /// </summary>
+            /// <remarks>
+            /// Only used by MS-GF+
+            /// </remarks>
+            public int IsotopeError;
+
+            /// <summary>
+            /// Reset stored values to empty strings and zeros
+            /// </summary>
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -240,6 +387,9 @@ namespace PeptideHitResultsProcessor.Processor
                 IsotopeError = 0;
             }
 
+            /// <summary>
+            /// Show scan, peptide, and Spec E-value
+            /// </summary>
             public override string ToString()
             {
                 return string.Format("Scan {0}: {1}, SpecEValue {2}", ScanNum, Peptide, SpecEValue);
