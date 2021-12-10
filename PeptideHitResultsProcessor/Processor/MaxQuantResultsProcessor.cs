@@ -543,7 +543,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="precursorsByDataset">Keys are dataset names, values are dictionaries of precursor m/z by scan number</param>
         /// <param name="modList"></param>
         private void ComputeObservedMassErrors(
-            IList<MaxQuantSearchResult> filteredSearchResults,
+            IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             IReadOnlyDictionary<string, Dictionary<int, double>> precursorsByDataset,
             IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
@@ -551,10 +551,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             var isobaricModPresent = modList.Any(modItem => modItem.IsobaricMod);
 
-            for (var i = 0; i < filteredSearchResults.Count; i++)
+            foreach (var searchResult in filteredSearchResults)
             {
-                var searchResult = filteredSearchResults[i];
-
                 if (!precursorsByDataset.TryGetValue(searchResult.DatasetName, out var precursorsByScan))
                     continue;
 
