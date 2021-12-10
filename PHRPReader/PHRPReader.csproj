@@ -57,6 +57,7 @@
     <Compile Include="PeptideMassCalculator.cs" />
     <Compile Include="ReaderFactory.cs" />
     <Compile Include="Reader\MaxQuantSynFileReader.cs" />
+    <Compile Include="Reader\MSFraggerSynFileReader.cs" />
     <Compile Include="Reader\PrecursorInfoFileReader.cs" />
     <Compile Include="Reader\ReporterIonsFileReader.cs" />
     <Compile Include="Reader\SICStatsReader.cs" />

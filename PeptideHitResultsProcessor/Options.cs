@@ -255,6 +255,14 @@ namespace PeptideHitResultsProcessor
                        "A PSM is stored if its Andromeda score is above the MaxQScore threshold, or if its PEP score is below the MaxQPEP threshold.")]
         public float MaxQuantPosteriorErrorProbabilityThreshold { get; set; }
 
+        /// <summary>
+        /// MSFragger Hyperscore threshold to use when creating the synopsis file
+        /// </summary>
+        [Option("MSFraggerHyperscoreThreshold", "MaxHyperscore",
+            HelpText = "When processing MSFragger results, the Expectation score (E-Value) used to determine which peptides are written to the synopsis file\n" +
+                       "Smaller E-values are higher confidence results.\n" +
+                       "Filter passing peptides have E-value less than 0.75 or Hyperscore greater than 20")]
+        public int MSFraggerHyperscoreThreshold { get; set; }
 
         /// <summary>
         /// MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
@@ -404,6 +412,8 @@ namespace PeptideHitResultsProcessor
             MaxQuantAndromedaScoreThreshold = MaxQuantResultsProcessor.DEFAULT_ANDROMEDA_SCORE_THRESHOLD;
             MaxQuantPosteriorErrorProbabilityThreshold = MaxQuantResultsProcessor.DEFAULT_PEP_THRESHOLD;
 
+            MSFraggerHyperscoreThreshold = MSFraggerResultsProcessor.DEFAULT_HYPERSCORE_THRESHOLD;
+
             MSGFPlusSynopsisFileEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
             MSGFPlusSynopsisFileSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
@@ -477,6 +487,8 @@ namespace PeptideHitResultsProcessor
 
             MaxQuantAndromedaScoreThreshold = sourceOptions.MaxQuantAndromedaScoreThreshold;
             MaxQuantPosteriorErrorProbabilityThreshold = sourceOptions.MaxQuantPosteriorErrorProbabilityThreshold;
+
+            MSFraggerHyperscoreThreshold = sourceOptions.MSFraggerHyperscoreThreshold;
 
             MODaMODPlusSynopsisFileProbabilityThreshold = sourceOptions.MODaMODPlusSynopsisFileProbabilityThreshold;
 

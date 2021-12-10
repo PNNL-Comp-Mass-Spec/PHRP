@@ -456,6 +456,147 @@ namespace PHRPReader.Data
 #pragma warning restore 1591
 
     /// <summary>
+    /// MSFragger synopsis file columns
+    /// </summary>
+    public enum MSFraggerSynFileColumns
+    {
+        /// <summary>
+        /// Result ID
+        /// </summary>
+        ResultID = 0,
+
+        /// <summary>
+        /// Dataset name (typically the .raw file name, without the extension)
+        /// </summary>
+        Dataset = 1,
+
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
+        DatasetID = 2,
+
+        /// <summary>
+        /// MS/MS scan number in the dataset
+        /// </summary>
+        Scan = 3,
+
+        /// <summary>
+        /// Charge state of the precursor ion
+        /// </summary>
+        Charge = 4,
+
+        /// <summary>
+        /// Precursor ion m/z (observed value)
+        /// </summary>
+        PrecursorMZ = 5,
+
+        /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence
+        /// </summary>
+        DelM = 6,
+
+        /// <summary>
+        /// Mass Error, in ppm
+        /// </summary>
+        DelM_PPM = 7,
+
+        /// <summary>
+        /// Mass error of the precursor ion equivalent monoisotopic mass value
+        /// vs. the predicted monoisotopic mass of the identified peptide sequence,
+        /// as computed by MSFragger
+        /// </summary>
+        DelM_MSFragger = 8,
+
+        /// <summary>
+        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+        /// </summary>
+        MH = 9,
+
+        /// <summary>
+        /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MSFragger
+        /// </summary>
+        Mass = 10,
+
+        /// <summary>
+        /// Peptide sequence, including modification symbols
+        /// </summary>
+        Peptide = 11,
+
+        /// <summary>
+        /// Comma separated list of static and dynamic modifications in the peptide
+        /// </summary>
+        Modifications = 12,
+
+        /// <summary>
+        /// Primary protein name
+        /// </summary>
+        Protein = 13,
+
+        /// <summary>
+        /// Additional protein names (comma separated list)
+        /// </summary>
+        AdditionalProteins = 14,
+
+        /// <summary>
+        /// Number of tryptic terminii
+        /// </summary>
+        NTT = 15,
+
+        /// <summary>
+        /// Expectation value (E-value)
+        /// </summary>
+        EValue = 16,
+
+        /// <summary>
+        /// Ranked E-value
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means lowest (best) E-value, 2 means next higher E-value, etc. (ties get the same rank)
+        /// </remarks>
+        RankEValue = 17,
+
+        /// <summary>
+        /// Hyperscore of the top match
+        /// </summary>
+        /// <remarks>
+        /// Higher scores are better
+        /// </remarks>
+        Hyperscore = 18,
+
+        /// <summary>
+        /// Hyperscore of the next best match
+        /// </summary>
+        /// <remarks>
+        /// Larger values are better
+        /// </remarks>
+        Nextscore = 19,
+
+        /// <summary>
+        /// Peptide prophet probability
+        /// </summary>
+        /// <remarks>
+        /// Values closer to 1 are better
+        /// </remarks>
+        PeptideProphetProbability = 20,
+
+        /// <summary>
+        /// Elution time of the MS/MS spectrum
+        /// </summary>
+        RetentionTime = 21,
+
+        /// <summary>
+        /// Number of missed enzymatic cleavages
+        /// </summary>
+        MissedCleavages = 22,
+
+        /// <summary>
+        /// Q-Value (computed by PHRP)
+        /// </summary>
+        QValue = 23
+    }
+
+    /// <summary>
     /// These columns correspond Synopsis files created for legacy tool MSGFDB
     /// </summary>
     public enum MSGFDBSynFileColumns

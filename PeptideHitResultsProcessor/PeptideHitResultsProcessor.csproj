@@ -58,7 +58,9 @@
     <Compile Include="Data\MaxQuantModInfo.cs" />
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
+    <Compile Include="Data\MSFraggerResults.cs" />
     <Compile Include="SearchToolResults\MaxQuantSearchResult.cs" />
+    <Compile Include="SearchToolResults\MSFraggerSearchResult.cs" />
     <Compile Include="Data\PrecursorMassTolerance.cs" />
     <Compile Include="SearchToolResults\ToolResultsBaseClass.cs" />
     <Compile Include="Enums.cs" />
@@ -81,6 +83,7 @@
     <Compile Include="Processor\MODaResultsProcessor.cs" />
     <Compile Include="Processor\MODPlusResultsProcessor.cs" />
     <Compile Include="Processor\MSAlignResultsProcessor.cs" />
+    <Compile Include="Processor\MSFraggerResultsProcessor.cs" />
     <Compile Include="Processor\MSGFPlusResultsProcessor.cs" />
     <Compile Include="Processor\MSPathFinderResultsProcessor.cs" />
     <Compile Include="Processor\PHRPBaseClass.cs" />
