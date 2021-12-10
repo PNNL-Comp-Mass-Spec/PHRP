@@ -523,28 +523,24 @@ namespace PHRPReader.Reader
                     return false;
                 }
 
-                int value;
-
                 // Determine the enzyme name
-                if (searchEngineParams.Parameters.TryGetValue("enzymeid", out var settingValue))
+                if (searchEngineParams.Parameters.TryGetValue("enzymeid", out var settingValue) &&
+                    int.TryParse(settingValue, out var value))
                 {
-                    if (int.TryParse(settingValue, out value))
+                    searchEngineParams.Enzyme = value switch
                     {
-                        searchEngineParams.Enzyme = value switch
-                        {
-                            0 => "no_enzyme",
-                            1 => "trypsin",
-                            2 => "Chymotrypsin",
-                            3 => "Lys-C",
-                            4 => "Lys-N",
-                            5 => "Glu-C",
-                            6 => "Arg-C",
-                            7 => "Asp-N",
-                            8 => "alphaLP",
-                            9 => "no_enzyme_peptidomics",
-                            _ => "unknown_enzyme",
-                        };
-                    }
+                        0 => "no_enzyme",
+                        1 => "trypsin",
+                        2 => "Chymotrypsin",
+                        3 => "Lys-C",
+                        4 => "Lys-N",
+                        5 => "Glu-C",
+                        6 => "Arg-C",
+                        7 => "Asp-N",
+                        8 => "alphaLP",
+                        9 => "no_enzyme_peptidomics",
+                        _ => "unknown_enzyme",
+                    };
                 }
 
                 // Determine the cleavage specificity
