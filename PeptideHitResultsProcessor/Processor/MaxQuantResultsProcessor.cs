@@ -2872,10 +2872,12 @@ namespace PeptideHitResultsProcessor.Processor
                     // Protein names in the synopsis file are a semicolon separated list
                     foreach (var proteinName in proteinNames.Split(';'))
                     {
-                        if (string.IsNullOrWhiteSpace(proteinName))
+                        var trimmedName = proteinName.Trim();
+
+                        if (string.IsNullOrWhiteSpace(trimmedName))
                             continue;
 
-                        searchResult.Proteins.Add(proteinName);
+                        searchResult.Proteins.Add(trimmedName);
                     }
 
                     if (searchResult.Proteins.Count > 0)
