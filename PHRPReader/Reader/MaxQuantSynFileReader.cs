@@ -441,7 +441,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + linesRead + " in the MSAlign data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the MaxQuant data file: " + ex.Message);
             }
 
             return success;
