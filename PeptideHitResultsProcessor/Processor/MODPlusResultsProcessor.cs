@@ -390,14 +390,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var cleanSequence = GetCleanSequence(peptide);
 
-            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
-
-            if (Math.Abs(totalModMass) > double.Epsilon)
-            {
-                mass += totalModMass;
-            }
-
-            return mass;
+            return ComputePeptideMassForCleanSequence(cleanSequence, totalModMass);
         }
 
         private static readonly Regex ModMassMatcher = new(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
@@ -1373,7 +1366,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (Options.CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
+                        // Use a higher match error threshold because some peptides reported by MODPlus may not match the FASTA file (due to amino acid substitutions)
+                        const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                        success = CreateProteinModsFileWork(
+                            baseName, inputFile,
+                            synOutputFilePath, outputDirectoryPath,
+                            PeptideHitResultTypes.MODPlus,
+                            MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
                     }
 
                     if (success)
@@ -1394,84 +1394,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
-        }
-
-        private bool CreateProteinModsFileWork(
-            string baseName,
-            FileInfo inputFile,
-            string synOutputFilePath,
-            string outputDirectoryPath)
-        {
-            bool success;
-
-            if (inputFile.Directory == null)
-            {
-                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                return false;
-            }
-
-            // Create the MTSPepToProteinMap file
-
-            var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
-
-            var sourcePHRPDataFiles = new List<string>();
-
-            if (!string.IsNullOrEmpty(synOutputFilePath))
-            {
-                sourcePHRPDataFiles.Add(synOutputFilePath);
-            }
-
-            if (sourcePHRPDataFiles.Count == 0)
-            {
-                SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
-            }
-            else
-            {
-                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                {
-                    success = true;
-                }
-                else
-                {
-                    // Use a higher match error threshold because some peptides reported by MODPlus may not match the FASTA file (due to amino acid substitutions)
-                    const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
-
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
-
-                    if (!success)
-                    {
-                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                    }
-                }
-            }
-
-            if (success)
-            {
-                if (string.IsNullOrWhiteSpace(synOutputFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                    // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.MODPlus);
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                return true;
-            }
-
-            return true;
         }
 
         private void ResolveMODPlusModsWithModDefinitions(IReadOnlyCollection<ModificationDefinition> modPlusModInfo)

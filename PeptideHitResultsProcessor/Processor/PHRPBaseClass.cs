@@ -16,11 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using PeptideHitResultsProcessor.Data;
+using PeptideHitResultsProcessor.SearchToolResults;
 using PeptideToProteinMapEngine;
 using PHRPReader;
 using PHRPReader.Data;
@@ -903,6 +905,71 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Compute the mass of the residues in the sequence, then add the modification mass (if non-zero) and return the result
+        /// </summary>
+        /// <param name="cleanSequence"></param>
+        /// <param name="totalModMass"></param>
+        /// <returns>Mass, in Daltons</returns>
+        protected double ComputePeptideMassForCleanSequence(string cleanSequence, double totalModMass)
+        {
+            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
+
+            if (Math.Abs(totalModMass) > double.Epsilon)
+            {
+                return mass + totalModMass;
+            }
+
+            return mass;
+        }
+
+        /// <summary>
+        /// Compute FDR values, then assign QValues
+        /// </summary>
+        /// <remarks>Assumes the data is sorted by highest confidence to lowest confidence</remarks>
+        /// <param name="searchResults"></param>
+        protected void ComputeQValues(List<ToolResultsBaseClass> searchResults)
+        {
+            var forwardPeptideCount = 0;
+            var reversePeptideCount = 0;
+
+            foreach (var searchResult in searchResults)
+            {
+                if (searchResult.Reverse)
+                {
+                    reversePeptideCount++;
+                }
+                else
+                {
+                    forwardPeptideCount++;
+                }
+
+                double fdr = 1;
+
+                if (forwardPeptideCount > 0)
+                {
+                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                }
+
+                searchResult.FDR = fdr;
+            }
+
+            // Now compute Q-Values
+            // We step through the list, from the worst scoring result to the best result
+            // The first Q-Value is the FDR of the final entry
+            // The next Q-Value is the minimum of (QValue, CurrentFDR)
+
+            var qValue = searchResults.Last().FDR;
+            if (qValue > 1)
+                qValue = 1;
+
+            for (var index = searchResults.Count - 1; index >= 0; index += -1)
+            {
+                qValue = Math.Min(qValue, searchResults[index].FDR);
+                searchResults[index].QValue = qValue;
+            }
+        }
+
+        /// <summary>
         /// Construct the peptide to protein map file path
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
@@ -1495,6 +1562,112 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Create the MTSPepToProteinMap file if missing, then create the protein modification details file
+        /// </summary>
+        /// <param name="baseName"></param>
+        /// <param name="inputFile"></param>
+        /// <param name="synOutputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <param name="phrpResultType"></param>
+        /// <param name="maximumAllowableMatchErrorPercentThreshold"></param>
+        /// <param name="matchErrorPercentWarningThreshold"></param>
+        /// <param name="fhtOutputFilePath"></param>
+        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <returns>True if successful, false if an error</returns>
+        protected bool CreateProteinModsFileWork(
+            string baseName,
+            FileInfo inputFile,
+            string synOutputFilePath,
+            string outputDirectoryPath,
+            PeptideHitResultTypes phrpResultType,
+            double maximumAllowableMatchErrorPercentThreshold = 0.1,
+            double matchErrorPercentWarningThreshold = 0,
+            string fhtOutputFilePath = "",
+            string mtsPepToProteinMapFilePath = ""
+            )
+        {
+            bool success;
+
+            if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
+            {
+                var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
+                mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
+            }
+
+            var sourcePHRPDataFiles = new List<string>();
+
+            if (!string.IsNullOrEmpty(fhtOutputFilePath))
+            {
+                sourcePHRPDataFiles.Add(fhtOutputFilePath);
+            }
+
+            if (!string.IsNullOrEmpty(synOutputFilePath))
+            {
+                sourcePHRPDataFiles.Add(synOutputFilePath);
+            }
+
+            if (sourcePHRPDataFiles.Count == 0)
+            {
+                SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                success = false;
+            }
+            else
+            {
+                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
+                {
+                    success = true;
+                }
+                else
+                {
+                    success = CreatePepToProteinMapFile(
+                        sourcePHRPDataFiles,
+                        mtsPepToProteinMapFilePath,
+                        maximumAllowableMatchErrorPercentThreshold,
+                        matchErrorPercentWarningThreshold);
+
+                    if (!success)
+                    {
+                        // Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False
+                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
+                    }
+                }
+            }
+
+            if (!success)
+            {
+                // Do not treat this as a fatal error
+                return true;
+            }
+
+            if (inputFile.Directory == null)
+            {
+                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+            }
+            else if (string.IsNullOrWhiteSpace(synOutputFilePath))
+            {
+                OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+            }
+            else
+            {
+                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)),
+                    outputDirectoryPath);
+
+                // Create the Protein Mods file
+                var modsFileCreated = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, phrpResultType);
+
+                if (!modsFileCreated)
+                {
+                    // Do not treat this as a fatal error
+                    return true;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

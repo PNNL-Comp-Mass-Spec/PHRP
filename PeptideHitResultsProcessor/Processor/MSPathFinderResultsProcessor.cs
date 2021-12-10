@@ -326,14 +326,6 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
-        private double ComputePeptideMass(string cleanSequence, double totalModMass)
-        {
-            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
-            mass += totalModMass;
-
-            return mass;
-        }
-
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
@@ -381,79 +373,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return totalModMass;
-        }
-
-        private bool CreateProteinModsFileWork(
-            string baseName,
-            FileInfo inputFile,
-            string synOutputFilePath,
-            string outputDirectoryPath)
-        {
-            bool success;
-
-            // Create the MTSPepToProteinMap file
-
-            var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
-
-            var sourcePHRPDataFiles = new List<string>();
-
-            if (!string.IsNullOrEmpty(synOutputFilePath))
-            {
-                sourcePHRPDataFiles.Add(synOutputFilePath);
-            }
-
-            if (sourcePHRPDataFiles.Count == 0)
-            {
-                SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
-            }
-            else
-            {
-                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                {
-                    success = true;
-                }
-                else
-                {
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
-
-                    if (!success)
-                    {
-                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                    }
-                }
-            }
-
-            if (success)
-            {
-                if (inputFile.Directory == null)
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                }
-                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                    // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.MSPathFinder);
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                return true;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -935,7 +854,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modList);
 
                 // Compute monoisotopic mass of the peptide
-                udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
+                udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMassForCleanSequence(udtSearchResult.Sequence, totalModMass);
 
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
                 GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
@@ -1365,7 +1284,10 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                         else
                         {
-                            success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
+                            success = CreateProteinModsFileWork(
+                                baseName, inputFile,
+                                synOutputFilePath, outputDirectoryPath,
+                                PeptideHitResultTypes.MSPathFinder);
                         }
                     }
 

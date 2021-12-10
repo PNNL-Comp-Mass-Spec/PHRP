@@ -526,29 +526,6 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
-        /// </summary>
-        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
-        /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
-        /// <param name="precursorMZ">Precursor m/z</param>
-        /// <param name="charge">Precursor charge</param>
-        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
-        /// <param name="adjustPrecursorMassForC13">When true, adjust for correct for C13 isotopic selection errors</param>
-        /// <returns>DelM, in ppm</returns>
-        private double ComputeDelMCorrectedPPM(
-            double precursorErrorDa,
-            double precursorMZ,
-            int charge,
-            double peptideMonoisotopicMass,
-            bool adjustPrecursorMassForC13)
-        {
-            // Compute the observed precursor monoisotopic mass
-            var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
-
-            return SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, adjustPrecursorMassForC13);
-        }
-
-        /// <summary>
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
         /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
@@ -635,8 +612,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (Math.Abs(deltaMassDa) < 15)
                 {
-                    peptideDeltaMassPpm =
-                        ComputeDelMCorrectedPPM(deltaMassDa, precursorMz, searchResult.ChargeNum, searchResult.CalculatedMonoMassPHRP, true);
+                    peptideDeltaMassPpm = SearchResultsBaseClass.ComputeDelMCorrectedPPM(
+                        mPeptideSeqMassCalculator, deltaMassDa, precursorMz, searchResult.ChargeNum,
+                        searchResult.CalculatedMonoMassPHRP, true);
 
                     // Note that this will be a C13-corrected precursor error; not the absolute precursor error
                     precursorErrorDa = PeptideMassCalculator.PPMToMass(peptideDeltaMassPpm, searchResult.CalculatedMonoMassPHRP);
@@ -695,71 +673,6 @@ namespace PeptideHitResultsProcessor.Processor
                             mPrecursorMassTolerance.ToleranceLeft * 1.5,
                             precursorErrorDa));
                 }
-            }
-        }
-
-        private double ComputePeptideMass(string cleanSequence, double totalModMass)
-        {
-            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
-            mass += totalModMass;
-
-            return mass;
-        }
-
-        /// <summary>
-        /// Compute FDR values, then assign QValues
-        /// </summary>
-        /// <remarks>Assumes the data is sorted by descending score using MaxQuantSearchResultsComparerScoreScanChargePeptide</remarks>
-        /// <param name="searchResults"></param>
-        private void ComputeQValues(IList<MaxQuantSearchResult> searchResults)
-        {
-            var forwardPeptideCount = 0;
-            var reversePeptideCount = 0;
-
-            for (var index = 0; index < searchResults.Count; index++)
-            {
-                // Reverse should be true for reverse-hit peptides
-                // Alternative, the LeadingRazor protein field will start with REV__ for reverse-hit peptides
-
-                if (searchResults[index].Reverse || searchResults[index].LeadingRazorProtein.StartsWith("REV__"))
-                {
-                    reversePeptideCount++;
-                }
-                else
-                {
-                    forwardPeptideCount++;
-                }
-
-                double fdr = 1;
-
-                if (forwardPeptideCount > 0)
-                {
-                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
-                }
-
-                var udtResult = searchResults[index];
-                udtResult.FDR = fdr;
-
-                searchResults[index] = udtResult;
-            }
-
-            // Now compute Q-Values
-            // We step through the list, from the worst scoring result to the best result
-            // The first Q-Value is the FDR of the final entry
-            // The next Q-Value is the minimum of (QValue, CurrentFDR)
-
-            var qValue = searchResults.Last().FDR;
-            if (qValue > 1)
-                qValue = 1;
-
-            for (var index = searchResults.Count - 1; index >= 0; index += -1)
-            {
-                var udtResult = searchResults[index];
-
-                qValue = Math.Min(qValue, udtResult.FDR);
-                udtResult.QValue = qValue;
-
-                searchResults[index] = udtResult;
             }
         }
 
@@ -1015,87 +928,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return string.Join(",", dynamicModifications);
-        }
-
-        private bool CreateProteinModsFileWork(
-            string baseName,
-            FileInfo inputFile,
-            string synOutputFilePath,
-            string outputDirectoryPath)
-        {
-            bool success;
-
-            // Create the MTSPepToProteinMap file
-
-            var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
-
-            var sourcePHRPDataFiles = new List<string>();
-
-            if (!string.IsNullOrEmpty(synOutputFilePath))
-            {
-                sourcePHRPDataFiles.Add(synOutputFilePath);
-            }
-
-            if (sourcePHRPDataFiles.Count == 0)
-            {
-                SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
-            }
-            else
-            {
-                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                {
-                    success = true;
-                }
-                else
-                {
-                    const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
-                    const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
-
-                    success = CreatePepToProteinMapFile(
-                        sourcePHRPDataFiles,
-                        mtsPepToProteinMapFilePath,
-                        MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
-                        MATCH_ERROR_PERCENT_WARNING_THRESHOLD);
-
-                    if (!success)
-                    {
-                        // Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False
-                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                    }
-                }
-            }
-
-            if (success)
-            {
-                if (inputFile.Directory == null)
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                }
-                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                    // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.MaxQuant);
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                return true;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -2686,7 +2518,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Modifications = ConstructDynamicModificationList(searchResult, modList);
 
                 // Compute monoisotopic mass of the peptide
-                searchResult.CalculatedMonoMassPHRP = ComputePeptideMass(searchResult.Sequence, totalModMass);
+                searchResult.CalculatedMonoMassPHRP = ComputePeptideMassForCleanSequence(searchResult.Sequence, totalModMass);
 
                 // For other tools, we manually compute the mass error using the observed precursor ion m/z value
                 // This cannot be done with the information in the msms.txt file, but it can be done if a PrecursorInfo file exists
@@ -3304,7 +3136,16 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                         else
                         {
-                            success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
+                            // Use a higher match error threshold since some peptides reported by MaxQuant don't perfectly match the FASTA file
+                            const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+                            const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
+
+                            success = CreateProteinModsFileWork(
+                                baseName, inputFile,
+                                synOutputFilePath, outputDirectoryPath,
+                                PeptideHitResultTypes.MaxQuant,
+                                MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                                MATCH_ERROR_PERCENT_WARNING_THRESHOLD);
                         }
                     }
 

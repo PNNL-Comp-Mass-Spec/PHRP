@@ -1521,6 +1521,9 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
+                    // Define the base output filename using inputFilePath
+                    var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
+
                     // Define the output file name based on inputFilePath
                     // The name will be DatasetName_xt.txt
 
@@ -1535,7 +1538,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (Options.CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(inputFile, outputDirectoryPath, xtandemXTFilePath);
+                        success = CreateProteinModsFileWork(
+                            baseName, inputFile,
+                            xtandemXTFilePath, outputDirectoryPath,
+                            PeptideHitResultTypes.XTandem);
                     }
 
                     if (success)
@@ -1556,60 +1562,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
-        }
-
-        private bool CreateProteinModsFileWork(FileInfo inputFile, string outputDirectoryPath, string xtandemXTFilePath)
-        {
-            bool success;
-
-            // First create the MTS PepToProteinMap file using inputFile
-            var sourcePHRPDataFiles = new List<string> {
-                xtandemXTFilePath
-            };
-
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
-
-            if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-            {
-                success = true;
-            }
-            else
-            {
-                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
-
-                if (!success)
-                {
-                    OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                }
-            }
-
-            if (success)
-            {
-                if (inputFile.Directory == null)
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                }
-                else if (string.IsNullOrWhiteSpace(xtandemXTFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: xtandemXTFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(xtandemXTFilePath)), outputDirectoryPath);
-
-                    // Now create the Protein Mods file
-                    success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.XTandem);
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                return true;
-            }
-            return true;
         }
 
         private void SaveXTandemResultsFileEntry(XTandemResults searchResult, ref StreamWriter writer)

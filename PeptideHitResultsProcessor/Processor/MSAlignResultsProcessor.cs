@@ -453,14 +453,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var cleanSequence = GetCleanSequence(peptide);
 
-            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
-
-            if (Math.Abs(totalModMass) > double.Epsilon)
-            {
-                mass += totalModMass;
-            }
-
-            return mass;
+            return ComputePeptideMassForCleanSequence(cleanSequence, totalModMass);
         }
 
         private static readonly Regex RegexModMassRegEx = new(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS);
@@ -1464,7 +1457,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (Options.CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
+                        // Use a higher match error threshold since some peptides reported by MSAlign don't perfectly match the FASTA file
+                        const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                        success = CreateProteinModsFileWork(
+                            baseName, inputFile,
+                            synOutputFilePath, outputDirectoryPath,
+                            PeptideHitResultTypes.MSAlign,
+                            MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
                     }
 
                     if (success)
@@ -1484,85 +1484,6 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 
-            return success;
-        }
-
-        /// <summary>
-        /// Create the MTSPepToProteinMap file
-        /// </summary>
-        /// <param name="baseName"></param>
-        /// <param name="inputFile"></param>
-        /// <param name="synOutputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <returns>True if successful, false if an error</returns>
-        private bool CreateProteinModsFileWork(string baseName, FileInfo inputFile, string synOutputFilePath, string outputDirectoryPath)
-        {
-            bool success;
-
-            var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
-
-            var sourcePHRPDataFiles = new List<string>();
-
-            if (!string.IsNullOrEmpty(synOutputFilePath))
-            {
-                sourcePHRPDataFiles.Add(synOutputFilePath);
-            }
-
-            if (sourcePHRPDataFiles.Count == 0)
-            {
-                SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
-            }
-            else
-            {
-                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                {
-                    success = true;
-                }
-                else
-                {
-                    // Use a higher match error threshold since some peptides reported by MSAlign don't perfectly match the FASTA file
-                    const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
-
-                    success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
-
-                    if (!success)
-                    {
-                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                    }
-                }
-            }
-
-            if (success)
-            {
-                if (inputFile.Directory == null)
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-                }
-                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
-                {
-                    OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-                }
-                else
-                {
-                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                    // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PeptideHitResultTypes.MSAlign);
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                success = true;
-            }
-
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             return success;
         }
 

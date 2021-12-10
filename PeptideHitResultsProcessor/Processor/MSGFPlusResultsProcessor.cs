@@ -618,10 +618,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var cleanSequence = GetCleanSequence(peptide);
 
-            var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
-            mass += totalModMass;
-
-            return mass;
+            return ComputePeptideMassForCleanSequence(cleanSequence, totalModMass);
         }
 
         /// <summary>
@@ -2496,7 +2493,18 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (Options.CreateProteinModsFile)
                         {
-                            success = CreateProteinModsFileWork(baseName, inputFile, fhtOutputFilePath, synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath);
+                            // Use a higher match error threshold since MS-GF+ often includes reverse protein peptides in the results
+                            // even though the FASTA typically does not have reverse proteins
+                            const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                            success = CreateProteinModsFileWork(
+                                baseName, inputFile,
+                                synOutputFilePath, outputDirectoryPath,
+                                PeptideHitResultTypes.MSGFPlus,
+                                MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                                0,
+                                fhtOutputFilePath,
+                                mtsPepToProteinMapFilePath);
                         }
                     }
 
@@ -2518,104 +2526,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
-        }
-
-        private bool CreateProteinModsFileWork(
-            string baseName,
-            FileInfo inputFile,
-            string fhtOutputFilePath,
-            string synOutputFilePath,
-            string outputDirectoryPath,
-            string mtsPepToProteinMapFilePath)
-        {
-            bool success;
-
-            if (!string.IsNullOrEmpty(mtsPepToProteinMapFilePath) && File.Exists(mtsPepToProteinMapFilePath))
-            {
-                success = true;
-            }
-            else
-            {
-                // MTSPepToProteinMap file not found; auto-create it
-
-                if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
-                {
-                    var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
-                    mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
-                }
-
-                var sourcePHRPDataFiles = new List<string>();
-
-                if (!string.IsNullOrEmpty(fhtOutputFilePath))
-                {
-                    sourcePHRPDataFiles.Add(fhtOutputFilePath);
-                }
-
-                if (!string.IsNullOrEmpty(synOutputFilePath))
-                {
-                    sourcePHRPDataFiles.Add(synOutputFilePath);
-                }
-
-                if (sourcePHRPDataFiles.Count == 0)
-                {
-                    SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                    success = false;
-                }
-                else
-                {
-                    if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                    {
-                        success = true;
-                    }
-                    else
-                    {
-                        // Use a higher match error threshold since MS-GF+ often includes reverse protein peptides in the results
-                        // even though the FASTA typically does not have reverse proteins
-                        const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
-
-                        success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
-
-                        if (!success)
-                        {
-                            // Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False
-                            OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                        }
-                    }
-                }
-            }
-
-            if (!success)
-            {
-                // Do not treat this as a fatal error
-                return true;
-            }
-
-            if (inputFile.Directory == null)
-            {
-                OnWarningEvent("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
-            }
-            else if (string.IsNullOrWhiteSpace(synOutputFilePath))
-            {
-                OnWarningEvent("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
-            }
-            else
-            {
-                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
-
-                // Create the Protein Mods file
-                var modsFileCreated = CreateProteinModDetailsFile(
-                    synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PeptideHitResultTypes.MSGFPlus);
-
-                if (!modsFileCreated)
-                {
-                    // Do not treat this as a fatal error
-                    return true;
-                }
-            }
-
-            return true;
         }
 
         private static readonly Regex NTerminalModMassMatcher = new(MSGFPlus_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
