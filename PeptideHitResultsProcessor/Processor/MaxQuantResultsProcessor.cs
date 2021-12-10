@@ -2566,6 +2566,13 @@ namespace PeptideHitResultsProcessor.Processor
                         PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
                         _ => 0
                     };
+
+                    // ReSharper disable once InvertIf
+                    if (searchResult.LeadingRazorProtein.StartsWith("REV__") && !searchResult.Reverse)
+                    {
+                        OnWarningEvent("Setting Reverse to true since the leading razor protein starts with REV__, line {0}: {1}", lineNumber, searchResult.LeadingRazorProtein);
+                        searchResult.Reverse = true;
+                    }
                 }
                 else
                 {
