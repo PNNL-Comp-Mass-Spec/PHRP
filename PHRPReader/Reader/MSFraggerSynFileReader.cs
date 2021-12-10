@@ -10,7 +10,12 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSFraggerSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Chymotrypsin, Hyperscore, MSFragger, NextScore, PepToProtMap, tryptic
+        // ReSharper disable CommentTypo
+
+        // Ignore Spelling: Chymotrypsin, Daltons, Hyperscore, MSFragger, NextScore, PepToProtMap, tryptic
+        // Ignore Spelling: argc, aspn, cnbr, elastase, formicacid, gluc, lysc, lysn, stricttrypsin, thermolysin
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// MSFragger synopsis file suffix

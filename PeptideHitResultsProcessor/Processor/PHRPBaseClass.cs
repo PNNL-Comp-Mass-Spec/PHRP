@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : EventNotifier
     {
-        // Ignore Spelling: A-Za-z, Da, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
+        // Ignore Spelling: A-Za-z, Da, Daltons, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
 
         /// <summary>
         /// Program date
