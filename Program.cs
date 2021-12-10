@@ -100,7 +100,9 @@ namespace PeptideHitResultsProcRunner
             try
             {
                 if (InvalidParameterFile(parser.ParameterFilePath))
+                {
                     return -1;
+                }
 
                 var peptideHitResultsProcessor = new PeptideHitResultsProcRunner(options);
 
@@ -177,26 +179,36 @@ namespace PeptideHitResultsProcRunner
         private static void DisplayProgressPercent(int percentComplete, bool addCarriageReturn)
         {
             if (addCarriageReturn)
+            {
                 Console.WriteLine();
+            }
 
             if (percentComplete > 100)
+            {
                 percentComplete = 100;
+            }
 
             Console.Write("Processing: " + percentComplete + "% ");
 
             if (addCarriageReturn)
+            {
                 Console.WriteLine();
+            }
         }
 
         private static bool InvalidParameterFile(string parameterFilePath)
         {
             if (string.IsNullOrWhiteSpace(parameterFilePath))
+            {
                 return false;
+            }
 
             // Assure that the user did not provide an old-style XML-based parameter file
             var paramFile = new FileInfo(parameterFilePath);
             if (!paramFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
 
             using var paramFileReader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -205,7 +217,9 @@ namespace PeptideHitResultsProcRunner
             {
                 var dataLine = paramFileReader.ReadLine();
                 if (string.IsNullOrWhiteSpace(dataLine))
+                {
                     continue;
+                }
 
                 linesRead++;
 
@@ -297,9 +311,13 @@ namespace PeptideHitResultsProcRunner
         private static void PeptideHitResultsProcRunner_WarningEvent(string message)
         {
             if (message.StartsWith("Warning", StringComparison.OrdinalIgnoreCase))
+            {
                 ConsoleMsgUtils.ShowWarning(message);
+            }
             else
+            {
                 ConsoleMsgUtils.ShowWarning("Warning: " + message);
+            }
         }
     }
 }
