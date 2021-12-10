@@ -41,7 +41,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 17, 2019";
+            FileDate = "December 10, 2021";
             InitializeLocalVariables();
         }
 

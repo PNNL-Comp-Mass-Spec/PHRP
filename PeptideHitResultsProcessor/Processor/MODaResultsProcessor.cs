@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public MODaResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "July 10, 2019";
+            FileDate = "December 10, 2021";
             InitializeLocalVariables();
         }
 
@@ -1511,8 +1511,8 @@ namespace PeptideHitResultsProcessor.Processor
                         const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
 
                         success = CreateProteinModsFileWork(
-                            baseName, inputFile, 
-                            synOutputFilePath, outputDirectoryPath, 
+                            baseName, inputFile,
+                            synOutputFilePath, outputDirectoryPath,
                             PeptideHitResultTypes.MODa,
                             MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
                     }

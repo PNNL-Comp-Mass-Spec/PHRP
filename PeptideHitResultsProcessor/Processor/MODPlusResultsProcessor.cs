@@ -36,7 +36,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public MODPlusResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "May 3, 2021";
+            FileDate = "December 10, 2021";
         }
 
         /// <summary>
