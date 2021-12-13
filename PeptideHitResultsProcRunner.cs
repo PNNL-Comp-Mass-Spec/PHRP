@@ -351,13 +351,13 @@ namespace PeptideHitResultsProcRunner
 
             if (resultsProcessor is MSGFPlusResultsProcessor)
             {
-                LogMessage(string.Format("{0,-49} {1:F2}",
+                LogMessage(string.Format("{0,-45} {1:F2}",
                     "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileEValueThreshold));
             }
 
             if (resultsProcessor is MSGFPlusResultsProcessor or MSPathFinderResultsProcessor)
             {
-                LogMessage(string.Format("{0,-49} {1:E2}",
+                LogMessage(string.Format("{0,-45} {1:E2}",
                     "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileSpecEValueThreshold));
             }
 
@@ -368,6 +368,15 @@ namespace PeptideHitResultsProcRunner
 
                 LogMessage(string.Format("{0,-49} {1:F3}",
                     "MaxQuant Synopsis File PEP Threshold:", resultsProcessor.Options.MaxQuantPosteriorErrorProbabilityThreshold));
+            }
+
+            if (resultsProcessor is MSFraggerResultsProcessor)
+            {
+                LogMessage(string.Format("{0,-45} {1:F3}",
+                    "MSFragger Synopsis File E-Value Threshold:", resultsProcessor.Options.MSGFPlusSynopsisFileEValueThreshold));
+
+                LogMessage(string.Format("{0,-45} {1:N0}",
+                    "MaxQuant Synopsis File Hyperscore Threshold:", resultsProcessor.Options.MSFraggerHyperscoreThreshold));
             }
 
             Console.WriteLine();
