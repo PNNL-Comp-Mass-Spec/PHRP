@@ -1411,42 +1411,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                // Check whether inputFilePath is a directory path
-                var candidateDirectory = new DirectoryInfo(inputFilePath);
-                if (candidateDirectory.Exists)
-                {
-                    ResetProgress("Parsing " + candidateDirectory.FullName);
-
-                    // Find the _psm.tsv file
-
-                    var candidateFiles = candidateDirectory.GetFileSystemInfos("*" + PSM_FILE_SUFFIX);
-
-                    if (candidateFiles.Length == 0)
-                    {
-                        SetErrorMessage(string.Format(
-                            "{0} file not found in the input directory, {1}",
-                            PSM_FILE_SUFFIX, candidateDirectory.FullName));
-
-                        SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
-                        return false;
-                    }
-
-                    if (candidateFiles.Length > 1)
-                    {
-                        SetErrorMessage(string.Format(
-                            "Multiple {0} files were found in the input directory, {1}",
-                            PSM_FILE_SUFFIX, candidateDirectory.FullName));
-
-                        SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
-                        return false;
-                    }
-
-                    inputFilePath = candidateFiles[0].FullName;
-                }
-                else
-                {
-                    ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
-                }
+                ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
 
                 if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
