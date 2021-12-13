@@ -712,64 +712,58 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Read mod info from the MSFragger parameter file
+        /// Read the precursor match tolerance from the MSFragger parameter file
         /// </summary>
-        /// <param name="MSFraggerParamFilePath"></param>
+        /// <param name="msFraggerParamFilePath"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool LoadSearchEngineParamFile(string MSFraggerParamFilePath)
+        private bool LoadSearchEngineParamFile(string msFraggerParamFilePath)
         {
             try
             {
-                var sourceFile = new FileInfo(MSFraggerParamFilePath);
+                var sourceFile = new FileInfo(msFraggerParamFilePath);
                 if (!sourceFile.Exists)
                 {
-                    SetErrorMessage("MSFragger parameter file not found: " + MSFraggerParamFilePath);
+                    SetErrorMessage("MSFragger parameter file not found: " + msFraggerParamFilePath);
                     SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
                     return false;
                 }
 
-                OnStatusEvent("Reading the MSFragger parameters.txt file in " + PathUtils.CompactPathString(sourceFile.Directory?.FullName, 80));
+                OnStatusEvent("Reading the MSFragger parameter file: " + PathUtils.CompactPathString(sourceFile.FullName, 110));
 
-                // ReSharper disable once StringLiteralTypo
-                OnWarningEvent("The parameters.txt file only lists static mods. " +
-                               "It does not include dynamic mods or isobaric mods (like TMT or iTRAQ). " +
-                               "To allow PHRP to accurately compute monoisotopic mass values, you should reference an XML-based parameter file. " +
-                               "For example, MSFragger_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml at " +
-                               "https://github.com/PNNL-Comp-Mass-Spec/PHRP/tree/master/Data/MSFragger_Example");
-
-                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                var lineNumber = 0;
-
-                while (!reader.EndOfStream)
+                var startupOptions = new StartupOptions
                 {
-                    var lineIn = reader.ReadLine();
-                    lineNumber++;
+                    DisableOpeningInputFiles = true
+                };
 
-                    if (string.IsNullOrWhiteSpace(lineIn) || !lineIn.StartsWith("Fixed modifications", StringComparison.OrdinalIgnoreCase))
-                        continue;
+                var reader = new MSFraggerSynFileReader("MSFragger_ParamFile_Reader", sourceFile.FullName, startupOptions);
+                RegisterEvents(reader);
 
-                    // Found the static mods line, e.g.
-                    // Fixed modifications	Carbamidomethyl (C)
+                var success = reader.LoadSearchEngineParameters(sourceFile.FullName, out var searchEngineParams);
 
-                    var lineParts = lineIn.Split('\t');
+                if (!success)
+                {
+                    return false;
+                }
 
-                    if (lineParts.Length < 2)
-                    {
-                        OnWarningEvent("Line number {0} in the parameters.txt file has 'Fixed modifications' but does not have a tab character; this is unexpected", lineNumber);
+                var validTolerances = reader.GetPrecursorSearchTolerances(
+                    searchEngineParams,
+                    out var toleranceLower, out var toleranceUpper,
+                    out var ppmBased, out var singleTolerance);
 
-                        continue;
-                    }
-
-                    // ToDo: Parse and store these
-                    // precursor_true_tolerance = 20          # True precursor mass tolerance (window is +/- this value)
-                    // precursor_true_units = 1               # True precursor mass tolerance units (0=Da, 1=ppm)
-
-                    // precursor_mass_lower = -20             # Lower bound of the precursor mass window (overrides precursor_true_tolerance)
-                    // precursor_mass_upper = 20              # Upper bound of the precursor mass window (overrides precursor_true_tolerance)
-                    // precursor_mass_units = 1               # Precursor mass tolerance units (0=Da, 1=ppm)
-
+                if (!validTolerances)
+                {
+                    OnWarningEvent("Unable to extract the precursor ion match tolerances from the parameter file");
                     mPrecursorMassTolerance = new PrecursorMassTolerance(75, true);
+                    return false;
+                }
+
+                if (singleTolerance)
+                {
+                    mPrecursorMassTolerance = new PrecursorMassTolerance(toleranceLower, ppmBased);
+                }
+                else
+                {
+                    mPrecursorMassTolerance = new PrecursorMassTolerance(toleranceLower, toleranceUpper, ppmBased);
                 }
 
                 return true;
@@ -1481,8 +1475,8 @@ namespace PeptideHitResultsProcessor.Processor
                     else
                     {
                         // Examine the MSFragger parameter file to determine the precursor match tolerance
-                        var modInfoExtracted = LoadSearchEngineParamFile(Options.SearchToolParameterFilePath);
-                        if (!modInfoExtracted)
+                        var toleranceExtracted = LoadSearchEngineParamFile(Options.SearchToolParameterFilePath);
+                        if (!toleranceExtracted)
                         {
                             return false;
                         }

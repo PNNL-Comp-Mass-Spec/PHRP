@@ -284,6 +284,61 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
+        /// Examine the MSFragger parameters to determine the precursor mass tolerance(s)
+        /// </summary>
+        /// <param name="searchEngineParams">MSFragger search engine parameters loaded from a Key=Value parameter file</param>
+        /// <param name="toleranceLower">Tolerance to the left, e.g. -20</param>
+        /// <param name="toleranceUpper">Tolerance to the right, e.g. 20</param>
+        /// <param name="ppmBased">True if ppm-based tolerances</param>
+        /// <param name="singleTolerance"></param>
+        /// <returns>True if the tolerance parameters were found, false if not found or an error</returns>
+        public bool GetPrecursorSearchTolerances(
+            SearchEngineParameters searchEngineParams,
+            out double toleranceLower,
+            out double toleranceUpper,
+            out bool ppmBased,
+            out bool singleTolerance)
+        {
+            // First look for the legacy symmetric tolerance parameter
+            searchEngineParams.Parameters.TryGetValue("precursor_true_tolerance", out var precursorTrueTolerance);
+            searchEngineParams.Parameters.TryGetValue("precursor_true_units", out var precursorTrueUnits);
+
+            // Next look for the newer tolerance parameters
+            searchEngineParams.Parameters.TryGetValue("precursor_mass_lower", out var precursorMassLower);
+            searchEngineParams.Parameters.TryGetValue("precursor_mass_upper", out var precursorMassUpper);
+            searchEngineParams.Parameters.TryGetValue("precursor_mass_units", out var precursorMassUnits);
+
+            if (int.TryParse(precursorMassUnits, out var precursorMassUnitsVal) &&
+                double.TryParse(precursorMassLower, out var precursorMassLowerVal) &&
+                double.TryParse(precursorMassUpper, out var precursorMassUpperVal))
+            {
+                ppmBased = MassToleranceUnitsArePPM(precursorMassUnitsVal, "precursor_mass_units");
+                singleTolerance = false;
+                toleranceLower = precursorMassLowerVal;
+                toleranceUpper = precursorMassUpperVal;
+
+                return true;
+            }
+
+            if (int.TryParse(precursorTrueUnits, out var precursorTrueUnitsVal) &&
+                double.TryParse(precursorTrueTolerance, out var precursorTrueToleranceVal))
+            {
+                ppmBased = MassToleranceUnitsArePPM(precursorTrueUnitsVal, "precursor_true_units");
+                singleTolerance = true;
+                toleranceLower = precursorTrueToleranceVal;
+                toleranceUpper = precursorTrueToleranceVal;
+
+                return true;
+            }
+
+            ppmBased = false;
+            singleTolerance = true;
+            toleranceLower = 0;
+            toleranceUpper = 0;
+            return false;
+        }
+
+        /// <summary>
         /// Search engine name
         /// </summary>
         public static string GetSearchEngineName()
@@ -302,6 +357,27 @@ namespace PHRPReader.Reader
             searchEngineParams = new SearchEngineParameters(MSFRAGGER_SEARCH_ENGINE_NAME);
 
             return ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
+        }
+
+        private bool MassToleranceUnitsArePPM(int massToleranceUnits, string parameterName)
+        {
+            switch (massToleranceUnits)
+            {
+                case 0:
+                    // Dalton based
+                    return false;
+
+                case 1:
+                    // ppm based
+                    return true;
+
+                default:
+                    ReportWarning(string.Format(
+                        "Unrecognized value for parameter {0} in the MSFragger parameter file: {1}",
+                        parameterName, massToleranceUnits));
+
+                    return false;
+            }
         }
 
         /// <summary>
@@ -504,34 +580,26 @@ namespace PHRPReader.Reader
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
 
-                // First look for the legacy symmetric tolerance parameter
-                searchEngineParams.Parameters.TryGetValue("precursor_true_tolerance", out var precursorTrueTolerance);
-                searchEngineParams.Parameters.TryGetValue("precursor_true_units", out var precursorTrueUnits);
+                var validTolerance = GetPrecursorSearchTolerances(
+                    searchEngineParams,
+                    out var toleranceLower, out var toleranceUpper,
+                    out var ppmBased, out var singleTolerance);
 
-                // Next look for the newer tolerance parameters
-                searchEngineParams.Parameters.TryGetValue("precursor_mass_lower", out var precursorMassLower);
-                searchEngineParams.Parameters.TryGetValue("precursor_mass_upper", out var precursorMassUpper);
-                searchEngineParams.Parameters.TryGetValue("precursor_mass_units", out var precursorMassUnits);
-
-                if (int.TryParse(precursorMassUnits, out var precursorMassUnitsVal) &&
-                    double.TryParse(precursorMassLower, out var precursorMassLowerVal) &&
-                    double.TryParse(precursorMassUpper, out var precursorMassUpperVal))
-                {
-                    UpdatePrecursorMassTolerance(
-                        searchEngineParams, precursorMassUnitsVal,
-                        precursorMassLowerVal, precursorMassUpperVal);
-                }
-                else if (int.TryParse(precursorTrueUnits, out var precursorTrueUnitsVal) &&
-                         double.TryParse(precursorTrueTolerance, out var precursorTrueToleranceVal))
-                {
-                    UpdatePrecursorMassTolerance(
-                        searchEngineParams, precursorTrueUnitsVal,
-                        precursorTrueToleranceVal, precursorTrueToleranceVal);
-                }
-                else
+                if (!validTolerance)
                 {
                     searchEngineParams.PrecursorMassToleranceDa = 0;
                     searchEngineParams.PrecursorMassTolerancePpm = 0;
+
+                    return true;
+                }
+
+                if (singleTolerance)
+                {
+                    UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
+                }
+                else
+                {
+                    UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
                 }
 
                 return true;
@@ -547,14 +615,14 @@ namespace PHRPReader.Reader
         /// Update PrecursorMassToleranceDa and PrecursorMassTolerancePpm in searchEngineParams
         /// </summary>
         /// <param name="searchEngineParams">Search engine parameters</param>
-        /// <param name="massToleranceUnits">Precursor mass units: 0 means Daltons, 1 means ppm</param>
         /// <param name="massToleranceLower">Tolerance to the left, e.g. -20</param>
         /// <param name="massToleranceUpper">Tolerance to the right, e.g. 20</param>
+        /// <param name="ppmBased">True if ppm-based tolerances</param>
         private void UpdatePrecursorMassTolerance(
             SearchEngineParameters searchEngineParams,
-            int massToleranceUnits,
             double massToleranceLower,
-            double massToleranceUpper)
+            double massToleranceUpper,
+            bool ppmBased)
         {
             double toleranceToStore;
 
@@ -568,23 +636,15 @@ namespace PHRPReader.Reader
                 toleranceToStore = (Math.Abs(massToleranceLower) + Math.Abs(massToleranceUpper)) / 2.0;
             }
 
-            switch (massToleranceUnits)
+            if (ppmBased)
             {
-                case 0:
-                    // Dalton based
-                    searchEngineParams.PrecursorMassToleranceDa = toleranceToStore;
-                    searchEngineParams.PrecursorMassTolerancePpm = PeptideMassCalculator.MassToPPM(toleranceToStore, 1000);
-                    break;
-
-                case 1:
-                    // ppm based
-                    searchEngineParams.PrecursorMassToleranceDa = PeptideMassCalculator.PPMToMass(toleranceToStore, 2000);
-                    searchEngineParams.PrecursorMassTolerancePpm = toleranceToStore;
-                    break;
-
-                default:
-                    ReportWarning(string.Format("Unrecognized value for precursor_mass_units in the MSFragger parameter file: {0}", massToleranceUnits));
-                    break;
+                searchEngineParams.PrecursorMassToleranceDa = PeptideMassCalculator.PPMToMass(toleranceToStore, 2000);
+                searchEngineParams.PrecursorMassTolerancePpm = toleranceToStore;
+            }
+            else
+            {
+                searchEngineParams.PrecursorMassToleranceDa = toleranceToStore;
+                searchEngineParams.PrecursorMassTolerancePpm = PeptideMassCalculator.MassToPPM(toleranceToStore, 1000);
             }
         }
     }
