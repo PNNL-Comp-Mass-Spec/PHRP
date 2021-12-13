@@ -79,19 +79,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public const string PSM_FILE_SUFFIX = "_psm.tsv";
 
-        private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
-
-        /// <summary>
-        /// This variable keeps track of the number of PSMs whose computed monoisotopic mass
-        /// does not agree with the monoisotopic mass computed from the precursor m/z, within a reasonable tolerance
-        /// </summary>
-        private int mPrecursorMassErrorWarningCount;
-
-        /// <summary>
-        /// Precursor match tolerance read from the MSFragger parameter file
-        /// </summary>
-        private PrecursorMassTolerance mPrecursorMassTolerance;
-
         /// <summary>
         /// Default Hyperscore threshold to use when creating the synopsis file
         /// </summary>
@@ -170,6 +157,19 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly Regex mModListResidueModMatcher = new(@"(?<ResidueNumber>\d+)(?<ResidueSymbol>[A-Z])\((?<ModMass>[0-9.-]+)\)", RegexOptions.Compiled);
 
         private readonly Regex mModListTerminalModMatcher = new(@"(?<TerminusName>[^ ]+-term)\((?<ModMass>[0-9.-]+)\)", RegexOptions.Compiled);
+
+        private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+
+        /// <summary>
+        /// This variable keeps track of the number of PSMs whose computed monoisotopic mass
+        /// does not agree with the monoisotopic mass computed from the precursor m/z, within a reasonable tolerance
+        /// </summary>
+        private int mPrecursorMassErrorWarningCount;
+
+        /// <summary>
+        /// Precursor match tolerance read from the MSFragger parameter file
+        /// </summary>
+        private PrecursorMassTolerance mPrecursorMassTolerance;
 
         /// <summary>
         /// Add modifications to a peptide read from the MSFragger synopsis file
