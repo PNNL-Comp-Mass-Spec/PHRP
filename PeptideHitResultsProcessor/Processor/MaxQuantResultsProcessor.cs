@@ -217,7 +217,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public override string ToString()
             {
-                return string.Format("{0}: {1:F2}", Residue, ModInfo.ModMassVal);
+                return string.Format("{0}: {1:F4}", Residue, ModInfo.ModMassVal);
             }
         }
 

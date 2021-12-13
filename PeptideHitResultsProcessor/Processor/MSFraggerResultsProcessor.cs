@@ -152,6 +152,16 @@ namespace PeptideHitResultsProcessor.Processor
             public char ResidueSymbol;
             public int ResidueLocInPeptide;
             public AminoAcidModInfo.ResidueTerminusState TerminusState;
+
+            /// <summary>
+            /// Show the residue symbol and mod mass
+            /// </summary>
+            public override string ToString()
+            {
+                return ResidueSymbol is default(char)
+                    ? string.Format("{0:F4}", ModMass)
+                    : string.Format("{0}: {1:F4}", ResidueSymbol, ModMass);
+            }
         }
 
         private readonly Regex mModListResidueModMatcher = new(@"(?<ResidueNumber>\d+)(?<ResidueSymbol>[A-Z])\((?<ModMass>[0-9.-]+)\)", RegexOptions.Compiled);
