@@ -2116,6 +2116,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var splitLine = lineIn.Split('\t');
 
+                    // The file should have over 50 columns, but we'll only require 30
                     if (splitLine.Length < 30)
                         continue;
 
@@ -2403,7 +2404,8 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length < 20)
+                // The file should have over 20 columns, but we'll only require 15
+                if (splitLine.Length < 15)
                 {
                     return false;
                 }

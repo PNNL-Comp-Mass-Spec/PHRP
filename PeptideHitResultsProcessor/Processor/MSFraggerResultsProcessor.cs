@@ -948,7 +948,8 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length < 20)
+                // The file should have over 20 columns, but we'll only require 15
+                if (splitLine.Length < 15)
                 {
                     return false;
                 }
