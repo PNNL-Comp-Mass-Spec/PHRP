@@ -3090,7 +3090,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         modList = new List<MSGFPlusParamFileModExtractor.ModInfo>();
 
-                        mPrecursorMassTolerance = new PrecursorMassTolerance();
+                        mPrecursorMassTolerance = new PrecursorMassTolerance(75, true);
                     }
                     else
                     {

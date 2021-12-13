@@ -1466,11 +1466,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (string.IsNullOrWhiteSpace(Options.SearchToolParameterFilePath))
                     {
-                        OnWarningEvent(
-                            "MSFragger parameter file not defined; cannot generate the _ModSummary.txt and _ModDetails.txt files may be incomplete. " +
-                            "To define, use /N at the command line or SearchToolParameterFilePath in a parameter file");
-
-                        mPrecursorMassTolerance = new PrecursorMassTolerance();
+                        OnWarningEvent("MSFragger parameter file not defined; unable to determine the precursor match tolerance");
+                        mPrecursorMassTolerance = new PrecursorMassTolerance(75, true);
                     }
                     else
                     {

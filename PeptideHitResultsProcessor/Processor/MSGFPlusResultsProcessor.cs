@@ -1305,7 +1305,7 @@ namespace PeptideHitResultsProcessor.Processor
                         MSGFPlusSynFileReader.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM,
                         Path.GetFileName(searchEngineParams.SearchEngineParamFilePath));
 
-                    return new PrecursorMassTolerance();
+                    return new PrecursorMassTolerance(75, true);
                 }
 
                 // Parent ion tolerance line found
@@ -1324,7 +1324,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Tolerance does not contain a comma and does not contain a valid number
                     OnWarningEvent("Invalid parent ion tolerance format: {0}; should be 20ppm or 1.5Da or 20ppm,30ppm", value);
-                    return new PrecursorMassTolerance();
+                    return new PrecursorMassTolerance(75, true);
                 }
 
                 // Tolerance line does contain a comma
@@ -1341,14 +1341,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 OnWarningEvent("Invalid parent ion tolerance format: {0}; should be 0.5Da,2.5Da", value);
-                return new PrecursorMassTolerance();
+                return new PrecursorMassTolerance(75, true);
             }
             catch (Exception ex)
             {
                 SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MS-GF+ parameter file ({0}): {1}",
                     Path.GetFileName(searchEngineParams.SearchEngineParamFilePath), ex.Message), ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
-                return new PrecursorMassTolerance();
+                return new PrecursorMassTolerance(75, true);
             }
         }
 
