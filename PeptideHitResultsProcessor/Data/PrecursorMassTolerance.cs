@@ -20,15 +20,33 @@ namespace PeptideHitResultsProcessor.Data
     {
         // Ignore Spelling: Da
 
+        private double mToleranceLeft;
+
+        private double mToleranceRight;
+
         /// <summary>
         /// Mass tolerance to the left of a m/z value (i.e., more negative)
         /// </summary>
-        public double ToleranceLeft { get; set; }
+        /// <remarks>
+        /// MSFragger tracks this as a negative value, but this class stores it as a positive number
+        /// </remarks>
+        public double ToleranceLeft
+        {
+            get => mToleranceLeft;
+            set => mToleranceLeft = Math.Abs(value);
+        }
 
         /// <summary>
         /// Mass tolerance to the right of a m/z value (i.e., more positive)
         /// </summary>
-        public double ToleranceRight { get; set; }
+        /// <remarks>
+        /// Using a backing variable here for symmetry with property ToleranceLeft
+        /// </remarks>
+        public double ToleranceRight
+        {
+            get => mToleranceRight;
+            set => mToleranceRight = Math.Abs(value);
+        }
 
         /// <summary>
         /// True if the tolerance is specified in parts per million
