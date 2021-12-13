@@ -755,6 +755,11 @@ namespace PeptideHitResultsProcessor.Processor
                 return ResultsFileFormat.MaxQuantTXTFile;
             }
 
+            if (fileName.EndsWith(MSFraggerResultsProcessor.PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResultsFileFormat.MSFraggerTSVFile;
+            }
+
             if (extensionLCase == ".tsv")
             {
                 // Assume this is an MS-GF+ TSV file

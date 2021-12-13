@@ -643,6 +643,11 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected MaxQuant results file");
                         break;
 
+                    case ResultsFileFormat.MSFraggerTSVFile:
+                        mPeptideHitResultsProcessor = new MSFraggerResultsProcessor(Options);
+                        LogMessage("Detected MSFragger results file");
+                        break;
+
                     case ResultsFileFormat.AutoDetermine:
                         throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (peptideHitResultsFormat)");
 

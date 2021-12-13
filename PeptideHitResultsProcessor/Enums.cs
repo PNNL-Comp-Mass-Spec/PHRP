@@ -164,6 +164,11 @@
         /// <summary>
         /// MaxQuant
         /// </summary>
-        MaxQuantTXTFile = 11
+        MaxQuantTXTFile = 11,
+
+        /// <summary>
+        /// MSFragger
+        /// </summary>
+        MSFraggerTSVFile = 12
     }
 }
