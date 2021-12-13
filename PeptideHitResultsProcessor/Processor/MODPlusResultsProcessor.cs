@@ -955,7 +955,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // The protein column will have both the protein name and the peptide position
                     // For example, ref|YP_001038741.1[R.67~78.L(2)]
                     // It may have multiple proteins listed, separated by semicolons
-                    // We will split the list on semicolons in function ParseMODPlusSynFileEntry
+                    // We will split the list on semicolons in method ParseMODPlusSynFileEntry
 
                     if (!udtSearchResult.ProteinList.Contains('['))
                     {
@@ -1233,7 +1233,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Error; Leave .peptideDeltaMass unchanged
                 }
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -1285,7 +1285,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">MODPlus results file (Dataset_MODPlus.id.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>

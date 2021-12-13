@@ -608,7 +608,9 @@ namespace PHRPReader
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
-        /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+        /// <remarks>
+        /// The Char.IsLetter() method returns True for "º" and various other Unicode ModifierLetter characters;
+        /// Use IsLetterAtoZ() to only return True for normal letters between A and Z</remarks>
         /// <param name="chChar">Character to examine</param>
         [Obsolete("Superseded by ReaderFactory.IsLetterAtoZ")]
         public static bool IsLetterAtoZ(char chChar)
@@ -729,7 +731,7 @@ namespace PHRPReader
 
         /// <summary>
         /// When FastReadMode is True, first call MoveNext to read the peptide scores.
-        /// Then, if the peptide is a peptide of interest, call this function to finalize any processing steps that were skipped.
+        /// Then, if the peptide is a peptide of interest, call this method to finalize any processing steps that were skipped.
         /// </summary>
         [Obsolete("Superseded by ReaderFactory.FinalizeCurrentPSM")]
         public void FinalizeCurrentPSM()

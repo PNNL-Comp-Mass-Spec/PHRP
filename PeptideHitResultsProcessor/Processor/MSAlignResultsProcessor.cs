@@ -1304,7 +1304,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Error; Leave .peptideDeltaMass unchanged
                 }
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -1374,7 +1374,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">MSAlign results file (Dataset_MSAlign_ResultTable.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>

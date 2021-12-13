@@ -82,7 +82,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
         /// <remarks>
-        /// Note that the Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters
+        /// Note that the Char.IsLetter() method returns True for "º" and various other Unicode ModifierLetter characters
         /// In contrast, this method only returns True for normal letters between A and Z (case insensitive)
         /// </remarks>
         /// <param name="character">Character to examine</param>

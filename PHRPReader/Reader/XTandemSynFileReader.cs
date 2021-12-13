@@ -564,7 +564,7 @@ namespace PHRPReader.Reader
             bool lookForDefaultParamsFileName,
             ref string errorMessage)
         {
-            // Note: Do not put a Try/Catch block in this function
+            // Note: Do not put a Try/Catch block in this method
 
             var paramFilePath = Path.Combine(inputDirectoryPath, paramFileName);
 
@@ -584,7 +584,7 @@ namespace PHRPReader.Reader
                 if (!string.IsNullOrEmpty(defaultParamsFilename))
                 {
                     // Read the parameters from the default parameters file and store them in searchEngineParams
-                    // Do this by recursively calling this function
+                    // Do this by recursively calling this method
 
                     // First confirm that the file exists
                     if (File.Exists(Path.Combine(inputDirectoryPath, defaultParamsFilename)))

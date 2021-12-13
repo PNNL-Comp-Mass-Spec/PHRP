@@ -1009,7 +1009,7 @@ namespace PHRPReader.Reader
         /// <param name="searchEngineName">Search engine name (e.g. MS-GF+)</param>
         /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in InputDirectoryPath)</param>
         /// <param name="peptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
-        /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
+        /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling method)</param>
         /// <returns>True if successful, false if an error</returns>
         protected bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
@@ -1041,7 +1041,7 @@ namespace PHRPReader.Reader
         /// <param name="searchEngineName">Search engine name (e.g. MS-GF+)</param>
         /// <param name="paramFilePath">Search engine parameter file path</param>
         /// <param name="peptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
-        /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
+        /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling method)</param>
         /// <param name="errorMessage">Output: error message</param>
         /// <param name="warningMessage">Output: warning message</param>
         /// <returns>True if successful, false if an error</returns>

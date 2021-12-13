@@ -441,7 +441,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
         /// </summary>
-        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
+        /// <remarks>This method should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         /// <param name="peptideSeqMassCalculator">Peptide mass calculator</param>
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
@@ -942,7 +942,6 @@ namespace PeptideHitResultsProcessor.Data
         /// <param name="options"></param>
         public void UpdateSearchResultEnzymeAndTerminusInfo(PHRPOptions options)
         {
-            // options.EnzymeMatchSpec, options.PeptideNTerminusMassChange, options.PeptideCTerminusMassChange
             SetEnzymeMatchSpec(options.EnzymeMatchSpec);
 
             // Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
@@ -964,7 +963,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <remarks>
         /// If you want to guarantee that mod symbols are included in the peptide sequence,
-        /// You must call ApplyModificationInformation before using this function
+        /// You must call ApplyModificationInformation before using this method
         /// </remarks>
         /// <param name="returnSequenceWithMods">When true, include the mod symbols in the sequence</param>
         /// <returns>Peptide, with prefix and suffix letters, e.g. K.PEPTIDER.S</returns>

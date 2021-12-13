@@ -229,7 +229,7 @@ namespace PHRPReader.Reader
             seqInfo.Clear();
             pepToProteinMap.Clear();
 
-            // Note: do not put a Try/Catch handler in this function
+            // Note: do not put a Try/Catch handler in this method
             //       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
 
             if (string.IsNullOrEmpty(ResultToSeqMapFilename))

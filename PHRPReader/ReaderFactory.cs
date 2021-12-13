@@ -1417,7 +1417,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
-        /// Note that if the _SeqInfo.txt file is available, this function will not be used
+        /// Note that if the _SeqInfo.txt file is available, this method will not be used
         /// </summary>
         /// <remarks>peptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
         /// <param name="peptide"></param>
@@ -2108,7 +2108,9 @@ namespace PHRPReader
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
-        /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+        /// <remarks>
+        /// The Char.IsLetter() method returns True for "º" and various other Unicode ModifierLetter characters
+        /// Use IsLetterAtoZ() to only return True for normal letters between A and Z</remarks>
         /// <param name="chChar">Character to examine</param>
         public static bool IsLetterAtoZ(char chChar)
         {
@@ -2562,7 +2564,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// This function extracts the Parent Ion m/z from the filter string
+        /// This method extracts the Parent Ion m/z from the filter string
         /// </summary>
         /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
         /// <param name="filterText"></param>
@@ -2620,7 +2622,7 @@ namespace PHRPReader
 
         /// <summary>
         /// When FastReadMode is True, first call MoveNext to read the peptide scores.
-        /// Then, if the peptide is a peptide of interest, call this function to finalize any processing steps that were skipped.
+        /// Then, if the peptide is a peptide of interest, call this method to finalize any processing steps that were skipped.
         /// </summary>
         public void FinalizeCurrentPSM()
         {
@@ -2694,7 +2696,7 @@ namespace PHRPReader
         {
             try
             {
-                // Clear dynamicMods and staticMods (should have been instantiated by the calling function)
+                // Clear dynamicMods and staticMods (should have been instantiated by the calling method)
                 dynamicMods.Clear();
                 staticMods.Clear();
 

@@ -1081,10 +1081,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
-        /// <param name="maximumAllowableMatchErrorPercentThreshold"></param>
-        /// <param name="matchErrorPercentWarningThreshold">
+        /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
         /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50
+        /// </param>
+        /// <param name="matchErrorPercentWarningThreshold">
+        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
         /// </param>
         protected bool CreatePepToProteinMapFile(
             List<string> sourcePHRPDataFiles,
@@ -1572,8 +1574,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="synOutputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="phrpResultType"></param>
-        /// <param name="maximumAllowableMatchErrorPercentThreshold"></param>
-        /// <param name="matchErrorPercentWarningThreshold"></param>
+        /// <param name="maximumAllowableMatchErrorPercentThreshold">
+        /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
+        /// </param>
+        /// <param name="matchErrorPercentWarningThreshold">
+        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
+        /// </param>
         /// <param name="fhtOutputFilePath"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
@@ -1898,7 +1904,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Initializes the StreamWriter objects using baseOutputFilePath as a base name and replacing the suffix with the default suffix names
         /// </summary>
         /// <param name="baseOutputFilePath"></param>
-        /// <returns>True if success; does not catch errors; they will be thrown to the calling function if they occur</returns>
+        /// <returns>True if success; does not catch errors; they will be thrown to the calling method if they occur</returns>
         protected bool InitializeSequenceOutputFiles(string baseOutputFilePath)
         {
             var outputFileInfo = new FileInfo(baseOutputFilePath);
@@ -2168,7 +2174,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Load the PeptideToProteinMap information
         /// </summary>
         /// <param name="pepToProteinMapFilePath">File to read</param>
-        /// <param name="pepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
+        /// <param name="pepToProteinMapping">Output parameter: peptide to protein mapping (calling method must pre-initialize the list)</param>
         /// <param name="headerLine">Output parameter: Header line text</param>
         /// <returns>True if successful, false if an error</returns>
         protected bool LoadPeptideToProteinMapInfo(
@@ -2329,7 +2335,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
@@ -2341,7 +2347,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
@@ -2918,8 +2924,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// This is typically 0.1, but for MaxQuant we set this to 50
         /// </param>
         /// <param name="matchErrorPercentWarningThreshold">
-        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown
-        /// This is typically 0, but for MaxQuant we set it to 5
+        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
+        /// This is typically 0, but for MaxQuant and MSFragger we set it to 5
         /// </param>
         /// <returns>
         /// True if the required percentage of peptides matched a known protein, false if they did not and ignorePeptideToProteinMapperErrors is false

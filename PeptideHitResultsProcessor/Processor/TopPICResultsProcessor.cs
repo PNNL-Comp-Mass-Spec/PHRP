@@ -1458,7 +1458,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">TopPIC results file (Dataset_TopPIC_PrSMs.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>

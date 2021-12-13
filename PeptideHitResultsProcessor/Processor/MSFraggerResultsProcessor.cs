@@ -57,7 +57,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSFraggerResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: Da, Carbamidomethyl, Hyperscore, Nextscore, Prev, txt
+        // Ignore Spelling: Da, Carbamidomethyl, Hyperscore, Nextscore, Prev, proline, tryptic, txt
 
         /// <summary>
         /// Constructor
@@ -1323,7 +1323,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Note that MSFragger peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
                 // Thus, .PeptideSequenceWithMods will not have any mod symbols
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -1386,7 +1386,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">MSFragger results file (msms.txt); alternatively, a directory with files msms.txt and peptides.txt</param>
         /// <param name="outputDirectoryPath">Output directory</param>
@@ -1560,7 +1560,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
 
-            // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
+            // Sort filteredSearchResults by E-value, Scan, Peptide, and Razor Protein
             filteredSearchResults.Sort(new MSFraggerSearchResultsComparerEValueScanChargePeptide());
 
             var listForQValue = new List<ToolResultsBaseClass>();
@@ -1607,8 +1607,8 @@ namespace PeptideHitResultsProcessor.Processor
             ExpandListIfRequired(filteredSearchResults, endIndex - startIndex + 1);
 
             // Now store the matches that pass the filters
-            //  Either Andromeda Score > AndromedaScoreThreshold
-            //  or     pep < PosteriorErrorProbabilityThreshold
+            //  Either E-value < 0.75
+            //  or     HyperscoreValue > 20
             for (var index = startIndex; index <= endIndex; index++)
             {
                 if (searchResults[index].EValue < Options.MSGFPlusSynopsisFileEValueThreshold ||

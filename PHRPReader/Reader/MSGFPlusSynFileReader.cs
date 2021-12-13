@@ -271,7 +271,7 @@ namespace PHRPReader.Reader
         /// If defined, update chargeCarrierMass with the associated mass value and return True
         /// Otherwise return false
         /// </summary>
-        /// <remarks>This function is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
+        /// <remarks>This method is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
         /// <param name="searchEngineParams"></param>
         /// <param name="chargeCarrierMass"></param>
         /// <returns>True if successful, false if an error</returns>
@@ -590,7 +590,7 @@ namespace PHRPReader.Reader
                 }
 
                 // Store the Custom Amino Acid info
-                // Need to use a different parsing function to extract it
+                // Need to use a different parsing method to extract it
                 success = UpdateMassCalculatorMasses(searchEngineParamFilePath);
 
                 // Look for a custom charge carrier mass

@@ -740,7 +740,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
         /// </summary>
-        /// <remarks>This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
+        /// <remarks>This method should only be called when column PMError(Da) is present (and PMError(ppm) is not present)</remarks>
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
@@ -958,7 +958,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="outputFilePath"></param>
         /// <param name="scanGroupFilePath"></param>
         /// <param name="msgfPlusModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
-        /// <param name="isMsgfPlus">Output parameter: this function will set this to True if we're processing MS-GF+ results</param>
+        /// <param name="isMsgfPlus">Output parameter: this method will set this to True if we're processing MS-GF+ results</param>
         /// <param name="specIdToIndex"></param>
         /// <param name="filteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns>True if successful, false if an error</returns>
@@ -1871,7 +1871,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // This is a merged spectrum and thus scan number looks like: 3010/3011/3012
                     // Split the Scan list on the slash
-                    // Later in this function, we'll append searchResults with this scan plus the other scans
+                    // Later in this method, we'll append searchResults with this scan plus the other scans
 
                     var splitResult = udtSearchResult.Scan.Split('/');
                     scanCount = splitResult.Length;
@@ -1935,7 +1935,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
                     precursorErrorDa = StringUtilities.CDblSafe(udtSearchResult.PMErrorDa, 0);
-                    udtSearchResult.PMErrorPPM = string.Empty; // We'll populate this column later in this function
+                    udtSearchResult.PMErrorPPM = string.Empty; // We'll populate this column later in this method
                 }
 
                 if (!GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
@@ -2326,7 +2326,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Error; Leave .peptideDeltaMass unchanged
                 }
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -2447,7 +2447,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
         /// <param name="inputFilePath">MS-GF+ results file (Dataset.tsv)</param>
@@ -2687,7 +2687,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
         /// </summary>
         /// <param name="peptide"></param>
-        /// <param name="msgfPlusModInfo">This function assumes that each entry in msgfPlusModInfo has both .ModName and .ModSymbol defined</param>
+        /// <param name="msgfPlusModInfo">This method assumes that each entry in msgfPlusModInfo has both .ModName and .ModSymbol defined</param>
         /// <param name="isMsgfPlus">Should be set to True if processing MS-GF+ results</param>
         /// <param name="totalModMass">Output parameter: total mass of all modifications</param>
         /// <returns>Updated peptide sequence</returns>

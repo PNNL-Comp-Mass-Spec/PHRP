@@ -274,7 +274,7 @@ namespace PeptideHitResultsProcessor
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
 
         /// <summary>
-        /// Used by MSGFPlusResultsProcessor
+        /// Used by MSGFPlusResultsProcessor and MSFragger
         /// </summary>
         /// <remarks>Smaller E-values are higher confidence results</remarks>
         [Option("MSGFPlusSynopsisFileEValueThreshold", "MSGFPlusEValue",

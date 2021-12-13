@@ -1101,7 +1101,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Note that MSPathFinder sequences don't actually have mod symbols; that information is tracked via searchResult.Modifications
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -1179,7 +1179,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">MSPathFinder results file (Dataset_IcTda.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>

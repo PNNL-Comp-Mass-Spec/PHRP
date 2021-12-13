@@ -135,9 +135,9 @@ namespace PeptideHitResultsProcessor.Processor
                 // searchResult.SearchResultAddIsotopicModifications(updateModOccurrenceCounts)
 
                 // Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
-                // Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
+                // Method .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
                 //  is not already modified by the given terminus mod mass
-                // This function will also add peptide terminus static mods, if defined, though those are not supported by X!Tandem and therefore should not be defined
+                // This method will also add peptide terminus static mods, if defined, though those are not supported by X!Tandem and therefore should not be defined
                 searchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, updateModOccurrenceCounts);
 
                 // Compute the monoisotopic mass for this peptide
@@ -147,7 +147,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputeDelMCorrectedXT();
 
                 // Populate .PeptideSequenceWithMods and .PeptideModDescription
-                // Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
+                // Note that this method will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
                 searchResult.ApplyModificationInformation();
 
                 success = true;
@@ -224,7 +224,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void InitializeLocalVariables()
         {
-            // Note: This function is called from ParseXTandemResultsFile()
+            // Note: This method is called from ParseXTandemResultsFile()
             // These variables will therefore be reset for each XTandem XML file analyzed
             mNextResultID = 1;
             mLookForReverseSequenceTag = false;
@@ -434,7 +434,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseXTandemResultsFile(string inputFilePath, string outputFilePath, bool resetMassCorrectionTagsAndModificationDefinitions = true)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
+            // Warning: This method does not call LoadParameterFile; you should typically call ProcessFile
 
             try
             {
@@ -701,7 +701,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                                 // For proteins with long descriptions, the ":reversed" tag is not present in the label attribute
                                 //  and is instead in the <note label="description"> element (a sub-element of the <protein> element
-                                // We'll check for this case later in this function
+                                // We'll check for this case later in this method
 
                                 // Reset the Protein Sequence Parsed and Domain Parsed flags
                                 proteinSequenceParsed = false;
@@ -1051,7 +1051,7 @@ namespace PeptideHitResultsProcessor.Processor
                                     if (updateResultToSeqMapFile)
                                     {
                                         // Only save the first result for each peptide in the group to the _xt.txt and _ResultToSeqMap.txt files
-                                        // Note: This function will update .ResultID to the next available ID value (mNextResultID)
+                                        // Note: This method will update .ResultID to the next available ID value (mNextResultID)
                                         SaveXTandemResultsFileEntry(searchResults[searchResultIndex], ref writer);
                                     }
 
@@ -1478,7 +1478,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">X!Tandem results file (Dataset_xt.xml)</param>
         /// <param name="outputDirectoryPath">Output directory</param>

@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcRunner
     public class PeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: Battelle, enums, MaxQuant, MODa, parm, proc
+        // Ignore Spelling: Battelle, enums, Hyperscore, MaxQuant, MODa, parm, proc
 
         /// <summary>
         /// Constructor
@@ -140,7 +140,7 @@ namespace PeptideHitResultsProcRunner
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
         /// <param name="outputDirectoryPath"></param>

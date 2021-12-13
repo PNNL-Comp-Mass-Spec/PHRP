@@ -445,7 +445,7 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Peptide column is missing or invalid", true);
                 }
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -503,7 +503,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">SEQUEST Synopsis or First-hits file</param>
         /// <param name="outputDirectoryPath">Output directory</param>

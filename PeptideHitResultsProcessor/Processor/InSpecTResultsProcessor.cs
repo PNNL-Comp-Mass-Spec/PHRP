@@ -649,7 +649,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         if (double.TryParse(precursorErrorText, out var precursorError))
                         {
-                            // Note: the October 2008 version of InSpecT uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
+                            // Note: the October 2008 version of InSpecT uses an Absolute Value method when computing the PrecursorError; the version used by PNNL does not use Absolute Value
                             // Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
                             peptideMH = (precursorMZ - precursorError) * charge - (charge - 1) * PeptideMassCalculator.MASS_PROTON;
                         }
@@ -1370,7 +1370,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Peptide], out peptideSequenceWithMods);
 
-                // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
                 var searchResultBase = (SearchResultsBaseClass)searchResult;
@@ -1424,7 +1424,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DBFilePos], out string dbFilePos);
                 GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.SpecFilePos], out string specFilePos);
 
-                // Note: .PrecursorError was processed earlier in this function
+                // Note: .PrecursorError was processed earlier in this method
                 GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorMZ], out string precursorMz);
 
                 searchResult.MQScore = mqScore;
@@ -1471,7 +1471,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Main processing function
+        /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">InSpecT results file (Dataset_inspect.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
@@ -1680,7 +1680,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
         /// </summary>
         /// <param name="peptide"></param>
-        /// <param name="inspectModInfo">This function assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined</param>
+        /// <param name="inspectModInfo"></param>
+        /// <remarks>
+        /// This method assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined
+        /// </remarks>
         private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<ModInfo> inspectModInfo)
         {
             var prefix = string.Empty;
