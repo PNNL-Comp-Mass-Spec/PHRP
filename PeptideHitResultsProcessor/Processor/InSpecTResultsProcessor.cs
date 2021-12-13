@@ -1204,115 +1204,117 @@ namespace PeptideHitResultsProcessor.Processor
 
                 splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length >= 15)
+                if (splitLine.Length < 15)
                 {
-                    if (resultsProcessed == 0)
-                    {
-                        // This is the first line of the file; it may be a header row
-                        // Determine this by seeing if any of the first three columns contains a number
-                        if (!(SynFileReaderBaseClass.IsNumber(splitLine[0]) ||
-                              SynFileReaderBaseClass.IsNumber(splitLine[1]) ||
-                              SynFileReaderBaseClass.IsNumber(splitLine[2])))
-                        {
-                            // This is a header line; ignore it
-                            return false;
-                        }
-                    }
-
-                    udtSearchResult.SpectrumFileName = splitLine[(int)InspectResultsFileColumns.SpectrumFile];
-                    if (splitLine[(int)InspectResultsFileColumns.Scan] == "0")
-                    {
-                        udtSearchResult.Scan = ExtractScanNumFromDTAName(udtSearchResult.SpectrumFileName);
-                    }
-                    else
-                    {
-                        udtSearchResult.Scan = splitLine[(int)InspectResultsFileColumns.Scan];
-                    }
-                    udtSearchResult.ScanNum = StringUtilities.CIntSafe(udtSearchResult.Scan, 0);
-
-                    // Replace any mod text names in the peptide sequence with the appropriate mod symbols
-                    // In addition, replace the * terminus symbols with dashes
-                    udtSearchResult.PeptideAnnotation = ReplaceInspectModTextWithSymbol(ReplaceTerminus(splitLine[(int)InspectResultsFileColumns.Annotation]), inspectModInfo);
-                    udtSearchResult.Protein = TruncateProteinName(splitLine[(int)InspectResultsFileColumns.Protein]);
-
-                    udtSearchResult.Charge = splitLine[(int)InspectResultsFileColumns.Charge];
-                    udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
-
-                    udtSearchResult.MQScore = splitLine[(int)InspectResultsFileColumns.MQScore];
-                    udtSearchResult.MQScoreNum = StringUtilities.CSngSafe(udtSearchResult.MQScore, 0);
-
-                    udtSearchResult.Length = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.Length], 0);
-
-                    udtSearchResult.TotalPRMScore = splitLine[(int)InspectResultsFileColumns.TotalPRMScore];
-                    udtSearchResult.TotalPRMScoreNum = StringUtilities.CSngSafe(udtSearchResult.TotalPRMScore, 0);
-
-                    udtSearchResult.MedianPRMScore = splitLine[(int)InspectResultsFileColumns.MedianPRMScore];
-                    udtSearchResult.FractionY = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionY]);
-                    udtSearchResult.FractionB = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionB]);
-                    udtSearchResult.Intensity = splitLine[(int)InspectResultsFileColumns.Intensity];
-                    udtSearchResult.NTT = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.NTT], 0);
-
-                    udtSearchResult.PValue = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.PValue]);
-                    udtSearchResult.PValueNum = StringUtilities.CSngSafe(udtSearchResult.PValue, 0);
-
-                    udtSearchResult.FScore = splitLine[(int)InspectResultsFileColumns.FScore];
-                    udtSearchResult.FScoreNum = StringUtilities.CSngSafe(udtSearchResult.FScore, 0);
-
-                    udtSearchResult.DeltaScore = splitLine[(int)InspectResultsFileColumns.DeltaScore];
-                    udtSearchResult.DeltaScoreOther = splitLine[(int)InspectResultsFileColumns.DeltaScoreOther];
-
-                    udtSearchResult.RecordNumber = splitLine[(int)InspectResultsFileColumns.RecordNumber];
-                    udtSearchResult.DBFilePos = splitLine[(int)InspectResultsFileColumns.DBFilePos];
-                    udtSearchResult.SpecFilePos = splitLine[(int)InspectResultsFileColumns.SpecFilePos];
-
-                    if (splitLine.Length >= (int)InspectResultsFileColumns.PrecursorError + 1)
-                    {
-                        // InSpecT version 2008-10-14 added these two Precursor mass columns
-                        udtSearchResult.PrecursorMZ = splitLine[(int)InspectResultsFileColumns.PrecursorMZ];
-                        udtSearchResult.PrecursorError = splitLine[(int)InspectResultsFileColumns.PrecursorError];
-
-                        udtSearchResult.MH = ComputePeptideMHFromPrecursorInfo(udtSearchResult.PrecursorMZ, udtSearchResult.PrecursorError, udtSearchResult.Charge);
-
-                        if (double.TryParse(udtSearchResult.PrecursorMZ, out var precursorMZ))
-                        {
-                            var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, udtSearchResult.ChargeNum, 0);
-                            var peptideMonoisotopicMass = udtSearchResult.MH - PeptideMassCalculator.MASS_PROTON;
-
-                            var precursorErrorDa = precursorMonoMass - peptideMonoisotopicMass;
-
-                            var peptideDeltaMassCorrectedPpm =
-                                ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, true);
-
-                            udtSearchResult.DelMPPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
-                        }
-                    }
-                    else
-                    {
-                        udtSearchResult.PrecursorMZ = "0";
-                        udtSearchResult.PrecursorError = "0";
-                        udtSearchResult.MH = 0;
-                        udtSearchResult.DelMPPM = "0";
-                    }
-
-                    return true;
+                    return false;
                 }
 
-                return false;
+                if (resultsProcessed == 0)
+                {
+                    // This is the first line of the file; it may be a header row
+                    // Determine this by seeing if any of the first three columns contains a number
+                    if (!(SynFileReaderBaseClass.IsNumber(splitLine[0]) ||
+                          SynFileReaderBaseClass.IsNumber(splitLine[1]) ||
+                          SynFileReaderBaseClass.IsNumber(splitLine[2])))
+                    {
+                        // This is a header line; ignore it
+                        return false;
+                    }
+                }
+
+                udtSearchResult.SpectrumFileName = splitLine[(int)InspectResultsFileColumns.SpectrumFile];
+                if (splitLine[(int)InspectResultsFileColumns.Scan] == "0")
+                {
+                    udtSearchResult.Scan = ExtractScanNumFromDTAName(udtSearchResult.SpectrumFileName);
+                }
+                else
+                {
+                    udtSearchResult.Scan = splitLine[(int)InspectResultsFileColumns.Scan];
+                }
+                udtSearchResult.ScanNum = StringUtilities.CIntSafe(udtSearchResult.Scan, 0);
+
+                // Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                // In addition, replace the * terminus symbols with dashes
+                udtSearchResult.PeptideAnnotation = ReplaceInspectModTextWithSymbol(ReplaceTerminus(splitLine[(int)InspectResultsFileColumns.Annotation]), inspectModInfo);
+                udtSearchResult.Protein = TruncateProteinName(splitLine[(int)InspectResultsFileColumns.Protein]);
+
+                udtSearchResult.Charge = splitLine[(int)InspectResultsFileColumns.Charge];
+                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+
+                udtSearchResult.MQScore = splitLine[(int)InspectResultsFileColumns.MQScore];
+                udtSearchResult.MQScoreNum = StringUtilities.CSngSafe(udtSearchResult.MQScore, 0);
+
+                udtSearchResult.Length = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.Length], 0);
+
+                udtSearchResult.TotalPRMScore = splitLine[(int)InspectResultsFileColumns.TotalPRMScore];
+                udtSearchResult.TotalPRMScoreNum = StringUtilities.CSngSafe(udtSearchResult.TotalPRMScore, 0);
+
+                udtSearchResult.MedianPRMScore = splitLine[(int)InspectResultsFileColumns.MedianPRMScore];
+                udtSearchResult.FractionY = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionY]);
+                udtSearchResult.FractionB = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.FractionB]);
+                udtSearchResult.Intensity = splitLine[(int)InspectResultsFileColumns.Intensity];
+                udtSearchResult.NTT = StringUtilities.CIntSafe(splitLine[(int)InspectResultsFileColumns.NTT], 0);
+
+                udtSearchResult.PValue = RemoveExtraneousDigits(splitLine[(int)InspectResultsFileColumns.PValue]);
+                udtSearchResult.PValueNum = StringUtilities.CSngSafe(udtSearchResult.PValue, 0);
+
+                udtSearchResult.FScore = splitLine[(int)InspectResultsFileColumns.FScore];
+                udtSearchResult.FScoreNum = StringUtilities.CSngSafe(udtSearchResult.FScore, 0);
+
+                udtSearchResult.DeltaScore = splitLine[(int)InspectResultsFileColumns.DeltaScore];
+                udtSearchResult.DeltaScoreOther = splitLine[(int)InspectResultsFileColumns.DeltaScoreOther];
+
+                udtSearchResult.RecordNumber = splitLine[(int)InspectResultsFileColumns.RecordNumber];
+                udtSearchResult.DBFilePos = splitLine[(int)InspectResultsFileColumns.DBFilePos];
+                udtSearchResult.SpecFilePos = splitLine[(int)InspectResultsFileColumns.SpecFilePos];
+
+                if (splitLine.Length >= (int)InspectResultsFileColumns.PrecursorError + 1)
+                {
+                    // InSpecT version 2008-10-14 added these two Precursor mass columns
+                    udtSearchResult.PrecursorMZ = splitLine[(int)InspectResultsFileColumns.PrecursorMZ];
+                    udtSearchResult.PrecursorError = splitLine[(int)InspectResultsFileColumns.PrecursorError];
+
+                    udtSearchResult.MH = ComputePeptideMHFromPrecursorInfo(udtSearchResult.PrecursorMZ, udtSearchResult.PrecursorError, udtSearchResult.Charge);
+
+                    if (double.TryParse(udtSearchResult.PrecursorMZ, out var precursorMZ))
+                    {
+                        var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, udtSearchResult.ChargeNum, 0);
+                        var peptideMonoisotopicMass = udtSearchResult.MH - PeptideMassCalculator.MASS_PROTON;
+
+                        var precursorErrorDa = precursorMonoMass - peptideMonoisotopicMass;
+
+                        var peptideDeltaMassCorrectedPpm =
+                            ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, peptideMonoisotopicMass, true);
+
+                        udtSearchResult.DelMPPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
+                    }
+                }
+                else
+                {
+                    udtSearchResult.PrecursorMZ = "0";
+                    udtSearchResult.PrecursorError = "0";
+                    udtSearchResult.MH = 0;
+                    udtSearchResult.DelMPPM = "0";
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 // Error parsing this row from the synopsis or first hits file
-                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
+                if (errorMessages.Count >= MAX_ERROR_MESSAGE_COUNT)
                 {
-                    if (splitLine?.Length > 0)
-                    {
-                        errorMessages.Add(string.Format(
-                            "Error parsing InSpecT results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
-                    }
-                    else
-                    {
-                        errorMessages.Add("Error parsing InSpecT Results in ParseInspectResultsFileEntry: " + ex.Message);
-                    }
+                    return false;
+                }
+
+                if (splitLine?.Length > 0)
+                {
+                    errorMessages.Add(string.Format(
+                        "Error parsing InSpecT results for RowIndex '{0}': {1}", splitLine[0], ex.Message));
+                }
+                else
+                {
+                    errorMessages.Add("Error parsing InSpecT Results in ParseInspectResultsFileEntry: " + ex.Message);
                 }
                 return false;
             }

@@ -693,35 +693,30 @@ namespace PeptideHitResultsProcessor.Data
             byte modMassDigitsOfPrecision,
             byte modMassDigitsOfPrecisionLoose)
         {
-            var success = false;
-
             if (residueLocInPeptide < 1)
             {
                 // Invalid position; ignore this modification
-                mErrorMessage = "Invalid value for residueLocInPeptide: " + residueLocInPeptide.ToString();
-            }
-            else
-            {
-                // Lookup the modification definition given the modification information
-                // If the modification mass is unknown, will auto-add it to the list of known modifications
-                var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
-                    modificationMass,
-                    targetResidue,
-                    residueTerminusState,
-                    out _,
-                    true,
-                    modMassDigitsOfPrecision,
-                    modMassDigitsOfPrecisionLoose);
-
-                success = SearchResultAddModification(
-                    modificationDefinition,
-                    targetResidue,
-                    residueLocInPeptide,
-                    residueTerminusState,
-                    updateModOccurrenceCounts);
+                mErrorMessage = "Invalid value for residueLocInPeptide: " + residueLocInPeptide;
+                return false;
             }
 
-            return success;
+            // Lookup the modification definition given the modification information
+            // If the modification mass is unknown, will auto-add it to the list of known modifications
+            var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
+                modificationMass,
+                targetResidue,
+                residueTerminusState,
+                out _,
+                true,
+                modMassDigitsOfPrecision,
+                modMassDigitsOfPrecisionLoose);
+
+            return SearchResultAddModification(
+                modificationDefinition,
+                targetResidue,
+                residueLocInPeptide,
+                residueTerminusState,
+                updateModOccurrenceCounts);
         }
 
         /// <summary>
