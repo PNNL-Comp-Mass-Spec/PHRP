@@ -744,7 +744,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var startupOptions = new StartupOptions
                 {
-                    DisableOpeningInputFiles = true
+                    DisableOpeningInputFiles = true,
+                    LoadModsAndSeqInfo = false
                 };
 
                 var reader = new MSFraggerSynFileReader("MSFragger_ParamFile_Reader", sourceFile.FullName, startupOptions);
