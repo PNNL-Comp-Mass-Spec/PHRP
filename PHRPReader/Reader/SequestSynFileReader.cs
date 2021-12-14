@@ -567,9 +567,7 @@ namespace PHRPReader.Reader
             const int SCAN_NOT_FOUND_FLAG = -100;
 
             var columns = line.Split('\t');
-
-            var success = false;
-
+            
             psm = new PSM();
 
             try
@@ -579,72 +577,67 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.RowIndex), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.RankXC), mColumnHeaders, 1);
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.PeptideSequence), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.RowIndex), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.RankXC), mColumnHeaders, 1);
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.PeptideSequence), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.Charge), mColumnHeaders, 0);
-
-                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.ProteinName), mColumnHeaders);
-                    psm.AddProtein(protein);
-
-                    // Note that the MH value listed in SEQUEST files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
-                    // We'll update this value below using massErrorDa
-                    // We'll further update this value using the ScanStatsEx data
-                    var precursorMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.PeptideMH), mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH, 1, 0);
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.DelM), mColumnHeaders);
-                    if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
-                    {
-                        // Adjust the precursor mass
-                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH - massErrorDa, 1, 0);
-                    }
-
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.DelMPPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.Charge), mColumnHeaders, 0);
+
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.ProteinName), mColumnHeaders);
+                psm.AddProtein(protein);
+
+                // Note that the MH value listed in SEQUEST files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
+                // We'll update this value below using massErrorDa
+                // We'll further update this value using the ScanStatsEx data
+                var precursorMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.PeptideMH), mColumnHeaders, 0.0);
+                psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH, 1, 0);
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.DelM), mColumnHeaders);
+                if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
                 {
-                    if (!fastReadMode)
-                    {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining scores
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.XCorr));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.Sp));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn2));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.RankSP));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.RankXC));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.XcRatio));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.IonsObserved));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.IonsExpected));
-                    AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.NTT));
+                    // Adjust the precursor mass
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH - massErrorDa, 1, 0);
                 }
+
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(SequestSynopsisFileColumns.DelMPPM), mColumnHeaders);
+
+                if (!fastReadMode)
+                {
+                    UpdatePSMUsingSeqInfo(psm);
+                }
+
+                // Store the remaining scores
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.XCorr));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.Sp));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn2));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.RankSP));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.RankXC));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.XcRatio));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.IonsObserved));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.IonsExpected));
+                AddScore(psm, columns, GetColumnNameByID(SequestSynopsisFileColumns.NTT));
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the SEQUEST data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
     }
 }

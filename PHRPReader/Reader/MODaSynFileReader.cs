@@ -422,8 +422,6 @@ namespace PHRPReader.Reader
 
             var columns = line.Split('\t');
 
-            var success = false;
-
             psm = new PSM();
 
             try
@@ -433,61 +431,56 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Rank_Probability), mColumnHeaders, 1);
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Peptide), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Rank_Probability), mColumnHeaders, 1);
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Peptide), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Protein), mColumnHeaders);
-                    psm.AddProtein(protein);
-
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM), mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM_PPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Charge), mColumnHeaders, 0);
+
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.Protein), mColumnHeaders);
+                psm.AddProtein(protein);
+
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
+                psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODaSynFileColumns.DelM_PPM), mColumnHeaders);
+
+                if (!fastReadMode)
                 {
-                    if (!fastReadMode)
-                    {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining scores
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Spectrum_Index));
-
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.MH));
-
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Score));
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Probability));
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Peptide_Position));
-                    AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.QValue));
+                    UpdatePSMUsingSeqInfo(psm);
                 }
+
+                // Store the remaining scores
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Spectrum_Index));
+
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.MH));
+
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Score));
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Probability));
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.Peptide_Position));
+                AddScore(psm, columns, GetColumnNameByID(MODaSynFileColumns.QValue));
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the MODa data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
     }
 }

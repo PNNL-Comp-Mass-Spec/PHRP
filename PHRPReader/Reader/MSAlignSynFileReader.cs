@@ -393,8 +393,6 @@ namespace PHRPReader.Reader
 
             var columns = line.Split('\t');
 
-            var success = false;
-
             psm = new PSM();
 
             try
@@ -404,70 +402,65 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Rank_PValue), mColumnHeaders, 1);
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Peptide), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Rank_PValue), mColumnHeaders, 1);
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Peptide), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Protein), mColumnHeaders);
-                    psm.AddProtein(protein);
-
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelM), mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelMPPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Charge), mColumnHeaders, 0);
+
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.Protein), mColumnHeaders);
+                psm.AddProtein(protein);
+
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
+                psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSAlignSynFileColumns.DelMPPM), mColumnHeaders);
+
+                if (!fastReadMode)
                 {
-                    if (!fastReadMode)
-                    {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining scores
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Prsm_ID));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Spectrum_ID));
-
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.MH));
-
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Protein_Mass));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Unexpected_Mod_Count));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Peak_Count));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Peak_Count));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Fragment_Ion_Count));
-
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.PValue));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.EValue));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FDR));
-
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Species_ID));
-                    AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FragMethod));
+                    UpdatePSMUsingSeqInfo(psm);
                 }
+
+                // Store the remaining scores
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Prsm_ID));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Spectrum_ID));
+
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.MH));
+
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Protein_Mass));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Unexpected_Mod_Count));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Peak_Count));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Peak_Count));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Matched_Fragment_Ion_Count));
+
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.PValue));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.EValue));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FDR));
+
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.Species_ID));
+                AddScore(psm, columns, GetColumnNameByID(MSAlignSynFileColumns.FragMethod));
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the MSAlign data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
     }
 }

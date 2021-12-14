@@ -350,52 +350,43 @@ namespace PHRPReader.Reader
             try
             {
                 var columns = line.Split('\t');
-                var success = false;
 
                 psm.DataLineText = line;
                 psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Scan), mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = 1;
+
+                var sequence = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Sequence), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(sequence, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = 1;
-
-                    var sequence = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Sequence), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(sequence, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(sequence, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Protein), mColumnHeaders);
-                    psm.AddProtein(protein);
-
-                    // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
-                    psm.PrecursorNeutralMass = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Mass), mColumnHeaders, 0.0);
-
-                    // Collision mode, precursor neutral mass, etc. are not applicable
-                    // psm.CollisionMode =
-                    // psm.MassErrorDa =
-                    // psm.MassErrorPPM =
-
-                    // psm.MSGFSpecEValue =
-
-                    success = true;
+                    psm.SetPeptide(sequence, mCleavageStateCalculator);
                 }
 
-                if (!success)
-                {
-                    return false;
-                }
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Charge), mColumnHeaders, 0);
+
+                var protein = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Protein), mColumnHeaders);
+                psm.AddProtein(protein);
+
+                // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
+                psm.PrecursorNeutralMass = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSPathFinderSynFileColumns.Mass), mColumnHeaders, 0.0);
+
+                // Collision mode, precursor neutral mass, etc. are not applicable
+                // psm.CollisionMode =
+                // psm.MassErrorDa =
+                // psm.MassErrorPPM =
+
+                // psm.MSGFSpecEValue =
 
                 if (!fastReadMode)
                 {

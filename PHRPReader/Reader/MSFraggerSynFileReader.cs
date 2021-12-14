@@ -395,8 +395,6 @@ namespace PHRPReader.Reader
 
             var columns = line.Split('\t');
 
-            var success = false;
-
             psm = new PSM();
 
             try
@@ -406,87 +404,82 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.RankEValue), mColumnHeaders, 0);
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Peptide), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.RankEValue), mColumnHeaders, 0);
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Peptide), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    var proteinName = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Protein), mColumnHeaders);
-
-                    if (!string.IsNullOrWhiteSpace(proteinName))
-                    {
-                        psm.AddProtein(proteinName.Trim());
-                    }
-
-                    var additionalProteins = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.AdditionalProteins), mColumnHeaders);
-                    if (!string.IsNullOrWhiteSpace(additionalProteins))
-                    {
-                        foreach (var protein in additionalProteins.Split(';'))
-                        {
-                            if (string.IsNullOrWhiteSpace(protein))
-                                continue;
-
-                            psm.AddProtein(protein.Trim());
-                        }
-                    }
-
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
-
-                    if (Math.Abs(precursorMZ) > float.Epsilon)
-                    {
-                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
-                    }
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM), mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM_PPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Charge), mColumnHeaders, 0);
+
+                var proteinName = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.Protein), mColumnHeaders);
+
+                if (!string.IsNullOrWhiteSpace(proteinName))
                 {
-                    if (!fastReadMode)
-                    {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining data
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Dataset));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.DatasetID));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM_MSFragger));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MH));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Mass));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Modifications));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.NTT));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.EValue));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Hyperscore));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Nextscore));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.PeptideProphetProbability));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.RetentionTime));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MissedCleavages));
-                    AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.QValue));
+                    psm.AddProtein(proteinName.Trim());
                 }
+
+                var additionalProteins = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.AdditionalProteins), mColumnHeaders);
+                if (!string.IsNullOrWhiteSpace(additionalProteins))
+                {
+                    foreach (var protein in additionalProteins.Split(';'))
+                    {
+                        if (string.IsNullOrWhiteSpace(protein))
+                            continue;
+
+                        psm.AddProtein(protein.Trim());
+                    }
+                }
+
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
+
+                if (Math.Abs(precursorMZ) > float.Epsilon)
+                {
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+                }
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM_PPM), mColumnHeaders);
+
+                if (!fastReadMode)
+                {
+                    UpdatePSMUsingSeqInfo(psm);
+                }
+
+                // Store the remaining data
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Dataset));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.DatasetID));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.DelM_MSFragger));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MH));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Mass));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Modifications));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.NTT));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.EValue));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Hyperscore));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Nextscore));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.PeptideProphetProbability));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.RetentionTime));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MissedCleavages));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.QValue));
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the MSFragger data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
 
         private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)

@@ -691,8 +691,6 @@ namespace PHRPReader.Reader
 
             var columns = line.Split('\t');
 
-            var success = false;
-
             psm = new PSM();
 
             try
@@ -702,85 +700,80 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.ResultID), mColumnHeaders, 0);
+
+                // X!Tandem only tracks the top-ranked peptide for each spectrum
+                psm.ScoreRank = 1;
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Peptide), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.ResultID), mColumnHeaders, 0);
-
-                    // X!Tandem only tracks the top-ranked peptide for each spectrum
-                    psm.ScoreRank = 1;
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Peptide), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    // Lookup the protein name(s) using mResultIDToProteins
-                    if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
-                    {
-                        foreach (var protein in proteinsForResultID)
-                        {
-                            psm.AddProtein(protein);
-                        }
-                    }
-
-                    // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
-                    // We'll update this value below using massErrorDa
-                    // We'll further update this value using the ScanStatsEx data
-                    var peptideMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.MH), mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelM), mColumnHeaders);
-                    if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
-                    {
-                        // Adjust the precursor mass
-                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
-                    }
-
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelMPPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.Charge), mColumnHeaders, 0);
+
+                // Lookup the protein name(s) using mResultIDToProteins
+                if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
                 {
-                    if (!fastReadMode)
+                    foreach (var protein in proteinsForResultID)
                     {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining scores
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Hyperscore));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.EValue));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.DeltaCn2));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YScore));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YIons));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BScore));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BIons));
-                    AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Intensity));
-
-                    // This is the base-10 log of the expectation value
-                    if (double.TryParse(psm.GetScore(GetColumnNameByID(XTandemSynFileColumns.EValue)), out var logEValue))
-                    {
-                        // Record the original E-value
-                        psm.SetScore("Peptide_Expectation_Value", Math.Pow(10, logEValue).ToString("0.00e+000"));
+                        psm.AddProtein(protein);
                     }
                 }
+
+                // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
+                // We'll update this value below using massErrorDa
+                // We'll further update this value using the ScanStatsEx data
+                var peptideMH = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.MH), mColumnHeaders, 0.0);
+                psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelM), mColumnHeaders);
+                if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
+                {
+                    // Adjust the precursor mass
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
+                }
+
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(XTandemSynFileColumns.DelMPPM), mColumnHeaders);
+
+                if (!fastReadMode)
+                {
+                    UpdatePSMUsingSeqInfo(psm);
+                }
+
+                // Store the remaining scores
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Hyperscore));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.EValue));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.DeltaCn2));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YScore));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.YIons));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BScore));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.BIons));
+                AddScore(psm, columns, GetColumnNameByID(XTandemSynFileColumns.Intensity));
+
+                // This is the base-10 log of the expectation value
+                if (double.TryParse(psm.GetScore(GetColumnNameByID(XTandemSynFileColumns.EValue)), out var logEValue))
+                {
+                    // Record the original E-value
+                    psm.SetScore("Peptide_Expectation_Value", Math.Pow(10, logEValue).ToString("0.00e+000"));
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 HandleException("Error parsing line " + linesRead + " in the X!Tandem data file", ex);
+                return false;
             }
-
-            return success;
         }
 
         private static string XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, string valueIfMissing)

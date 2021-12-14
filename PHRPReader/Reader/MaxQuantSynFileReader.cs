@@ -330,8 +330,6 @@ namespace PHRPReader.Reader
 
             var columns = line.Split('\t');
 
-            var success = false;
-
             psm = new PSM();
 
             try
@@ -341,110 +339,105 @@ namespace PHRPReader.Reader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.ResultID), mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.RankScore), mColumnHeaders, 0);
+
+                var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Peptide), mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.ResultID), mColumnHeaders, 0);
-                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.RankScore), mColumnHeaders, 0);
-
-                    var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Peptide), mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Charge), mColumnHeaders, 0);
-
-                    var proteinNames = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Proteins), mColumnHeaders);
-                    if (!string.IsNullOrWhiteSpace(proteinNames))
-                    {
-                        foreach (var protein in proteinNames.Split(';'))
-                        {
-                            if (string.IsNullOrWhiteSpace(protein))
-                                continue;
-
-                            psm.AddProtein(protein.Trim());
-                        }
-                    }
-
-                    var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
-
-                    if (Math.Abs(precursorMZ) > float.Epsilon)
-                    {
-                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
-                    }
-                    else
-                    {
-                        var precursorMZ_MaxQuant = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_MaxQuant), mColumnHeaders, 0.0);
-                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ_MaxQuant, psm.Charge, 0);
-                    }
-
-                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM), mColumnHeaders);
-                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_PPM), mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Charge), mColumnHeaders, 0);
+
+                var proteinNames = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Proteins), mColumnHeaders);
+                if (!string.IsNullOrWhiteSpace(proteinNames))
                 {
-                    if (!fastReadMode)
+                    foreach (var protein in proteinNames.Split(';'))
                     {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
+                        if (string.IsNullOrWhiteSpace(protein))
+                            continue;
 
-                    // Store the remaining data
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Dataset));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DatasetID));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.FragMethod));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.SpecIndex));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_MaxQuant));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_PPM_MaxQuant));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MH));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Mass));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DynamicModifications));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.LeadingRazorProtein));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NTT));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PEP));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Score));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DeltaScore));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.TotalPeptideIntensity));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MassAnalyzer));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorType));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.RetentionTime));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorScan));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorIntensity));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NumberOfMatches));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.IntensityCoverage));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MissedCleavages));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MsMsID));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ProteinGroupIDs));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PeptideID));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ModPeptideID));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.EvidenceID));
-                    AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.QValue));
-
-                    if (psm.Proteins.Count == 0)
-                    {
-                        // Add the leading razor protein to the protein list
-                        if (psm.TryGetScore(GetColumnNameByID(MaxQuantSynFileColumns.LeadingRazorProtein), out var leadingRazorProtein) &&
-                            !string.IsNullOrWhiteSpace(leadingRazorProtein))
-                        {
-                            psm.AddProtein(leadingRazorProtein.Trim());
-                        }
+                        psm.AddProtein(protein.Trim());
                     }
                 }
+
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
+
+                if (Math.Abs(precursorMZ) > float.Epsilon)
+                {
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+                }
+                else
+                {
+                    var precursorMZ_MaxQuant = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_MaxQuant), mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ_MaxQuant, psm.Charge, 0);
+                }
+
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM), mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_PPM), mColumnHeaders);
+
+                if (!fastReadMode)
+                {
+                    UpdatePSMUsingSeqInfo(psm);
+                }
+
+                // Store the remaining data
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Dataset));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DatasetID));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.FragMethod));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.SpecIndex));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_MaxQuant));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DelM_PPM_MaxQuant));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MH));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Mass));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DynamicModifications));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.LeadingRazorProtein));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NTT));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PEP));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Score));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DeltaScore));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.TotalPeptideIntensity));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MassAnalyzer));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorType));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.RetentionTime));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorScan));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorIntensity));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NumberOfMatches));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.IntensityCoverage));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MissedCleavages));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MsMsID));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ProteinGroupIDs));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PeptideID));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ModPeptideID));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.EvidenceID));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.QValue));
+
+                if (psm.Proteins.Count == 0)
+                {
+                    // Add the leading razor protein to the protein list
+                    if (psm.TryGetScore(GetColumnNameByID(MaxQuantSynFileColumns.LeadingRazorProtein), out var leadingRazorProtein) &&
+                        !string.IsNullOrWhiteSpace(leadingRazorProtein))
+                    {
+                        psm.AddProtein(leadingRazorProtein.Trim());
+                    }
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the MaxQuant data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
 
         private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)
