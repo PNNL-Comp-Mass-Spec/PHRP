@@ -2486,6 +2486,71 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Looks for fileNameOrPath in the current working directory
+        /// If not found, looks in sourceDirectoryPath
+        /// If searchParentDirectory is true, also looks in the parent directory of both the source file directory and the working directory
+        /// </summary>
+        /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>
+        /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
+        /// <param name="searchParentDirectory">
+        /// If true and the file is not found in the working directory or the source directory, also examine the parent directory of each
+        /// </param>
+        /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
+        public static string ResolveFilePath(string sourceDirectoryPath, string fileNameOrPath, bool searchParentDirectory = true)
+        {
+            if (File.Exists(fileNameOrPath))
+            {
+                return fileNameOrPath;
+            }
+
+            var fileName = Path.GetFileName(fileNameOrPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+                return fileNameOrPath;
+
+            var sourceDirectoryCandidateFile = new FileInfo(Path.Combine(sourceDirectoryPath, fileName));
+            if (sourceDirectoryCandidateFile.Exists)
+            {
+                return sourceDirectoryCandidateFile.FullName;
+            }
+
+            var workingDirectoryCandidateFile = new FileInfo(fileName);
+            if (workingDirectoryCandidateFile.Exists)
+            {
+                return workingDirectoryCandidateFile.FullName;
+            }
+
+            if (!searchParentDirectory)
+            {
+                return fileNameOrPath;
+            }
+
+            var parentDirectories = new List<DirectoryInfo>();
+
+            if (sourceDirectoryCandidateFile.Directory != null)
+            {
+                parentDirectories.Add(sourceDirectoryCandidateFile.Directory.Parent);
+            }
+
+            if (workingDirectoryCandidateFile.Directory != null)
+            {
+                parentDirectories.Add(workingDirectoryCandidateFile.Directory.Parent);
+            }
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var directory in parentDirectories)
+            {
+                var parentCandidateFile = new FileInfo(Path.Combine(directory.FullName, fileName));
+
+                if (parentCandidateFile.Exists)
+                {
+                    return parentCandidateFile.FullName;
+                }
+            }
+
+            return fileNameOrPath;
+        }
+
+        /// <summary>
         /// Round a value (stored as text) to the given number of digits after the decimal point
         /// </summary>
         /// <param name="valueToRound"></param>

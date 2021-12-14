@@ -123,11 +123,11 @@ namespace PeptideHitResultsProcRunner
 
         private void InitializePeptideHitResultsProcessor(string inputFilePath)
         {
-            var sourceFile = new FileInfo(inputFilePath);
+            var sourceFile = new FileInfo(PathUtils.GetCleanPath(inputFilePath));
 
-            mPeptideHitResultsProcessor.Options.MassCorrectionTagsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.MassCorrectionTagsFilePath);
-            mPeptideHitResultsProcessor.Options.ModificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.ModificationDefinitionsFilePath);
-            mPeptideHitResultsProcessor.Options.SearchToolParameterFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.SearchToolParameterFilePath);
+            mPeptideHitResultsProcessor.Options.MassCorrectionTagsFilePath = PHRPBaseClass.ResolveFilePath(sourceFile.DirectoryName, Options.MassCorrectionTagsFilePath);
+            mPeptideHitResultsProcessor.Options.ModificationDefinitionsFilePath = PHRPBaseClass.ResolveFilePath(sourceFile.DirectoryName, Options.ModificationDefinitionsFilePath);
+            mPeptideHitResultsProcessor.Options.SearchToolParameterFilePath = PHRPBaseClass.ResolveFilePath(sourceFile.DirectoryName, Options.SearchToolParameterFilePath);
         }
 
         /// <summary>
@@ -212,33 +212,6 @@ namespace PeptideHitResultsProcRunner
             resultsProcessor.ProgressUpdate += PeptideHitResultsProcessor_ProgressChanged;
             resultsProcessor.WarningEvent += PeptideHitResultsProcessor_WarningMessageEvent;
             resultsProcessor.ProgressReset += PeptideHitResultsProcessor_ProgressReset;
-        }
-
-        /// <summary>
-        /// Looks for fileNameOrPath in the current working directory
-        /// If not found, looks in sourceDirectoryPath
-        /// </summary>
-        /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>
-        /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
-        /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
-        protected string ResolveFilePath(string sourceDirectoryPath, string fileNameOrPath)
-        {
-            if (File.Exists(fileNameOrPath))
-            {
-                return fileNameOrPath;
-            }
-
-            var fileName = Path.GetFileName(fileNameOrPath);
-            if (string.IsNullOrWhiteSpace(fileName))
-                return fileNameOrPath;
-
-            var newFilePath = Path.Combine(sourceDirectoryPath, fileName);
-            if (File.Exists(newFilePath))
-            {
-                return newFilePath;
-            }
-
-            return fileNameOrPath;
         }
 
         private void SetLocalErrorCode(ResultsProcessorErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged = false)
