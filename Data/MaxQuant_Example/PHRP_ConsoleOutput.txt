@@ -1,4 +1,6 @@
+/i:msms.txt /n:MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml /t:Mass_Correction_Tags.txt /L /ProteinMods /F:M_musculus_UniProt_SPROT_2013_09_2013-09-18_Tryp_Pig_Bov.fasta
 Parsing msms.txt
+
 Input file:                                   msms.txt
 Output directory:                             F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example
 Detected MaxQuant results file
@@ -20,7 +22,7 @@ Create Synopsis File:                         True
 MaxQuant Synopsis File Andromeda Score Threshold: 50
 MaxQuant Synopsis File PEP Threshold:             0.010
 
-Loading MaxQuant modifications from C:\DMS_Programs\MaxQuant\bin\conf\modifications.xml
+Loading MaxQuant modifications from F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example\modifications.xml
 Reading the MaxQuant parameter file, F:\...\MaxQuant_..\MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml
 Reading peptides from file F:\...\DataMining\PeptideHitResultsProcessor\Data\MaxQuant_Example\peptides.txt
 
@@ -30,7 +32,7 @@ Reading MaxQuant results file, F:\...\Pr..\DataMining\PeptideHitResultsProcessor
 Creating the SYN file (0.0% complete)
 Processing: 0% .
 Processing: 25% .
-Processing: 50% .
+Processing: 50% 
 Processing: 75% 
 
 Loading precursor m/z information from F:\...\MaxQua..\QC_Mam_19_01_Run3_02Jun21_Cicero_WBEH-20-09-08_PrecursorInfo.txt
@@ -78,7 +80,7 @@ Processing: 50%
 Processing: 75% 
 
 Creating Peptide to Protein Map file (90.0% complete)
-.
+
   Checking for write permission by creating file F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
 
   Deleting F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
@@ -158,7 +160,7 @@ Warning: MSGF file not found; column MSGF_SpecProb will not have any data
 
 Processing: 25% 
 Processing: 50% 
-Processing: 75% ...
+Processing: 75% ..
 Processing: 100% 
 Note: skipped 7 / 34,308 PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file
 Processing Complete
