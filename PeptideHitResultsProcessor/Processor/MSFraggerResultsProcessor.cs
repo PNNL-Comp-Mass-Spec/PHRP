@@ -968,7 +968,14 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         currentDatasetName = baseName;
                     }
+
+                    if (currentDatasetName.EndsWith(".pep"))
+                    {
+                        currentDatasetName = currentDatasetName.Substring(0, currentDatasetName.Length - 4);
+                    }
                 }
+
+                searchResult.DatasetName = currentDatasetName;
 
                 if (!GetColumnValue(splitLine, columnMapping[MSFraggerResultsFileColumns.Spectrum], out searchResult.Scan))
                 {
