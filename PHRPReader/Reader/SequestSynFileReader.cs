@@ -567,7 +567,7 @@ namespace PHRPReader.Reader
             const int SCAN_NOT_FOUND_FLAG = -100;
 
             var columns = line.Split('\t');
-            
+
             psm = new PSM();
 
             try

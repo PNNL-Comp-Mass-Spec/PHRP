@@ -528,7 +528,6 @@ namespace PHRPReader.Reader
                 psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.DelM), mColumnHeaders);
                 psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MODPlusSynFileColumns.DelM_PPM), mColumnHeaders);
 
-
                 if (!fastReadMode)
                 {
                     UpdatePSMUsingSeqInfo(psm);
