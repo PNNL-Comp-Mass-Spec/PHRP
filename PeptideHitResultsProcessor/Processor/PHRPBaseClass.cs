@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "December 13, 2021";
+        public const string PROGRAM_DATE = "December 14, 2021";
 
         /// <summary>
         /// Constructor
@@ -1988,13 +1988,12 @@ namespace PeptideHitResultsProcessor.Processor
         {
             if (proteinName.StartsWith("reversed_", StringComparison.OrdinalIgnoreCase))
             {
-                // Used in DMS-generated protein collections
                 return true;
             }
 
             if (proteinName.StartsWith("REV_", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by MSGFDB
+                // Used by MSGFDB and in DMS-generated protein collections
                 return true;
             }
 
