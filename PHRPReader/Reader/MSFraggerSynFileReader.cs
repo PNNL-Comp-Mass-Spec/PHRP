@@ -20,7 +20,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// MSFragger synopsis file suffix
         /// </summary>
-        public const string FILENAME_SUFFIX_SYN = "_msf_syn.txt";
+        public const string FILENAME_SUFFIX_SYN = "_msfragger_syn.txt";
 
         /// <summary>
         /// MSFragger first hits file suffix
@@ -33,7 +33,7 @@ namespace PHRPReader.Reader
         /// We don't actually create first-hits files for MSFragger results
         /// </para>
         /// </remarks>
-        public const string FILENAME_SUFFIX_FHT = "_msf_fht.txt";
+        public const string FILENAME_SUFFIX_FHT = "_msfragger_fht.txt";
 
         /// <summary>
         /// Search engine name
@@ -220,7 +220,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return datasetName + "_msf_syn_ModSummary.txt";
+            return datasetName + "_msfragger_syn_ModSummary.txt";
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return datasetName + "_msf_PepToProtMapMTS.txt";
+            return datasetName + "_msfragger_PepToProtMapMTS.txt";
         }
 
         /// <summary>
@@ -240,7 +240,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return datasetName + "_msf_syn_ProteinMods.txt";
+            return datasetName + "_msfragger_syn_ProteinMods.txt";
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return datasetName + "_msf_syn_ResultToSeqMap.txt";
+            return datasetName + "_msfragger_syn_ResultToSeqMap.txt";
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return datasetName + "_msf_syn_SeqInfo.txt";
+            return datasetName + "_msfragger_syn_SeqInfo.txt";
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return datasetName + "_msf_syn_SeqToProteinMap.txt";
+            return datasetName + "_msfragger_syn_SeqToProteinMap.txt";
         }
 
         /// <summary>

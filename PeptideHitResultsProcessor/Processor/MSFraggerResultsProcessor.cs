@@ -532,15 +532,15 @@ namespace PeptideHitResultsProcessor.Processor
                 // Compute MassErrorPpm and MassErrorDa
                 ComputeObservedMassErrors(filteredSearchResults);
 
-                // The synopsis file name will be of the form DatasetName_msf_syn.txt
+                // The synopsis file name will be of the form DatasetName_msfragger_syn.txt
                 // If baseDatasetNames only has one item, will use the full dataset name
                 // If baseDatasetNames has multiple items, will use the longest string in common for the keys in baseDatasetNames
 
                 baseName = baseNameByDatasetName.Count switch
                 {
-                    0 => "Dataset_msf",
-                    1 => baseNameByDatasetName.First().Key + "_msf",
-                    _ => longestCommonBaseName + "_msf"
+                    0 => "Dataset_msfragger",
+                    1 => baseNameByDatasetName.First().Key + "_msfragger",
+                    _ => longestCommonBaseName + "_msfragger"
                 };
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
