@@ -1509,10 +1509,16 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                         else
                         {
+                            // Use a higher match error threshold since some peptides reported by MSFragger don't perfectly match the FASTA file
+                            const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 15;
+                            const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
+
                             success = CreateProteinModsFileWork(
                                 baseName, inputFile,
                                 synOutputFilePath, outputDirectoryPath,
-                                PeptideHitResultTypes.MSFragger);
+                                PeptideHitResultTypes.MSFragger,
+                                MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                                MATCH_ERROR_PERCENT_WARNING_THRESHOLD);
                         }
                     }
 
