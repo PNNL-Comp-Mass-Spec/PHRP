@@ -1076,11 +1076,24 @@ namespace PeptideHitResultsProcessor.Processor
                     _ => 0
                 };
 
-                if (cleavageState != PeptideCleavageStateCalculator.PeptideCleavageState.Unknown && searchResult.NumberOfTrypticTerminii != ntt)
+                if (cleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Unknown || searchResult.NumberOfTrypticTerminii == ntt)
                 {
-                    OnWarningEvent("Changing cleavage state from {0} to {1} for {2} in scan {3}",
-                        searchResult.NumberOfTrypticTerminii, ntt, peptideWithPrefixAndSuffix, searchResult.Scan);
+                    return true;
                 }
+
+                if (ntt <= searchResult.NumberOfTrypticTerminii)
+                {
+                    // If a peptide starts after the M at the start of a protein,
+                    // MSFragger treats this as valid for a fully tryptic peptide
+
+                    // MSFragger also does not use the proline rule when determining cleavage state
+
+                    // Thus, allow NumberOfTrypticTerminii to be larger than the computed cleavage state value
+                    return true;
+                }
+
+                OnWarningEvent("Changing cleavage state from {0} to {1} for {2} in scan {3}",
+                    searchResult.NumberOfTrypticTerminii, ntt, peptideWithPrefixAndSuffix, searchResult.Scan);
 
                 return true;
             }
