@@ -831,6 +831,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
                     if (!filesInitialized)
                         return false;
