@@ -1316,7 +1316,7 @@ namespace PeptideHitResultsProcessor.Processor
                         searchResult.Proteins.Add(trimmedName);
                     }
 
-                    if (searchResult.Proteins.Count > 0)
+                    if (string.IsNullOrWhiteSpace(searchResult.ProteinName) && searchResult.Proteins.Count > 0)
                     {
                         searchResult.ProteinName = searchResult.Proteins[0];
                     }
