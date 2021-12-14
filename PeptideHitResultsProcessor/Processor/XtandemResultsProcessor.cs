@@ -114,7 +114,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public XTandemResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 10, 2021";
+            FileDate = "December 13, 2021";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();

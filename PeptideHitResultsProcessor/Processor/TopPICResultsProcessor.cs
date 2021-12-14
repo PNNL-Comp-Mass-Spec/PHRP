@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 10, 2021";
+            FileDate = "December 13, 2021";
             InitializeLocalVariables();
         }
 
@@ -1558,7 +1558,7 @@ namespace PeptideHitResultsProcessor.Processor
                         success = CreateProteinModsFileWork(
                             baseName, inputFile,
                             synOutputFilePath, outputDirectoryPath,
-                            PeptideHitResultTypes.TopPIC, 
+                            PeptideHitResultTypes.TopPIC,
                             MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
                     }
 
