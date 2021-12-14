@@ -627,16 +627,18 @@ namespace PeptideHitResultsProcessor.Processor
             foreach (var modEntry in modificationList.Split(','))
             {
                 // Parse out the residue and mod mass
-                var match = mModListResidueModMatcher.Match(modEntry);
+                var residueMatch = mModListResidueModMatcher.Match(modEntry);
                 var termMatch = mModListTerminalModMatcher.Match(modEntry);
 
-                if (!match.Success || !termMatch.Success)
+                if (!(residueMatch.Success || termMatch.Success))
                 {
                     ReportError("Invalid MSFragger mod entry format; must be residue number, symbol, and mod mass: " + modEntry);
                     continue;
                 }
 
-                var modMassText = match.Groups["ModMass"].Value;
+                var modMassText = residueMatch.Success
+                    ? residueMatch.Groups["ModMass"].Value
+                    : termMatch.Groups["ModMass"].Value;
 
                 if (!double.TryParse(modMassText, out var modMass))
                 {
@@ -649,11 +651,11 @@ namespace PeptideHitResultsProcessor.Processor
                     ModMass = modMass
                 };
 
-                if (match.Success)
+                if (residueMatch.Success)
                 {
                     // Matched a modified residue
-                    var residueNumber = match.Groups["ResidueNumber"].Value;
-                    currentMod.ResidueSymbol = match.Groups["ResidueSymbol"].Value[0];
+                    var residueNumber = residueMatch.Groups["ResidueNumber"].Value;
+                    currentMod.ResidueSymbol = residueMatch.Groups["ResidueSymbol"].Value[0];
 
                     if (!int.TryParse(residueNumber, out currentMod.ResidueLocInPeptide))
                     {
@@ -677,7 +679,7 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     // Matched a terminal mod
-                    switch (match.Groups["TerminusName"].Value)
+                    switch (termMatch.Groups["TerminusName"].Value)
                     {
                         case "N-term":
                             currentMod.ResidueLocInPeptide = 1;
