@@ -2427,7 +2427,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         public bool ResetMassCorrectionTagsAndModificationDefinitions()
         {
-            var fileNotFound = false;
+            var sourceFile = new FileInfo(PathUtils.GetCleanPath(Options.InputFilePath));
+
+            var massCorrectionFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.MassCorrectionTagsFilePath);
 
             // Note: If mMassCorrectionTagsFilePath is blank, the mass correction tags will be reset to the defaults and success will be True
             var massCorrectionTagsSuccess = mPeptideMods.ReadMassCorrectionTagsFile(massCorrectionFilePath, out var massCorrectionTagsFileNotFound);
@@ -2445,23 +2447,25 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
+            var modificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, Options.ModificationDefinitionsFilePath);
 
             // Note: If mModificationDefinitionsFilePath is blank, the modifications will be cleared and success will be True
             var modDefsSuccess = mPeptideMods.ReadModificationDefinitionsFile(modificationDefinitionsFilePath, out var modDefsFileNotFound);
 
+            if (modDefsSuccess)
+                return true;
+
+            if (modDefsFileNotFound)
             {
-                if (fileNotFound)
-                {
-                    SetErrorCode(PHRPErrorCode.ModificationDefinitionFileNotFound);
-                    OnWarningEvent("File not found: " + Options.ModificationDefinitionsFilePath);
-                }
-                else
-                {
-                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
-                }
+                SetErrorCode(PHRPErrorCode.ModificationDefinitionFileNotFound);
+                OnWarningEvent("File not found: " + Options.ModificationDefinitionsFilePath);
+            }
+            else
+            {
+                SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
             }
 
-            return success;
+            return false;
         }
 
         /// <summary>
