@@ -1205,8 +1205,10 @@ namespace PHRPReader.Data
         /// <param name="filePath"></param>
         /// <param name="fileNotFound"></param>
         /// <returns>True if successful, false if an error</returns>
-        public bool ReadMassCorrectionTagsFile(string filePath, ref bool fileNotFound)
+        public bool ReadMassCorrectionTagsFile(string filePath, out bool fileNotFound)
         {
+            fileNotFound = false;
+
             try
             {
                 // Open the mass correction tags file
@@ -1276,8 +1278,10 @@ namespace PHRPReader.Data
         /// <param name="filePath"></param>
         /// <param name="fileNotFound"></param>
         /// <returns>True if successful, false if an error</returns>
-        public bool ReadModificationDefinitionsFile(string filePath, ref bool fileNotFound)
+        public bool ReadModificationDefinitionsFile(string filePath, out bool fileNotFound)
         {
+            fileNotFound = false;
+
             try
             {
                 // Open the modification file

@@ -2430,10 +2430,11 @@ namespace PeptideHitResultsProcessor.Processor
             var fileNotFound = false;
 
             // Note: If mMassCorrectionTagsFilePath is blank, the mass correction tags will be reset to the defaults and success will be True
-            var success = mPeptideMods.ReadMassCorrectionTagsFile(Options.MassCorrectionTagsFilePath, ref fileNotFound);
-            if (!success)
+            var massCorrectionTagsSuccess = mPeptideMods.ReadMassCorrectionTagsFile(massCorrectionFilePath, out var massCorrectionTagsFileNotFound);
+
+            if (!massCorrectionTagsSuccess)
             {
-                if (fileNotFound)
+                if (massCorrectionTagsFileNotFound)
                 {
                     SetErrorCode(PHRPErrorCode.MassCorrectionTagsFileNotFound);
                     OnWarningEvent("Mass Correction Tags file not found: " + Options.MassCorrectionTagsFilePath);
@@ -2444,9 +2445,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
+
             // Note: If mModificationDefinitionsFilePath is blank, the modifications will be cleared and success will be True
-            success = mPeptideMods.ReadModificationDefinitionsFile(Options.ModificationDefinitionsFilePath, ref fileNotFound);
-            if (!success)
+            var modDefsSuccess = mPeptideMods.ReadModificationDefinitionsFile(modificationDefinitionsFilePath, out var modDefsFileNotFound);
+
             {
                 if (fileNotFound)
                 {
