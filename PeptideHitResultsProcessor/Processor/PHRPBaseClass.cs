@@ -2272,11 +2272,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="datasetNames"></param>
         /// <returns>Dictionary where keys are dataset names and values are dataset IDs</returns>
-        protected Dictionary<string, int> LookupDatasetIDs(IEnumerable<string> datasetNames)
+        protected Dictionary<string, int> LookupDatasetIDs(List<string> datasetNames)
         {
             var datasetIDs = new Dictionary<string, int>();
 
-            if (string.IsNullOrWhiteSpace(Options.DMSConnectionString) ||
+            if (datasetNames.Count == 0 ||
+                string.IsNullOrWhiteSpace(Options.DMSConnectionString) ||
                 Options.DMSConnectionString.Equals("false", StringComparison.OrdinalIgnoreCase))
             {
                 return datasetIDs;
