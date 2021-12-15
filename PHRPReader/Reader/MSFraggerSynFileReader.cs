@@ -495,12 +495,29 @@ namespace PHRPReader.Reader
                     return false;
                 }
 
-                // Determine the enzyme name
-                if (!searchEngineParams.Parameters.TryGetValue("search_enzyme_name", out var enzymeName))
+                string enzymeName;
+
+                // Starting with MSFragger v3.4, enzyme name is specified by parameter search_enzyme_name_1
+                // Previous versions used search_enzyme_name
+                if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name_1", out var enzymeNameA))
                 {
-                    ReportWarning("'search_enzyme_name' parameter not found in the MSFragger parameter file");
+                    enzymeName = enzymeNameA;
                 }
                 else
+                {
+                    if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name", out var enzymeNameB))
+                    {
+                        enzymeName = enzymeNameB;
+                    }
+                    else
+                    {
+                        enzymeName = string.Empty;
+                        ReportWarning("The MSFragger parameter file does not have parameter 'search_enzyme_name' or 'search_enzyme_name_1'");
+                    }
+                }
+
+                // Determine the enzyme name
+                if (!string.IsNullOrWhiteSpace(enzymeName))
                 {
                     searchEngineParams.Enzyme = enzymeName;
 
