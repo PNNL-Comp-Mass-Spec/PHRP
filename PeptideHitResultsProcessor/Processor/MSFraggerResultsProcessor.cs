@@ -1012,7 +1012,12 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PrevAA], out searchResult.PrefixResidue);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NextAA], out searchResult.SuffixResidue);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideLength], out searchResult.Length);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out searchResult.RetentionTime);
+
+                if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out int retentionTimeSeconds))
+                {
+                    searchResult.RetentionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
+                }
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMass], out searchResult.CalibratedObservedMass);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMZ], out searchResult.PrecursorMZ);

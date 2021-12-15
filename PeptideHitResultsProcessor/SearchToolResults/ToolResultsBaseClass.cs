@@ -124,10 +124,12 @@
         public short ChargeNum;
 
         /// <summary>
-        /// Elution time of the MS/MS spectrum
+        /// Elution time of the MS/MS spectrum, in minutes
         /// </summary>
         /// <remarks>
-        /// For MSFragger, from column "Retention"
+        /// For MaxQuant, in the msms.txt file, column "Retention time" is in minutes
+        /// For MSFragger, in the Dataset_psm.tsv file, column "Retention" is in seconds
+        /// For MSFragger, in the MSFragger results file, column "retention_time" is in minutes
         /// </remarks>
         public string RetentionTime;
 
