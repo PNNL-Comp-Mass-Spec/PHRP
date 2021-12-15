@@ -934,6 +934,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="searchResults"></param>
         protected void ComputeQValues(List<ToolResultsBaseClass> searchResults)
         {
+            if (searchResults.Count == 0)
+            {
+                OnDebugEvent("Skipping QValue computation since no filter passing results");
+                return;
+            }
+
             var forwardPeptideCount = 0;
             var reversePeptideCount = 0;
 

@@ -415,15 +415,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="outputDirectoryPath"></param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
+        /// <param name="filterPassingResultCount">Output: number of filter passing results</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputDirectoryPath,
             out string baseName,
-            out string synOutputFilePath)
+            out string synOutputFilePath,
+            out int filterPassingResultCount)
         {
             baseName = string.Empty;
             synOutputFilePath = string.Empty;
+            filterPassingResultCount = 0;
 
             try
             {
@@ -555,6 +558,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Sort the data in filteredSearchResults then write out to disk
                 SortAndWriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
+
+                filterPassingResultCount = filteredSearchResults.Count;
 
                 // Inform the user if any errors occurred
                 if (errorMessages.Count > 0)
@@ -1484,10 +1489,21 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the synopsis output file
                     ResetProgress("Creating the SYN file", true);
 
-                    success = CreateSynResultsFile(inputFilePath, outputDirectoryPath, out var baseName, out var synOutputFilePath);
+                    success = CreateSynResultsFile(
+                        inputFilePath, outputDirectoryPath,
+                        out var baseName,
+                        out var synOutputFilePath,
+                        out var filterPassingResultCount);
+
                     if (!success)
                     {
                         return false;
+                    }
+
+                    if (filterPassingResultCount == 0)
+                    {
+                        OnWarningEvent("Aborting processing since no filter passing results were found");
+                        return true;
                     }
 
                     // Create the other PHRP-specific files
