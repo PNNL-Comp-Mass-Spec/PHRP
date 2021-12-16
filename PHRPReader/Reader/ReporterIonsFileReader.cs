@@ -202,6 +202,7 @@ namespace PHRPReader.Reader
                 { "ParentIonMZ", ReporterIonsFileColumns.ParentIonMZ },
                 { "BasePeakIntensity", ReporterIonsFileColumns.BasePeakIntensity },
                 { "BasePeakMZ", ReporterIonsFileColumns.BasePeakMZ },
+                { "ParentScan", ReporterIonsFileColumns.ParentScan },
                 { "ReporterIonIntensityMax", ReporterIonsFileColumns.ReporterIonIntensityMax },
                 { "WeightedAvgPctIntensityCorrection", ReporterIonsFileColumns.WeightedAvgPctIntensityCorrection }
             };
@@ -316,6 +317,7 @@ namespace PHRPReader.Reader
                         ParentIonMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.ParentIonMZ), mColumnHeaders, 0.0),
                         BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.BasePeakIntensity), mColumnHeaders, 0.0),
                         BasePeakMZ = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.BasePeakMZ), mColumnHeaders, 0.0),
+                        ParentScan = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.ParentScan), mColumnHeaders, 0),
                         ReporterIonIntensityMax = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.ReporterIonIntensityMax), mColumnHeaders, 0.0),
                         WeightedAvgPctIntensityCorrection = ReaderFactory.LookupColumnValue(splitLine, GetColumnNameByID(ReporterIonsFileColumns.WeightedAvgPctIntensityCorrection), mColumnHeaders, 0.0),
                     };

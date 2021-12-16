@@ -987,8 +987,9 @@ namespace PHRPReader.Data
         ParentIonMZ = 3,
         BasePeakIntensity = 4,
         BasePeakMZ = 5,
-        ReporterIonIntensityMax = 6,
-        WeightedAvgPctIntensityCorrection = 7
+        ParentScan = 6,
+        ReporterIonIntensityMax = 7,
+        WeightedAvgPctIntensityCorrection = 8
     }
 
     /// <summary>

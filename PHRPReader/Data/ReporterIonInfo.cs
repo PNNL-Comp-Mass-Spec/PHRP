@@ -38,6 +38,11 @@ namespace PHRPReader.Data
         public double BasePeakMZ { get; set; }
 
         /// <summary>
+        /// Parent scan number
+        /// </summary>
+        public int ParentScan { get; set; }
+
+        /// <summary>
         /// Maximum reporter ion intensity
         /// </summary>
         public double ReporterIonIntensityMax { get; set; }
