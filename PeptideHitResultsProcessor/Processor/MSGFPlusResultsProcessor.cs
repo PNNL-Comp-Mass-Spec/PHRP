@@ -1394,7 +1394,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
-        /// <param name="sourceDirectoryPath"></param>
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="msgfPlusModInfo"></param>
@@ -1403,7 +1402,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool LoadPeptideToProteinMapInfoMSGFPlus(
-            string sourceDirectoryPath,
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
@@ -2636,7 +2634,6 @@ namespace PeptideHitResultsProcessor.Processor
                         ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
                         LoadPeptideToProteinMapInfoMSGFPlus(
-                            inputFile.DirectoryName,
                             pepToProteinMapFilePath,
                             outputDirectoryPath,
                             msgfPlusModInfo,
