@@ -1,14 +1,14 @@
 # Peptide Hit Results Processor
 
-The Peptide Hit Results Processor (PHRP) converts search results from various 
+The Peptide Hit Results Processor (PHRP) converts search results from various
 MS/MS identification tools into a series of tab-delimited text files
-that organize the data in a similar format for each tool. It supports 
-MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder, 
+that organize the data in a similar format for each tool. It supports
+MS-GF+, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, MSPathFinder,
 TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.
 
 PHRP will insert modification symbols into the peptide sequences for modified peptides.
 Parallel files are created containing sequence information, modification details,
-and protein information. The user can optionally provide a modification definition 
+and protein information. The user can optionally provide a modification definition
 file that specifies the symbol to use for each modification mass.
 
 ## Example Data
@@ -17,11 +17,11 @@ Example input and output files are in the Data directory:
 * MSGFPlus_Example has MS-GF+ results
 * XTandem_Example has X!Tandem results
 
-For [MS-GF+](https://github.com/sangtaekim/msgfplus) results, prior to running PHRP, use the 
+For [MS-GF+](https://github.com/sangtaekim/msgfplus) results, prior to running PHRP, use the
 [Mzid-To-Tsv-Converter](https://github.com/PNNL-Comp-Mass-Spec/Mzid-To-Tsv-Converter)
 to convert the .mzid file to a tab-delimited .tsv file.
 
-## Example Command line 
+## Example Command line
 
 ```
 PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFPlus_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFPlus_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:H_sapiens_UniProt_SPROT_2021-03-07.fasta
@@ -30,28 +30,28 @@ PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFPlus_PartTryp_Met
 ## Command Line Syntax
 
 PHRP is a console application, and must be run from the Windows command prompt.
-* On Linux, use [Mono](https://www.mono-project.com/download/stable/#download-lin) to run the program, 
+* On Linux, use [Mono](https://www.mono-project.com/download/stable/#download-lin) to run the program,
 for example `mono PeptideHitResultsProcRunner.exe`
 
 ```
-PeptideHitResultsProcRunner.exe 
+PeptideHitResultsProcRunner.exe
  InputFilePath [/O:OutputDirectoryPath]
  [/S:[MaxLevel]]
  [/P:ParameterFilePath]
  [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]
  [/T:MassCorrectionTagsFilePath]
  [/M:ModificationDefinitionFilePath]
- [/N:SearchToolParameterFilePath] 
+ [/N:SearchToolParameterFilePath]
  [/F:FastaFilePath]
- [/CreateModSummaryFile:True|False] 
+ [/CreateModSummaryFile:True|False]
  [/ProteinMods] [/ProteinModsIncludeReversed]
  [/UseExistingPepToProteinMapFile]
- [/CreateProteinModsViaPHRP] 
+ [/CreateProteinModsViaPHRP]
  [/IgnorePepToProtMapErrors]
  [/FHT:True|False] [/Syn:True|False]
  [/MaxQScore:50] [/MaxQPEP:0.01]
  [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]
- [/SynProb:0.05] [/SynPValue:0.95] 
+ [/SynProb:0.05] [/SynPValue:0.95]
  [/DB:DatabaseConnectionString]
 ```
 
@@ -59,11 +59,11 @@ The input file should be one of the following:
 * MS-GF+ results file (_msgfplus.tsv or _msgfdb.tsv or .tsv)
 * MSPathFinder results file (_IcTda.txt)
 * MaxQuant results files (msms.txt and peptides.txt)
-* MSFragger results file (_psm.tsv)
+* MSFragger results file (Dataset_psm.tsv or Dataset.tsv)
 * MODa results file (_moda.id.txt)
 * MODPlus results file (_modp.id.txt)
-* MSAlign results file (_MSAlign_ResultTable.txt)
-* TopPIC results file (_TopPIC_PrSMs.txt)
+* MSAlign results file (\_MSAlign_ResultTable.txt)
+* TopPIC results file (\_TopPIC_PrSMs.txt)
 * X!Tandem Results file (_xt.xml)
 * Legacy tools
   * Inspect results file (_inspect.txt)
@@ -144,7 +144,7 @@ When processing a MODPlus or MODa results file, use `/SynPValue` to customize th
 * The default is `/SynPValue:0.95`
 * Lower p-values are higher confidence results
   * 0.95 is a very loose filter
-  
+
 When processing MaxQuant results using a computer on the pnl.gov domain, the DMS database is contacted to lookup dataset IDs by dataset name, where dataset name comes from the 'Raw file' column in the msms.txt file
 * Optionally use `/DB` to override the default connection info
 * The default is `/DB:"Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun"`
@@ -158,8 +158,8 @@ Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ o
 
 ## License
 
-The Peptide Hit Results Processor is licensed under the 2-Clause BSD License; 
-you may not use this program except in compliance with the License. You may obtain 
+The Peptide Hit Results Processor is licensed under the 2-Clause BSD License;
+you may not use this program except in compliance with the License. You may obtain
 a copy of the License at https://opensource.org/licenses/BSD-2-Clause
 
 Copyright 2018 Battelle Memorial Institute
