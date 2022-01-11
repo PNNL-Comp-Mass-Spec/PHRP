@@ -143,10 +143,24 @@ namespace PeptideHitResultsProcRunner
                 }
                 else
                 {
-                    if (peptideHitResultsProcessor.ProcessFilesWildcard(
-                        options.InputFilePath,
-                        options.OutputDirectoryPath,
-                        options.XmlParameterFile))
+                    bool success;
+
+                    if (options.InputFilePath.Contains("*") || options.InputFilePath.Contains("?"))
+                    {
+                        success = peptideHitResultsProcessor.ProcessFilesWildcard(
+                            options.InputFilePath,
+                            options.OutputDirectoryPath,
+                            options.XmlParameterFile);
+                    }
+                    else
+                    {
+                        success = peptideHitResultsProcessor.ProcessFile(
+                            options.InputFilePath,
+                            options.OutputDirectoryPath,
+                            options.XmlParameterFile);
+                    }
+
+                    if (success)
                     {
                         returnCode = 0;
                     }
