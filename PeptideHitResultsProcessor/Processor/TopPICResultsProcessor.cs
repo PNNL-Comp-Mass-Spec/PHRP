@@ -1491,7 +1491,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1503,8 +1503,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
+                    var topPICParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the TopPIC Parameter File so that we can determine whether Cysteine residues are statically modified
-                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var topPicModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(topPICParameterFilePath, out var topPicModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;

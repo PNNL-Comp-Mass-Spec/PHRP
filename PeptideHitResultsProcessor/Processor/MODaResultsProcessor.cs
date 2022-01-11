@@ -1439,7 +1439,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1451,8 +1451,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
+                    var modaParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the MODa Parameter File to look for any static mods
-                    var modInfoExtracted = ExtractModInfoFromMODaParamFile(Options.SearchToolParameterFilePath, out var modaModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMODaParamFile(modaParameterFilePath, out var modaModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;

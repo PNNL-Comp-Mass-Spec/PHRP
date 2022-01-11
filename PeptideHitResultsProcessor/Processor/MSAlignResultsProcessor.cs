@@ -640,7 +640,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!File.Exists(msAlignParamFilePath))
                 {
-                    SetErrorMessage("MSAlign param file not found: " + msAlignParamFilePath);
+                    SetErrorMessage("MSAlign parameter file not found: " + msAlignParamFilePath);
                     return false;
                 }
 
@@ -1407,7 +1407,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1419,8 +1419,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
+                    var msAlignParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
-                    var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(Options.SearchToolParameterFilePath, out var msAlignModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(msAlignParameterFilePath, out var msAlignModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;

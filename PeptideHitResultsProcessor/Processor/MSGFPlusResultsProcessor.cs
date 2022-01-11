@@ -1394,6 +1394,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
+        /// <param name="sourceDirectoryPath"></param>
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="msgfPlusModInfo"></param>
@@ -1402,6 +1403,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool LoadPeptideToProteinMapInfoMSGFPlus(
+            string sourceDirectoryPath,
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
@@ -1436,8 +1438,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                     Console.WriteLine();
 
+                    var fastaFilePath = FindInputFile(Options.FastaFilePath, Options.AlternateBasePath, out var fastaFile, true)
+                        ? fastaFile.FullName
+                        : Options.FastaFilePath;
+
                     // If the .FASTA file was defined (and exists), this program will use it to define the peptide to protein mapping
-                    if (!string.IsNullOrWhiteSpace(Options.FastaFilePath) && File.Exists(Options.FastaFilePath))
+                    if (!string.IsNullOrWhiteSpace(fastaFilePath) && File.Exists(fastaFilePath))
                     {
                         OnDebugEvent(
                             "The PepToProteinMap file does not exist ({0}), but the FASTA file does exist ({1}); " +
@@ -2496,7 +2502,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -2513,15 +2519,17 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
+                    var msgfPlusParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the MS-GF+ Parameter File so that we can determine the modification names and masses
                     // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
-                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var msgfPlusModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(msgfPlusParameterFilePath, out var msgfPlusModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
                     }
 
-                    if (!LoadSearchEngineParamFile(Options.SearchToolParameterFilePath))
+                    if (!LoadSearchEngineParamFile(msgfPlusParameterFilePath))
                     {
                         return false;
                     }
@@ -2541,7 +2549,7 @@ namespace PeptideHitResultsProcessor.Processor
                         modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
                         MSGFPlusSynFileReader.UpdateMassCalculatorMasses(
-                            Options.SearchToolParameterFilePath,
+                            msgfPlusParameterFilePath,
                             modFileProcessor,
                             mPeptideSeqMassCalculator,
                             out var localErrorMsg);
@@ -2627,7 +2635,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                         ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
-                        LoadPeptideToProteinMapInfoMSGFPlus(pepToProteinMapFilePath, outputDirectoryPath, msgfPlusModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
+                        LoadPeptideToProteinMapInfoMSGFPlus(
+                            inputFile.DirectoryName,
+                            pepToProteinMapFilePath,
+                            outputDirectoryPath,
+                            msgfPlusModInfo,
+                            isMsgfPlus,
+                            pepToProteinMapping,
+                            out var mtsPepToProteinMapFilePath);
 
                         // Create the other PHRP-specific files
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);

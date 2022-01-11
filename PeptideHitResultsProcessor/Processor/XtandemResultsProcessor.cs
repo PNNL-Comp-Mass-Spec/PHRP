@@ -1511,7 +1511,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }

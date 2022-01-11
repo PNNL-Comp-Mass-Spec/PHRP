@@ -1212,7 +1212,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1222,15 +1222,17 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
+                    var msPathFinderParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the MSPathFinder Parameter File so that we can determine the modification names and masses
-                    var modInfoExtracted = ExtractModInfoFromParamFile(Options.SearchToolParameterFilePath, out var modList);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(msPathFinderParameterFilePath, out var modList);
                     if (!modInfoExtracted)
                     {
                         return false;
                     }
 
                     // Re-parse the MSPathFinder parameter file to look for NumMatchesPerSpec
-                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(Options.SearchToolParameterFilePath);
+                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(msPathFinderParameterFilePath);
                     if (numMatchesPerSpec > 1)
                     {
                         // Auto-change IgnorePeptideToProteinMapperErrors to True

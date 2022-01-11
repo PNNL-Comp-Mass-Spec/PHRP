@@ -149,8 +149,6 @@ namespace PeptideHitResultsProcRunner
         /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {
-            var success = false;
-
             if (!mLogFileOptionsUpdated)
             {
                 UpdateLogFileOptions();
@@ -167,42 +165,44 @@ namespace PeptideHitResultsProcRunner
                 {
                     ShowErrorMessage("Input file name is empty");
                     SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidInputFilePath);
+                    return false;
                 }
-                else
-                {
-                    // Note that CleanupFilePaths() will update mOutputDirectoryPath, which is used by LogMessage()
-                    if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
-                    {
-                        SetBaseClassErrorCode(ProcessFilesErrorCodes.FilePathError);
-                        if (inputFilePath?.Contains("..") == true)
-                        {
-                            var inputFile = new FileInfo(inputFilePath);
-                            OnStatusEvent("Absolute path: " + inputFile.DirectoryName);
-                        }
-                    }
-                    else
-                    {
-                        UpdateProgress("Parsing " + Path.GetFileName(inputFilePath));
-                        ResetProgress();
 
-                        if (Options.CreateProteinModsUsingPHRPDataFile)
-                        {
-                            success = StartCreateProteinModsViaPHRPData(inputFilePath, outputDirectoryPath);
-                        }
-                        else
-                        {
-                            success = StartPHRP(inputFilePath, outputDirectoryPath, parameterFilePath);
-                        }
-                    }
+                if (PHRPBaseClass.FindInputFile(inputFilePath, Options.AlternateBasePath, out var inputFileToUse))
+                {
+                    inputFilePath = inputFileToUse.FullName;
                 }
+
+                // Note that CleanupFilePaths() will update mOutputDirectoryPath, which is used by LogMessage()
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                {
+                    SetBaseClassErrorCode(ProcessFilesErrorCodes.FilePathError);
+                    if (inputFilePath?.Contains("..") == true)
+                    {
+                        var inputFile = new FileInfo(inputFilePath);
+                        OnStatusEvent("Absolute path: " + inputFile.DirectoryName);
+                    }
+
+                    return false;
+                }
+
+                UpdateProgress("Parsing " + Path.GetFileName(inputFilePath));
+                ResetProgress();
+
+                // ReSharper disable once ConvertIfStatementToReturnStatement
+                if (Options.CreateProteinModsUsingPHRPDataFile)
+                {
+                    return StartCreateProteinModsViaPHRPData(inputFilePath, outputDirectoryPath);
+                }
+
+                return StartPHRP(inputFilePath, outputDirectoryPath, parameterFilePath);
             }
             catch (Exception ex)
             {
                 HandleException("Error in ProcessFile", ex);
                 OnDebugEvent(StackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
+                return false;
             }
-
-            return success;
         }
 
         private void RegisterResultsProcessEvents(PHRPBaseClass resultsProcessor)

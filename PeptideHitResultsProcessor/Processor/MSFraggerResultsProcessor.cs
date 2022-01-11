@@ -1458,7 +1458,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1481,8 +1481,10 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
+                        var msFraggerParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                         // Examine the MSFragger parameter file to determine the precursor match tolerance
-                        var toleranceExtracted = LoadSearchEngineParamFile(Options.SearchToolParameterFilePath);
+                        var toleranceExtracted = LoadSearchEngineParamFile(msFraggerParameterFilePath);
                         if (!toleranceExtracted)
                         {
                             return false;

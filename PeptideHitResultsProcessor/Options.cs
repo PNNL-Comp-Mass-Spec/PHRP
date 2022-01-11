@@ -9,7 +9,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class PHRPOptions
     {
-        // Ignore Spelling: conf, Hyperscore, MaxQuant, MODa, txt
+        // Ignore Spelling: conf, Hyperscore, MaxQuant, MODa, prepended, txt
 
         /// <summary>
         /// Default database connection string
@@ -33,6 +33,17 @@ namespace PeptideHitResultsProcessor
             HelpText = "Output directory name (or full path)\n" +
                        "If omitted, the output files will be created in the program directory")]
         public string OutputDirectoryPath { get; set; }
+
+        /// <summary>
+        /// Alternate base path for input files
+        /// </summary>
+        [Option("AlternateBasePath", "AltBasePath", "BasePath", HelpShowsDefault = false,
+            HelpText = "Alternative base path for input files\n" +
+                       "The program first looks for input files using the path provided for a given parameter. " +
+                       "If the file is not found, the base path specified here is prepended to the provided path " +
+                       "to look for the file in an alternative location " +
+                       @"(not valid for rooted paths like C:\Work\Dataset.tsv or \\Server\Share\Dataset.tsv)")]
+        public string AlternateBasePath { get; set; }
 
         /// <summary>
         /// Typically a Key=Value parameter file path, but can also be a legacy XML-based parameter file
@@ -449,6 +460,7 @@ namespace PeptideHitResultsProcessor
         {
             InputFilePath = sourceOptions.InputFilePath;
             OutputDirectoryPath = sourceOptions.OutputDirectoryPath;
+            AlternateBasePath = sourceOptions.AlternateBasePath;
             ParameterFilePath = sourceOptions.ParameterFilePath;
 
             RecurseDirectories = sourceOptions.RecurseDirectories;

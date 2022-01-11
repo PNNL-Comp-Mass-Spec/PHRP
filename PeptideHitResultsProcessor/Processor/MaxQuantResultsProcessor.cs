@@ -3072,7 +3072,7 @@ namespace PeptideHitResultsProcessor.Processor
                     ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
                 }
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -3108,8 +3108,10 @@ namespace PeptideHitResultsProcessor.Processor
                             return false;
                         }
 
+                        var maxQuantParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                         // Examine the MaxQuant parameter file to determine the modification names and precursor match tolerance
-                        var modInfoExtracted = LoadSearchEngineParamFile(Options.SearchToolParameterFilePath, out modList);
+                        var modInfoExtracted = LoadSearchEngineParamFile(maxQuantParameterFilePath, out modList);
                         if (!modInfoExtracted)
                         {
                             return false;

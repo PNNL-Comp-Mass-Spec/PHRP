@@ -698,6 +698,12 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
+                if (!File.Exists(inspectParameterFilePath))
+                {
+                    SetErrorMessage("InSpecT parameter file not found: " + inspectParameterFilePath);
+                    return false;
+                }
+
                 // Read the contents of the inspect parameter file
                 using var reader = new StreamReader(new FileStream(inspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -1506,7 +1512,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1524,8 +1530,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var pepToProteinMapping = new List<PepToProteinMapping>();
 
+                    var inspectParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the InSpecT Parameter File so that we can determine the modification names and masses
-                    if (!ExtractModInfoFromInspectParamFile(Options.SearchToolParameterFilePath, out var inspectModInfo))
+                    if (!ExtractModInfoFromInspectParamFile(inspectParameterFilePath, out var inspectModInfo))
                     {
                         if (inspectModInfo == null || inspectModInfo.Count == 0)
                         {

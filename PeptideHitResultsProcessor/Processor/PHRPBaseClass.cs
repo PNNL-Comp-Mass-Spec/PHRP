@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : EventNotifier
     {
-        // Ignore Spelling: A-Za-z, Da, Daltons, Fscore, MaxQuant, MSFragger, mts, pre, prot, xxx
+        // Ignore Spelling: A-Za-z, Da, Daltons, Fscore, MaxQuant, MSFragger, mts, pre, prepending, prot, xxx
 
         /// <summary>
         /// Program date
@@ -537,7 +537,12 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var proteinNumber = 0;
 
-                using var reader = new StreamReader(new FileStream(Options.FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var fastaFilePath = FindInputFile(Options.FastaFilePath, Options.AlternateBasePath, out var fastaFile, true)
+                    ? fastaFile.FullName
+                    : Options.FastaFilePath;
+
+                using var reader = new StreamReader(new FileStream(fastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 while (!reader.EndOfStream)
                 {
@@ -613,28 +618,30 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
+        /// <param name="alternateBasePath"></param>
         /// <returns>True if successful, False if failure</returns>
-        protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath)
+        protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath, string alternateBasePath)
         {
             try
             {
                 // Make sure inputFilePath points to a valid file
-                var inputFile = new FileInfo(inputFilePath);
-
-                if (!inputFile.Exists)
+                if (!FindInputFile(inputFilePath, alternateBasePath, out var inputFile))
                 {
                     SetErrorMessage("Input file not found: " + inputFilePath);
                     if (inputFilePath.Contains(".."))
                     {
                         OnWarningEvent("Absolute path: " + inputFile.DirectoryName);
                     }
+
                     SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
+                inputFilePath = inputFile.FullName;
+
                 if (string.IsNullOrWhiteSpace(outputDirectoryPath))
                 {
-                    // Define outputDirectoryPath based on inputFilePath
+                    // Define outputDirectoryPath based on the input file path
                     outputDirectoryPath = inputFile.DirectoryName;
                 }
 
@@ -677,6 +684,72 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage("Error cleaning up the file paths", ex);
                 SetErrorCode(PHRPErrorCode.FilePathError);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Look for the file, first checking the path provided, then prepending the alternate base path if not found (and if the path is not rooted)
+        /// </summary>
+        /// <param name="filePath">Relative or full path to a file</param>
+        /// <param name="alternateBasePath">Optional alternate base path</param>
+        /// <param name="inputFile">Output: input file (if found)</param>
+        /// <param name="lookInAppDirectoryIfNotFound">When true, if the file is not found, look for the file in the directory with the entry or executing assembly</param>
+        /// <param name="showDebugMessage"></param>
+        /// <returns>True if the file is found, otherwise false</returns>
+        public static bool FindInputFile(
+            string filePath,
+            string alternateBasePath,
+            out FileInfo inputFile,
+            bool lookInAppDirectoryIfNotFound = false,
+            bool showDebugMessage = true)
+        {
+            try
+            {
+                inputFile = new FileInfo(filePath);
+
+                if (inputFile.Exists)
+                    return true;
+
+                if (!string.IsNullOrWhiteSpace(alternateBasePath) && !Path.IsPathRooted(filePath))
+                {
+                    var alternateInputFile = new FileInfo(Path.Combine(alternateBasePath, filePath));
+
+                    if (alternateInputFile.Exists)
+                    {
+                        if (showDebugMessage)
+                            ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(alternateInputFile.FullName, 100));
+
+                        inputFile = alternateInputFile;
+                        return true;
+                    }
+                }
+
+                if (!lookInAppDirectoryIfNotFound)
+                {
+                    return false;
+                }
+
+                var appDirPath = ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
+                if (string.IsNullOrWhiteSpace(appDirPath))
+                {
+                    return false;
+                }
+
+                var fileInAppDirectory = new FileInfo(Path.Combine(appDirPath, Path.GetFileName(filePath)));
+                if (!fileInAppDirectory.Exists)
+                    return false;
+
+                if (showDebugMessage)
+                    ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(fileInAppDirectory.FullName, 100));
+
+                inputFile = fileInAppDirectory;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ConsoleMsgUtils.ShowWarning("Error in FindInputFile: " + ex.Message);
+                inputFile = null;
                 return false;
             }
         }
@@ -1123,7 +1196,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!File.Exists(Options.FastaFilePath))
+                var fastaFilePath = FindInputFile(Options.FastaFilePath, Options.AlternateBasePath, out var fastaFile, true)
+                    ? fastaFile.FullName
+                    : Options.FastaFilePath;
+
+                if (!File.Exists(fastaFilePath))
                 {
                     SetErrorMessage("Cannot create the PepToProtein map file because the FASTA File was not found: " + Options.FastaFilePath);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
@@ -1131,7 +1208,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Verify that the FASTA file is not a DNA-sequence based FASTA file
-                success = ValidateProteinFastaFile(Options.FastaFilePath);
+                success = ValidateProteinFastaFile(fastaFilePath);
                 if (!success)
                 {
                     return false;
@@ -1159,7 +1236,7 @@ namespace PeptideHitResultsProcessor.Processor
                     OutputProteinSequence = false,
                     PeptideFileSkipFirstLine = false,
                     RemoveSymbolCharacters = true,
-                    ProteinInputFilePath = Options.FastaFilePath,
+                    ProteinInputFilePath = fastaFilePath,
                     SaveProteinToPeptideMappingFile = true,
                     SearchAllProteinsForPeptideSequence = true,
                     SearchAllProteinsSkipCoverageComputationSteps = true
@@ -2052,10 +2129,14 @@ namespace PeptideHitResultsProcessor.Processor
                     return true;
                 }
 
-                var parameterFile = new FileInfo(parameterFilePath);
+                if (!FindInputFile(parameterFilePath, Options.AlternateBasePath, out var parameterFile, true))
+                {
+                    SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
+                    return false;
+                }
 
                 if (parameterFile.Extension.Equals(".xml", StringComparison.OrdinalIgnoreCase))
-                    return LoadParameterFileSettingsXML(parameterFilePath);
+                    return LoadParameterFileSettingsXML(parameterFile.FullName);
 
                 // Read settings from a Key=Value parameter file
 
@@ -2115,20 +2196,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!File.Exists(parameterFilePath))
                 {
-                    // See if parameterFilePath points to a file in the same directory as the application
-                    var appDirPath = ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
-                    if (string.IsNullOrWhiteSpace(appDirPath))
-                    {
-                        SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
-                        return false;
-                    }
-
-                    parameterFilePath = Path.Combine(appDirPath, Path.GetFileName(parameterFilePath));
-                    if (!File.Exists(parameterFilePath))
-                    {
-                        SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
-                        return false;
-                    }
+                    SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
+                    return false;
                 }
 
                 if (settingsFile.LoadSettings(parameterFilePath))
@@ -2508,6 +2577,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
         public static string ResolveFilePath(string sourceDirectoryPath, string fileNameOrPath, bool searchParentDirectory = true)
         {
+            if (string.IsNullOrWhiteSpace(fileNameOrPath))
+                return string.Empty;
+
             if (File.Exists(fileNameOrPath))
             {
                 return fileNameOrPath;

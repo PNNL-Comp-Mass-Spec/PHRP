@@ -1318,7 +1318,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {
                     return false;
                 }
@@ -1328,8 +1328,10 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
+                    var modPlusParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
+
                     // Load the MODPlus Parameter File to look for any static mods
-                    var modInfoExtracted = ExtractModInfoFromMODPlusParamFile(Options.SearchToolParameterFilePath, out var modPlusModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMODPlusParamFile(modPlusParameterFilePath, out var modPlusModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
