@@ -757,6 +757,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Examine the extension on filePath to determine the file format
         /// </summary>
+        /// <remarks>
+        /// For TSV files, read the first line and examine column names to determine the file format
+        /// </remarks>
         /// <param name="filePath"></param>
         public static ResultsFileFormat DetermineResultsFileFormat(string filePath)
         {
@@ -835,8 +838,39 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (extensionLCase == ".tsv")
             {
-                // Assume this is an MS-GF+ TSV file
-                return ResultsFileFormat.MSGFPlusTXTFile;
+                // Examine the header names in the first line of the file to determine the file format
+                if (!ReaderFactory.ReadHeaderLine(filePath, out var columnNames))
+                {
+                    // Error determining the column names; a warning has already been shown
+
+                    // Assume this is an MS-GF+ TSV file
+                    return ResultsFileFormat.MSGFPlusTXTFile;
+                }
+
+                if (ReaderFactory.LineContainsColumns(columnNames, "MSGFScore", "SpecEValue"))
+                {
+                    // MS-GF+ results file
+                    return ResultsFileFormat.MSGFPlusTXTFile;
+                }
+
+                if (ReaderFactory.LineContainsColumns(columnNames, "MSGFScore", "SpecProb"))
+                {
+                    // MSGFDB results file
+                    return ResultsFileFormat.MSGFPlusTXTFile;
+                }
+
+                if (ReaderFactory.LineContainsColumns(columnNames, "Expectation", "Hyperscore", "Nextscore"))
+                {
+                    // MSFragger _psm.tsv file
+                    return ResultsFileFormat.MSFraggerTSVFile;
+                }
+
+                // ReSharper disable once StringLiteralTypo
+                if (ReaderFactory.LineContainsColumns(columnNames, "expectscore", "hyperscore", "nextscore"))
+                {
+                    // MSFragger Dataset.tsv file
+                    return ResultsFileFormat.MSFraggerTSVFile;
+                }
             }
 
             var candidateDirectory = new DirectoryInfo(filePath);
