@@ -119,9 +119,14 @@ namespace PHRPReader.Reader
                         // The Occurrence_Count column was misspelled prior to December 2012; need to check for this
                         for (var index = 0; index <= splitLine.Length - 1; index++)
                         {
-                            if (splitLine[index] == "Occurence_Count")
-                                splitLine[index] = MOD_SUMMARY_COLUMN_Occurrence_Count;
+                            // ReSharper disable once StringLiteralTypo
+                            if (splitLine[index] != "Occurence_Count")
+                                continue;
+
+                            splitLine[index] = MOD_SUMMARY_COLUMN_Occurrence_Count;
+                            break;
                         }
+
                         ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
                         skipLine = true;
                     }
