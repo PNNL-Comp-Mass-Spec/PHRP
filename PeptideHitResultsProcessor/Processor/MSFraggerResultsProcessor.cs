@@ -1472,7 +1472,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 100));
+                ResetProgress("Parsing " + PathUtils.CompactPathString(inputFilePath, 110));
 
                 if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath, Options.AlternateBasePath))
                 {

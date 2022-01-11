@@ -542,7 +542,6 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var proteinNumber = 0;
 
-
                 var fastaFilePath = FindInputFile(Options.FastaFilePath, Options.AlternateBasePath, out var fastaFile, true)
                     ? fastaFile.FullName
                     : Options.FastaFilePath;
@@ -723,7 +722,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (alternateInputFile.Exists)
                     {
                         if (showDebugMessage)
-                            ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(alternateInputFile.FullName, 100));
+                            ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(alternateInputFile.FullName, 110));
 
                         inputFile = alternateInputFile;
                         return true;
@@ -746,7 +745,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
 
                 if (showDebugMessage)
-                    ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(fileInAppDirectory.FullName, 100));
+                    ConsoleMsgUtils.ShowDebug("Using alternate path for input file: " + PathUtils.CompactPathString(fileInAppDirectory.FullName, 110));
 
                 inputFile = fileInAppDirectory;
                 return true;
