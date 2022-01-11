@@ -443,6 +443,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
 
+                var readingPsmFile = inputFilePath.EndsWith("_psm.tsv");
+
                 // Open the input file and parse it
                 using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -487,8 +489,11 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     var validSearchResult = ParseMSFraggerResultsFileEntry(
-                        lineIn, out var searchResult,
-                        errorMessages, columnMapping,
+                        readingPsmFile,
+                        lineIn,
+                        out var searchResult,
+                        errorMessages,
+                        columnMapping,
                         lineNumber,
                         ref currentDatasetName);
 
@@ -935,6 +940,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MSFragger results line while creating the MSFragger synopsis file
         /// </summary>
+        /// <param name="readingPsmFile"></param>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
         /// <param name="errorMessages"></param>
@@ -943,6 +949,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="currentDatasetName">Current dataset name; updated by this method if the Spectrum File name is not an empty string</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSFraggerResultsFileEntry(
+            bool readingPsmFile,
             string lineIn,
             out MSFraggerSearchResult searchResult,
             ICollection<string> errorMessages,
@@ -1013,9 +1020,18 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NextAA], out searchResult.SuffixResidue);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideLength], out searchResult.Length);
 
-                if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out int retentionTimeSeconds))
+                if (readingPsmFile)
                 {
-                    searchResult.RetentionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
+                    // The aggregated results file reports retention time in seconds
+                    if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out int retentionTimeSeconds))
+                    {
+                        searchResult.RetentionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
+                    }
+                }
+                else
+                {
+                    // The single dataset results file reports retention time in minutes
+                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out searchResult.RetentionTime);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
