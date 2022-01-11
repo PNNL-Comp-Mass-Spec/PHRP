@@ -131,7 +131,7 @@
         InspectTXTFile = 4,
 
         /// <summary>
-        /// MSGFDB, MS-GF+ (MSGF+)
+        /// MSGFDB or MS-GF+ (MSGF+) .tsv file
         /// </summary>
         MSGFPlusTXTFile = 5,
 

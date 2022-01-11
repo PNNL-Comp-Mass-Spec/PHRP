@@ -33,7 +33,8 @@ namespace PHRPReader
     /// </summary>
     public class ReaderFactory : EventNotifier, IDisposable
     {
-        // Ignore Spelling: A-Za-z, DA, fht, kv, moda, MODa, modp, modplus, msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt
+        // Ignore Spelling: A-Za-z, DA, fht, kv, Hyperscore, moda, MODa, modp, modplus
+        // Ignore Spelling: msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt
 
         /// <summary>
         /// Symbol used by PHRP to indicate a protein terminus
@@ -1087,9 +1088,15 @@ namespace PHRPReader
             return filePath;
         }
 
+        /// <summary>
+        /// Check whether filePath ends in other known PHRP extensions
+        /// If it does, remove the suffix and return the trimmed path
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="filePathTrimmed"></param>
+        /// <returns>True if the path was trimmed, otherwise false</returns>
         private static bool AutoTrimExtraSuffix(string filePath, out string filePathTrimmed)
         {
-            // Check whether filePath ends in other known PHRP extensions
             foreach (var suffix in GetPHRPAuxiliaryFileSuffixes())
             {
                 if (filePath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))

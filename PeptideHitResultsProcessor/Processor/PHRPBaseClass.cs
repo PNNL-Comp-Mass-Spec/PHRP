@@ -39,7 +39,12 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public abstract class PHRPBaseClass : EventNotifier
     {
-        // Ignore Spelling: A-Za-z, Da, Daltons, Fscore, MaxQuant, MSFragger, mts, pre, prepending, prot, xxx
+        // ReSharper disable CommentTypo
+
+        // Ignore Spelling: A-Za-z, Da, Daltons, expectscore, Fscore, hyperscore, MaxQuant, MSFragger, mts
+        // Ignore Spelling: nextscore, pre, prepending, prot, xxx
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// Program date
