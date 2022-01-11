@@ -78,6 +78,12 @@ namespace PHRPReader
 
         private PSM mCachedPSM;
 
+        private static SynFileReaderBaseClass mCachedReader;
+
+        private static PeptideHitResultTypes mCachedReaderType;
+
+        private static string mCachedDataset = string.Empty;
+
         /// <summary>
         /// Keys in this dictionary are mod symbols
         /// Values are the corresponding modification definition
@@ -100,14 +106,6 @@ namespace PHRPReader
         /// <remarks>If the peptide is a peptide of interest, you must call FinalizeCurrentPSM after calling .MoveNext()</remarks>
         private bool mFastReadMode;
 
-        private bool mHeaderLineParsed;
-
-        private bool mInitialized;
-
-        private string mInputFilePath;
-
-        private string mInputDirectoryPath;
-
         /// <summary>
         /// RegEx to extract parent ions from filter strings that do not have Full msx
         /// </summary>
@@ -119,6 +117,16 @@ namespace PHRPReader
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
         private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex mRegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
+
+        private bool mHeaderLineParsed;
+
+        private bool mInitialized;
+
+        private string mInputFilePath;
+
+        private string mInputDirectoryPath;
 
         private PHRPReaderErrorCodes mLocalErrorCode;
 
@@ -419,430 +427,40 @@ namespace PHRPReader
             InitializeClass(inputFilePath, resultType);
         }
 
-        /// <summary>
-        /// Updates filePath to have _fht instead of _syn if filePath contains_syn yet basePHRPFileName contains _fht
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="basePHRPFileName"></param>
-        private static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
+        private void AddDynamicModIfPresent(
+            IReadOnlyDictionary<char, ModificationDefinition> mods,
+            char residue,
+            char modSymbol,
+            int residueLocInPeptide,
+            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
+            StringBuilder sbNewPeptide,
+            ICollection<AminoAcidModInfo> peptideMods)
         {
-            if (string.IsNullOrEmpty(basePHRPFileName))
+            if (mods.TryGetValue(modSymbol, out var modDef))
             {
-                return filePath;
-            }
-
-            var basePHRPFile = new FileInfo(basePHRPFileName);
-            if (basePHRPFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                // basePHRPFileName is first-hits-file based
-
-                var firstHitsFile = new FileInfo(filePath);
-                var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.OrdinalIgnoreCase);
-                if (synIndex > 0)
-                {
-                    // filePath is synopsis-file based
-                    // Change filePath to contain _fht instead of _syn
-
-                    var filePathFHT = firstHitsFile.Name.Substring(0, synIndex) + "_fht" + firstHitsFile.Name.Substring(synIndex + "_syn".Length);
-
-                    if (Path.IsPathRooted(filePath) && firstHitsFile.Directory != null)
-                    {
-                        return Path.Combine(firstHitsFile.Directory.FullName, filePathFHT);
-                    }
-
-                    return filePathFHT;
-                }
-            }
-
-            return filePath;
-        }
-
-        /// <summary>
-        /// Updates filePath to have _msgfdb instead of _msgfplus if basePHRPFileName contains _msgfdb
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="basePHRPFileName"></param>
-        public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
-        {
-            var basePHRPFile = new FileInfo(basePHRPFileName);
-            if (basePHRPFile.Name.IndexOf("_msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                var dataFile = new FileInfo(filePath);
-                var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.OrdinalIgnoreCase);
-                if (charIndex > 0)
-                {
-                    // filePath has _msgfplus but should have _msgfdb
-
-                    var filePathNew = dataFile.Name.Substring(0, charIndex) + "_msgfdb" + dataFile.Name.Substring(charIndex + "_msgfplus".Length);
-
-                    if (Path.IsPathRooted(filePath) && dataFile.Directory != null)
-                    {
-                        return Path.Combine(dataFile.Directory.FullName, filePathNew);
-                    }
-
-                    return filePathNew;
-                }
-            }
-
-            return filePath;
-        }
-
-        /// <summary>
-        /// Clear any cached error messages
-        /// </summary>
-        public void ClearErrors()
-        {
-            ErrorMessages.Clear();
-            SynFileReader?.ClearErrors();
-        }
-
-        private int CountLines(string textFilePath)
-        {
-            int totalLines;
-
-            try
-            {
-                totalLines = 0;
-
-                using var reader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                while (!reader.EndOfStream)
-                {
-                    reader.ReadLine();
-                    totalLines++;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error counting the lines in " + Path.GetFileName(textFilePath) + ": " + ex.Message, ex);
-            }
-
-            return totalLines;
-        }
-
-        /// <summary>
-        /// Clear any cached warning messages
-        /// </summary>
-        public void ClearWarnings()
-        {
-            WarningMessages.Clear();
-            SynFileReader?.ClearWarnings();
-        }
-
-        /// <summary>
-        /// Initialize the class
-        /// </summary>
-        /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="resultType">Source file PeptideHit result type</param>
-        private void InitializeClass(string inputFilePath, PeptideHitResultTypes resultType)
-        {
-            mInitialized = false;
-
-            InitializeMemberVariables();
-
-            InitializeReader(inputFilePath, resultType);
-
-            mInitialized = true;
-        }
-
-        private void InitializeMemberVariables()
-        {
-            DatasetName = string.Empty;
-            mInputFilePath = string.Empty;
-            mInputDirectoryPath = string.Empty;
-
-            CanRead = false;
-            ModSummaryFileLoaded = false;
-
-            SkipDuplicatePSMs = true;
-
-            EchoMessagesToConsole = false;
-
-            ErrorMessage = string.Empty;
-            mLocalErrorCode = PHRPReaderErrorCodes.NoError;
-
-            mSourceFileLineCount = 0;
-        }
-
-        private void InitializeReader(string inputFilePath, PeptideHitResultTypes resultType)
-        {
-            try
-            {
-                FileInfo inputFile;
-
-                if (mStartupOptions.DisableOpeningInputFiles)
-                {
-                    // Auto-set these to false
-                    mStartupOptions.LoadModsAndSeqInfo = false;
-                    mStartupOptions.LoadMSGFResults = false;
-                    mStartupOptions.LoadScanStatsData = false;
-
-                    if (string.IsNullOrWhiteSpace(inputFilePath))
-                    {
-                        ReportWarning("Input file name is empty");
-                        inputFile = new FileInfo(NON_EXISTENT_FILE_PLACEHOLDER_NAME);
-                    }
-                    else
-                    {
-                        inputFile = new FileInfo(inputFilePath);
-                    }
-
-                    if (inputFile.Directory == null)
-                    {
-                        ReportWarning("Unable to determine the parent directory of " + inputFile.FullName);
-                        mInputDirectoryPath = string.Empty;
-                    }
-                    else
-                    {
-                        mInputDirectoryPath = inputFile.Directory.FullName;
-                    }
-
-                    mInputFilePath = inputFile.FullName;
-                }
-                else
-                {
-                    if (string.IsNullOrWhiteSpace(inputFilePath))
-                    {
-                        ReportError("Input file name is empty");
-                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                        if (!mInitialized)
-                            throw new FileNotFoundException(ErrorMessage);
-
-                        return;
-                    }
-
-                    // Confirm that the source file exists
-                    // Make sure inputFilePath points to a valid file
-                    inputFile = new FileInfo(inputFilePath);
-
-                    if (inputFile.Directory == null)
-                    {
-                        ReportError("Unable to determine the parent directory of " + inputFile.FullName);
-                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                        if (!mInitialized)
-                            throw new FileNotFoundException(ErrorMessage);
-
-                        return;
-                    }
-
-                    mInputDirectoryPath = inputFile.Directory.FullName;
-                    mInputFilePath = inputFile.FullName;
-
-                    if (!inputFile.Exists)
-                    {
-                        ReportError("Input file not found: " + inputFilePath);
-                        if (inputFilePath.Contains(".."))
-                        {
-                            ReportWarning("Absolute path: " + inputFile.DirectoryName);
-                        }
-
-                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
-                        if (!mInitialized)
-                            throw new FileNotFoundException(ErrorMessage);
-
-                        return;
-                    }
-                }
-
-                // Validate the input files, including updating resultType if it is PeptideHitResultTypes.Unknown
-                // Note that the following populates DatasetName
-                var success = ValidateInputFiles(inputFile, ref resultType, out var modSummaryFilePath);
-
-                if (!success)
-                {
-                    SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound, true);
-                    if (!mInitialized)
-                        throw new FileNotFoundException(ErrorMessage);
-                    return;
-                }
-
-                // Initialize the SynFileReader
-                // If the input file exists, open the input file for reading
-                // Note that this will also load the MSGFSpecEValue info and ScanStats info (if enabled via properties in mStartupOptions)
-                success = InitializeReader(resultType);
-
-                if (success && mStartupOptions.LoadModsAndSeqInfo)
-                {
-                    // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
-                    // Note that the SynFileReader also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
-                    success = ReadModSummaryFile(modSummaryFilePath, mDynamicMods, mStaticMods);
-                    if (!success)
-                    {
-                        ModSummaryFileLoaded = false;
-                        success = true;
-                    }
-                    else
-                    {
-                        ModSummaryFileLoaded = true;
-                    }
-                }
-
-                if (success && mStartupOptions.LoadMSGFResults)
-                {
-                    // Cache the MSGF values (if present)
-                    ReadAndCacheMSGFData();
-                }
-
-                if (success && mStartupOptions.LoadScanStatsData)
-                {
-                    // Cache the Scan Stats values (if present)
-                    ReadScanStatsData();
-                    ReadExtendedScanStatsData();
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleException("Error in InitializeReader", ex);
-                if (!mInitialized)
-                    throw new Exception(ErrorMessage, ex);
+                // Mod mass found for dynamic mod symbol; append the mod
+                sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
+                peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
             }
         }
 
-        private bool InitializeReader(PeptideHitResultTypes resultType)
+        private void AddStaticModIfPresent(
+            IReadOnlyDictionary<string, List<ModificationDefinition>> mods,
+            char residue,
+            int residueLocInPeptide,
+            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
+            StringBuilder sbNewPeptide,
+            ICollection<AminoAcidModInfo> peptideMods)
         {
-            var success = true;
-            var datasetName = DatasetName;
-
-            try
+            if (mods.TryGetValue(residue.ToString(), out var modDefs))
             {
-                if (string.IsNullOrEmpty(datasetName))
+                // Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
+
+                foreach (var modDef in modDefs)
                 {
-                    if (mStartupOptions.LoadModsAndSeqInfo)
-                    {
-                        ReportError("Dataset name is undefined; unable to continue since loading ModsAndSeqInfo");
-                        return false;
-                    }
-
-                    if (mStartupOptions.LoadMSGFResults)
-                    {
-                        ReportError("Dataset name is undefined; unable to continue since loading MSGF results");
-                        return false;
-                    }
-
-                    if (mStartupOptions.LoadScanStatsData)
-                    {
-                        ReportError("Dataset name is undefined; unable to continue since loading ScanStatsData");
-                        return false;
-                    }
-
-                    datasetName = "Unknown_Dataset";
+                    sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
+                    peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
                 }
-
-                // Initialize some tracking variables
-                mMSGFCachedResults.Clear();
-
-                mPSMCurrent = new PSM();
-
-                mSourceFileLinesRead = 0;
-                mHeaderLineParsed = false;
-                mCachedLineAvailable = false;
-                mCachedLine = string.Empty;
-
-                // Open the peptide-hit result file (from PHRP) for reading
-                // Instantiate the appropriate PHRP SynFileReader
-
-                // If mInputFilePath is an empty string, the reader will be instantiated, and methods that solely depend on dataset name will be callable,
-                // but data related methods will not be callable
-
-                switch (resultType)
-                {
-                    case PeptideHitResultTypes.Inspect:
-                        SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MaxQuant:
-                        SynFileReader = new MaxQuantSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MODa:
-                        SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MODPlus:
-                        SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MSAlign:
-                        SynFileReader = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MSFragger:
-                        SynFileReader = new MSFraggerSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MSGFPlus:
-                        // MS-GF+
-                        SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.MSPathFinder:
-                        SynFileReader = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.Sequest:
-                        SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.TopPIC:
-                        SynFileReader = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    case PeptideHitResultTypes.XTandem:
-                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
-                        SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
-                        break;
-
-                    default:
-                        // Should never get here; invalid result type specified
-                        ReportError("Invalid PeptideHit ResultType specified: " + resultType);
-                        success = false;
-                        break;
-                }
-
-                if (!success)
-                {
-                    return false;
-                }
-
-                // Attach the event handlers
-                RegisterEvents(SynFileReader);
-
-                // Report any errors cached during instantiation of the SynFileReader
-                foreach (var message in SynFileReader.ErrorMessages)
-                {
-                    ReportError(message);
-                }
-
-                // Report any warnings cached during instantiation of the SynFileReader
-                foreach (var message in SynFileReader.WarningMessages)
-                {
-                    ReportWarning(message);
-                }
-
-                SynFileReader.ClearErrors();
-                SynFileReader.ClearWarnings();
-
-                if (mStartupOptions.DisableOpeningInputFiles)
-                {
-                    return true;
-                }
-
-                // Open the data file and count the number of lines so that we can compute progress
-                mSourceFileLineCount = CountLines(mInputFilePath);
-
-                // Open the data file for reading
-                mSourceFile = new StreamReader(new FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                CanRead = true;
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                HandleException("Error in ReaderFactory.InitializeReader", ex);
-                if (!mInitialized)
-                    throw new Exception(ErrorMessage, ex);
-
-                return false;
             }
         }
 
@@ -1398,6 +1016,74 @@ namespace PHRPReader
             return resultType;
         }
 
+        /// <summary>
+        /// Updates filePath to have _fht instead of _syn if filePath contains_syn yet basePHRPFileName contains _fht
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="basePHRPFileName"></param>
+        private static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
+        {
+            if (string.IsNullOrEmpty(basePHRPFileName))
+            {
+                return filePath;
+            }
+
+            var basePHRPFile = new FileInfo(basePHRPFileName);
+            if (basePHRPFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                // basePHRPFileName is first-hits-file based
+
+                var firstHitsFile = new FileInfo(filePath);
+                var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.OrdinalIgnoreCase);
+                if (synIndex > 0)
+                {
+                    // filePath is synopsis-file based
+                    // Change filePath to contain _fht instead of _syn
+
+                    var filePathFHT = firstHitsFile.Name.Substring(0, synIndex) + "_fht" + firstHitsFile.Name.Substring(synIndex + "_syn".Length);
+
+                    if (Path.IsPathRooted(filePath) && firstHitsFile.Directory != null)
+                    {
+                        return Path.Combine(firstHitsFile.Directory.FullName, filePathFHT);
+                    }
+
+                    return filePathFHT;
+                }
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        /// Updates filePath to have _msgfdb instead of _msgfplus if basePHRPFileName contains _msgfdb
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="basePHRPFileName"></param>
+        public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
+        {
+            var basePHRPFile = new FileInfo(basePHRPFileName);
+            if (basePHRPFile.Name.IndexOf("_msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                var dataFile = new FileInfo(filePath);
+                var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.OrdinalIgnoreCase);
+                if (charIndex > 0)
+                {
+                    // filePath has _msgfplus but should have _msgfdb
+
+                    var filePathNew = dataFile.Name.Substring(0, charIndex) + "_msgfdb" + dataFile.Name.Substring(charIndex + "_msgfplus".Length);
+
+                    if (Path.IsPathRooted(filePath) && dataFile.Directory != null)
+                    {
+                        return Path.Combine(dataFile.Directory.FullName, filePathNew);
+                    }
+
+                    return filePathNew;
+                }
+            }
+
+            return filePath;
+        }
+
         private static bool AutoTrimExtraSuffix(string filePath, out string filePathTrimmed)
         {
             // Check whether filePath ends in other known PHRP extensions
@@ -1413,6 +1099,56 @@ namespace PHRPReader
             filePathTrimmed = string.Empty;
 
             return false;
+        }
+
+        /// <summary>
+        /// Clear any cached error messages
+        /// </summary>
+        public void ClearErrors()
+        {
+            ErrorMessages.Clear();
+            SynFileReader?.ClearErrors();
+        }
+
+        /// <summary>
+        /// Clear any cached warning messages
+        /// </summary>
+        public void ClearWarnings()
+        {
+            WarningMessages.Clear();
+            SynFileReader?.ClearWarnings();
+        }
+
+        private void ComputePrecursorNeutralMass()
+        {
+            if (!mExtendedScanStatsValid || mExtendedScanStatsInfo == null)
+                return;
+
+            double monoisotopicPrecursorMass = 0;
+
+            // Try to extract out the precursor m/z value from the "Scan Filter Text" field
+
+            if (ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, out var parentIonMZ))
+            {
+                if (parentIonMZ > 0)
+                {
+                    monoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(parentIonMZ, mPSMCurrent.Charge, 0);
+                }
+            }
+
+            if (Math.Abs(monoisotopicPrecursorMass) < double.Epsilon)
+            {
+                if (mExtendedScanStatsInfo.MonoisotopicMZ > 0)
+                {
+                    // Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
+                    monoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ, mPSMCurrent.Charge, 0);
+                }
+            }
+
+            if (monoisotopicPrecursorMass > 0)
+            {
+                mPSMCurrent.PrecursorNeutralMass = monoisotopicPrecursorMass;
+            }
         }
 
         /// <summary>
@@ -1552,41 +1288,80 @@ namespace PHRPReader
             return true;
         }
 
-        private void AddDynamicModIfPresent(
-            IReadOnlyDictionary<char, ModificationDefinition> mods,
-            char residue,
-            char modSymbol,
-            int residueLocInPeptide,
-            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
-            StringBuilder sbNewPeptide,
-            ICollection<AminoAcidModInfo> peptideMods)
+        private int CountLines(string textFilePath)
         {
-            if (mods.TryGetValue(modSymbol, out var modDef))
-            {
-                // Mod mass found for dynamic mod symbol; append the mod
-                sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
-                peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
-            }
-        }
+            int totalLines;
 
-        private void AddStaticModIfPresent(
-            IReadOnlyDictionary<string, List<ModificationDefinition>> mods,
-            char residue,
-            int residueLocInPeptide,
-            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
-            StringBuilder sbNewPeptide,
-            ICollection<AminoAcidModInfo> peptideMods)
-        {
-            if (mods.TryGetValue(residue.ToString(), out var modDefs))
+            try
             {
-                // Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
+                totalLines = 0;
 
-                foreach (var modDef in modDefs)
+                using var reader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
-                    peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
+                    reader.ReadLine();
+                    totalLines++;
                 }
             }
+            catch (Exception ex)
+            {
+                throw new Exception("Error counting the lines in " + Path.GetFileName(textFilePath) + ": " + ex.Message, ex);
+            }
+
+            return totalLines;
+        }
+
+        /// <summary>
+        /// This method extracts the Parent Ion m/z from the filter string
+        /// </summary>
+        /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
+        /// <param name="filterText"></param>
+        /// <param name="parentIonMz"></param>
+        /// <returns>True if parsing successful</returns>
+        public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
+        {
+            Regex matcher;
+
+            if (filterText.IndexOf("msx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                matcher = mFindParentIonOnlyMsx;
+            }
+            else
+            {
+                matcher = mFindParentIonOnlyNonMsx;
+            }
+
+            var match = matcher.Match(filterText);
+
+            if (match.Success)
+            {
+                var parentIonMzText = match.Groups["ParentMZ"].Value;
+
+                return double.TryParse(parentIonMzText, out parentIonMz);
+            }
+
+            parentIonMz = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// When FastReadMode is True, first call MoveNext to read the peptide scores.
+        /// Then, if the peptide is a peptide of interest, call this method to finalize any processing steps that were skipped.
+        /// </summary>
+        public void FinalizeCurrentPSM()
+        {
+            if (mPSMCurrentFinalized)
+                return;
+
+            // Determine the clean sequence and cleavage state, and update the Seq_ID fields
+            SynFileReader.FinalizePSM(mPSMCurrent);
+
+            MarkupPeptideWithMods();
+
+            ComputePrecursorNeutralMass();
+
+            mPSMCurrentFinalized = true;
         }
 
         /// <summary>
@@ -1862,10 +1637,6 @@ namespace PHRPReader
             };
         }
 
-        private static SynFileReaderBaseClass mCachedReader;
-        private static PeptideHitResultTypes mCachedReaderType = PeptideHitResultTypes.Unknown;
-        private static string mCachedDataset = string.Empty;
-
         private static SynFileReaderBaseClass GetPHRPFileFreeReader(PeptideHitResultTypes resultType, string datasetName)
         {
             if (mCachedReaderType != PeptideHitResultTypes.Unknown && mCachedReaderType == resultType && mCachedDataset == datasetName)
@@ -2103,7 +1874,322 @@ namespace PHRPReader
             ReportError(baseMessage + ": " + ex.Message);
         }
 
-        private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
+        /// <summary>
+        /// Initialize the class
+        /// </summary>
+        /// <param name="inputFilePath">Input file to read</param>
+        /// <param name="resultType">Source file PeptideHit result type</param>
+        private void InitializeClass(string inputFilePath, PeptideHitResultTypes resultType)
+        {
+            mInitialized = false;
+
+            InitializeMemberVariables();
+
+            InitializeReader(inputFilePath, resultType);
+
+            mInitialized = true;
+        }
+
+        private void InitializeMemberVariables()
+        {
+            DatasetName = string.Empty;
+            mInputFilePath = string.Empty;
+            mInputDirectoryPath = string.Empty;
+
+            CanRead = false;
+            ModSummaryFileLoaded = false;
+
+            SkipDuplicatePSMs = true;
+
+            EchoMessagesToConsole = false;
+
+            ErrorMessage = string.Empty;
+            mLocalErrorCode = PHRPReaderErrorCodes.NoError;
+
+            mSourceFileLineCount = 0;
+        }
+
+        private void InitializeReader(string inputFilePath, PeptideHitResultTypes resultType)
+        {
+            try
+            {
+                FileInfo inputFile;
+
+                if (mStartupOptions.DisableOpeningInputFiles)
+                {
+                    // Auto-set these to false
+                    mStartupOptions.LoadModsAndSeqInfo = false;
+                    mStartupOptions.LoadMSGFResults = false;
+                    mStartupOptions.LoadScanStatsData = false;
+
+                    if (string.IsNullOrWhiteSpace(inputFilePath))
+                    {
+                        ReportWarning("Input file name is empty");
+                        inputFile = new FileInfo(NON_EXISTENT_FILE_PLACEHOLDER_NAME);
+                    }
+                    else
+                    {
+                        inputFile = new FileInfo(inputFilePath);
+                    }
+
+                    if (inputFile.Directory == null)
+                    {
+                        ReportWarning("Unable to determine the parent directory of " + inputFile.FullName);
+                        mInputDirectoryPath = string.Empty;
+                    }
+                    else
+                    {
+                        mInputDirectoryPath = inputFile.Directory.FullName;
+                    }
+
+                    mInputFilePath = inputFile.FullName;
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(inputFilePath))
+                    {
+                        ReportError("Input file name is empty");
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
+
+                    // Confirm that the source file exists
+                    // Make sure inputFilePath points to a valid file
+                    inputFile = new FileInfo(inputFilePath);
+
+                    if (inputFile.Directory == null)
+                    {
+                        ReportError("Unable to determine the parent directory of " + inputFile.FullName);
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
+
+                    mInputDirectoryPath = inputFile.Directory.FullName;
+                    mInputFilePath = inputFile.FullName;
+
+                    if (!inputFile.Exists)
+                    {
+                        ReportError("Input file not found: " + inputFilePath);
+                        if (inputFilePath.Contains(".."))
+                        {
+                            ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                        }
+
+                        SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
+                        if (!mInitialized)
+                            throw new FileNotFoundException(ErrorMessage);
+
+                        return;
+                    }
+                }
+
+                // Validate the input files, including updating resultType if it is PeptideHitResultTypes.Unknown
+                // Note that the following populates DatasetName
+                var success = ValidateInputFiles(inputFile, ref resultType, out var modSummaryFilePath);
+
+                if (!success)
+                {
+                    SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound, true);
+                    if (!mInitialized)
+                        throw new FileNotFoundException(ErrorMessage);
+                    return;
+                }
+
+                // Initialize the SynFileReader
+                // If the input file exists, open the input file for reading
+                // Note that this will also load the MSGFSpecEValue info and ScanStats info (if enabled via properties in mStartupOptions)
+                success = InitializeReader(resultType);
+
+                if (success && mStartupOptions.LoadModsAndSeqInfo)
+                {
+                    // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
+                    // Note that the SynFileReader also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
+                    success = ReadModSummaryFile(modSummaryFilePath, mDynamicMods, mStaticMods);
+                    if (!success)
+                    {
+                        ModSummaryFileLoaded = false;
+                        success = true;
+                    }
+                    else
+                    {
+                        ModSummaryFileLoaded = true;
+                    }
+                }
+
+                if (success && mStartupOptions.LoadMSGFResults)
+                {
+                    // Cache the MSGF values (if present)
+                    ReadAndCacheMSGFData();
+                }
+
+                if (success && mStartupOptions.LoadScanStatsData)
+                {
+                    // Cache the Scan Stats values (if present)
+                    ReadScanStatsData();
+                    ReadExtendedScanStatsData();
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleException("Error in InitializeReader", ex);
+                if (!mInitialized)
+                    throw new Exception(ErrorMessage, ex);
+            }
+        }
+
+        private bool InitializeReader(PeptideHitResultTypes resultType)
+        {
+            var success = true;
+            var datasetName = DatasetName;
+
+            try
+            {
+                if (string.IsNullOrEmpty(datasetName))
+                {
+                    if (mStartupOptions.LoadModsAndSeqInfo)
+                    {
+                        ReportError("Dataset name is undefined; unable to continue since loading ModsAndSeqInfo");
+                        return false;
+                    }
+
+                    if (mStartupOptions.LoadMSGFResults)
+                    {
+                        ReportError("Dataset name is undefined; unable to continue since loading MSGF results");
+                        return false;
+                    }
+
+                    if (mStartupOptions.LoadScanStatsData)
+                    {
+                        ReportError("Dataset name is undefined; unable to continue since loading ScanStatsData");
+                        return false;
+                    }
+
+                    datasetName = "Unknown_Dataset";
+                }
+
+                // Initialize some tracking variables
+                mMSGFCachedResults.Clear();
+
+                mPSMCurrent = new PSM();
+
+                mSourceFileLinesRead = 0;
+                mHeaderLineParsed = false;
+                mCachedLineAvailable = false;
+                mCachedLine = string.Empty;
+
+                // Open the peptide-hit result file (from PHRP) for reading
+                // Instantiate the appropriate PHRP SynFileReader
+
+                // If mInputFilePath is an empty string, the reader will be instantiated, and methods that solely depend on dataset name will be callable,
+                // but data related methods will not be callable
+
+                switch (resultType)
+                {
+                    case PeptideHitResultTypes.Inspect:
+                        SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MaxQuant:
+                        SynFileReader = new MaxQuantSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MODa:
+                        SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MODPlus:
+                        SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MSAlign:
+                        SynFileReader = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MSFragger:
+                        SynFileReader = new MSFraggerSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MSGFPlus:
+                        // MS-GF+
+                        SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.MSPathFinder:
+                        SynFileReader = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.Sequest:
+                        SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.TopPIC:
+                        SynFileReader = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    case PeptideHitResultTypes.XTandem:
+                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
+                        SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
+                    default:
+                        // Should never get here; invalid result type specified
+                        ReportError("Invalid PeptideHit ResultType specified: " + resultType);
+                        success = false;
+                        break;
+                }
+
+                if (!success)
+                {
+                    return false;
+                }
+
+                // Attach the event handlers
+                RegisterEvents(SynFileReader);
+
+                // Report any errors cached during instantiation of the SynFileReader
+                foreach (var message in SynFileReader.ErrorMessages)
+                {
+                    ReportError(message);
+                }
+
+                // Report any warnings cached during instantiation of the SynFileReader
+                foreach (var message in SynFileReader.WarningMessages)
+                {
+                    ReportWarning(message);
+                }
+
+                SynFileReader.ClearErrors();
+                SynFileReader.ClearWarnings();
+
+                if (mStartupOptions.DisableOpeningInputFiles)
+                {
+                    return true;
+                }
+
+                // Open the data file and count the number of lines so that we can compute progress
+                mSourceFileLineCount = CountLines(mInputFilePath);
+
+                // Open the data file for reading
+                mSourceFile = new StreamReader(new FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                CanRead = true;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                HandleException("Error in ReaderFactory.InitializeReader", ex);
+                if (!mInitialized)
+                    throw new Exception(ErrorMessage, ex);
+
+                return false;
+            }
+        }
 
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
@@ -2114,7 +2200,7 @@ namespace PHRPReader
         /// <param name="chChar">Character to examine</param>
         public static bool IsLetterAtoZ(char chChar)
         {
-            return RegexIsLetter.IsMatch(chChar.ToString());
+            return mRegexIsLetter.IsMatch(chChar.ToString());
         }
 
         /// <summary>
@@ -2305,32 +2391,26 @@ namespace PHRPReader
             return value;
         }
 
-        /// <summary>
-        /// Updates the column name to column index mapping in columnHeaders
-        /// </summary>
-        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
-        /// <param name="dataColumns">Column names read from the input file</param>
-        /// <param name="columnHeaders">Column mapping dictionary object to update</param>
-        public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
+        private void MarkupPeptideWithMods()
         {
-            // Reset the column indices in columnHeaders
-            if (columnHeaders.Count > 0)
-            {
-                var keys = new string[columnHeaders.Count];
-                columnHeaders.Keys.CopyTo(keys, 0);
+            // Markup the peptide with the dynamic and static mods
 
-                foreach (var key in keys)
+            var success = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim(), out var peptideWithMods, out var peptideMods);
+            if (success)
+            {
+                double totalModMass = 0;
+
+                mPSMCurrent.PeptideWithNumericMods = peptideWithMods;
+                mPSMCurrent.ClearModifiedResidues();
+                foreach (var modEntry in peptideMods)
                 {
-                    columnHeaders[key] = -1;
+                    mPSMCurrent.AddModifiedResidue(modEntry);
+                    totalModMass += modEntry.ModDefinition.ModificationMass;
                 }
-            }
 
-            for (var index = 0; index <= dataColumns.Length - 1; index++)
-            {
-                if (columnHeaders.ContainsKey(dataColumns[index]))
+                if (Math.Abs(mPSMCurrent.PeptideMonoisotopicMass) < double.Epsilon)
                 {
-                    // Update the index associated with this column name
-                    columnHeaders[dataColumns[index]] = index;
+                    mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + totalModMass;
                 }
             }
         }
@@ -2531,112 +2611,34 @@ namespace PHRPReader
             return true;
         }
 
-        private void ComputePrecursorNeutralMass()
-        {
-            if (!mExtendedScanStatsValid || mExtendedScanStatsInfo == null)
-                return;
-
-            double monoisotopicPrecursorMass = 0;
-
-            // Try to extract out the precursor m/z value from the "Scan Filter Text" field
-
-            if (ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, out var parentIonMZ))
-            {
-                if (parentIonMZ > 0)
-                {
-                    monoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(parentIonMZ, mPSMCurrent.Charge, 0);
-                }
-            }
-
-            if (Math.Abs(monoisotopicPrecursorMass) < double.Epsilon)
-            {
-                if (mExtendedScanStatsInfo.MonoisotopicMZ > 0)
-                {
-                    // Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
-                    monoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ, mPSMCurrent.Charge, 0);
-                }
-            }
-
-            if (monoisotopicPrecursorMass > 0)
-            {
-                mPSMCurrent.PrecursorNeutralMass = monoisotopicPrecursorMass;
-            }
-        }
-
         /// <summary>
-        /// This method extracts the Parent Ion m/z from the filter string
+        /// Updates the column name to column index mapping in columnHeaders
         /// </summary>
-        /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz"></param>
-        /// <returns>True if parsing successful</returns>
-        public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
+        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
+        /// <param name="dataColumns">Column names read from the input file</param>
+        /// <param name="columnHeaders">Column mapping dictionary object to update</param>
+        public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
         {
-            Regex matcher;
-
-            if (filterText.IndexOf("msx", StringComparison.OrdinalIgnoreCase) >= 0)
+            // Reset the column indices in columnHeaders
+            if (columnHeaders.Count > 0)
             {
-                matcher = mFindParentIonOnlyMsx;
-            }
-            else
-            {
-                matcher = mFindParentIonOnlyNonMsx;
-            }
+                var keys = new string[columnHeaders.Count];
+                columnHeaders.Keys.CopyTo(keys, 0);
 
-            var match = matcher.Match(filterText);
-
-            if (match.Success)
-            {
-                var parentIonMzText = match.Groups["ParentMZ"].Value;
-
-                return double.TryParse(parentIonMzText, out parentIonMz);
-            }
-
-            parentIonMz = 0;
-            return false;
-        }
-
-        private void MarkupPeptideWithMods()
-        {
-            // Markup the peptide with the dynamic and static mods
-
-            var success = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim(), out var peptideWithMods, out var peptideMods);
-            if (success)
-            {
-                double totalModMass = 0;
-
-                mPSMCurrent.PeptideWithNumericMods = peptideWithMods;
-                mPSMCurrent.ClearModifiedResidues();
-                foreach (var modEntry in peptideMods)
+                foreach (var key in keys)
                 {
-                    mPSMCurrent.AddModifiedResidue(modEntry);
-                    totalModMass += modEntry.ModDefinition.ModificationMass;
-                }
-
-                if (Math.Abs(mPSMCurrent.PeptideMonoisotopicMass) < double.Epsilon)
-                {
-                    mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + totalModMass;
+                    columnHeaders[key] = -1;
                 }
             }
-        }
 
-        /// <summary>
-        /// When FastReadMode is True, first call MoveNext to read the peptide scores.
-        /// Then, if the peptide is a peptide of interest, call this method to finalize any processing steps that were skipped.
-        /// </summary>
-        public void FinalizeCurrentPSM()
-        {
-            if (mPSMCurrentFinalized)
-                return;
-
-            // Determine the clean sequence and cleavage state, and update the Seq_ID fields
-            SynFileReader.FinalizePSM(mPSMCurrent);
-
-            MarkupPeptideWithMods();
-
-            ComputePrecursorNeutralMass();
-
-            mPSMCurrentFinalized = true;
+            for (var index = 0; index <= dataColumns.Length - 1; index++)
+            {
+                if (columnHeaders.ContainsKey(dataColumns[index]))
+                {
+                    // Update the index associated with this column name
+                    columnHeaders[dataColumns[index]] = index;
+                }
+            }
         }
 
         private void ReadAndCacheMSGFData()
@@ -2976,8 +2978,7 @@ namespace PHRPReader
             return true;
         }
 
-        private bool TryGetScanStats(int scanNumber,
-            out ScanStatsInfo scanStatsInfo)
+        private bool TryGetScanStats(int scanNumber, out ScanStatsInfo scanStatsInfo)
         {
             if (mScanStats?.Count > 0 && mScanStats.TryGetValue(scanNumber, out scanStatsInfo))
             {
@@ -2988,8 +2989,7 @@ namespace PHRPReader
             return false;
         }
 
-        private bool TryGetExtendedScanStats(int scanNumber,
-            out ScanStatsExInfo extendedScanStatsInfo)
+        private bool TryGetExtendedScanStats(int scanNumber, out ScanStatsExInfo extendedScanStatsInfo)
         {
             if (mScanStatsEx != null && mScanStats.Count > 0 && mScanStatsEx.TryGetValue(scanNumber, out extendedScanStatsInfo))
             {
