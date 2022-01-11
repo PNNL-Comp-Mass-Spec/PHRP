@@ -926,8 +926,6 @@ namespace PHRPReader
             const string LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt";
             const string LEGACY_MSGFPLUS_SUFFIX_FHT = "_msgfdb_fht.txt";
 
-            var resultType = PeptideHitResultTypes.Unknown;
-
             var filePathLCase = filePath.ToLower();
 
             var suffixesToCheck = new List<KeyValuePair<string, PeptideHitResultTypes>>();
@@ -957,14 +955,8 @@ namespace PHRPReader
             {
                 if (filePathLCase.EndsWith(item.Key, StringComparison.OrdinalIgnoreCase))
                 {
-                    resultType = item.Value;
-                    break;
+                    return item.Value;
                 }
-            }
-
-            if (resultType != PeptideHitResultTypes.Unknown)
-            {
-                return resultType;
             }
 
             // Open the file and read the header line to determine if this is a SEQUEST file, InSpecT file, MS-GF+, or something else
@@ -974,46 +966,57 @@ namespace PHRPReader
                 return PeptideHitResultTypes.MSGFPlus;
             }
 
-            using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-            if (!reader.EndOfStream)
+            if (!ReadHeaderLine(filePath, out var columnNames))
             {
-                var headerLine = reader.ReadLine();
+                // Error reading the header line; assume MSGFPlus
+                return PeptideHitResultTypes.MSGFPlus;
+            }
 
-                var msgfColumn = MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore);
+            if (LineContainsColumns(columnNames,
+                InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.MQScore),
+                InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.TotalPRMScore)))
+            {
+                // The header line has columns MQScore and TotalPRMScore
+                return PeptideHitResultTypes.Inspect;
+            }
 
-                if (LineContainsValues(headerLine,
-                    InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.MQScore),
-                    InspectSynFileReader.GetColumnNameByID(InspectSynFileColumns.TotalPRMScore)))
-                {
-                    resultType = PeptideHitResultTypes.Inspect;
-                }
-                else if (LineContainsValues(headerLine,
-                             msgfColumn, MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb)) ||
-                         LineContainsValues(headerLine,
-                             msgfColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue)) ||
-                         LineContainsValues(headerLine,
-                             msgfColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DeNovoScore)))
-                {
-                    resultType = PeptideHitResultTypes.MSGFPlus;
-                }
-                else if (LineContainsValues(headerLine,
+            if (LineContainsColumns(columnNames,
+                    MaxQuantSynFileReader.GetColumnNameByID(MaxQuantSynFileColumns.DelM_MaxQuant),
+                    MaxQuantSynFileReader.GetColumnNameByID(MaxQuantSynFileColumns.Score)))
+            {
+                // The header line has columns DelM_MaxQuant and Score
+                return PeptideHitResultTypes.MaxQuant;
+            }
+
+            if (LineContainsColumns(columnNames,
+                    MSFraggerSynFileReader.GetColumnNameByID(MSFraggerSynFileColumns.DelM_MSFragger),
+                    MSFraggerSynFileReader.GetColumnNameByID(MSFraggerSynFileColumns.Hyperscore)))
+            {
+                // The header line has columns DelM_MSFragger and Hyperscore
+                return PeptideHitResultTypes.MSFragger;
+            }
+
+            var msgfScoreColumn = MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.MSGFScore);
+
+            if (LineContainsColumns(columnNames, msgfScoreColumn, MSGFPlusSynFileReader.GetMSGFDBColumnNameByID(MSGFDBSynFileColumns.SpecProb)) ||
+                LineContainsColumns(columnNames, msgfScoreColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.SpecEValue)) ||
+                LineContainsColumns(columnNames, msgfScoreColumn, MSGFPlusSynFileReader.GetColumnNameByID(MSGFPlusSynFileColumns.DeNovoScore)))
+            {
+                // The header line has column MSGFScore plus also column MSGFDB_SpecProb, MSGFDB_SpecEValue, or DeNovoScore
+                return PeptideHitResultTypes.MSGFPlus;
+            }
+
+            if (LineContainsColumns(columnNames,
                     SequestSynFileReader.GetColumnNameByID(SequestSynopsisFileColumns.XCorr),
                     SequestSynFileReader.GetColumnNameByID(SequestSynopsisFileColumns.DeltaCn)))
-                {
-                    resultType = PeptideHitResultTypes.Sequest;
-                }
-            }
-
-            if (resultType != PeptideHitResultTypes.Unknown)
-                return resultType;
-
-            if (AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
             {
-                resultType = AutoDetermineResultType(filePathTrimmed);
+                // The header line has columns XCorr and DelCn
+                return PeptideHitResultTypes.Sequest;
             }
 
-            return resultType;
+            return AutoTrimExtraSuffix(filePath, out var filePathTrimmed)
+                ? AutoDetermineResultType(filePathTrimmed)
+                : PeptideHitResultTypes.Unknown;
         }
 
         /// <summary>
@@ -2271,19 +2274,17 @@ namespace PHRPReader
             }
         }
 
-        private static bool LineContainsValues(string dataLine, params string[] valuesToFind)
+        /// <summary>
+        /// Look for the given column names, returning true if all are found
+        /// </summary>
+        /// <param name="columnNames"></param>
+        /// <param name="columnNamesToFind"></param>
+        /// <returns>True if all of the columns are found, otherwise false</returns>
+        public static bool LineContainsColumns(IReadOnlyCollection<string> columnNames, params string[] columnNamesToFind)
         {
-            var matchCount = 0;
+            var matchCount = columnNamesToFind.Count(item => columnNames.Any(column => column.Equals(item)));
 
-            foreach (var item in valuesToFind)
-            {
-                if (dataLine.IndexOf(item, StringComparison.OrdinalIgnoreCase) > -1)
-                {
-                    matchCount++;
-                }
-            }
-
-            return matchCount == valuesToFind.Length;
+            return matchCount == columnNamesToFind.Length;
         }
 
         /// <summary>
@@ -2681,6 +2682,63 @@ namespace PHRPReader
             catch (Exception ex)
             {
                 HandleException("Exception reading MSGF file", ex);
+            }
+        }
+
+        /// <summary>
+        /// Read the column names in the first line of the file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="columnNames"></param>
+        /// <param name="columnDelimiter"></param>
+        /// <returns>True if successful, false if an error</returns>
+        public static bool ReadHeaderLine(string filePath, out List<string> columnNames, char columnDelimiter = '\t')
+        {
+            columnNames = new List<string>();
+
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    ConsoleMsgUtils.ShowWarning(
+                        "Cannot determine header line column names since file not found: {0}",
+                        PathUtils.CompactPathString(filePath, 110));
+
+                    return false;
+                }
+
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
+                {
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var columns = dataLine.TrimEnd().Split(columnDelimiter);
+
+                    if (columns.Length <= 1)
+                    {
+                        ConsoleMsgUtils.ShowWarning(
+                            "The header line of file {0} does not contain the expected delimiter ({1})",
+                            PathUtils.CompactPathString(filePath, 110),
+                            columnDelimiter == '\t' ? "tab" : columnDelimiter);
+                    }
+
+                    columnNames.AddRange(columns);
+                    break;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ConsoleMsgUtils.ShowWarning(
+                    "Error reading the column names on the first line of file {0}: {1}",
+                    PathUtils.CompactPathString(filePath, 110), ex.Message);
+
+                return false;
             }
         }
 
