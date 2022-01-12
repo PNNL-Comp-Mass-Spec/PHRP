@@ -31,7 +31,6 @@ namespace PeptideHitResultsProcessor.Processor
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "December 13, 2021";
-            InitializeLocalVariables();
         }
 
         /// <summary>
@@ -702,11 +701,6 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
-        }
-
-        private void InitializeLocalVariables()
-        {
-            // Nothing to do at present
         }
 
         private bool ParseMSAlignSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)

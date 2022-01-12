@@ -41,8 +41,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public InSpecTResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
-            InitializeLocalVariables();
+            FileDate = "January 10, 2022";
+
+            SortFHTAndSynFiles = true;
         }
 
         /// <summary>
@@ -835,11 +836,6 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return scanNum;
-        }
-
-        private void InitializeLocalVariables()
-        {
-            SortFHTAndSynFiles = true;
         }
 
         /// <summary>

@@ -41,8 +41,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
-            InitializeLocalVariables();
+            FileDate = "January 10, 2022";
         }
 
         /// <summary>
@@ -191,11 +190,6 @@ namespace PeptideHitResultsProcessor.Processor
             };
 
             return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
-        }
-
-        private void InitializeLocalVariables()
-        {
-            // Reserved for future use
         }
 
         /// <summary>

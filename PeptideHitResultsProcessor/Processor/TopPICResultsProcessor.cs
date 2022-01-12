@@ -39,8 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
-            InitializeLocalVariables();
+            FileDate = "January 10, 2022";
         }
 
         /// <summary>
@@ -742,11 +741,6 @@ namespace PeptideHitResultsProcessor.Processor
 
             // The primary sequence may still contain parentheses; remove them
             return base.GetCleanSequence(primarySequence);
-        }
-
-        private void InitializeLocalVariables()
-        {
-            // Nothing to do at present
         }
 
         private bool LookupModificationMassByName(string modName, out double modMass)
