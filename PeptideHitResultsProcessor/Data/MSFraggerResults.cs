@@ -134,6 +134,22 @@ namespace PeptideHitResultsProcessor.Data
         public string MissedCleavageCount { get; set; }
 
         /// <summary>
+        /// Number of matched ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        public string NumberOfMatchedIons { get; set; }
+
+        /// <summary>
+        /// Total number of ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        public string TotalNumberOfIons { get; set; }
+
+        /// <summary>
         /// Q-Value
         /// </summary>
         /// <remarks>
@@ -179,6 +195,8 @@ namespace PeptideHitResultsProcessor.Data
             PeptideProphetProbability = string.Empty;
             RetentionTime = string.Empty;
             MissedCleavageCount = string.Empty;
+            NumberOfMatchedIons = string.Empty;
+            TotalNumberOfIons = string.Empty;
             QValue = string.Empty;
         }
     }

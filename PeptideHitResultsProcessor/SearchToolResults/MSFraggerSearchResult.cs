@@ -203,6 +203,22 @@
         public string AdditionalProteins;
 
         /// <summary>
+        /// Number of matched ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        public string NumberOfMatchedIons;
+
+        /// <summary>
+        /// Total number of ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        public string TotalNumberOfIons;
+
+        /// <summary>
         /// Reset stored values to empty strings and zeros
         /// </summary>
         public void Clear()

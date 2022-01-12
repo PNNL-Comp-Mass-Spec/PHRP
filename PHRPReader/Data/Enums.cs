@@ -591,9 +591,25 @@ namespace PHRPReader.Data
         MissedCleavages = 22,
 
         /// <summary>
+        /// Number of matched ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        NumberOfMatchedIons = 23,
+
+        /// <summary>
+        /// Total number of ions in the fragmentation spectrum
+        /// </summary>
+        /// <remarks>
+        /// Read from the Dataset.tsv file since not in the _psm.tsv file
+        /// </remarks>
+        TotalNumberOfIons = 24,
+
+        /// <summary>
         /// Q-Value (computed by PHRP)
         /// </summary>
-        QValue = 23
+        QValue = 25
     }
 
     /// <summary>

@@ -21,6 +21,7 @@ using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM;
+
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
@@ -57,7 +58,12 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSFraggerResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: Da, Carbamidomethyl, Hyperscore, Nextscore, Prev, proline, tryptic, txt
+        // ReSharper disable CommentTypo
+
+        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Hyperscore, massdiff
+        // Ignore Spelling: Nextscore, Prev, proline, scannum, sp, tryptic, txt
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// Constructor
@@ -106,6 +112,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private enum MSFraggerPsmFileColumns
         {
+            Undefined = -1,
 
             /// <summary>
             /// MS/MS scan number in the dataset
@@ -341,6 +348,43 @@ namespace PeptideHitResultsProcessor.Processor
             /// Additional protein names (comma separated list)
             /// </summary>
             MappedProteins = 34
+        }
+
+        /// <summary>
+        /// These columns correspond to the MSFragger PSM results file
+        /// </summary>
+        private enum MSFraggerDatasetTsvFileColumns
+        {
+            /// <summary>
+            /// Scan number
+            /// </summary>
+            ScanNumber = 0,
+
+            PrecursorNeutralMass = 1,
+            RetentionTimeMinutes = 2,
+            Charge = 3,
+            HitRank = 4,
+            Peptide = 5,
+            PeptidePrevAA = 6,
+            PeptideNextAA = 7,
+            Protein = 8,
+            NumMatchedIons = 9,
+            TotNumIons = 10,
+            CalcNeutralPepMass = 11,
+            MassDiff = 12,
+            NumTolTerm = 13,
+            NumMissedCleavages = 14,
+            ModificationInfo = 15,
+            Hyperscore = 16,
+            NextScore = 17,
+            ExpectScore = 18,
+            // ReSharper disable once IdentifierTypo
+            BestLocs = 19,
+            ScoreWithoutDeltaMass = 20,
+            BestScoreWithDeltaMass = 21,
+            SecondBestScoreWithDeltaMass = 22,
+            DeltaScore = 23,
+            AlternativeProteins = 24
         }
 
         private struct MSFraggerModInfo
@@ -640,7 +684,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
 
-                var readingPsmFile = inputFilePath.EndsWith("_psm.tsv");
+                var readingPsmFile = inputFilePath.EndsWith("_psm.tsv", StringComparison.OrdinalIgnoreCase);
 
                 // Open the input file and parse it
                 using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -670,7 +714,8 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!headerParsed)
                     {
                         // Parse the header line
-                        var success = ParseMSFraggerResultsFileHeaderLine(lineIn, columnMapping);
+                        var success = ParseMSFraggerResultsFileHeaderLine(lineIn, columnMapping, readingPsmFile);
+
                         if (!success)
                         {
                             if (string.IsNullOrEmpty(mErrorMessage))
@@ -928,6 +973,44 @@ namespace PeptideHitResultsProcessor.Processor
                 return peptideInfo.Sequence;
 
             return peptideInfo.PrefixResidue + "." + peptideInfo.Sequence + "." + peptideInfo.SuffixResidue;
+        }
+
+        private bool GetTsvColumnNameSynonym(
+            IReadOnlyDictionary<string, MSFraggerDatasetTsvFileColumns> tsvFileColumnNames,
+            string columnName,
+            out MSFraggerPsmFileColumns psmFileColumn)
+        {
+            if (!tsvFileColumnNames.TryGetValue(columnName, out var resultFileColumn))
+            {
+                psmFileColumn = MSFraggerPsmFileColumns.Undefined;
+                return false;
+            }
+
+            psmFileColumn = resultFileColumn switch
+            {
+                MSFraggerDatasetTsvFileColumns.ScanNumber => MSFraggerPsmFileColumns.Spectrum,
+                MSFraggerDatasetTsvFileColumns.Peptide => MSFraggerPsmFileColumns.Peptide,
+                MSFraggerDatasetTsvFileColumns.PeptidePrevAA => MSFraggerPsmFileColumns.PrevAA,
+                MSFraggerDatasetTsvFileColumns.PeptideNextAA => MSFraggerPsmFileColumns.NextAA,
+                MSFraggerDatasetTsvFileColumns.Charge => MSFraggerPsmFileColumns.Charge,
+                MSFraggerDatasetTsvFileColumns.RetentionTimeMinutes => MSFraggerPsmFileColumns.RetentionTime,
+                MSFraggerDatasetTsvFileColumns.PrecursorNeutralMass => MSFraggerPsmFileColumns.ObservedMass,
+                MSFraggerDatasetTsvFileColumns.CalcNeutralPepMass => MSFraggerPsmFileColumns.CalculatedPeptideMass,
+                MSFraggerDatasetTsvFileColumns.MassDiff => MSFraggerPsmFileColumns.DeltaMass,
+                MSFraggerDatasetTsvFileColumns.ExpectScore => MSFraggerPsmFileColumns.Expectation,
+                MSFraggerDatasetTsvFileColumns.Hyperscore => MSFraggerPsmFileColumns.Hyperscore,
+                MSFraggerDatasetTsvFileColumns.NextScore => MSFraggerPsmFileColumns.Nextscore,
+                MSFraggerDatasetTsvFileColumns.NumTolTerm => MSFraggerPsmFileColumns.NumberOfEnzymaticTermini,
+                MSFraggerDatasetTsvFileColumns.NumMissedCleavages => MSFraggerPsmFileColumns.NumberOfMissedCleavages,
+                MSFraggerDatasetTsvFileColumns.NumMatchedIons => MSFraggerPsmFileColumns.NumberOfMatchedIons,
+                MSFraggerDatasetTsvFileColumns.TotNumIons => MSFraggerPsmFileColumns.TotalNumberOfIons,
+                MSFraggerDatasetTsvFileColumns.ModificationInfo => MSFraggerPsmFileColumns.AssignedModifications,
+                MSFraggerDatasetTsvFileColumns.Protein => MSFraggerPsmFileColumns.Protein,
+                MSFraggerDatasetTsvFileColumns.AlternativeProteins => MSFraggerPsmFileColumns.MappedProteins,
+                _ => MSFraggerPsmFileColumns.Undefined
+            };
+
+            return psmFileColumn != MSFraggerPsmFileColumns.Undefined;
         }
 
         /// <summary>
@@ -1220,7 +1303,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (readingPsmFile)
                 {
                     // The aggregated results file reports retention time in seconds
-                    if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out int retentionTimeSeconds))
+                    if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out int retentionTimeSeconds))
                     {
                         searchResult.RetentionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
                     }
@@ -1228,7 +1311,7 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     // The single dataset results file reports retention time in minutes
-                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Retention], out searchResult.RetentionTime);
+                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out searchResult.RetentionTime);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
@@ -1254,19 +1337,35 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Nextscore], out searchResult.Nextscore);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideProphetProbability], out searchResult.PeptideProphetProbability);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfEnzymaticTermini], out searchResult.NumberOfTrypticTerminii);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMissedCleavages], out searchResult.MissedCleavageCount);
+
+                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMatchedIons], out searchResult.NumberOfMatchedIons);
+                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.TotalNumberOfIons], out searchResult.TotalNumberOfIons);
+
+                if (readingPsmFile)
+                {
+                    // ToDo: Populate searchResult.NumberOfMatchedIons and searchResult.TotalNumberOfIons using data loaded from the Dataset.tsv file(s)
+                }
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinStart], out searchResult.ProteinStart);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinEnd], out searchResult.ProteinEnd);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Intensity], out searchResult.Intensity);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.AssignedModifications], out searchResult.ModificationList);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedModifications], out searchResult.ObservedModifications);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.IsUnique], out searchResult.IsUnique);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Protein], out searchResult.Protein);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinID], out searchResult.ProteinID);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.EntryName], out searchResult.EntryName);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Gene], out searchResult.Gene);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinDescription], out searchResult.ProteinDescription);
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedGenes], out searchResult.AdditionalGenes);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedProteins], out searchResult.AdditionalProteins);
 
@@ -1338,11 +1437,19 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the MSFragger results file header line, populating columnMapping
         /// </summary>
+        /// <remarks>
+        /// This method supports both Dataset_psm.tsv files and Dataset.tsv (which have similar, but different column names)
+        /// </remarks>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
+        /// <param name="readingPsmFile"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
-        private bool ParseMSFraggerResultsFileHeaderLine(string lineIn, IDictionary<MSFraggerPsmFileColumns, int> columnMapping)
+        private bool ParseMSFraggerResultsFileHeaderLine(
+            string lineIn,
+            IDictionary<MSFraggerPsmFileColumns, int> columnMapping,
+            bool readingPsmFile)
         {
+            // Columns in _psm.tsv files
             var columnNames = new SortedDictionary<string, MSFraggerPsmFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"Spectrum", MSFraggerPsmFileColumns.Spectrum},
@@ -1353,7 +1460,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Next AA", MSFraggerPsmFileColumns.NextAA},
                 {"Peptide Length", MSFraggerPsmFileColumns.PeptideLength},
                 {"Charge", MSFraggerPsmFileColumns.Charge},
-                {"Retention", MSFraggerPsmFileColumns.Retention},
+                {"Retention", MSFraggerPsmFileColumns.RetentionTime},
                 {"Observed Mass", MSFraggerPsmFileColumns.ObservedMass},
                 {"Calibrated Observed Mass", MSFraggerPsmFileColumns.CalibratedObservedMass},
                 {"Observed M/Z", MSFraggerPsmFileColumns.ObservedMZ},
@@ -1379,8 +1486,41 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Gene", MSFraggerPsmFileColumns.Gene},
                 {"Protein Description", MSFraggerPsmFileColumns.ProteinDescription},
                 {"Mapped Genes", MSFraggerPsmFileColumns.MappedGenes},
-                {"Mapped Proteins", MSFraggerPsmFileColumns.MappedProteins}
+                {"Mapped Proteins", MSFraggerPsmFileColumns.MappedProteins},
             };
+
+            // ReSharper disable StringLiteralTypo
+
+            var tsvFileColumnNames = new SortedDictionary<string, MSFraggerDatasetTsvFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "scannum", MSFraggerDatasetTsvFileColumns.ScanNumber },
+                { "precursor_neutral_mass", MSFraggerDatasetTsvFileColumns.PrecursorNeutralMass },
+                { "retention_time", MSFraggerDatasetTsvFileColumns.RetentionTimeMinutes },
+                { "charge", MSFraggerDatasetTsvFileColumns.Charge },
+                { "hit_rank", MSFraggerDatasetTsvFileColumns.HitRank },
+                { "peptide", MSFraggerDatasetTsvFileColumns.Peptide },
+                { "peptide_prev_aa", MSFraggerDatasetTsvFileColumns.PeptidePrevAA },
+                { "peptide_next_aa", MSFraggerDatasetTsvFileColumns.PeptideNextAA },
+                { "protein", MSFraggerDatasetTsvFileColumns.Protein },
+                { "num_matched_ions", MSFraggerDatasetTsvFileColumns.NumMatchedIons },
+                { "tot_num_ions", MSFraggerDatasetTsvFileColumns.TotNumIons },
+                { "calc_neutral_pep_mass", MSFraggerDatasetTsvFileColumns.CalcNeutralPepMass },
+                { "massdiff", MSFraggerDatasetTsvFileColumns.MassDiff },
+                { "num_tol_term", MSFraggerDatasetTsvFileColumns.NumTolTerm },
+                { "num_missed_cleavages", MSFraggerDatasetTsvFileColumns.NumMissedCleavages },
+                { "modification_info", MSFraggerDatasetTsvFileColumns.ModificationInfo },
+                { "hyperscore", MSFraggerDatasetTsvFileColumns.Hyperscore },
+                { "nextscore", MSFraggerDatasetTsvFileColumns.NextScore },
+                { "expectscore", MSFraggerDatasetTsvFileColumns.ExpectScore },
+                { "best_locs", MSFraggerDatasetTsvFileColumns.BestLocs },
+                { "score_without_delta_mass", MSFraggerDatasetTsvFileColumns.ScoreWithoutDeltaMass },
+                { "best_score_with_delta_mass", MSFraggerDatasetTsvFileColumns.BestScoreWithDeltaMass },
+                { "second_best_score_with_delta_mass", MSFraggerDatasetTsvFileColumns.SecondBestScoreWithDeltaMass },
+                { "delta_score", MSFraggerDatasetTsvFileColumns.DeltaScore },
+                { "alternative_proteins", MSFraggerDatasetTsvFileColumns.AlternativeProteins }
+            };
+
+            // ReSharper restore StringLiteralTypo
 
             columnMapping.Clear();
 
@@ -1396,6 +1536,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 for (var index = 0; index < splitLine.Length; index++)
                 {
+                    if (!readingPsmFile && GetTsvColumnNameSynonym(tsvFileColumnNames, splitLine[index], out var psmFileColumn))
+                    {
+                        // Recognized column name; update columnMapping
+                        columnMapping[psmFileColumn] = index;
+                        continue;
+                    }
+
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
                         // Recognized column name; update columnMapping
@@ -1596,6 +1743,8 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PeptideProphetProbability], out string peptideProphetProbability);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.RetentionTime], out string retentionTime);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MissedCleavages], out string missedCleavages);
+                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NumberOfMatchedIons], out string numberOfMatchedIons);
+                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.TotalNumberOfIons], out string totalNumberOfIons);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.QValue], out string qValue);
 
                 // Store the data
@@ -1608,6 +1757,8 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.PeptideProphetProbability = peptideProphetProbability;
                 searchResult.RetentionTime = retentionTime;
                 searchResult.MissedCleavageCount = missedCleavages;
+                searchResult.NumberOfMatchedIons = numberOfMatchedIons;
+                searchResult.TotalNumberOfIons = totalNumberOfIons;
                 searchResult.QValue = qValue;
 
                 if (string.IsNullOrWhiteSpace(searchResult.MultipleProteinCount))
@@ -1640,7 +1791,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing routine
         /// </summary>
-        /// <param name="inputFilePath">MSFragger results file (msms.txt); alternatively, a directory with files msms.txt and peptides.txt</param>
+        /// <param name="inputFilePath">MSFragger results file (Dataset_psm.tsv or Dataset.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>
@@ -1924,6 +2075,8 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PeptideProphetProbability,
                     searchResult.RetentionTime,
                     searchResult.MissedCleavageCount,
+                    searchResult.NumberOfMatchedIons,
+                    searchResult.TotalNumberOfIons,
                     PRISM.StringUtilities.DblToString(searchResult.QValue, 5, 0.00005)
                 };
 
