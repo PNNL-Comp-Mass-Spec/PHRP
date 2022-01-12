@@ -289,10 +289,10 @@ namespace PHRPReader.Reader
         /// Examine the MSFragger parameters to determine the precursor mass tolerance(s)
         /// </summary>
         /// <param name="searchEngineParams">MSFragger search engine parameters loaded from a Key=Value parameter file</param>
-        /// <param name="toleranceLower">Tolerance to the left, e.g. -20</param>
-        /// <param name="toleranceUpper">Tolerance to the right, e.g. 20</param>
-        /// <param name="ppmBased">True if ppm-based tolerances</param>
-        /// <param name="singleTolerance"></param>
+        /// <param name="toleranceLower">Output: Tolerance to the left, e.g. -20</param>
+        /// <param name="toleranceUpper">Output: Tolerance to the right, e.g. 20</param>
+        /// <param name="ppmBased">Output: True if ppm-based tolerances</param>
+        /// <param name="singleTolerance">Output: true if a single tolerance is defined, false if two tolerances are defined</param>
         /// <returns>True if the tolerance parameters were found, false if not found or an error</returns>
         public bool GetPrecursorSearchTolerances(
             SearchEngineParameters searchEngineParams,
@@ -314,6 +314,7 @@ namespace PHRPReader.Reader
                 double.TryParse(precursorMassLower, out var precursorMassLowerVal) &&
                 double.TryParse(precursorMassUpper, out var precursorMassUpperVal))
             {
+                // Two tolerances are defined (though they may be equivalent)
                 ppmBased = MassToleranceUnitsArePPM(precursorMassUnitsVal, "precursor_mass_units");
                 singleTolerance = false;
                 toleranceLower = precursorMassLowerVal;
@@ -325,6 +326,7 @@ namespace PHRPReader.Reader
             if (int.TryParse(precursorTrueUnits, out var precursorTrueUnitsVal) &&
                 double.TryParse(precursorTrueTolerance, out var precursorTrueToleranceVal))
             {
+                // A single, symmetric tolerance is defined
                 ppmBased = MassToleranceUnitsArePPM(precursorTrueUnitsVal, "precursor_true_units");
                 singleTolerance = true;
                 toleranceLower = precursorTrueToleranceVal;
@@ -597,7 +599,7 @@ namespace PHRPReader.Reader
                 var validTolerance = GetPrecursorSearchTolerances(
                     searchEngineParams,
                     out var toleranceLower, out var toleranceUpper,
-                    out var ppmBased, out var singleTolerance);
+                    out var ppmBased, out _);
 
                 if (!validTolerance)
                 {
@@ -607,14 +609,7 @@ namespace PHRPReader.Reader
                     return true;
                 }
 
-                if (singleTolerance)
-                {
-                    UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
-                }
-                else
-                {
-                    UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
-                }
+                UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
 
                 return true;
             }
