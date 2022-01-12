@@ -56,7 +56,7 @@ namespace PeptideHitResultsProcessor.Processor
     ///    Sorts ascending Expectation value, Scan, Peptide, and Protein
     /// </para>
     /// </remarks>
-    public class MSFraggerResultsProcessor : PHRPBaseClass
+    public class MSFraggerResultsProcessor : MultiDatasetResultsProcessor
     {
         // ReSharper disable CommentTypo
 
@@ -777,7 +777,7 @@ namespace PeptideHitResultsProcessor.Processor
                 Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
-                var baseNameByDatasetName = GetDatasetNameMap(filteredSearchResults, out var longestCommonBaseName);
+                var baseNameByDatasetName = GetDatasetNameMap(inputFile.Name, filteredSearchResults, out var longestCommonBaseName);
 
                 // Compute MassErrorPpm and MassErrorDa
                 ComputeObservedMassErrors(filteredSearchResults);
@@ -828,31 +828,28 @@ namespace PeptideHitResultsProcessor.Processor
         /// Examine the dataset names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
+        /// <param name="inputFileName"></param>
         /// <param name="filteredSearchResults"></param>
         /// <param name="longestCommonBaseName"></param>
         /// <returns>Dictionary where keys are dataset names and values are abbreviated names</returns>
-        private Dictionary<string, string> GetDatasetNameMap(IEnumerable<MSFraggerSearchResult> filteredSearchResults, out string longestCommonBaseName)
+        private Dictionary<string, string> GetDatasetNameMap(
+            string inputFileName,
+            IEnumerable<MSFraggerSearchResult> filteredSearchResults,
+            out string longestCommonBaseName)
         {
             var datasetNames = new SortedSet<string>();
 
             foreach (var item in filteredSearchResults)
             {
                 var datasetName = item.DatasetName;
-
-                if (datasetNames.Contains(datasetName))
+                if (string.IsNullOrWhiteSpace(datasetName))
                     continue;
 
+                // Note that .Add() calls .AddIfNotPresent() internally, so it is safe to call for dataset names already in the SortedSet
                 datasetNames.Add(datasetName);
             }
 
-            var baseNameByDatasetName = MaxQuantResultsProcessor.GetDatasetNameMap(datasetNames, out longestCommonBaseName, out var warnings);
-
-            foreach (var warning in warnings)
-            {
-                OnWarningEvent(warning);
-            }
-
-            return baseNameByDatasetName;
+            return GetDatasetNameMap(inputFileName, datasetNames, out longestCommonBaseName, PSM_FILE_SUFFIX);
         }
 
         private List<MSFraggerModInfo> GetPeptideModifications(MSFraggerResults searchResult)

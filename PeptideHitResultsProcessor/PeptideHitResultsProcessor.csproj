@@ -59,6 +59,7 @@
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
     <Compile Include="Data\MSFraggerResults.cs" />
+    <Compile Include="Processor\MultiDatasetResultsProcessor.cs" />
     <Compile Include="SearchToolResults\MaxQuantSearchResult.cs" />
     <Compile Include="SearchToolResults\MSFraggerSearchResult.cs" />
     <Compile Include="Data\PrecursorMassTolerance.cs" />
