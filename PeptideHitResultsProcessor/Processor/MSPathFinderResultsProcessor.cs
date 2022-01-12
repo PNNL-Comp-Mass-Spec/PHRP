@@ -65,7 +65,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSPathFinderResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
+            FileDate = "January 10, 2022";
         }
 
         /// <summary>

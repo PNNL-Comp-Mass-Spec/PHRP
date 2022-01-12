@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
+            FileDate = "January 12, 2022";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -783,8 +783,8 @@ namespace PeptideHitResultsProcessor.Processor
                 ComputeObservedMassErrors(filteredSearchResults);
 
                 // The synopsis file name will be of the form DatasetName_msfragger_syn.txt
-                // If baseDatasetNames only has one item, will use the full dataset name
-                // If baseDatasetNames has multiple items, will use the longest string in common for the keys in baseDatasetNames
+                // If baseNameByDatasetName only has one item, will use the full dataset name
+                // If baseNameByDatasetName has multiple items, will use the longest string in common for the keys in baseNameByDatasetName
 
                 baseName = baseNameByDatasetName.Count switch
                 {
@@ -1374,7 +1374,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMassForCleanSequence(searchResult.Sequence, totalModMass);
 
-                // ToDo: compute the mass error using the observed precursor ion m/z value
+                // MassErrorPpm and MassErrorDa will be computed later by method ComputeObservedMassErrors
 
                 // Compare the mass computed by PHRP to the one reported by MSFragger
                 var deltaMassVsMSFragger = searchResult.CalculatedMonoMassPHRP - searchResult.CalculatedMonoMassValue;

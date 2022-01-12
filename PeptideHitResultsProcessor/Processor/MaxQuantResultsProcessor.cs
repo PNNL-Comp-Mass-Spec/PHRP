@@ -73,7 +73,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
+            FileDate = "January 12, 2022";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -1016,8 +1016,8 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // The synopsis file name will be of the form DatasetName_maxq_syn.txt
-                // If baseDatasetNames only has one item, will use the full dataset name
-                // If baseDatasetNames has multiple items, will use the longest string in common for the keys in baseDatasetNames
+                // If baseNameByDatasetName only has one item, will use the full dataset name
+                // If baseNameByDatasetName has multiple items, will use the longest string in common for the keys in baseNameByDatasetName
 
                 baseName = baseNameByDatasetName.Count switch
                 {
@@ -2099,6 +2099,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
+
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
                     if (!filesInitialized)
                         return false;
