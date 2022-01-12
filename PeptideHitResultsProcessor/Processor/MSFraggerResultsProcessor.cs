@@ -262,7 +262,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// Read from the Dataset.tsv file since not in the _psm.tsv file
             /// </remarks>
-            NumberOfMatchedIons,
+            NumberOfMatchedIons = 22,
 
             /// <summary>
             /// Total number of ions in the fragmentation spectrum
@@ -270,22 +270,22 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// Read from the Dataset.tsv file since not in the _psm.tsv file
             /// </remarks>
-            TotalNumberOfIons,
+            TotalNumberOfIons = 23,
 
             /// <summary>
             /// Residue number in the protein where the peptide starts
             /// </summary>
-            ProteinStart = 22,
+            ProteinStart = 24,
 
             /// <summary>
             /// Residue number in the protein where the peptide ends
             /// </summary>
-            ProteinEnd = 23,
+            ProteinEnd = 25,
 
             /// <summary>
             /// Observed intensity
             /// </summary>
-            Intensity = 24,
+            Intensity = 26,
 
             /// <summary>
             /// Comma separated list of static and dynamic modifications in the peptide
@@ -299,27 +299,27 @@ namespace PeptideHitResultsProcessor.Processor
             ///   6M(15.9949), N-term(42.0106)
             ///   15M(15.9949), 16C(57.0215), 9M(15.9949)
             /// </remarks>
-            AssignedModifications = 25,
+            AssignedModifications = 27,
 
             /// <summary>
             /// Unknown
             /// </summary>
-            ObservedModifications = 26,
+            ObservedModifications = 28,
 
             /// <summary>
             /// True if the protein only maps to one protein
             /// </summary>
-            IsUnique = 27,
+            IsUnique = 29,
 
             /// <summary>
             /// Primary protein name
             /// </summary>
-            Protein = 28,
+            Protein = 30,
 
             /// <summary>
             /// Protein ID
             /// </summary>
-            ProteinID = 29,
+            ProteinID = 31,
 
             /// <summary>
             /// Protein name portion after the final |
@@ -327,27 +327,27 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// For example, given "sp|Q86YZ3|HORN_HUMAN", the EntryName is HORN_HUMAN
             /// </remarks>
-            EntryName = 30,
+            EntryName = 32,
 
             /// <summary>
             /// Gene name
             /// </summary>
-            Gene = 31,
+            Gene = 33,
 
             /// <summary>
             /// Protein description
             /// </summary>
-            ProteinDescription = 32,
+            ProteinDescription = 34,
 
             /// <summary>
             /// Additional gene names
             /// </summary>
-            MappedGenes = 33,
+            MappedGenes = 35,
 
             /// <summary>
             /// Additional protein names (comma separated list)
             /// </summary>
-            MappedProteins = 34
+            MappedProteins = 36
         }
 
         /// <summary>
