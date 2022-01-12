@@ -40,7 +40,7 @@ namespace PHRP_UnitTests
                     datasetNames.Add(item);
             }
 
-            var baseDatasetNames = MaxQuantResultsProcessor.GetDatasetNameMap(datasetNames, out var longestCommonString, out var warnings);
+            var baseDatasetNames = MultiDatasetResultsProcessor.GetDatasetNameMap(datasetNames, out var longestCommonString, out var warnings);
 
             foreach (var warning in warnings)
             {
