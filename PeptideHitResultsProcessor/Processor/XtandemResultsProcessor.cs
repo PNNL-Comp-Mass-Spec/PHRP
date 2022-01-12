@@ -101,10 +101,10 @@ namespace PeptideHitResultsProcessor.Processor
         private int mNextResultID;
         private bool mLookForReverseSequenceTag;
 
-        private Regex mScanNumberRegExA;
-        private Regex mScanNumberRegExB;
-        private Regex mScanNumberRegExC;
-        private Regex mScanNumberRegExD;
+        private readonly Regex mScanNumberRegExA;
+        private readonly Regex mScanNumberRegExB;
+        private readonly Regex mScanNumberRegExC;
+        private readonly Regex mScanNumberRegExD;
 
         private readonly Dictionary<string, int> mSeqsWithMods;
         private readonly SortedSet<string> mSeqsWithoutMods;
@@ -114,10 +114,17 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public XTandemResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "December 13, 2021";
+            FileDate = "January 10, 2022";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();
+
+            const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
+
+            mScanNumberRegExA = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_A, REGEX_OPTIONS);
+            mScanNumberRegExB = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_B, REGEX_OPTIONS);
+            mScanNumberRegExC = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_C, REGEX_OPTIONS);
+            mScanNumberRegExD = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_D, REGEX_OPTIONS);
 
             InitializeLocalVariables();
         }
@@ -225,28 +232,9 @@ namespace PeptideHitResultsProcessor.Processor
         private void InitializeLocalVariables()
         {
             // Note: This method is called from ParseXTandemResultsFile()
-            // These variables will therefore be reset for each XTandem XML file analyzed
+            // These variables will therefore be reset for each X!Tandem XML file analyzed
             mNextResultID = 1;
             mLookForReverseSequenceTag = false;
-
-            InitializeRegExObjects();
-        }
-
-        private void InitializeRegExObjects()
-        {
-            const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
-
-            try
-            {
-                mScanNumberRegExA = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_A, REGEX_OPTIONS);
-                mScanNumberRegExB = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_B, REGEX_OPTIONS);
-                mScanNumberRegExC = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_C, REGEX_OPTIONS);
-                mScanNumberRegExD = new Regex(SCAN_NUMBER_EXTRACTION_REGEX_D, REGEX_OPTIONS);
-            }
-            catch (Exception)
-            {
-                // Ignore errors here
-            }
         }
 
         private bool ParseXTandemInputParameterModInfo(
