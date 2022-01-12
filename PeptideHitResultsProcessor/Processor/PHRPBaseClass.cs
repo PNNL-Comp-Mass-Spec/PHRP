@@ -863,14 +863,14 @@ namespace PeptideHitResultsProcessor.Processor
                     return ResultsFileFormat.MSGFPlusTXTFile;
                 }
 
-                if (ReaderFactory.LineContainsColumns(columnNames, "Expectation", "Hyperscore", "Nextscore"))
+                if (ReaderFactory.LineContainsColumns(columnNames, true, "Expectation", "Hyperscore", "Nextscore"))
                 {
                     // MSFragger _psm.tsv file
                     return ResultsFileFormat.MSFraggerTSVFile;
                 }
 
                 // ReSharper disable once StringLiteralTypo
-                if (ReaderFactory.LineContainsColumns(columnNames, "expectscore", "hyperscore", "nextscore"))
+                if (ReaderFactory.LineContainsColumns(columnNames, true, "expectscore", "hyperscore", "nextscore"))
                 {
                     // MSFragger Dataset.tsv file
                     return ResultsFileFormat.MSFraggerTSVFile;

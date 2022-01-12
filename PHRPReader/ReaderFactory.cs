@@ -2284,12 +2284,27 @@ namespace PHRPReader
         /// <summary>
         /// Look for the given column names, returning true if all are found
         /// </summary>
+        /// <remarks>Uses case-sensitive comparison</remarks>
         /// <param name="columnNames"></param>
         /// <param name="columnNamesToFind"></param>
         /// <returns>True if all of the columns are found, otherwise false</returns>
         public static bool LineContainsColumns(IReadOnlyCollection<string> columnNames, params string[] columnNamesToFind)
         {
-            var matchCount = columnNamesToFind.Count(item => columnNames.Any(column => column.Equals(item)));
+            return LineContainsColumns(columnNames, false, columnNamesToFind);
+        }
+
+        /// <summary>
+        /// Look for the given column names, returning true if all are found
+        /// </summary>
+        /// <param name="columnNames"></param>
+        /// <param name="ignoreCase">When true, ignore case when comparing names</param>
+        /// <param name="columnNamesToFind"></param>
+        /// <returns>True if all of the columns are found, otherwise false</returns>
+        public static bool LineContainsColumns(IReadOnlyCollection<string> columnNames, bool ignoreCase, params string[] columnNamesToFind)
+        {
+            var comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+            var matchCount = columnNamesToFind.Count(item => columnNames.Any(column => column.Equals(item, comparisonType)));
 
             return matchCount == columnNamesToFind.Length;
         }
