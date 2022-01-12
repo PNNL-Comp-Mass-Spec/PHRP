@@ -106,43 +106,240 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         private enum MSFraggerPsmFileColumns
         {
+
             /// <summary>
-            /// Scan number
+            /// MS/MS scan number in the dataset
             /// </summary>
             Spectrum = 0,
+
+            /// <summary>
+            /// Spectrum file name
+            /// </summary>
             SpectrumFile = 1,
+
+            /// <summary>
+            /// Peptide sequence (no modification symbols)
+            /// </summary>
             Peptide = 2,
+
+            // ReSharper disable CommentTypo
+
+            /// <summary>
+            /// Peptide sequence with integer residue masses for dynamic mods
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// For example, for peptide SMPEQTGEK with an oxidized methionine (+15.9949) on the second residue,
+            /// ModifiedPeptide is "SM[147]PEQTGEK" where 147 comes from the mass of a methionine residue (131) plus 16
+            /// </para>
+            /// <para>
+            /// N-terminal protein mods are listed before the first residue.
+            /// For example, for peptide xx with an acetylated N-terminus (+42.0106),
+            /// ModifiedPeptide is "n[43]MNHQQQQQQQK" where 43 comes from the mass of hydrogen (1) plus 42
+            /// </para>
+            /// </remarks>
             ModifiedPeptide = 3,
+
+            // ReSharper restore CommentTypo
+
+            /// <summary>
+            /// Amino acid in the protein just prior to the peptide
+            /// </summary>
+            /// <remarks>
+            /// Dash if at the N-terminus of a protein
+            /// </remarks>
             PrevAA = 4,
+
+            /// <summary>
+            /// Amino acid in the protein just after the peptide
+            /// </summary>
+            /// <remarks>
+            /// Dash if at the C-terminus of a protein
+            /// </remarks>
             NextAA = 5,
+
+            /// <summary>
+            /// Number of residues in the peptide
+            /// </summary>
             PeptideLength = 6,
+
+            /// <summary>
+            /// Charge state of the precursor ion
+            /// </summary>
             Charge = 7,
-            Retention = 8,
+
+            /// <summary>
+            /// Retention time
+            /// </summary>
+            /// <remarks>Listed as seconds in _psm.tsv files, but as minutes in Dataset.tsv files</remarks>
+            RetentionTime = 8,
+
+            /// <summary>
+            /// Precursor neutral mass
+            /// </summary>
             ObservedMass = 9,
+
+            /// <summary>
+            /// Calibrated precursor neutral mass
+            /// </summary>
             CalibratedObservedMass = 10,
+
+            /// <summary>
+            /// Precursor ion m/z (observed value)
+            /// </summary>
             ObservedMZ = 11,
+
+            /// <summary>
+            /// Precursor ion m/z (observed value, calibrated)
+            /// </summary>
             CalibratedObservedMZ = 12,
+
+            /// <summary>
+            /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods)
+            /// </summary>
             CalculatedPeptideMass = 13,
+
+            /// <summary>
+            /// Theoretical m/z of the identified sequence, based on theoretical mass and observed charge
+            /// </summary>
             CalculatedMZ = 14,
+
+            /// <summary>
+            /// Mass error of the precursor ion equivalent monoisotopic mass value
+            /// vs. the predicted monoisotopic mass of the identified peptide sequence
+            /// </summary>
             DeltaMass = 15,
+
+            /// <summary>
+            /// Expectation value (E-value)
+            /// </summary>
             Expectation = 16,
+
+            /// <summary>
+            /// Hyperscore of the top match
+            /// </summary>
+            /// <remarks>
+            /// Higher scores are better
+            /// </remarks>
             Hyperscore = 17,
+
+            /// <summary>
+            /// Hyperscore of the next best match
+            /// </summary>
+            /// <remarks>
+            /// Larger values are better
+            /// </remarks>
             Nextscore = 18,
+
+            /// <summary>
+            /// Peptide prophet probability
+            /// </summary>
+            /// <remarks>
+            /// Values closer to 1 are better
+            /// </remarks>
             PeptideProphetProbability = 19,
+
+            /// <summary>
+            /// Number of enzymatic termini
+            /// </summary>
             NumberOfEnzymaticTermini = 20,
+
+            /// <summary>
+            /// Number of missed enzymatic cleavages
+            /// </summary>
             NumberOfMissedCleavages = 21,
+
+            /// <summary>
+            /// Number of matched ions in the fragmentation spectrum
+            /// </summary>
+            /// <remarks>
+            /// Read from the Dataset.tsv file since not in the _psm.tsv file
+            /// </remarks>
+            NumberOfMatchedIons,
+
+            /// <summary>
+            /// Total number of ions in the fragmentation spectrum
+            /// </summary>
+            /// <remarks>
+            /// Read from the Dataset.tsv file since not in the _psm.tsv file
+            /// </remarks>
+            TotalNumberOfIons,
+
+            /// <summary>
+            /// Residue number in the protein where the peptide starts
+            /// </summary>
             ProteinStart = 22,
+
+            /// <summary>
+            /// Residue number in the protein where the peptide ends
+            /// </summary>
             ProteinEnd = 23,
+
+            /// <summary>
+            /// Observed intensity
+            /// </summary>
             Intensity = 24,
+
+            /// <summary>
+            /// Comma separated list of static and dynamic modifications in the peptide
+            /// </summary>
+            /// <remarks>
+            /// Examples:
+            ///   7M(15.9949)
+            ///   N-term(42.0106)
+            ///   11C(57.0215), 4C(57.0215)
+            ///   2C(57.0215), 7M(15.9949)
+            ///   6M(15.9949), N-term(42.0106)
+            ///   15M(15.9949), 16C(57.0215), 9M(15.9949)
+            /// </remarks>
             AssignedModifications = 25,
+
+            /// <summary>
+            /// Unknown
+            /// </summary>
             ObservedModifications = 26,
+
+            /// <summary>
+            /// True if the protein only maps to one protein
+            /// </summary>
             IsUnique = 27,
+
+            /// <summary>
+            /// Primary protein name
+            /// </summary>
             Protein = 28,
+
+            /// <summary>
+            /// Protein ID
+            /// </summary>
             ProteinID = 29,
+
+            /// <summary>
+            /// Protein name portion after the final |
+            /// </summary>
+            /// <remarks>
+            /// For example, given "sp|Q86YZ3|HORN_HUMAN", the EntryName is HORN_HUMAN
+            /// </remarks>
             EntryName = 30,
+
+            /// <summary>
+            /// Gene name
+            /// </summary>
             Gene = 31,
+
+            /// <summary>
+            /// Protein description
+            /// </summary>
             ProteinDescription = 32,
+
+            /// <summary>
+            /// Additional gene names
+            /// </summary>
             MappedGenes = 33,
+
+            /// <summary>
+            /// Additional protein names (comma separated list)
+            /// </summary>
             MappedProteins = 34
         }
 
@@ -408,10 +605,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This routine creates a synopsis file from the output from MSFragger (file msms.txt)
+        /// This routine creates a synopsis file from the output from MSFragger (file Dataset_psm.tsv or Dataset.tsv)
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
-        /// <param name="inputFilePath">MSFragger results file (msms.txt)</param>
+        /// <param name="inputFilePath">MSFragger results file</param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
