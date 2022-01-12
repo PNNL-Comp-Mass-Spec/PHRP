@@ -684,7 +684,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
 
-                var readingPsmFile = inputFilePath.EndsWith("_psm.tsv", StringComparison.OrdinalIgnoreCase);
+                // Check whether the input file ends with _psm.tsv
+                var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
 
                 // Open the input file and parse it
                 using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -698,7 +699,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize the list that will hold all of the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<MSFraggerSearchResult>();
 
-                var currentDatasetName = string.Empty;
+                var currentDatasetName = readingPsmFile ? string.Empty : Path.GetFileNameWithoutExtension(inputFile.Name);
 
                 // Parse the input file
                 while (!reader.EndOfStream && !AbortProcessing)
@@ -1248,6 +1249,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.SpectrumFile], out string spectrumFile);
+
                 if (!string.IsNullOrWhiteSpace(spectrumFile))
                 {
                     var baseName = Path.GetFileNameWithoutExtension(spectrumFile);
@@ -1297,6 +1299,11 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NextAA], out searchResult.SuffixResidue);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideLength], out searchResult.Length);
 
+                if (searchResult.Length == 0)
+                {
+                    searchResult.Length = searchResult.Sequence.Length;
+                }
+
                 if (readingPsmFile)
                 {
                     // The aggregated results file reports retention time in seconds
@@ -1317,6 +1324,18 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMZ], out searchResult.CalibratedObservedMZ);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalculatedMZ], out searchResult.CalculatedMZ);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.DeltaMass], out searchResult.MassErrorDaMSFragger);
+
+                if (string.IsNullOrWhiteSpace(searchResult.PrecursorMZ) && double.TryParse(searchResult.PrecursorMonoMass, out var precursorMonoMass))
+                {
+                    var observedPrecursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, searchResult.ChargeNum);
+                    searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(observedPrecursorMZ, 4);
+                }
+
+                if (string.IsNullOrWhiteSpace(searchResult.CalculatedMZ) && searchResult.CalculatedMonoMassValue > 0)
+                {
+                    var calculatedPrecursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0, searchResult.ChargeNum);
+                    searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(calculatedPrecursorMZ, 4);
+                }
 
                 // Store the monoisotopic MH value in .MH
                 // This is (M+H)+ when the charge carrier is a proton
@@ -1349,22 +1368,54 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinStart], out searchResult.ProteinStart);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinEnd], out searchResult.ProteinEnd);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Intensity], out searchResult.Intensity);
+                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Intensity], out searchResult.Intensity, "0");
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.AssignedModifications], out searchResult.ModificationList);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedModifications], out searchResult.ObservedModifications);
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.IsUnique], out searchResult.IsUnique);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Protein], out searchResult.Protein);
+
+                // The Protein column in Dataset.tsv files has both protein name and description; extract out the protein description
+                // For _psm.tsv files, .Protein should just have a single protein name, but we'll check for a space anyway
+
+                if (SplitProteinNameAndDescription(searchResult.Protein, out var proteinName, out var proteinDescription))
+                {
+                    searchResult.Protein = proteinName;
+                }
+
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinID], out searchResult.ProteinID);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.EntryName], out searchResult.EntryName);
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Gene], out searchResult.Gene);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinDescription], out searchResult.ProteinDescription);
+                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinDescription], out searchResult.ProteinDescription, proteinDescription);
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedGenes], out searchResult.AdditionalGenes);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedProteins], out searchResult.AdditionalProteins);
+
+                if (string.IsNullOrWhiteSpace(searchResult.IsUnique))
+                {
+                    searchResult.IsUnique = searchResult.AdditionalProteins.Length > 0 ? "FALSE" : "TRUE";
+                }
+
+                if (!readingPsmFile && searchResult.AdditionalProteins.Length > 0 ||
+                    searchResult.AdditionalProteins.IndexOf("@@", StringComparison.Ordinal) > 0)
+                {
+                    // The list of additional proteins will have both protein names and descriptions, each separated by @@
+
+                    var additionalProteinAndDescriptions = searchResult.AdditionalProteins.Split(new[] { "@@" }, StringSplitOptions.RemoveEmptyEntries);
+                    var additionalProteins = new List<string>();
+
+                    foreach (var item in additionalProteinAndDescriptions)
+                    {
+                        SplitProteinNameAndDescription(item, out var additionalProteinName, out _);
+
+                        additionalProteins.Add(additionalProteinName);
+                    }
+
+                    searchResult.AdditionalProteins = string.Join(", ", additionalProteins);
+                }
 
                 searchResult.Reverse = IsReversedProtein(searchResult.Protein);
 
@@ -1415,6 +1466,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnWarningEvent("Changing cleavage state from {0} to {1} for {2} in scan {3}",
                     searchResult.NumberOfTrypticTerminii, ntt, peptideWithPrefixAndSuffix, searchResult.Scan);
+
+                searchResult.NumberOfTrypticTerminii = ntt;
 
                 return true;
             }
@@ -1962,6 +2015,34 @@ namespace PeptideHitResultsProcessor.Processor
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
             }
+        }
+
+        /// <summary>
+        /// If proteinNameToCheck contains a space, extract the protein name and description, then return true
+        /// Otherwise, store the string in proteinName, set proteinDescription to an empty string, and return false
+        /// </summary>
+        /// <param name="proteinNameToCheck"></param>
+        /// <param name="proteinName"></param>
+        /// <param name="proteinDescription"></param>
+        /// <returns>True if a space was found, otherwise false</returns>
+        private bool SplitProteinNameAndDescription(string proteinNameToCheck, out string proteinName, out string proteinDescription)
+        {
+            var trimmedName = proteinNameToCheck.Trim();
+            var spaceIndex = trimmedName.IndexOf(' ');
+
+            if (spaceIndex > 0)
+            {
+                proteinDescription = spaceIndex < trimmedName.Length - 1
+                    ? trimmedName.Substring(spaceIndex + 1).Trim()
+                    : string.Empty;
+
+                proteinName = trimmedName.Substring(0, spaceIndex);
+                return true;
+            }
+
+            proteinName = trimmedName;
+            proteinDescription = string.Empty;
+            return false;
         }
 
         /// <summary>
