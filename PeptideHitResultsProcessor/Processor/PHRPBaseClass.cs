@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "December 14, 2021";
+        public const string PROGRAM_DATE = "January 11, 2022";
 
         /// <summary>
         /// Constructor
@@ -835,11 +835,6 @@ namespace PeptideHitResultsProcessor.Processor
                 return ResultsFileFormat.MaxQuantTXTFile;
             }
 
-            if (fileName.EndsWith(MSFraggerResultsProcessor.PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
-            {
-                return ResultsFileFormat.MSFraggerTSVFile;
-            }
-
             if (extensionLCase == ".tsv")
             {
                 // Examine the header names in the first line of the file to determine the file format
@@ -875,6 +870,11 @@ namespace PeptideHitResultsProcessor.Processor
                     // MSFragger Dataset.tsv file
                     return ResultsFileFormat.MSFraggerTSVFile;
                 }
+            }
+
+            if (fileName.EndsWith(MSFraggerResultsProcessor.PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResultsFileFormat.MSFraggerTSVFile;
             }
 
             var candidateDirectory = new DirectoryInfo(filePath);
