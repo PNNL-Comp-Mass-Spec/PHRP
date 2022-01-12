@@ -1939,6 +1939,7 @@ namespace PeptideHitResultsProcessor.Processor
             List<MSFraggerSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
+            // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
             var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
 
             // Sort filteredSearchResults by E-value, Scan, Peptide, and Razor Protein
@@ -1956,12 +1957,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
-                var baseDatasetName = baseNameByDatasetName[result.DatasetName];
-
-                if (!datasetIDs.TryGetValue(result.DatasetName, out var datasetID))
-                {
-                    datasetID = 0;
-                }
+                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;
