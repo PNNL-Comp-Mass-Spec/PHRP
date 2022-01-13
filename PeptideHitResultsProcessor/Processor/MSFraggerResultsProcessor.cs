@@ -698,6 +698,15 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!LoadNonPsmResults(inputFile, errorMessages, filteredSearchResults))
                         return false;
                 }
+                else
+                {
+                    // If we loaded results from a _psm.tsv file, merge in the ion counts from the Dataset.tsv file (if it exists)
+                    // If we loaded results from a Dataset.tsv file, merge in peptide prophet values and other scores from the _psm.tsv file (if it exists)
+
+                    if (!MergeRelatedMSFraggerResults(inputFile, errorMessages, filteredSearchResults))
+                        return false;
+                }
+
                 Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
@@ -1102,6 +1111,76 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in LoadSearchEngineParamFile", ex);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
+                return false;
+            }
+        }
+
+        private bool MergeRelatedMSFraggerResults(
+            FileInfo inputFile,
+            ICollection<string> errorMessages,
+            List<MSFraggerSearchResult> filteredSearchResults)
+        {
+            try
+            {
+                if (inputFile.Directory == null)
+                {
+                    return false;
+                }
+
+                // Check whether the input file ends with _psm.tsv
+                var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
+
+                List<FileInfo> additionalResultFiles;
+
+                if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
+                {
+                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile);
+                }
+                else
+                {
+                    var nameToFind = readingPsmFile
+                        ? inputFile.Name.Substring(0, inputFile.Name.Length - PSM_FILE_SUFFIX.Length) + ".tsv"
+                        : Path.GetFileNameWithoutExtension(inputFile.Name) + PSM_FILE_SUFFIX;
+
+                    var tsvToFind = new FileInfo(Path.Combine(inputFile.Directory.FullName, nameToFind));
+
+                    additionalResultFiles = new List<FileInfo>();
+
+                    if (tsvToFind.Exists)
+                    {
+                        additionalResultFiles.Add(tsvToFind);
+                    }
+                }
+
+                if (additionalResultFiles.Count == 0)
+                {
+                    if (readingPsmFile)
+                    {
+                        OnDebugEvent("Unable to find the Dataset.tsv file that corresponds to {0}", inputFile.Name);
+                    }
+                    else
+                    {
+                        OnDebugEvent("Unable to find the Dataset_psm.tsv file that corresponds to {0}", inputFile.Name);
+                    }
+
+                    // This is not a fatal error, so return true
+                    return true;
+                }
+
+                foreach (var additionalFile in additionalResultFiles)
+                {
+                    if (!ReadMSFraggerResults(additionalFile, errorMessages, out var additionalSearchResults))
+                        continue;
+
+                    // ToDo: Merge information from additionalSearchResults into filteredSearchResults by matching on scan and peptide
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in MergeRelatedMSFraggerResults", ex);
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
