@@ -149,9 +149,7 @@ namespace PHRPReader.Reader
 
                 if (!reporterIonMapping.TryGetValue(columnToFind, out var reporterIonColumnIndex))
                 {
-                    OnWarningEvent(
-                        string.Format("Did not find column {0} in reporterIonMapping; this is unexpected",
-                            columnToFind));
+                    OnWarningEvent("Did not find column {0} in reporterIonMapping; this is unexpected", columnToFind);
 
                     continue;
                 }
@@ -171,7 +169,7 @@ namespace PHRPReader.Reader
                         break;
 
                     default:
-                        OnWarningEvent(string.Format("Unrecognized suffix for column {0}", columnNames[columnIndex]));
+                        OnWarningEvent("Unrecognized suffix for column {0}", columnNames[columnIndex]);
                         break;
                 }
             }
