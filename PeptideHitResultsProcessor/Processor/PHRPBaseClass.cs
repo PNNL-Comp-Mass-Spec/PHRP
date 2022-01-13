@@ -3066,7 +3066,15 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!dataFound)
                 {
-                    errorMessage = fileDescription + " is empty (no data)";
+                    // Example messages:
+                    //   MSFragger results file is empty (no data)
+                    //   Synopsis file is empty (no numeric values in column 1)
+
+                    errorMessage = string.Format("{0} is empty ({1})",
+                        fileDescription,
+                        numericDataColIndex < 0
+                            ? "no data"
+                            : "no numeric values in column " + (numericDataColIndex + 1));
                 }
 
                 return dataFound;
