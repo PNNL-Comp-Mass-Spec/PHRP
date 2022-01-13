@@ -671,7 +671,6 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
-                var columnMapping = new Dictionary<MSFraggerPsmFileColumns, int>();
                 var errorMessages = new List<string>();
 
                 var inputFile = new FileInfo(inputFilePath);
@@ -684,94 +683,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
 
-                // Check whether the input file ends with _psm.tsv
-                var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
+                var success = ReadMSFraggerResults(inputFile, errorMessages, out var filteredSearchResults);
 
-                // Open the input file and parse it
-                using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                var headerParsed = false;
-                var lineNumber = 0;
-
-                // Initialize the list that will hold all of the records in the MSFragger result file
-                var searchResultsUnfiltered = new List<MSFraggerSearchResult>();
-
-                // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                var filteredSearchResults = new List<MSFraggerSearchResult>();
-
-                var currentDatasetName = readingPsmFile ? string.Empty : Path.GetFileNameWithoutExtension(inputFile.Name);
-
-                // Parse the input file
-                while (!reader.EndOfStream && !AbortProcessing)
+                if (!success)
                 {
-                    var lineIn = reader.ReadLine();
-                    lineNumber++;
-
-                    if (string.IsNullOrWhiteSpace(lineIn))
-                    {
-                        continue;
-                    }
-
-                    if (!headerParsed)
-                    {
-                        // Parse the header line
-                        var success = ParseMSFraggerResultsFileHeaderLine(lineIn, columnMapping, readingPsmFile);
-
-                        if (!success)
-                        {
-                            if (string.IsNullOrEmpty(mErrorMessage))
-                            {
-                                SetErrorMessage("Invalid header line in " + inputFile.Name);
-                            }
-
-                            return false;
-                        }
-
-                        headerParsed = true;
-                        continue;
-                    }
-
-                    var validSearchResult = ParseMSFraggerResultsFileEntry(
-                        readingPsmFile,
-                        lineIn,
-                        out var searchResult,
-                        errorMessages,
-                        columnMapping,
-                        lineNumber,
-                        ref currentDatasetName);
-
-                    if (validSearchResult)
-                    {
-                        searchResultsUnfiltered.Add(searchResult);
-                    }
-
-                    // Update the progress
-                    UpdateSynopsisFileCreationProgress(reader);
-                }
-
-                // Sort the SearchResults by dataset name, scan, charge, and descending Andromeda score
-                searchResultsUnfiltered.Sort(new MSFraggerSearchResultsComparerDatasetScanChargeEValuePeptide());
-
-                // Now filter the data
-                var startIndex = 0;
-
-                while (startIndex < searchResultsUnfiltered.Count)
-                {
-                    // Find all of the matches for the current result's scan
-                    // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
-                    // MSFragger will typically report just one match
-
-                    var endIndex = startIndex;
-                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                    {
-                        endIndex++;
-                    }
-
-                    // Store the results for this scan
-                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                    startIndex = endIndex + 1;
+                    return false;
                 }
 
                 Console.WriteLine();
@@ -1977,6 +1893,121 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Load MSFragger search results
+        /// </summary>
+        /// <param name="inputFile">Dataset.tsv, Dataset_psm.tsv, or Aggregation_psm.tsv file</param>
+        /// <param name="errorMessages"></param>
+        /// <param name="searchResults">Output: MSFragger results</param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool ReadMSFraggerResults(
+            FileSystemInfo inputFile,
+            ICollection<string> errorMessages,
+            out List<MSFraggerSearchResult> searchResults)
+        {
+            searchResults = new List<MSFraggerSearchResult>();
+
+            try
+            {
+                var columnMapping = new Dictionary<MSFraggerPsmFileColumns, int>();
+
+                // Open the input file and parse it
+                using var reader = new StreamReader(new FileStream(inputFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var headerParsed = false;
+                var lineNumber = 0;
+
+                // Initialize the list that will hold all of the records in the MSFragger result file
+                var searchResultsUnfiltered = new List<MSFraggerSearchResult>();
+
+                // Check whether the input file ends with _psm.tsv
+                var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
+
+                var currentDatasetName = readingPsmFile ? string.Empty : Path.GetFileNameWithoutExtension(inputFile.Name);
+
+                // Parse the input file
+                while (!reader.EndOfStream && !AbortProcessing)
+                {
+                    var lineIn = reader.ReadLine();
+                    lineNumber++;
+
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                    {
+                        continue;
+                    }
+
+                    if (!headerParsed)
+                    {
+                        // Parse the header line
+                        var success = ParseMSFraggerResultsFileHeaderLine(lineIn, columnMapping, readingPsmFile);
+
+                        if (!success)
+                        {
+                            if (string.IsNullOrEmpty(mErrorMessage))
+                            {
+                                SetErrorMessage("Invalid header line in " + inputFile.Name);
+                            }
+
+                            return false;
+                        }
+
+                        headerParsed = true;
+                        continue;
+                    }
+
+                    var validSearchResult = ParseMSFraggerResultsFileEntry(
+                        readingPsmFile,
+                        lineIn,
+                        out var searchResult,
+                        errorMessages,
+                        columnMapping,
+                        lineNumber,
+                        ref currentDatasetName);
+
+                    if (validSearchResult)
+                    {
+                        searchResultsUnfiltered.Add(searchResult);
+                    }
+
+                    // Update the progress
+                    UpdateSynopsisFileCreationProgress(reader);
+                }
+
+                // Sort the SearchResults by dataset name, scan, charge, and ascending E-Value
+                searchResultsUnfiltered.Sort(new MSFraggerSearchResultsComparerDatasetScanChargeEValuePeptide());
+
+                // Now filter the data
+                var startIndex = 0;
+
+                while (startIndex < searchResultsUnfiltered.Count)
+                {
+                    // Find all of the matches for the current result's scan
+                    // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
+                    // MSFragger will typically report just one match
+
+                    var endIndex = startIndex;
+                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, searchResults);
+
+                    startIndex = endIndex + 1;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in MSFraggerResultsProcessor.ReadMSFraggerResults", ex);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
+                return false;
+            }
         }
 
         /// <summary>
