@@ -1154,8 +1154,6 @@ namespace PeptideHitResultsProcessor.Processor
             // Initialize the Mod Info array
             var modList = new List<SearchOptionModificationInfo>();
 
-            var staticModsAreResetForRefinement = true;
-
             // Initialize paramLabels; this specifies the parameters to examine
             // Note: When populating this we use .ToLower() to make sure all of the text is lowercase
             var paramLabels = new string[INPUT_PARAM_LABEL_NAMES_MAX_INDEX + 1];
@@ -1284,13 +1282,6 @@ namespace PeptideHitResultsProcessor.Processor
                                             Options.EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftSpec, rightSpec);
                                         }
                                     }
-                                    else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_ModificationMass]))
-                                    {
-                                        if (!string.IsNullOrWhiteSpace(value))
-                                        {
-                                            staticModsAreResetForRefinement = true;
-                                        }
-                                    }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Scoring_Include_Reverse]))
                                     {
                                         if (!string.IsNullOrWhiteSpace(value))
@@ -1369,7 +1360,7 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    if (modDef.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod && staticModsAreResetForRefinement)
+                    if (modDef.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
                     {
                         // Add this static mod as a dynamic mod
                         var updatedModInfo = modDef.Clone();
