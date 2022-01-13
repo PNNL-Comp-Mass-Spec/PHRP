@@ -687,11 +687,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         /// <param name="topPICParamFilePath"></param>
-        /// <param name="modList"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromParamFile(
-            string topPICParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
+        private bool ExtractModInfoFromParamFile(string topPICParamFilePath)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
 
@@ -701,7 +698,7 @@ namespace PeptideHitResultsProcessor.Processor
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 topPICParamFilePath,
                 MSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
-                out modList);
+                out var modList);
 
             if (!success || mErrorCode != PHRPErrorCode.NoError)
             {
@@ -1500,7 +1497,8 @@ namespace PeptideHitResultsProcessor.Processor
                     var topPICParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
 
                     // Load the TopPIC Parameter File so that we can determine whether Cysteine residues are statically modified
-                    var modInfoExtracted = ExtractModInfoFromParamFile(topPICParameterFilePath, out var topPicModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(topPICParameterFilePath);
+
                     if (!modInfoExtracted)
                     {
                         return false;
