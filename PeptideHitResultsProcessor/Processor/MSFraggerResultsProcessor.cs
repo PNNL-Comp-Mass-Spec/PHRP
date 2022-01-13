@@ -30,7 +30,9 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 1) ProcessFile reads MSFragger results file Dataset_psm.tsv (single dataset) or Aggregation_psm.tsv (multi-dataset based)
+    /// 1) ProcessFile reads MSFragger results file Dataset_psm.tsv (single dataset) or Aggregation_psm.tsv (multi-dataset based).
+    ///    It also reads the matched and total ion counts from the Dataset.tsv file, merging with the info from the _psm.tsv file
+    ///    If the _psm.tsv file is empty, results in the Dataset.tsv file will be used instead.
     /// </para>
     /// <para>
     /// 2) It calls CreateSynResultsFile to create the _syn.txt file
@@ -681,8 +683,6 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
-
                 var success = ReadMSFraggerResults(inputFile, errorMessages, out var filteredSearchResults);
 
                 if (!success)
@@ -690,7 +690,14 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                Console.WriteLine();
+                if (filteredSearchResults.Count == 0 && inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+                {
+                    // The _psm.tsv file does not have any filter passing data
+                    // Instead, load data from the Dataset.tsv file (or files)
+
+                    if (!LoadNonPsmResults(inputFile, errorMessages, filteredSearchResults))
+                        return false;
+                }
                 Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
@@ -739,6 +746,50 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Find the Dataset.tsv files that correspond to a Aggregation_psm.tsv file
+        /// </summary>
+        /// <param name="inputFile"></param>
+        /// <returns>List of matching files</returns>
+        private List<FileInfo> FindAggregationPsmSourceFiles(FileInfo inputFile)
+        {
+            var sourceFiles = new List<FileInfo>();
+
+            if (inputFile.Directory == null)
+            {
+                return sourceFiles;
+            }
+
+            // ReSharper disable once CommentTypo
+            // Look for .tsv files in this directory that have columns "expectscore", "hyperscore", and "nextscore"
+
+            foreach (var candidateFile in inputFile.Directory.GetFiles("*.tsv"))
+            {
+                if (candidateFile.FullName.Equals(inputFile.FullName))
+                    continue;
+
+                switch (candidateFile.Name)
+                {
+                    case "Aggregation_ion.tsv":
+                    case "Aggregation_peptide.tsv":
+                    case "Aggregation_protein.tsv":
+                    case "Aggregation_psm.tsv":
+                        continue;
+                }
+
+                var tsvFileFormat = DetermineResultsFileFormat(candidateFile.FullName);
+
+                if (tsvFileFormat == ResultsFileFormat.MSFraggerTSVFile)
+                {
+                    sourceFiles.Add(candidateFile);
+                }
+
+                break;
+            }
+
+            return sourceFiles;
         }
 
         /// <summary>
@@ -925,6 +976,69 @@ namespace PeptideHitResultsProcessor.Processor
             };
 
             return psmFileColumn != MSFraggerPsmFileColumns.Undefined;
+        }
+
+        private bool LoadNonPsmResults(FileInfo inputFile, ICollection<string> errorMessages, List<MSFraggerSearchResult> filteredSearchResults)
+        {
+            try
+            {
+                if (inputFile.Directory == null)
+                {
+                    SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                    return false;
+                }
+
+                List<FileInfo> additionalResultFiles;
+
+                if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
+                {
+                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile);
+                }
+                else
+                {
+                    additionalResultFiles = new List<FileInfo>();
+
+                    var tsvToFind = new FileInfo(Path.Combine(
+                        inputFile.Directory.FullName,
+                        inputFile.Name.Substring(0, inputFile.Name.Length - PSM_FILE_SUFFIX.Length)) + ".tsv");
+
+                    if (tsvToFind.Exists)
+                    {
+                        additionalResultFiles.Add(tsvToFind);
+                    }
+                }
+
+                if (additionalResultFiles.Count == 0)
+                {
+                    OnWarningEvent("The _psm.tsv file does not have any filter passing data; unable to find any Dataset.tsv files to load instead");
+                    return false;
+                }
+
+                OnWarningEvent("The _psm.tsv file does not have any filter passing data; loading data from {0} instead",
+                    additionalResultFiles.Count == 1
+                        ? additionalResultFiles[0].Name
+                        : string.Format("{0} Dataset.tsv files", additionalResultFiles.Count));
+
+                var successCountAdditionalFiles = 0;
+
+                foreach (var additionalFile in additionalResultFiles)
+                {
+                    if (!ReadMSFraggerResults(additionalFile, errorMessages, out var additionalSearchResults))
+                        continue;
+
+                    successCountAdditionalFiles++;
+                    filteredSearchResults.AddRange(additionalSearchResults);
+                }
+
+                return successCountAdditionalFiles >= additionalResultFiles.Count;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in LoadNonPsmResults", ex);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                return false;
+            }
         }
 
         /// <summary>
@@ -1898,19 +2012,29 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load MSFragger search results
         /// </summary>
+        /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
         /// <param name="inputFile">Dataset.tsv, Dataset_psm.tsv, or Aggregation_psm.tsv file</param>
         /// <param name="errorMessages"></param>
-        /// <param name="searchResults">Output: MSFragger results</param>
+        /// <param name="filteredSearchResults">Output: MSFragger results</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ReadMSFraggerResults(
             FileSystemInfo inputFile,
             ICollection<string> errorMessages,
-            out List<MSFraggerSearchResult> searchResults)
+            out List<MSFraggerSearchResult> filteredSearchResults)
         {
-            searchResults = new List<MSFraggerSearchResult>();
+            filteredSearchResults = new List<MSFraggerSearchResult>();
 
             try
             {
+                if (!inputFile.Exists)
+                {
+                    OnErrorEvent("File not found: {0}", inputFile.FullName);
+                    Console.WriteLine();
+                    return false;
+                }
+
+                OnStatusEvent("Reading MSFragger results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
+
                 var columnMapping = new Dictionary<MSFraggerPsmFileColumns, int>();
 
                 // Open the input file and parse it
@@ -1975,6 +2099,14 @@ namespace PeptideHitResultsProcessor.Processor
                     UpdateSynopsisFileCreationProgress(reader);
                 }
 
+                if (searchResultsUnfiltered.Count == 0)
+                {
+                    OnWarningEvent("No results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
+
+                    Console.WriteLine();
+                    return true;
+                }
+
                 // Sort the SearchResults by dataset name, scan, charge, and ascending E-Value
                 searchResultsUnfiltered.Sort(new MSFraggerSearchResultsComparerDatasetScanChargeEValuePeptide());
 
@@ -1995,10 +2127,17 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Store the results for this scan
-                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, searchResults);
+                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
 
                     startIndex = endIndex + 1;
                 }
+
+                if (filteredSearchResults.Count == 0)
+                {
+                    OnWarningEvent("No filter passing results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
+                }
+
+                Console.WriteLine();
 
                 return true;
             }
