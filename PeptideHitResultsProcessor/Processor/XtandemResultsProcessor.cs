@@ -1284,12 +1284,9 @@ namespace PeptideHitResultsProcessor.Processor
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Scoring_Include_Reverse]))
                                     {
-                                        if (!string.IsNullOrWhiteSpace(value))
+                                        if (!string.IsNullOrWhiteSpace(value) && string.Equals(value.Trim(), "yes", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            if (string.Equals(value.Trim(), "yes", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                mLookForReverseSequenceTag = true;
-                                            }
+                                            mLookForReverseSequenceTag = true;
                                         }
                                     }
                                 }
