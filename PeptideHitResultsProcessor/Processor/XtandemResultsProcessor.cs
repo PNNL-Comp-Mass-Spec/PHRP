@@ -345,8 +345,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                OnDebugEvent("Error in ParseXTandemInputParameterModInfo: " + ex.Message);
             }
         }
 
@@ -401,8 +402,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                OnDebugEvent("Error in ParseXTandemInputParameterProteinTerminusMod: " + ex.Message);
             }
         }
 
