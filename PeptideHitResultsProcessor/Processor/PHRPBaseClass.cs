@@ -1897,6 +1897,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Remove the prefix and suffix residues from the given peptide sequence and return the result
         /// </summary>
+        /// <remarks>Also removes any non-letter characters</remarks>
         /// <param name="sequenceWithMods"></param>
         /// <param name="prefix">Output: prefix residue</param>
         /// <param name="suffix">Output: suffix residue</param>
@@ -2994,8 +2995,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="filePath">Path to the file</param>
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
         /// <param name="errorMessage"></param>
-        /// <param name="requireHeaderLine">When true, skip the first line</param>
         /// <param name="numericDataColIndex">Index of the numeric data column; use -1 to simply look for any text in the file</param>
+        /// <param name="requireHeaderLine">When true, skip the first line</param>
         /// <returns>True if the file has data; otherwise false</returns>
         public static bool ValidateFileHasData(
             string filePath,

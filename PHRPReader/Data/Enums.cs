@@ -2,7 +2,6 @@
 
 namespace PHRPReader.Data
 {
-#pragma warning disable 1591
     // Ignore Spelling: Da, Daltons, Hyperscore, MaxQuant, proteoform, novo, tda, tryptic
 
     /// <summary>
@@ -10,25 +9,104 @@ namespace PHRPReader.Data
     /// </summary>
     public enum ExtendedScanStatsFileColumns
     {
+        /// <summary>
+        /// Dataset Id
+        /// </summary>
         DatasetId = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         ScanNumber = 1,
+
+        /// <summary>
+        /// Ion injection time
+        /// </summary>
         IonInjectionTime = 2,
+
+        /// <summary>
+        /// Scan event
+        /// </summary>
         ScanEvent = 3,
+
+        /// <summary>
+        /// Master index
+        /// </summary>
         MasterIndex = 4,
+
+        /// <summary>
+        /// Elapsed scan time
+        /// </summary>
         ElapsedScanTime = 5,
+
+        /// <summary>
+        /// Charge state
+        /// </summary>
         ChargeState = 6,
+
+        /// <summary>
+        /// Monoisotopic m/z
+        /// </summary>
         MonoisotopicMZ = 7,
+
+        /// <summary>
+        /// MS2 isolation width
+        /// </summary>
         MS2IsolationWidth = 8,
+
+        /// <summary>
+        /// FT analyzer settings
+        /// </summary>
         FTAnalyzerSettings = 9,
+
+        /// <summary>
+        /// FT analyzer message
+        /// </summary>
         FTAnalyzerMessage = 10,
+
+        /// <summary>
+        /// FTResolution
+        /// </summary>
         FTResolution = 11,
+
+        /// <summary>
+        /// Conversion parameter B
+        /// </summary>
         ConversionParameterB = 12,
+
+        /// <summary>
+        /// Conversion parameter C
+        /// </summary>
         ConversionParameterC = 13,
+
+        /// <summary>
+        /// Conversion parameter D
+        /// </summary>
         ConversionParameterD = 14,
+
+        /// <summary>
+        /// Conversion parameter E
+        /// </summary>
         ConversionParameterE = 15,
+
+        /// <summary>
+        /// Collision mode
+        /// </summary>
         CollisionMode = 16,
+
+        /// <summary>
+        /// Scan filter text
+        /// </summary>
         ScanFilterText = 17,
+
+        /// <summary>
+        /// Source voltage
+        /// </summary>
         SourceVoltage = 18,
+
+        /// <summary>
+        /// Source current
+        /// </summary>
         Source_Current = 19
     }
 
@@ -37,33 +115,171 @@ namespace PHRPReader.Data
     /// </summary>
     public enum InspectSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         Scan = 1,
+
+        /// <summary>
+        /// Peptide
+        /// </summary>
         Peptide = 2,
+
+        /// <summary>
+        /// Protein
+        /// </summary>
         Protein = 3,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 4,
+
+        /// <summary>
+        /// MQScore
+        /// </summary>
         MQScore = 5,
+
+        /// <summary>
+        /// Length
+        /// </summary>
         Length = 6,
+
+        /// <summary>
+        /// Total PRM score
+        /// </summary>
         TotalPRMScore = 7,
+
+        /// <summary>
+        /// Median PRM score
+        /// </summary>
         MedianPRMScore = 8,
+
+        /// <summary>
+        /// Fraction Y
+        /// </summary>
         FractionY = 9,
+
+        /// <summary>
+        /// Fraction B
+        /// </summary>
         FractionB = 10,
+
+        /// <summary>
+        /// Intensity
+        /// </summary>
         Intensity = 11,
+
+        /// <summary>
+        /// NTT
+        /// </summary>
         NTT = 12,
+
+        /// <summary>
+        /// PValue
+        /// </summary>
         PValue = 13,
+
+        /// <summary>
+        /// FScore
+        /// </summary>
         FScore = 14,
+
+        /// <summary>
+        /// Delta score
+        /// </summary>
         DeltaScore = 15,
+
+        /// <summary>
+        /// Delta score other
+        /// </summary>
         DeltaScoreOther = 16,
-        DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, stores 0.  This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-        DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, stores 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
-        RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-        RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-        MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
+
+        /// <summary>
+        /// Delta norm MQ Score
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set.
+        /// If MQScore(n) is 0, stores 0.
+        /// </para>
+        /// <para>
+        /// This value is not usable when MQScore(n) is 0 or negative, and should generally not be used when MQScore(n) is less than 0.5
+        /// </para>
+        /// </remarks>
+        DeltaNormMQScore = 17,
+
+        /// <summary>
+        /// Delta norm total PRM score
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.
+        /// If TotalPRMScore(n) is 0, stores 0.
+        /// </para>
+        /// <para>
+        /// This value is not usable when TotalPRMScore(n) is 0 or negative, and should generally not be used when TotalPRMScore(n) is less than 0.5
+        /// </para>
+        /// </remarks>
+        DeltaNormTotalPRMScore = 18,
+
+        /// <summary>
+        /// Rank total PRM score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+        /// </remarks>
+        RankTotalPRMScore = 19,
+
+        /// <summary>
+        /// Rank F score
+        /// </summary>
+        /// <remarks>
+        /// Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+        /// </remarks>
+        RankFScore = 20,
+
+        /// <summary>
+        /// Theoretical monoisotopic peptide mass (computed by PHRP)
+        /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
+        MH = 21,
+
+        /// <summary>
+        /// Record number
+        /// </summary>
         RecordNumber = 22,
+
+        /// <summary>
+        /// DB file position
+        /// </summary>
         DBFilePos = 23,
+
+        /// <summary>
+        /// Spec file position
+        /// </summary>
         SpecFilePos = 24,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMZ = 25,
+
+        /// <summary>
+        /// Precursor error
+        /// </summary>
         PrecursorError = 26,
+
+        /// <summary>
+        /// Precursor error, in ppm
+        /// </summary>
         DelM_PPM = 27
     }
 
@@ -133,7 +349,7 @@ namespace PHRPReader.Data
         DelM = 9,
 
         /// <summary>
-        /// Mass Error, in ppm
+        /// Mass error, in ppm
         /// </summary>
         DelM_PPM = 10,
 
@@ -145,13 +361,16 @@ namespace PHRPReader.Data
         DelM_MaxQuant = 11,
 
         /// <summary>
-        /// Mass Error, in ppm, as computed by MaxQuant
+        /// Mass error, in ppm, as computed by MaxQuant
         /// </summary>
         DelM_PPM_MaxQuant = 12,
 
         /// <summary>
-        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge by PHRP
         /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
         MH = 13,
 
         /// <summary>
@@ -335,8 +554,19 @@ namespace PHRPReader.Data
         /// </summary>
         Scan = 1,
 
+        /// <summary>
+        /// Spectrum index
+        /// </summary>
         Spectrum_Index = 2,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 3,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMZ = 4,
 
         /// <summary>
@@ -350,8 +580,11 @@ namespace PHRPReader.Data
         DelM_PPM = 6,
 
         /// <summary>
-        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// Theoretical monoisotopic peptide MH (computed by PHRP)
         /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
         MH = 7,
 
         /// <summary>
@@ -359,11 +592,34 @@ namespace PHRPReader.Data
         /// </summary>
         Peptide = 8,
 
+        /// <summary>
+        /// Number of tryptic termini
+        /// </summary>
         NTT = 9,
+
+        /// <summary>
+        /// Modification annotation
+        /// </summary>
         ModificationAnnotation = 10,
+
+        /// <summary>
+        /// Protein
+        /// </summary>
         Protein = 11,
+
+        /// <summary>
+        /// Peptide position
+        /// </summary>
         Peptide_Position = 12,
+
+        /// <summary>
+        /// Score
+        /// </summary>
         Score = 13,
+
+        /// <summary>
+        /// Probability
+        /// </summary>
         Probability = 14,
 
         /// <summary>
@@ -385,11 +641,34 @@ namespace PHRPReader.Data
     /// </summary>
     public enum MSAlignSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         Scan = 1,
+
+        /// <summary>
+        /// Proteoform spectrum match ID
+        /// </summary>
         Prsm_ID = 2,
+
+        /// <summary>
+        /// Spectrum ID
+        /// </summary>
         Spectrum_ID = 3,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 4,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMZ = 5,
 
         /// <summary>
@@ -403,8 +682,11 @@ namespace PHRPReader.Data
         DelMPPM = 7,
 
         /// <summary>
-        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// Theoretical monoisotopic peptide MH (computed by PHRP)
         /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
         MH = 8,
 
         /// <summary>
@@ -413,15 +695,38 @@ namespace PHRPReader.Data
         Peptide = 9,
 
         /// <summary>
-        /// Protein Name
+        /// Protein name
         /// </summary>
         Protein = 10,
 
+        /// <summary>
+        /// Protein mass
+        /// </summary>
         Protein_Mass = 11,
+
+        /// <summary>
+        /// Unexpected mod count
+        /// </summary>
         Unexpected_Mod_Count = 12,
+
+        /// <summary>
+        /// Peak count
+        /// </summary>
         Peak_Count = 13,
+
+        /// <summary>
+        /// Matched peak count
+        /// </summary>
         Matched_Peak_Count = 14,
+
+        /// <summary>
+        /// Matched fragment ion count
+        /// </summary>
         Matched_Fragment_Ion_Count = 15,
+
+        /// <summary>
+        /// P-value
+        /// </summary>
         PValue = 16,
 
         /// <summary>
@@ -432,9 +737,24 @@ namespace PHRPReader.Data
         /// </remarks>
         Rank_PValue = 17,
 
+        /// <summary>
+        /// E-value
+        /// </summary>
         EValue = 18,
+
+        /// <summary>
+        /// FDR
+        /// </summary>
         FDR = 19,
+
+        /// <summary>
+        /// Species ID
+        /// </summary>
         Species_ID = 20,
+
+        /// <summary>
+        /// Fragmentation method
+        /// </summary>
         FragMethod = 21
     }
 
@@ -443,16 +763,41 @@ namespace PHRPReader.Data
     /// </summary>
     public enum MSGFFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan
+        /// </summary>
         Scan = 1,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 2,
+
+        /// <summary>
+        /// Protein
+        /// </summary>
         Protein = 3,
+
+        /// <summary>
+        /// Peptide
+        /// </summary>
         Peptide = 4,
+
+        /// <summary>
+        /// Spectral probability
+        /// </summary>
         SpecProb = 5,
+
+        /// <summary>
+        /// Notes
+        /// </summary>
         Notes = 6
     }
-
-#pragma warning restore 1591
 
     /// <summary>
     /// MSFragger synopsis file columns
@@ -508,8 +853,11 @@ namespace PHRPReader.Data
         DelM_MSFragger = 8,
 
         /// <summary>
-        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge
+        /// Monoisotopic (M+H)+ value, computed from PrecursorMZ and Charge by PHRP
         /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
         MH = 9,
 
         /// <summary>
@@ -617,7 +965,7 @@ namespace PHRPReader.Data
     public enum MSGFDBSynFileColumns
     {
         /// <summary>
-        /// SpecProb
+        /// Spectral probability
         /// </summary>
         SpecProb = 0,
 
@@ -640,7 +988,7 @@ namespace PHRPReader.Data
         FDR = 3,
 
         /// <summary>
-        /// PepFDR
+        /// Peptide level FDR
         /// </summary>
         PepFDR = 4
     }
@@ -755,7 +1103,7 @@ namespace PHRPReader.Data
         EValue = 16,
 
         // <summary>
-        // Obsolete name for E-Value (MS-GF+) or P-Value (MSGFDB)
+        // Obsolete name for E-Value (MS-GF+) or P-value (MSGFDB)
         // </summary>
         // [Obsolete("Use .EValue")]
         // PValue_EValue = EValue,
@@ -796,20 +1144,20 @@ namespace PHRPReader.Data
 
         // ReSharper disable UnusedMember.Global
         /// <summary>
-        /// IMSScan
+        /// IMS scan
         /// </summary>
         /// <remarks>Only present for MSGFDB_IMS results</remarks>
         IMSScan = 20,
 
         /// <summary>
-        /// IMSDriftTime
+        /// IMS drift time
         /// </summary>
         /// <remarks>Only present for MSGFDB_IMS results</remarks>
         IMSDriftTime = 21,
 
         // ReSharper restore UnusedMember.Global
         /// <summary>
-        /// IsotopeError
+        /// Isotope error
         /// </summary>
         IsotopeError = 22
     }
@@ -913,8 +1261,6 @@ namespace PHRPReader.Data
         PepQValue = 17
     }
 
-#pragma warning disable 1591
-
     /// <summary>
     /// These columns correspond to the Synopsis file created by MODaResultsProcessor
     /// </summary>
@@ -930,8 +1276,19 @@ namespace PHRPReader.Data
         /// </summary>
         Scan = 1,
 
+        /// <summary>
+        /// Spectrum index
+        /// </summary>
         Spectrum_Index = 2,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 3,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMZ = 4,
 
         /// <summary>
@@ -946,8 +1303,11 @@ namespace PHRPReader.Data
         DelM_PPM = 6,
 
         /// <summary>
-        /// Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        /// Theoretical monoisotopic peptide MH (computed by PHRP)
         /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
         MH = 7,
 
         /// <summary>
@@ -960,7 +1320,14 @@ namespace PHRPReader.Data
         /// </summary>
         Protein = 9,
 
+        /// <summary>
+        /// Score
+        /// </summary>
         Score = 10,
+
+        /// <summary>
+        /// Probability
+        /// </summary>
         Probability = 11,
 
         /// <summary>
@@ -971,7 +1338,14 @@ namespace PHRPReader.Data
         /// </remarks>
         Rank_Probability = 12,
 
+        /// <summary>
+        /// Peptide position
+        /// </summary>
         Peptide_Position = 13,
+
+        /// <summary>
+        /// Q-Value
+        /// </summary>
         QValue = 14
     }
 
@@ -980,11 +1354,34 @@ namespace PHRPReader.Data
     /// </summary>
     public enum PrecursorInfoFileColumns
     {
+        /// <summary>
+        /// Scan number
+        /// </summary>
         ScanNumber = 0,
+
+        /// <summary>
+        /// Scan time
+        /// </summary>
         ScanTime = 1,
+
+        /// <summary>
+        /// Scan type
+        /// </summary>
         ScanType = 2,
+
+        /// <summary>
+        /// Scan type name
+        /// </summary>
         ScanTypeName = 3,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMz = 4,
+
+        /// <summary>
+        /// Scan filter text
+        /// </summary>
         ScanFilterText = 5
     }
 
@@ -996,14 +1393,49 @@ namespace PHRPReader.Data
     /// </remarks>
     public enum ReporterIonsFileColumns
     {
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
         Dataset = 0,
+
+        /// <summary>
+        /// Scan Number
+        /// </summary>
         ScanNumber = 1,
+
+        /// <summary>
+        /// Collision mode
+        /// </summary>
         CollisionMode = 2,
+
+        /// <summary>
+        /// Parent ion m/z
+        /// </summary>
         ParentIonMZ = 3,
+
+        /// <summary>
+        /// Base peak intensity
+        /// </summary>
         BasePeakIntensity = 4,
+
+        /// <summary>
+        /// Base peak m/z
+        /// </summary>
         BasePeakMZ = 5,
+
+        /// <summary>
+        /// Parent scan
+        /// </summary>
         ParentScan = 6,
+
+        /// <summary>
+        /// Reporter ion intensity max
+        /// </summary>
         ReporterIonIntensityMax = 7,
+
+        /// <summary>
+        /// Weighted average percent intensity correction
+        /// </summary>
         WeightedAvgPctIntensityCorrection = 8
     }
 
@@ -1012,16 +1444,59 @@ namespace PHRPReader.Data
     /// </summary>
     public enum ScanStatsFileColumns
     {
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
         DatasetId = 0,
+
+        /// <summary>
+        /// Scan number
+        /// </summary>
         ScanNumber = 1,
+
+        /// <summary>
+        /// Scan time
+        /// </summary>
         ScanTime = 2,
+
+        /// <summary>
+        /// Scan type
+        /// </summary>
         ScanType = 3,
+
+        /// <summary>
+        /// Total ion intensity
+        /// </summary>
         TotalIonIntensity = 4,
+
+        /// <summary>
+        /// Base peak intensity
+        /// </summary>
         BasePeakIntensity = 5,
+
+        /// <summary>
+        /// Base peak m/z
+        /// </summary>
         BasePeakMZ = 6,
+
+        /// <summary>
+        /// Base peak S/N ratio
+        /// </summary>
         BasePeakSignalToNoiseRatio = 7,
+
+        /// <summary>
+        /// Ion count
+        /// </summary>
         IonCount = 8,
+
+        /// <summary>
+        /// Ion count raw
+        /// </summary>
         IonCountRaw = 9,
+
+        /// <summary>
+        /// Scan type name
+        /// </summary>
         ScanTypeName = 10
     }
 
@@ -1030,32 +1505,162 @@ namespace PHRPReader.Data
     /// </summary>
     public enum SequestSynopsisFileColumns
     {
+        /// <summary>
+        /// Row index
+        /// </summary>
         RowIndex = 0,
+
+        /// <summary>
+        /// Scan
+        /// </summary>
         Scan = 1,
+
+        /// <summary>
+        /// Number of merged scans
+        /// </summary>
         NumScans = 2,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 3,
+
+        /// <summary>
+        /// Peptide MH
+        /// </summary>
         PeptideMH = 4,
+
+        /// <summary>
+        /// XCorr
+        /// </summary>
         XCorr = 5,
+
+        /// <summary>
+        /// DeltaCn
+        /// </summary>
         DeltaCn = 6,
+
+        /// <summary>
+        /// Sp
+        /// </summary>
         Sp = 7,
-        ProteinName = 8,                 // Aka Reference
-        MultipleProteinCount = 9,        // Aka MO = MultipleORFCount; this is 0 if the peptide is in just one protein; 1 if in 2 proteins, etc.
-        PeptideSequence = 10,            // This is the sequence with prefix and suffix residues and also with modification symbols
+
+        /// <summary>
+        /// Protein name, aka Reference
+        /// </summary>
+        ProteinName = 8,
+
+        /// <summary>
+        /// Multiple protein count
+        /// </summary>
+        /// <remarks>
+        /// Comes from MO = MultipleORFCount; this is 0 if the peptide is in just one protein; 1 if in 2 proteins, etc.
+        /// </remarks>
+        MultipleProteinCount = 9,
+
+        /// <summary>
+        /// Peptide sequence
+        /// </summary>
+        /// <remarks>
+        /// This is the sequence with prefix and suffix residues and also with modification symbols
+        /// </remarks>
+        PeptideSequence = 10,
+
+        /// <summary>
+        /// DeltaCn
+        /// </summary>
         DeltaCn2 = 11,
+
+        /// <summary>
+        /// RankSP
+        /// </summary>
         RankSP = 12,
+
+        /// <summary>
+        /// RankXC
+        /// </summary>
         RankXC = 13,
+
+        /// <summary>
+        /// Precursor error, in Daltons
+        /// </summary>
         DelM = 14,
+
+        /// <summary>
+        /// XcRatio
+        /// </summary>
         XcRatio = 15,
-        PassFilt = 16,                   // Legacy/unused
-        MScore = 17,                     // Legacy/unused
-        NTT = 18,                        // Number of tryptic termini
-        IonsObserved = 19,               // Added in August 2011
-        IonsExpected = 20,               // Added in August 2011
-        DelMPPM = 21,                    // Added in August 2011
-        Cleavage_State = 22,             // This column and the ones after it are computed by this program and appended to the input file or saved in a new file
+
+        /// <summary>
+        /// Pass filter flag
+        /// </summary>
+        /// <remarks>
+        /// Legacy/unused
+        /// </remarks>
+        PassFilt = 16,
+
+        /// <summary>
+        /// MScore
+        /// </summary>
+        /// <remarks>
+        /// Legacy/unused
+        /// </remarks>
+        MScore = 17,
+
+        /// <summary>
+        /// Number of tryptic termini
+        /// </summary>
+        NTT = 18,
+
+        /// <summary>
+        /// Ions observed
+        /// </summary>
+        /// <remarks>
+        /// Added in August 2011
+        /// </remarks>
+        IonsObserved = 19,
+
+        /// <summary>
+        /// Ions expected
+        /// </summary>
+        /// <remarks>
+        /// Added in August 2011
+        /// </remarks>
+        IonsExpected = 20,
+
+        /// <summary>
+        /// Precursor error, in ppm
+        /// </summary>
+        /// <remarks>
+        /// Added in August 2011
+        /// </remarks>
+        DelMPPM = 21,
+
+        // The following column are computed by this program and appended to the input file or saved in a new file
+
+        /// <summary>
+        /// Cleavage state
+        /// </summary>
+        Cleavage_State = 22,
+
+        /// <summary>
+        /// Terminus state
+        /// </summary>
         Terminus_State = 23,
+
+        /// <summary>
+        /// Mod count
+        /// </summary>
         Mod_Count = 24,
+
+        /// <summary>
+        /// Mod description
+        /// </summary>
         Mod_Description = 25,
+
+        /// <summary>
+        /// Monoisotopic mass
+        /// </summary>
         Monoisotopic_Mass = 26
     }
 
@@ -1064,30 +1669,129 @@ namespace PHRPReader.Data
     /// </summary>
     public enum SICStatsFileColumns
     {
+        /// <summary>
+        /// Dataset
+        /// </summary>
         Dataset = 0,
+
+        /// <summary>
+        /// Parent ion index
+        /// </summary>
         ParentIonIndex = 1,
+
+        /// <summary>
+        /// MZ
+        /// </summary>
         MZ = 2,
+
+        /// <summary>
+        /// Survey scan number
+        /// </summary>
         SurveyScanNumber = 3,
+
+        /// <summary>
+        /// Fragmentation scan number
+        /// </summary>
         FragScanNumber = 4,
+
+        /// <summary>
+        /// Optimal peak apex scan number
+        /// </summary>
         OptimalPeakApexScanNumber = 5,
+
+        /// <summary>
+        /// Peak apex override parent ion index
+        /// </summary>
         PeakApexOverrideParentIonIndex = 6,
+
+        /// <summary>
+        /// CustomSICPeak
+        /// </summary>
         CustomSICPeak = 7,
+
+        /// <summary>
+        /// Peak scan start
+        /// </summary>
         PeakScanStart = 8,
+
+        /// <summary>
+        /// Peak scan end
+        /// </summary>
         PeakScanEnd = 9,
+
+        /// <summary>
+        /// Peak scan max intensity
+        /// </summary>
         PeakScanMaxIntensity = 10,
+
+        /// <summary>
+        /// Peak max intensity
+        /// </summary>
         PeakMaxIntensity = 11,
+
+        /// <summary>
+        /// Peak S/N ratio
+        /// </summary>
         PeakSignalToNoiseRatio = 12,
+
+        /// <summary>
+        /// Full-width at half-maximum, in scans
+        /// </summary>
         FWHMInScans = 13,
+
+        /// <summary>
+        /// Peak area
+        /// </summary>
         PeakArea = 14,
+
+        /// <summary>
+        /// Parent ion intensity
+        /// </summary>
         ParentIonIntensity = 15,
+
+        /// <summary>
+        /// Peak baseline noise level
+        /// </summary>
         PeakBaselineNoiseLevel = 16,
+
+        /// <summary>
+        /// Peak baseline noise StDev
+        /// </summary>
         PeakBaselineNoiseStDev = 17,
+
+        /// <summary>
+        /// Peak baseline points used
+        /// </summary>
         PeakBaselinePointsUsed = 18,
+
+        /// <summary>
+        /// Stat moments area
+        /// </summary>
         StatMomentsArea = 19,
+
+        /// <summary>
+        /// Center of mass scan
+        /// </summary>
         CenterOfMassScan = 20,
+
+        /// <summary>
+        /// Peak StDev
+        /// </summary>
         PeakStDev = 21,
+
+        /// <summary>
+        /// Peak skew
+        /// </summary>
         PeakSkew = 22,
+
+        /// <summary>
+        /// Peak KSStat
+        /// </summary>
         PeakKSStat = 23,
+
+        /// <summary>
+        /// Stat moments data count used
+        /// </summary>
         StatMomentsDataCountUsed = 24
     }
 
@@ -1096,27 +1800,117 @@ namespace PHRPReader.Data
     /// </summary>
     public enum TopPICSynFileColumns
     {
+        /// <summary>
+        /// Result ID
+        /// </summary>
         ResultID = 0,
+
+        /// <summary>
+        /// Scan
+        /// </summary>
         Scan = 1,
+
+        /// <summary>
+        /// Proteoform spectrum match ID
+        /// </summary>
         Prsm_ID = 2,
+
+        /// <summary>
+        /// Spectrum ID
+        /// </summary>
         Spectrum_ID = 3,
+
+        /// <summary>
+        /// Fragmentation method
+        /// </summary>
         FragMethod = 4,
+
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 5,
+
+        /// <summary>
+        /// Precursor m/z
+        /// </summary>
         PrecursorMZ = 6,
-        DelM = 7,                            // Precursor error, in Da
-        DelMPPM = 8,                         // Precursor error, in ppm
-        MH = 9,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-        Peptide = 10,                        // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+
+        /// <summary>
+        /// Precursor error, in Daltons
+        /// </summary>
+        DelM = 7,
+
+        /// <summary>
+        /// Precursor error, in ppm
+        /// </summary>
+        DelMPPM = 8,
+
+        /// <summary>
+        /// Theoretical monoisotopic peptide MH (computed by PHRP)
+        /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
+        MH = 9,
+
+        /// <summary>
+        /// Peptide sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+        /// </summary>
+        Peptide = 10,
+
+        /// <summary>
+        /// Proteoform ID
+        /// </summary>
         Proteoform_ID = 11,
+
+        /// <summary>
+        /// Feature intensity
+        /// </summary>
         Feature_Intensity = 12,
+
+        /// <summary>
+        /// Feature score
+        /// </summary>
         Feature_Score = 13,
-        Protein = 14,                        // Protein Name
+
+        /// <summary>
+        /// Protein name
+        /// </summary>
+        Protein = 14,
+
+        /// <summary>
+        /// Residue start
+        /// </summary>
         ResidueStart = 15,
+
+        /// <summary>
+        /// Residue end
+        /// </summary>
         ResidueEnd = 16,
+
+        /// <summary>
+        /// Unexpected Mod Count
+        /// </summary>
         Unexpected_Mod_Count = 17,
+
+        /// <summary>
+        /// Peak Count
+        /// </summary>
         Peak_Count = 18,
+
+        /// <summary>
+        /// Matched peak count
+        /// </summary>
         Matched_Peak_Count = 19,
+
+        /// <summary>
+        /// Matched fragment ion count
+        /// </summary>
         Matched_Fragment_Ion_Count = 20,
+
+        /// <summary>
+        /// P-value
+        /// </summary>
         PValue = 21,
 
         /// <summary>
@@ -1127,9 +1921,24 @@ namespace PHRPReader.Data
         /// </remarks>
         Rank_PValue = 22,
 
+        /// <summary>
+        /// E-Value
+        /// </summary>
         EValue = 23,
+
+        /// <summary>
+        /// Q Value
+        /// </summary>
         QValue = 24,
+
+        /// <summary>
+        /// Proteoform Q Value
+        /// </summary>
         Proteoform_QValue = 25,
+
+        /// <summary>
+        /// Variable PTMs
+        /// </summary>
         VariablePTMs = 26
     }
 
@@ -1143,6 +1952,9 @@ namespace PHRPReader.Data
         /// </summary>
         ResultID = 0,
 
+        /// <summary>
+        /// Group ID
+        /// </summary>
         GroupID = 1,
 
         /// <summary>
@@ -1150,6 +1962,9 @@ namespace PHRPReader.Data
         /// </summary>
         Scan = 2,
 
+        /// <summary>
+        /// Charge
+        /// </summary>
         Charge = 3,
 
         /// <summary>
@@ -1163,20 +1978,43 @@ namespace PHRPReader.Data
         Hyperscore = 5,
 
         /// <summary>
-        /// Peptide_Expectation_Value_LogE
+        /// Peptide expectation value LogE
         /// </summary>
         EValue = 6,
 
         /// <summary>
-        /// Multiple_Protein_Count
+        /// Multiple protein count
         /// </summary>
         ProteinCount = 7,
 
+        /// <summary>
+        /// Peptide
+        /// </summary>
         Peptide = 8,
+
+        /// <summary>
+        /// DeltaCn2
+        /// </summary>
         DeltaCn2 = 9,
+
+        /// <summary>
+        /// Y ions score
+        /// </summary>
         YScore = 10,
+
+        /// <summary>
+        /// Y ion count
+        /// </summary>
         YIons = 11,
+
+        /// <summary>
+        /// B ions score
+        /// </summary>
         BScore = 12,
+
+        /// <summary>
+        /// B ion count
+        /// </summary>
         BIons = 13,
 
         /// <summary>
@@ -1186,7 +2024,7 @@ namespace PHRPReader.Data
         DelM = 14,
 
         /// <summary>
-        /// Peptide_Intensity_LogI
+        /// Peptide intensity LogI
         /// </summary>
         Intensity = 15,
 

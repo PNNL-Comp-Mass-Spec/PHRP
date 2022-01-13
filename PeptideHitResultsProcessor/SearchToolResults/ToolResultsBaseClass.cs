@@ -144,7 +144,7 @@
         /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as reported by MaxQuant or MSFragger
         /// </summary>
         /// <remarks>
-        /// For MaxQuant, this mass will be overridden by PHRP if Isobaric mods were used
+        /// For MaxQuant, this mass will be overridden by PHRP if isobaric mods were used
         /// </remarks>
         public string CalculatedMonoMass;
 
@@ -153,7 +153,7 @@
         /// </summary>
         /// <remarks>
         /// <para>
-        /// For MaxQuant, this mass will be overridden by PHRP if Isobaric mods were used
+        /// For MaxQuant, this mass will be overridden by PHRP if isobaric mods were used
         /// </para>
         /// <para>
         /// For MSFragger, from column "Calculated Peptide Mass"
@@ -188,7 +188,7 @@
         /// Number of tryptic termini
         /// </summary>
         /// <remarks>
-        /// For MaxQuant, initially read from column "Number of Enzymatic Termini", but may be updated by this class
+        /// For MaxQuant, initially read from column "Number of Enzymatic Termini", but may be updated by PHRP
         /// </remarks>
         public int NumberOfTrypticTermini;
 
@@ -262,7 +262,7 @@
         /// FDR
         /// </summary>
         /// <remarks>
-        /// Computed by this class
+        /// Computed by PHRP
         /// </remarks>
         public double FDR;
 
@@ -270,7 +270,7 @@
         /// Q-Value
         /// </summary>
         /// <remarks>
-        /// Computed by this class
+        /// Computed by PHRP
         /// </remarks>
         public double QValue;
     }

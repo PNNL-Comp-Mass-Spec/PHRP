@@ -38,7 +38,8 @@
         /// Computed from PrecursorMZ and charge
         /// </para>
         /// <para>
-        /// From column "Observed Mass"
+        /// From column "Observed Mass" in _psm.tsv files
+        /// From column precursor_neutral_mass in Dataset.tsv files
         /// </para>
         /// </remarks>
         public string PrecursorMonoMass;
@@ -55,7 +56,8 @@
         /// Precursor ion m/z (observed)
         /// </summary>
         /// <remarks>
-        /// From column "Observed M/Z"
+        /// From column "Observed M/Z" in _psm.tsv files
+        /// Computed using precursor_neutral_mass and charge for Dataset.tsv files
         /// </remarks>
         public string PrecursorMZ;
 
