@@ -2981,22 +2981,32 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="filePath">Path to the file</param>
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
         /// <param name="errorMessage"></param>
+        /// <param name="requireHeaderLine"></param>
         /// <returns>True if the file has data; otherwise false</returns>
-        public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage)
+        public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, bool requireHeaderLine = false)
         {
             const int numericDataColIndex = 0;
-            return ValidateFileHasData(filePath, fileDescription, out errorMessage, numericDataColIndex);
+            return ValidateFileHasData(filePath, fileDescription, out errorMessage, numericDataColIndex, requireHeaderLine);
         }
 
         /// <summary>
         /// Validate that the specified file exists and has at least one tab-delimited row with a numeric value
         /// </summary>
+        /// <remarks>
+        /// If requireHeaderLine is true and the file has a header line, but no data, this method returns false
+        /// </remarks>
         /// <param name="filePath">Path to the file</param>
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
         /// <param name="errorMessage"></param>
+        /// <param name="requireHeaderLine">When true, skip the first line</param>
         /// <param name="numericDataColIndex">Index of the numeric data column; use -1 to simply look for any text in the file</param>
         /// <returns>True if the file has data; otherwise false</returns>
-        public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, int numericDataColIndex)
+        public static bool ValidateFileHasData(
+            string filePath,
+            string fileDescription,
+            out string errorMessage,
+            int numericDataColIndex,
+            bool requireHeaderLine)
         {
             var dataFound = false;
 
@@ -3021,11 +3031,19 @@ namespace PeptideHitResultsProcessor.Processor
                 // Open the file and confirm it has data rows
                 using var reader = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
+                var headerFound = !requireHeaderLine;
+
                 while (!reader.EndOfStream && !dataFound)
                 {
                     var lineIn = reader.ReadLine();
-                    if (string.IsNullOrEmpty(lineIn))
+                    if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
+
+                    if (!headerFound)
+                    {
+                        headerFound = true;
+                        continue;
+                    }
 
                     if (numericDataColIndex < 0)
                     {
@@ -3033,7 +3051,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        // Split on the tab character and check if the first column is numeric
+                        // Split on the tab character and check if the specified column is numeric
                         var splitLine = lineIn.Split('\t');
 
                         if (splitLine.Length <= numericDataColIndex)
