@@ -54,13 +54,6 @@ namespace PeptideHitResultsProcessor.Data
         public bool IsPPM { get; set; }
 
         /// <summary>
-        /// Parameter-less constructor
-        /// </summary>
-        public PrecursorMassTolerance() : this(0, 0, false)
-        {
-        }
-
-        /// <summary>
         /// Constructor for a symmetric tolerance
         /// </summary>
         /// <param name="tolerance"></param>
