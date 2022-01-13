@@ -308,7 +308,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <remarks>
         /// Computed by PHRP
         /// </remarks>
-        public string QValue;
+        public string QValue { get; set; }
 
         /// <summary>
         /// Constructor
