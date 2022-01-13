@@ -1372,7 +1372,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 
-                // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                // Now that the peptide location in the protein has been determined, re-compute the cleavage state and terminus state
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
                 // will all be based on the first protein since InSpecT only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();

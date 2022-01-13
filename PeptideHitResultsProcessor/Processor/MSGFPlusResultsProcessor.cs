@@ -745,7 +745,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
-        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="peptideMonoisotopicMass">Monoisotopic mass of the peptide</param>
         /// <param name="adjustPrecursorMassForC13"></param>
         /// <returns>DelM, in ppm</returns>
         private double ComputeDelMCorrectedPPM(
@@ -2335,7 +2335,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 
-                // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                // Now that the peptide location in the protein has been determined, re-compute the cleavage state and terminus state
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
                 // will all be based on the first protein since InSpecT only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();

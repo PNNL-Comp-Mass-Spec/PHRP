@@ -231,7 +231,7 @@ namespace PeptideHitResultsProcessor.Data
         public string PeptideMH { get; set; }
 
         /// <summary>
-        /// Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation)
+        /// Difference in mass between the computed peptide mass and the parent ion mass (i.e. the mass chosen for fragmentation)
         /// In SEQUEST this is Theoretical Mass - Observed Mass
         /// In X!Tandem, InSpecT, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
         /// however, PHRP negates that value while reading the synopsis file to match SEQUEST
@@ -391,7 +391,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <param name="delM">Delta mass, in Da</param>
         /// <param name="precursorMonoMass">Precursor monoisotopic mass</param>
-        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="peptideMonoisotopicMass">Monoisotopic mass of the peptide</param>
         /// <param name="adjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
         /// <returns>Delta mass, in ppm</returns>
         public static double ComputeDelMCorrectedPPM(
@@ -446,7 +446,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <param name="precursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
-        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
+        /// <param name="peptideMonoisotopicMass">Monoisotopic mass of the peptide</param>
         /// <param name="adjustPrecursorMassForC13">When true, adjust for correct for C13 isotopic selection errors</param>
         /// <returns>DelM, in ppm</returns>
         public static double ComputeDelMCorrectedPPM(
@@ -493,7 +493,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public void ComputePeptideCleavageStateInProtein()
         {
-            // Determine the peptide's terminus state and cleavage state within the protein
+            // Determine the peptide terminus state and cleavage state within the protein
             mPeptideCleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues);
             mPeptideTerminusState = mPeptideCleavageStateCalculator.ComputeTerminusState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues);
         }
@@ -507,10 +507,10 @@ namespace PeptideHitResultsProcessor.Data
             var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
             if (residueLocInPeptide == 1)
             {
-                // Residue is at the peptide's N-terminus
+                // Residue is at the N-terminus of the peptide
                 if (PeptideLocInProteinStart == ProteinSeqResidueNumberStart)
                 {
-                    // Residue is at the protein's N-terminus
+                    // Residue is at the N-terminus of the protein
                     if (PeptideLocInProteinEnd == ProteinSeqResidueNumberEnd)
                     {
                         // The protein only contains one Residue, and we're currently examining it
@@ -530,10 +530,10 @@ namespace PeptideHitResultsProcessor.Data
             {
                 if (residueLocInPeptide == PeptideLocInProteinEnd - PeptideLocInProteinStart + 1)
                 {
-                    // Residue is at the peptide's C-terminus
+                    // Residue is at the C-terminus of the peptide
                     if (PeptideLocInProteinEnd == ProteinSeqResidueNumberEnd)
                     {
-                        // Residue is at the protein's C-terminus
+                        // Residue is at the C-terminus of the protein
                         residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus;
                     }
                     else

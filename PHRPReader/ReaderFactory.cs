@@ -186,7 +186,7 @@ namespace PHRPReader
         public PSM CurrentPSM => mPSMCurrent;
 
         /// <summary>
-        /// Returns the most recently loaded PSM's sequence info (if available)
+        /// Returns the most recently loaded PSM sequence info (if available)
         /// </summary>
         public SequenceInfo CurrentPSMSeqInfo
         {

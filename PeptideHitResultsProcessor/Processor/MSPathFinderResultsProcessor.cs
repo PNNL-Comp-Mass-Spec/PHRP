@@ -1108,7 +1108,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 
-                // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                // Now that the peptide location in the protein has been determined, re-compute the cleavage state and terminus state
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values

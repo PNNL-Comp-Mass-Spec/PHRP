@@ -36,12 +36,12 @@
             None = 0,
 
             /// <summary>
-            /// The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
+            /// The residue is located at the peptide N-terminus; superseded by ProteinNTerminus if applicable
             /// </summary>
             PeptideNTerminus = 1,
 
             /// <summary>
-            /// The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
+            /// The residue is located at the peptide C-terminus; superseded by ProteinCTerminus if applicable
             /// </summary>
             PeptideCTerminus = 2,
 

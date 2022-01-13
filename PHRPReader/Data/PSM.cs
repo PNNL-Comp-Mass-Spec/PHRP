@@ -174,7 +174,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Computed monoisotopic mass (uncharged, theoretical mass, including mods)
         /// </summary>
-        /// <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide's residues</remarks>
+        /// <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide residues</remarks>
         public double PeptideMonoisotopicMass { get; set; }
 
         /// <summary>
