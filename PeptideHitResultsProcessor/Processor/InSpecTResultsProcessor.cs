@@ -848,15 +848,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool LoadPeptideToProteinMapInfoInspect(
+        private void LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             IReadOnlyList<ModInfo> inspectModInfo,
             ref List<PepToProteinMapping> pepToProteinMapping,
             ref string mtsPepToProteinMapFilePath)
         {
-            bool success;
-
             try
             {
                 mtsPepToProteinMapFilePath = string.Empty;
@@ -865,21 +863,21 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     Console.WriteLine();
                     OnWarningEvent("PepToProteinMap file is not defined");
-                    return false;
+                    return;
                 }
 
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
                     Console.WriteLine();
                     OnWarningEvent("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
-                    return false;
+                    return;
                 }
 
                 // Initialize pepToProteinMapping
                 pepToProteinMapping = new List<PepToProteinMapping>();
 
                 // Read the data in the peptide to protein map file
-                success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
+                var success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
 
                 if (success)
                 {
@@ -915,10 +913,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + ")", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                success = false;
             }
-
-            return success;
         }
 
         /// <summary>

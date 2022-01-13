@@ -1402,7 +1402,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool LoadPeptideToProteinMapInfoMSGFPlus(
+        private void LoadPeptideToProteinMapInfoMSGFPlus(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
@@ -1418,7 +1418,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     Console.WriteLine();
                     OnWarningEvent("PepToProteinMap file is not defined");
-                    return false;
+                    return;
                 }
 
                 if (!File.Exists(pepToProteinMapFilePath))
@@ -1458,7 +1458,7 @@ namespace PeptideHitResultsProcessor.Processor
                             "Proteins associated with each peptide will be based on protein names in the input file");
                     }
 
-                    return false;
+                    return;
                 }
 
                 // Initialize pepToProteinMapping
@@ -1469,7 +1469,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!success)
                 {
-                    return false;
+                    return;
                 }
 
                 mtsPepToProteinMapFilePath =
@@ -1500,14 +1500,11 @@ namespace PeptideHitResultsProcessor.Processor
                                      pepToProteinMapping[index].ResidueStart + "\t" +
                                      pepToProteinMapping[index].ResidueEnd);
                 }
-
-                return true;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + "): " + ex.Message, ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
-                return false;
             }
         }
 
