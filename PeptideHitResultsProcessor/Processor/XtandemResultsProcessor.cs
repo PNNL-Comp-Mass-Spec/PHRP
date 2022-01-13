@@ -237,7 +237,7 @@ namespace PeptideHitResultsProcessor.Processor
             mLookForReverseSequenceTag = false;
         }
 
-        private bool ParseXTandemInputParameterModInfo(
+        private void ParseXTandemInputParameterModInfo(
             ModificationDefinition.ResidueModificationType modificationType,
             int sortOrder,
             bool parsingMotifDef,
@@ -249,8 +249,6 @@ namespace PeptideHitResultsProcessor.Processor
             // If parsingMotifDef = True, do not try to determine .TargetResidues
 
             const char MOD_LIST_SEP_CHAR = ',';
-
-            bool success;
 
             try
             {
@@ -346,18 +344,13 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
                 }
-
-                success = true;
             }
             catch (Exception)
             {
-                success = false;
             }
-
-            return success;
         }
 
-        private bool ParseXTandemInputParameterProteinTerminusMod(
+        private void ParseXTandemInputParameterProteinTerminusMod(
             int sortOrder,
             bool nTerminus,
             string paramValue,
@@ -366,8 +359,6 @@ namespace PeptideHitResultsProcessor.Processor
             // Parse out the mass defined in paramValue
             // Add the entry to modifications if non-zero
             // if nTerminus = True, the mod applies to the protein's N-Terminus; otherwise, applies to the protein's C-Terminus
-
-            bool success;
 
             try
             {
@@ -409,15 +400,10 @@ namespace PeptideHitResultsProcessor.Processor
                         modifications.Add(modDef);
                     }
                 }
-
-                success = true;
             }
             catch (Exception)
             {
-                success = false;
             }
-
-            return success;
         }
 
         private bool ParseXTandemResultsFile(string inputFilePath, string outputFilePath, bool resetMassCorrectionTagsAndModificationDefinitions = true)
@@ -555,7 +541,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private bool ParseXTandemResultsFileEntry(
+        private void ParseXTandemResultsFileEntry(
             XmlReader xmlReader,
             StreamWriter writer,
             IList<XTandemResults> searchResults,
@@ -593,7 +579,6 @@ namespace PeptideHitResultsProcessor.Processor
 
             var proteinSequenceParsed = false;
             var domainParsed = false;
-            var success = false;
 
             var currentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL;
             var currentGroupLabel = GROUP_LABEL_PROTEIN;
@@ -1046,7 +1031,6 @@ namespace PeptideHitResultsProcessor.Processor
                                     SaveResultsFileEntrySeqInfo(searchResults[searchResultIndex], updateResultToSeqMapFile);
                                 }
 
-                                success = true;
                                 break;
                             }
                         }
@@ -1060,10 +1044,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     errorMessages.Add(string.Format("Error parsing value for Group ID '{0}'", groupIDInXMLFile));
                 }
-                success = false;
             }
-
-            return success;
         }
 
         private bool ParseXTandemResultsFileInputParameters(string inputFilePath)
