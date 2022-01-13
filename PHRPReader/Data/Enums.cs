@@ -2,9 +2,8 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, Daltons, Hyperscore, MaxQuant, novo, tda, terminii, tryptic
-
 #pragma warning disable 1591
+    // Ignore Spelling: Da, Daltons, Hyperscore, MaxQuant, proteoform, novo, tda, tryptic
 
     /// <summary>
     /// These columns correspond to the tab-delimited _ScanStatsEx.txt file created by MASIC or MSFileInfoScanner
@@ -196,7 +195,7 @@ namespace PHRPReader.Data
         LeadingRazorProtein = 18,
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         NTT = 19,
 
@@ -539,7 +538,7 @@ namespace PHRPReader.Data
         AdditionalProteins = 14,
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         NTT = 15,
 

@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MaxQuantResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, MaxQuant, Orbitrap, plex, terminii, tryptic
+        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, MaxQuant, Orbitrap, plex, tryptic
 
         /// <summary>
         /// Dataset name
@@ -163,7 +163,7 @@ namespace PeptideHitResultsProcessor.Data
         public string LeadingRazorProtein { get; set; }
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         public string NTT { get; set; }
 

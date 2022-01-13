@@ -249,7 +249,7 @@
             Hyperscore = string.Empty;
             Nextscore = string.Empty;
             PeptideProphetProbability = string.Empty;
-            NumberOfTrypticTerminii = 0;
+            NumberOfTrypticTermini = 0;
             MissedCleavageCount = string.Empty;
             ProteinStart = string.Empty;
             ProteinEnd = string.Empty;

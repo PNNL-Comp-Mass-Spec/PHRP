@@ -1463,7 +1463,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Nextscore], out searchResult.Nextscore);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideProphetProbability], out searchResult.PeptideProphetProbability);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfEnzymaticTermini], out searchResult.NumberOfTrypticTerminii);
+                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfEnzymaticTermini], out searchResult.NumberOfTrypticTermini);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMissedCleavages], out searchResult.MissedCleavageCount);
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMatchedIons], out searchResult.NumberOfMatchedIons);
@@ -1557,26 +1557,26 @@ namespace PeptideHitResultsProcessor.Processor
                     _ => 0
                 };
 
-                if (cleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Unknown || searchResult.NumberOfTrypticTerminii == ntt)
+                if (cleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Unknown || searchResult.NumberOfTrypticTermini == ntt)
                 {
                     return true;
                 }
 
-                if (ntt <= searchResult.NumberOfTrypticTerminii)
+                if (ntt <= searchResult.NumberOfTrypticTermini)
                 {
                     // If a peptide starts after the M at the start of a protein,
                     // MSFragger treats this as valid for a fully tryptic peptide
 
                     // MSFragger also does not use the proline rule when determining cleavage state
 
-                    // Thus, allow NumberOfTrypticTerminii to be larger than the computed cleavage state value
+                    // Thus, allow NumberOfTrypticTermini to be larger than the computed cleavage state value
                     return true;
                 }
 
                 OnWarningEvent("Changing cleavage state from {0} to {1} for {2} in scan {3}",
-                    searchResult.NumberOfTrypticTerminii, ntt, peptideWithPrefixAndSuffix, searchResult.Scan);
+                    searchResult.NumberOfTrypticTermini, ntt, peptideWithPrefixAndSuffix, searchResult.Scan);
 
-                searchResult.NumberOfTrypticTerminii = ntt;
+                searchResult.NumberOfTrypticTermini = ntt;
 
                 return true;
             }
@@ -2390,7 +2390,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.ModificationList,
                     searchResult.Protein,
                     searchResult.AdditionalProteins,
-                    searchResult.NumberOfTrypticTerminii.ToString(),
+                    searchResult.NumberOfTrypticTermini.ToString(),
                     searchResult.Expectation,
                     searchResult.RankScore.ToString(),
                     searchResult.Hyperscore,

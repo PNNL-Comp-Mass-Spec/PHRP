@@ -64,7 +64,7 @@ namespace PeptideHitResultsProcessor.Processor
         // ReSharper disable CommentTypo
 
         // Ignore Spelling: AaSubstitution, Acetyl, Carbamidomethyl, conf, Cterm, Crosslink, Da, Dehydro, Desc, diff, diffs, DimethNter
-        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, plex, pyro, struct, structs, terminii, tryptic, txt
+        // Ignore Spelling: Glu, Gln, Glycan, maxq, MaxQuant, NeuCode, Nterm, plex, pyro, struct, structs, tryptic, txt
 
         // ReSharper restore CommentTypo
 
@@ -2387,7 +2387,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(GetPeptideSequence(searchResult));
 
-                    searchResult.NumberOfTrypticTerminii = cleavageState switch
+                    searchResult.NumberOfTrypticTermini = cleavageState switch
                     {
                         PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
                         PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
@@ -3209,7 +3209,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Modifications,
                     searchResult.Proteins,
                     searchResult.LeadingRazorProtein,
-                    searchResult.NumberOfTrypticTerminii.ToString(),
+                    searchResult.NumberOfTrypticTermini.ToString(),
                     searchResult.PEP,
                     searchResult.Score,
                     searchResult.DeltaScore,

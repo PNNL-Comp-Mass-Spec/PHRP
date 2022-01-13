@@ -389,7 +389,7 @@ namespace PeptideHitResultsProcessor.SearchToolResults
             Sequence = string.Empty;
             PrefixResidue = string.Empty;
             SuffixResidue = string.Empty;
-            NumberOfTrypticTerminii = 0;
+            NumberOfTrypticTermini = 0;
             Length = 0;
             MissedCleavageCount = string.Empty;
             ModificationSummary = string.Empty;

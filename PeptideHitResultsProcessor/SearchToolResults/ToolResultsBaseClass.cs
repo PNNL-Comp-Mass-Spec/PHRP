@@ -5,7 +5,7 @@
     /// </summary>
     public abstract class ToolResultsBaseClass
     {
-        // Ignore Spelling: Acetyl, Da, prev, terminii, tryptic
+        // Ignore Spelling: Acetyl, Da, prev, tryptic
 
         /// <summary>
         /// Dataset name
@@ -185,12 +185,12 @@
         public string MassErrorDa;
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         /// <remarks>
         /// For MaxQuant, initially read from column "Number of Enzymatic Termini", but may be updated by this class
         /// </remarks>
-        public int NumberOfTrypticTerminii;
+        public int NumberOfTrypticTermini;
 
         /// <summary>
         /// Number of missed enzymatic cleavages

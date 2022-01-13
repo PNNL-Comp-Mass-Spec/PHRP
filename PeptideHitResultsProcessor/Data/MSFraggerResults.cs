@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MSFraggerResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Da, Hyperscore, terminii, tryptic
+        // Ignore Spelling: Da, Hyperscore, tryptic
 
         /// <summary>
         /// Dataset name
@@ -87,7 +87,7 @@ namespace PeptideHitResultsProcessor.Data
         public List<string> Proteins { get; } = new();
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         public string NTT { get; set; }
 

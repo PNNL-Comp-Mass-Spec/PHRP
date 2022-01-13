@@ -24,7 +24,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MSGFPlusResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: De novo, tda, terminii, tryptic
+        // Ignore Spelling: De novo, tda, tryptic
 
         /// <summary>
         /// Fragmentation method for the given MS/MS spectrum
@@ -52,7 +52,7 @@ namespace PeptideHitResultsProcessor.Data
         public string MSGFPlusComputedDelMPPM { get; set; }
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
         public string NTT { get; set; }
 
