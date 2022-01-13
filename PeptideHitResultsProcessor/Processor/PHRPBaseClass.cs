@@ -1905,15 +1905,11 @@ namespace PeptideHitResultsProcessor.Processor
             if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
             {
                 // Remove any non-letter characters
-                primarySequence = mReplaceSymbols.Replace(primarySequence, string.Empty);
-            }
-            else
-            {
-                // Sequence does not have prefix or suffix letters; use sequenceWithMods
-                primarySequence = mReplaceSymbols.Replace(sequenceWithMods, string.Empty);
+                return mReplaceSymbols.Replace(primarySequence, string.Empty);
             }
 
-            return primarySequence;
+            // Sequence does not have prefix or suffix letters; use sequenceWithMods
+            return mReplaceSymbols.Replace(sequenceWithMods, string.Empty);
         }
 
         /// <summary>

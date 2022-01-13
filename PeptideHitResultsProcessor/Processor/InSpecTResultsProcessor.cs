@@ -559,8 +559,6 @@ namespace PeptideHitResultsProcessor.Processor
                             StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
                                 errorMessages, ref sortComparer);
                         }
-
-                        currentScanResultsCount = 0;
                     }
 
                     if (SortFHTAndSynFiles)
@@ -879,34 +877,34 @@ namespace PeptideHitResultsProcessor.Processor
                 // Read the data in the peptide to protein map file
                 var success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
 
-                if (success)
+                if (!success)
+                    return;
+
+                mtsPepToProteinMapFilePath = Path.Combine(outputDirectoryPath, Path.GetFileNameWithoutExtension(pepToProteinMapFilePath) + "MTS.txt");
+
+                using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                if (!string.IsNullOrEmpty(headerLine))
                 {
-                    mtsPepToProteinMapFilePath = Path.Combine(outputDirectoryPath, Path.GetFileNameWithoutExtension(pepToProteinMapFilePath) + "MTS.txt");
+                    // Header line
+                    writer.WriteLine(headerLine);
+                }
 
-                    using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+                for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
+                {
+                    // Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                    // In addition, replace the * terminus symbols with dashes
+                    var mtsCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(pepToProteinMapping[index].Peptide), inspectModInfo);
 
-                    if (!string.IsNullOrEmpty(headerLine))
+                    if (pepToProteinMapping[index].Peptide != mtsCompatiblePeptide)
                     {
-                        // Header line
-                        writer.WriteLine(headerLine);
+                        UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
                     }
 
-                    for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
-                    {
-                        // Replace any mod text names in the peptide sequence with the appropriate mod symbols
-                        // In addition, replace the * terminus symbols with dashes
-                        var mtsCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(pepToProteinMapping[index].Peptide), inspectModInfo);
-
-                        if (pepToProteinMapping[index].Peptide != mtsCompatiblePeptide)
-                        {
-                            UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
-                        }
-
-                        writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
-                                         pepToProteinMapping[index].Protein + "\t" +
-                                         pepToProteinMapping[index].ResidueStart + "\t" +
-                                         pepToProteinMapping[index].ResidueEnd);
-                    }
+                    writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
+                                     pepToProteinMapping[index].Protein + "\t" +
+                                     pepToProteinMapping[index].ResidueStart + "\t" +
+                                     pepToProteinMapping[index].ResidueEnd);
                 }
             }
             catch (Exception ex)

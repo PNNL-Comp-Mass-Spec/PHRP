@@ -644,40 +644,42 @@ namespace PeptideHitResultsProcessor.Processor
                 doc.Load(paramFile.FullName);
 
                 var nodeList = doc.SelectNodes("/search/modifications/fixed/mod");
-                if (nodeList?.Count > 0)
+                if (nodeList == null || nodeList.Count == 0)
                 {
-                    // Store the fixed mods
+                    OnWarningEvent("Fixed mod nodes not found in the MODPlus parameter file (/search/modifications/fixed/mod)");
+                    return true;
+                }
 
-                    foreach (XmlNode node in nodeList)
+                // Store the fixed mods
+                foreach (XmlNode node in nodeList)
+                {
+                    // var modName = node.Attributes?["name"].Value;
+                    // var modPosition = node.Attributes?["position"].Value;
+
+                    var residue = node.Attributes?["site"].Value.Trim();
+                    var modMass = node.Attributes?["massdiff"].Value;
+
+                    // Replace N-Term or C-Term with < or >
+                    if (string.Equals(residue, "n-term", StringComparison.OrdinalIgnoreCase))
+                        residue = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+
+                    if (string.Equals(residue, "c-term", StringComparison.OrdinalIgnoreCase))
+                        residue = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+
+                    if (!double.TryParse(modMass, out var modMassDa) || !(Math.Abs(modMassDa) > float.Epsilon))
+                        continue;
+
+                    var massCorrectionTag = mPeptideMods.LookupMassCorrectionTagByMass(modMassDa);
+
+                    var modType = ModificationDefinition.ResidueModificationType.StaticMod;
+                    if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() ||
+                        residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        var modName = node.Attributes?["name"].Value;
-                        var residue = node.Attributes?["site"].Value.Trim();
-                        var modPosition = node.Attributes?["position"].Value;
-                        var modMass = node.Attributes?["massdiff"].Value;
-
-                        // Replace N-Term or C-Term with < or >
-                        if (string.Equals(residue, "n-term", StringComparison.OrdinalIgnoreCase))
-                            residue = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                        if (string.Equals(residue, "c-term", StringComparison.OrdinalIgnoreCase))
-                            residue = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-
-                        if (double.TryParse(modMass, out var modMassDa))
-                        {
-                            if (Math.Abs(modMassDa - 0) > float.Epsilon)
-                            {
-                                var massCorrectionTag = mPeptideMods.LookupMassCorrectionTagByMass(modMassDa);
-
-                                var modType = ModificationDefinition.ResidueModificationType.StaticMod;
-                                if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
-                                {
-                                    modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
-                                }
-
-                                var modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residue, modType, massCorrectionTag);
-                                modList.Add(modDef);
-                            }
-                        }
+                        modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                     }
+
+                    var modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residue, modType, massCorrectionTag);
+                    modList.Add(modDef);
                 }
 
                 Console.WriteLine();
@@ -1087,7 +1089,6 @@ namespace PeptideHitResultsProcessor.Processor
                             {
                                 // Recognized column name; update columnMapping
                                 columnMapping[resultFileColumn] = index;
-                                useDefaultHeaders = false;
                             }
                             else
                             {
@@ -1098,19 +1099,17 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                if (useDefaultHeaders)
-                {
-                    // Use default column mappings
-                    foreach (MODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(MODPlusResultsFileColumns)))
-                    {
-                        columnMapping[resultColumn] = (int)resultColumn;
-                    }
+                if (!useDefaultHeaders)
+                    return true;
 
-                    // This is not a header line; return false
-                    return false;
+                // Use default column mappings
+                foreach (MODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(MODPlusResultsFileColumns)))
+                {
+                    columnMapping[resultColumn] = (int)resultColumn;
                 }
 
-                return true;
+                // This is not a header line; return false
+                return false;
             }
             catch (Exception ex)
             {
