@@ -127,6 +127,9 @@ namespace PHRPReader.Data
         /// </remarks>
         public string MSGFSpecEValue { get; set; }
 
+        // ReSharper disable once InconsistentNaming
+        // ReSharper disable once UnusedMember.Global
+
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
         /// </summary>

@@ -103,6 +103,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         private struct MODaSearchResult
         {
+            // ReSharper disable NotAccessedField.Local
+
             public string SpectrumFileName;
             public string SpectrumIndex;
             public int ScanNum;                     // Determined by looking for SpectrumIndex in the _mgf_IndexToScanMap.txt file
@@ -123,6 +125,8 @@ namespace PeptideHitResultsProcessor.Processor
             public string Protein;
             public string PeptidePosition;          // Protein start/stop residues of the peptide, e.g. 108~115
             public double QValue;                   // Computed by this class
+
+            // ReSharper restore NotAccessedField.Local
 
             /// <summary>
             /// Reset stored values to empty strings and zeros

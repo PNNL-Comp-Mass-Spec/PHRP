@@ -2,6 +2,9 @@
 
 namespace PHRPReader.Reader
 {
+    // ReSharper disable once InconsistentNaming
+    // ReSharper disable once UnusedMember.Global
+
     /// <summary>
     /// Old PHRP SynFileReader for MS-GF+
     /// </summary>

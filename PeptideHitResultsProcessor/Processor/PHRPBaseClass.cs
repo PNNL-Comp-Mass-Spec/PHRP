@@ -1903,6 +1903,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="suffix">Output: suffix residue</param>
         protected string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix)
         {
+            // ReSharper disable once ConvertIfStatementToReturnStatement
             if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
             {
                 // Remove any non-letter characters

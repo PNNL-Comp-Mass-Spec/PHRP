@@ -58,6 +58,7 @@
             /// <summary>
             /// The protein only has one residue
             /// </summary>
+            // ReSharper disable once IdentifierTypo
             ProteinNandCCTerminus = 5
 
         }
@@ -65,6 +66,7 @@
         /// <summary>
         /// True if the location of the modification is ambiguous
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public bool AmbiguousMod => EndResidueLocInPeptide > ResidueLocInPeptide;
 
         /// <summary>

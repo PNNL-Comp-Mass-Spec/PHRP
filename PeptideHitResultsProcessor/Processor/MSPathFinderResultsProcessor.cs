@@ -140,11 +140,17 @@ namespace PeptideHitResultsProcessor.Processor
             public string ProteinLength;
             public string ResidueStart;
             public string ResidueEnd;
+
+            // ReSharper disable NotAccessedField.Local
+
             public string Charge;
             public short ChargeNum;
             public string MostAbundantIsotopeMz;        // As reported by MSPathfinder
             public string CalculatedMonoMass;           // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MSPathFinder
             public double CalculatedMonoMassPHRP;       // Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
+
+            // ReSharper restore NotAccessedField.Local
+
             public string NumMatchedFragments;
             public string SpecEValue;                   // EValue, at the scan level
             public double SpecEValueNum;

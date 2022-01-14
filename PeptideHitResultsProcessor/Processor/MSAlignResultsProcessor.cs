@@ -107,6 +107,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         private struct MSAlignSearchResult
         {
+            // ReSharper disable NotAccessedField.Local
+
             public string SpectrumFileName;
             public string Scans;
             public int ScanNum;
@@ -137,6 +139,8 @@ namespace PeptideHitResultsProcessor.Processor
             public string FDR;
             public string FragMethod;                   // Only present in MSAlign_Histone results
             public int RankPValue;
+
+            // ReSharper restore NotAccessedField.Local
 
             /// <summary>
             /// Reset stored values to empty strings and zeros
@@ -195,6 +199,8 @@ namespace PeptideHitResultsProcessor.Processor
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
+
+            // ReSharper disable once CommentTypo
 
             // Preferably use three digits of precision, but allow two digits of precision
             // since the MSAlign_ResultTable.txt file lists modifications with just two digits after the decimal, e.g. (DIQM)[16.00]

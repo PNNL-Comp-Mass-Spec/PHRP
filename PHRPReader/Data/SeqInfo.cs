@@ -38,6 +38,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor using Sequence ID and mass
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public SequenceInfo(int seqID, double monoisotopicMass) : this(seqID, monoisotopicMass, 0, string.Empty)
         {
         }
@@ -62,6 +63,7 @@ namespace PHRPReader.Data
         /// Update the monoisotopic mass for this sequence
         /// </summary>
         /// <param name="monoMass"></param>
+        // ReSharper disable once UnusedMember.Global
         public void UpdateMonoisotopicMass(double monoMass)
         {
             MonoisotopicMass = monoMass;

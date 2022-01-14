@@ -903,6 +903,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 }
                                 break;
 
+                            // ReSharper disable once RedundantEmptySwitchSection
                             default:
                                 // Unknown/unneeded child node name; ignore it
                                 break;
@@ -1295,6 +1296,8 @@ namespace PeptideHitResultsProcessor.Processor
                             }
 
                             break;
+
+                        // ReSharper disable once RedundantEmptySwitchSection
                         default:
                             // Unknown/unneeded child node name; ignore it
                             break;

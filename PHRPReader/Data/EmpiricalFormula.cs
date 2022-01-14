@@ -32,6 +32,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor, initialized with a list of element symbols
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public EmpiricalFormula(IEnumerable<string> elementInfo)
         {
             ElementCounts = new Dictionary<string, int>();
@@ -44,6 +45,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor, initialized with a list of KeyValuePairs of element symbol and element count
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public EmpiricalFormula(IEnumerable<KeyValuePair<string, int>> elementInfo)
         {
             ElementCounts = new Dictionary<string, int>();

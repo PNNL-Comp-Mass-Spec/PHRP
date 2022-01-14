@@ -123,6 +123,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         private struct TopPICSearchResult
         {
+            // ReSharper disable NotAccessedField.Local
             public string SpectrumFileName;
             public string Prsm_ID;
             public string Spectrum_ID;
@@ -159,9 +160,12 @@ namespace PeptideHitResultsProcessor.Processor
             public string Qvalue;
             public string Proteoform_QValue;
 
+            // ReSharper restore NotAccessedField.Local
+
             /// <summary>
             /// Reset stored values to empty strings and zeros
             /// </summary>
+            // ReSharper disable once UnusedMember.Local
             public void Clear()
             {
                 SpectrumFileName = string.Empty;
@@ -380,6 +384,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     modMassOrName += character;
                 }
+                // ReSharper disable once RedundantIfElseBlock
                 else
                 {
                     // Unrecognized symbol; ignore it

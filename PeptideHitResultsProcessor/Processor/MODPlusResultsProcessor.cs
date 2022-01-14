@@ -112,6 +112,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         private struct MODPlusSearchResult
         {
+            // ReSharper disable NotAccessedField.Local
+
             public string SpectrumFileName;
             public string SpectrumIndex;
             public int ScanNum;
@@ -135,6 +137,8 @@ namespace PeptideHitResultsProcessor.Processor
             public string ModificationAnnotation;
             public double FDR;                      // Computed by this class
             public double QValue;                   // Computed by this class
+
+            // ReSharper restore NotAccessedField.Local
 
             /// <summary>
             /// Reset stored values to empty strings and zeros
