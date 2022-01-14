@@ -1,5 +1,73 @@
 Peptide Hit Results Processor Runner Revision History
 
+Version 3.1.8049; January 14, 2022
+	- Add support for MSFragger
+
+Version 3.1.7997; November 23, 2021
+	- Add support for the _PepToProtMap.txt file having a header line and having more than two columns
+
+Version 3.1.7983; November 9, 2021
+	- Change the parameter file format from an XML file to a Key=Value parameter file
+	- Parse command line arguments using CommandLineParser instead of clsParseCommandLine
+
+Version 3.0.7972; October 29, 2021
+	- Read column UniMod_Mod_Name from _ModDefs.txt files
+
+Version 3.0.7937; September 24, 2021
+	- Add support for a header line in Mass_Correction_Tags and _ModDefs.txt files
+	- If the MaxQuant modifications.xml file was not loaded, look for the MaxQuant mod in data loaded from the _ModDefs.txt file
+
+Version 3.0.7825; June 4, 2021
+	- For MaxQuant results, only call ComputeDelMCorrectedPPM if the mass error is less than 15 Da
+	- Show a warning when the computed monoisotopic mass of a MaxQuant result is more than 3x larger than the precursor match tolerance
+
+Version 3.0.7824; June 3, 2021
+	- When an isobaric mod is present, use the peptide mass computed by PHRP instead of the mass computed by MaxQuant
+	- When reading a MaxQuant synopsis file, add the Razor Protein to the protein list (if empty)
+	- Look for precursor info files in the current directory, subdirectories of the current directory, the parent directory, and subdirectories of the parent directory
+
+Version 3.0.7803; May 13, 2021
+	- Read static MaxQuant modifications from the parameters.txt file instead of an XML-based parameter file
+
+Version 3.0.7797; May 7, 2021
+	- Add class for loading precursor m/z values from either a _PrecursorInfo.txt file or MASIC files
+	- Add readers for _SICStats.txt and _ReporterIons.txt files
+
+Version 3.0.7789; April 29, 2021
+	- Read precursor m/z values from _PrecursorInfo.txt files
+
+Version 3.0.7780; April 20, 2021
+	- Read peptides from the MaxQuant peptides.txt file
+
+Version 3.0.7766; April 6, 2021
+	- Add support for MaxQuant results
+
+Version 3.0.7763; April 3, 2021
+	- Move enums into Data\Enums.cs
+
+Version 3.0.7755; May 26, 2021
+	- Rename methods and variables to switch from Parser to Reader
+	- Remove obsolete enums
+
+Version 3.0.7752; May 23, 2021
+	- Rename classes and enums
+	- Reorganize classes
+
+Version 2.0.7724; February 23, 2021
+	- Convert to C#
+
+Version 2.0.7704; February 3, 2021
+	- Add support for new TopPIC column names
+	- Rename constants and methods to use MSGFPlus instead of MSGFDB
+	- Rename properties
+
+Version 1.5.7692; January 22, 2021
+	- Rename enum ePeptideHitResultType to PeptideHitResultType 
+	- Remove unused code
+
+Version 1.5.7458; June 2, 2020
+	- Update to .NET 4.7.2
+	
 Version 1.5.7130; July 10, 2019
 	- Allow the MS-GF+ input file to be named Dataset.tsv instead of Dataset_msgfplus.tsv
 
