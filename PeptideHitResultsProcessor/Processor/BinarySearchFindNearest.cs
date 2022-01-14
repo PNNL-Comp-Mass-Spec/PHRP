@@ -92,10 +92,13 @@ namespace PeptideHitResultsProcessor.Processor
         private static IEnumerable<KeyValuePair<double, double>> ConvertParallelLists(IReadOnlyList<double> list1, IReadOnlyList<double> list2)
         {
             var dataPoints = new List<KeyValuePair<double, double>>();
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
             for (var i = 0; i < list1.Count; i++)
             {
                 if (i >= list2.Count)
                     break;
+
                 dataPoints.Add(new KeyValuePair<double, double>(list1[i], list2[i]));
             }
 
