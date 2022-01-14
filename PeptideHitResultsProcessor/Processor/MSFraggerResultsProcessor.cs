@@ -1561,6 +1561,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!string.IsNullOrWhiteSpace(spectrumFile))
                 {
+                    // Extract the dataset name from the spectrum file name
+                    // Example names:
+                    //   interact-Dataset.pep.xml
+                    //   interact-Dataset.pin.pep.xml
+
                     var baseName = Path.GetFileNameWithoutExtension(spectrumFile);
                     if (baseName.StartsWith("interact-", StringComparison.OrdinalIgnoreCase))
                     {
@@ -1571,9 +1576,27 @@ namespace PeptideHitResultsProcessor.Processor
                         currentDatasetName = baseName;
                     }
 
-                    if (currentDatasetName.EndsWith(".pep"))
+                    var suffixesToRemove = new List<string>
                     {
-                        currentDatasetName = currentDatasetName.Substring(0, currentDatasetName.Length - 4);
+                        ".pep",
+                        ".pin"
+                    };
+
+                    while (true)
+                    {
+                        var suffixRemoved = false;
+
+                        foreach (var suffix in suffixesToRemove)
+                        {
+                            if (currentDatasetName.EndsWith(suffix))
+                            {
+                                currentDatasetName = currentDatasetName.Substring(0, currentDatasetName.Length - suffix.Length);
+                                suffixRemoved = true;
+                            }
+                        }
+
+                        if (!suffixRemoved)
+                            break;
                     }
                 }
 
