@@ -791,8 +791,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Find the Dataset.tsv files that correspond to an Aggregation_psm.tsv file
         /// </summary>
         /// <param name="inputFile"></param>
+        /// <param name="datasetNames"></param>
         /// <returns>Dictionary with the matching files, along with the dataset name for each file</returns>
-        private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile)
+        private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile, List<string> datasetNames)
         {
             var sourceFiles = new Dictionary<FileInfo, string>();
 
@@ -804,33 +805,44 @@ namespace PeptideHitResultsProcessor.Processor
             // ReSharper disable once CommentTypo
             // Look for .tsv files in this directory that have columns "expectscore", "hyperscore", and "nextscore"
 
+            var datasetNamesFound = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var candidateFile in inputFile.Directory.GetFiles("*.tsv"))
             {
                 if (candidateFile.FullName.Equals(inputFile.FullName))
                     continue;
 
-                switch (candidateFile.Name)
+                if (candidateFile.Name.EndsWith("_ion.tsv", StringComparison.OrdinalIgnoreCase) ||
+                    candidateFile.Name.EndsWith("_peptide.tsv", StringComparison.OrdinalIgnoreCase) ||
+                    candidateFile.Name.EndsWith("_protein.tsv", StringComparison.OrdinalIgnoreCase) ||
+                    candidateFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
-                    case "Aggregation_ion.tsv":
-                    case "Aggregation_peptide.tsv":
-                    case "Aggregation_protein.tsv":
-                    case "Aggregation_psm.tsv":
-                        continue;
+                    continue;
                 }
 
                 var tsvFileFormat = DetermineResultsFileFormat(candidateFile.FullName);
 
-                if (tsvFileFormat == ResultsFileFormat.MSFraggerTSVFile)
-                {
-                    var datasetName = GetDatasetName(candidateFile.Name);
+                if (tsvFileFormat != ResultsFileFormat.MSFraggerTSVFile)
+                    continue;
 
-                    sourceFiles.Add(candidateFile, datasetName);
-                }
+                var datasetName = GetDatasetName(candidateFile.Name);
 
-                break;
+                sourceFiles.Add(candidateFile, datasetName);
+
+                datasetNamesFound.Add(datasetName);
+            }
+
+            foreach (var expectedDataset in datasetNames.Where(expectedDataset => !datasetNamesFound.Contains(expectedDataset)))
+            {
+                OnWarningEvent("Did not find file {0} in {1}", expectedDataset + ".tsv", inputFile.Directory.FullName);
             }
 
             return sourceFiles;
+        }
+
+        private List<string> GetDatasetNames(IEnumerable<MSFraggerSearchResult> filteredSearchResults)
+        {
+            return (from item in filteredSearchResults select item.DatasetName).Distinct().ToList();
         }
 
         private string GetDatasetName(string fileName)
@@ -1058,7 +1070,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
-                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile);
+                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile, new List<string>());
                 }
                 else
                 {
@@ -1191,9 +1203,11 @@ namespace PeptideHitResultsProcessor.Processor
                 // Keys are FileInfo objects, values are the dataset name for the given file
                 Dictionary<FileInfo, string> additionalResultFiles;
 
-                if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
+                var datasetNames = GetDatasetNames(filteredSearchResults);
+
+                if (datasetNames.Count > 1 || inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
-                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile);
+                    additionalResultFiles = FindAggregationPsmSourceFiles(inputFile, datasetNames);
                 }
                 else
                 {
@@ -1238,7 +1252,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (targetResultsAreFromPsmFile)
                     {
                         // Additional search results were loaded from a Dataset.tsv file, which should have reverse hits
-                        // Thus, we can compute Q-Values
+                        // Thus, we can compute Q-Values for data in additionalSearchResults
                         // In contrast, PSM files do not have reverse hits
                         ComputeQValues(additionalSearchResults);
                     }
