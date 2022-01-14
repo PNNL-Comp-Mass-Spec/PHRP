@@ -89,7 +89,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private IEnumerable<KeyValuePair<double, double>> ConvertParallelLists(IReadOnlyList<double> list1, IReadOnlyList<double> list2)
+        private static IEnumerable<KeyValuePair<double, double>> ConvertParallelLists(IReadOnlyList<double> list1, IReadOnlyList<double> list2)
         {
             var dataPoints = new List<KeyValuePair<double, double>>();
             for (var i = 0; i < list1.Count; i++)
@@ -145,8 +145,7 @@ namespace PeptideHitResultsProcessor.Processor
             var y1 = mXYMapping[resultIndex1].Value;
             var y2 = mXYMapping[resultIndex2].Value;
 
-            var closestY = InterpolateY(x1, x2, y1, y2, xValue);
-            return closestY;
+            return InterpolateY(x1, x2, y1, y2, xValue);
         }
 
         /// <summary>
@@ -157,7 +156,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="y1"></param>
         /// <param name="y2"></param>
         /// <param name="xValueToInterpolate"></param>
-        private double InterpolateY(double x1, double x2, double y1, double y2, double xValueToInterpolate)
+        private static double InterpolateY(double x1, double x2, double y1, double y2, double xValueToInterpolate)
         {
             var xDifference = x2 - x1;
 
