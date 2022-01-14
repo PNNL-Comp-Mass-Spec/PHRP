@@ -79,7 +79,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var valueToAdd = mXYMapping[i].Key;
 
-                if (Math.Abs(valueToAdd - lastValue) < float.Epsilon)
+                if (Math.Abs(valueToAdd - lastValue) < double.Epsilon)
                     continue;
 
                 mValueKeys.Add(valueToAdd);
