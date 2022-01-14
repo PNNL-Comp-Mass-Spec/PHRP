@@ -2602,7 +2602,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Protein,
                     searchResult.AdditionalProteins,
                     searchResult.NumberOfTrypticTermini.ToString(),
-                    searchResult.Expectation,
+                    PRISM.StringUtilities.DblToString(searchResult.EValue,5, 0.00005),
                     searchResult.RankScore.ToString(),
                     searchResult.Hyperscore,
                     searchResult.Nextscore,
