@@ -43,9 +43,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             if (xValues.Count != yValues.Count)
             {
-                throw new InvalidOperationException(
-                    "Length of xValues and yValues should be identical; " +
-                    "currently " + xValues.Count + " and " + yValues.Count);
+                throw new InvalidOperationException(string.Format(
+                    "Length of {0} and {1} should be identical; currently {2} and {3}",
+                    nameof(xValues), nameof(yValues), xValues.Count, yValues.Count));
             }
 
             // Convert the parallel lists to a single list
