@@ -23,7 +23,7 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly List<int> mValueKeyIndices = new();
 
         /// <summary>
-        /// Add data using a dictionary where keys are integers values are doubles
+        /// Add data using a dictionary where keys are integers and values are doubles
         /// </summary>
         /// <param name="values"></param>
         public void AddData(IDictionary<int, double> values)
@@ -57,7 +57,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add data using a list of KeyValuePairs
         /// </summary>
-        /// <param name="xyValues"></param>
+        /// <remarks>
+        /// If two values in the list have the same X value, only the first one will be used
+        /// </remarks>
+        /// <param name="xyValues">List of X and Y values</param>
         public void AddData(IEnumerable<KeyValuePair<double, double>> xyValues)
         {
             // Assure that the items are sorted ascending
