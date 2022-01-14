@@ -666,6 +666,18 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Use scan number, charge state, and clean sequence (no prefix or suffix residues) to create a key for a PSM
+        /// </summary>
+        /// <param name="additionalResult"></param>
+        /// <returns>String in the form Scan-Charge-CleanSequence</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private string ConstructKeyForPSM(ToolResultsBaseClass additionalResult)
+        {
+            var cleanSequence = GetCleanSequence(additionalResult.Sequence);
+            return string.Format("{0}-{1}-{2}", additionalResult.Scan, additionalResult.Charge, cleanSequence);
+        }
+
+        /// <summary>
         /// This routine creates a synopsis file from the output from MSFragger (file Dataset_psm.tsv or Dataset.tsv)
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
@@ -1020,6 +1032,19 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool LoadNonPsmResults(FileInfo inputFile, ICollection<string> errorMessages, List<MSFraggerSearchResult> filteredSearchResults)
         {
+            if (!inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(inputFile),
+                    string.Format("The file name does not end with {0}; invalid method call", inputFile.Name));
+            }
+
+            if (filteredSearchResults.Count > 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(filteredSearchResults), "LoadNonPsmResults should only be called if there are no search results");
+            }
+
             try
             {
                 if (inputFile.Directory == null)
@@ -1161,7 +1186,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Check whether the input file ends with _psm.tsv
-                var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
+                var targetResultsAreFromPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
 
                 // Keys are FileInfo objects, values are the dataset name for the given file
                 Dictionary<FileInfo, string> additionalResultFiles;
@@ -1174,7 +1199,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     var datasetName = GetDatasetName(inputFile.Name);
 
-                    var nameToFind = readingPsmFile
+                    var nameToFind = targetResultsAreFromPsmFile
                         ? datasetName + ".tsv"
                         : datasetName + PSM_FILE_SUFFIX;
 
@@ -1190,25 +1215,65 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (additionalResultFiles.Count == 0)
                 {
-                    if (readingPsmFile)
+                    if (targetResultsAreFromPsmFile)
                     {
-                        OnDebugEvent("Unable to find the Dataset.tsv file that corresponds to {0}", inputFile.Name);
+                        OnDebugEvent("Unable to find the Dataset.tsv file that corresponds to {0}; synopsis file will not have matched ion counts", inputFile.Name);
                     }
                     else
                     {
-                        OnDebugEvent("Unable to find the Dataset_psm.tsv file that corresponds to {0}", inputFile.Name);
+                        OnDebugEvent("Unable to find the Dataset_psm.tsv file that corresponds to {0}; synopsis file will not have peptide prophet probabilities", inputFile.Name);
                     }
 
                     // This is not a fatal error, so return true
                     return true;
                 }
 
+                var matchDatasetNames = additionalResultFiles.Count > 1;
+
                 foreach (var additionalFile in additionalResultFiles)
                 {
-                    if (!ReadMSFraggerResults(additionalFile, errorMessages, out var additionalSearchResults))
+                    if (!ReadMSFraggerResults(additionalFile.Key, errorMessages, out var additionalSearchResults))
                         continue;
 
-                    // ToDo: Merge information from additionalSearchResults into filteredSearchResults by matching on scan and peptide
+                    if (targetResultsAreFromPsmFile)
+                    {
+                        // Additional search results were loaded from a Dataset.tsv file, which should have reverse hits
+                        // Thus, we can compute Q-Values
+                        // In contrast, PSM files do not have reverse hits
+                        ComputeQValues(additionalSearchResults);
+                    }
+
+                    // Populate a dictionary mapping scan, charge, and peptide to each row in additionalSearchResults
+                    var searchResultsLookup = new Dictionary<string, MSFraggerSearchResult>();
+
+                    foreach (var additionalResult in additionalSearchResults)
+                    {
+                        var key = ConstructKeyForPSM(additionalResult);
+                        searchResultsLookup.Add(key, additionalResult);
+                    }
+
+                    var datasetNameFilter = additionalFile.Value;
+
+                    // Merge information from additionalSearchResults into filteredSearchResults by matching on scan and peptide
+
+                    foreach (var item in filteredSearchResults)
+                    {
+                        if (matchDatasetNames && item.DatasetName.Length > 0 && !item.DatasetName.Equals(datasetNameFilter, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        var key = ConstructKeyForPSM(item);
+                        if (!searchResultsLookup.TryGetValue(key, out var additionalResult))
+                            continue;
+
+                        UpdateUndefinedValue(ref item.NumberOfMatchedIons, additionalResult.NumberOfMatchedIons);
+                        UpdateUndefinedValue(ref item.TotalNumberOfIons, additionalResult.TotalNumberOfIons);
+                        UpdateUndefinedValue(ref item.PeptideProphetProbability, additionalResult.PeptideProphetProbability);
+
+                        if (targetResultsAreFromPsmFile && additionalResult.QValue > 0)
+                        {
+                            item.QValue = additionalResult.QValue;
+                        }
+                    }
                 }
 
                 return true;
@@ -1503,11 +1568,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMatchedIons], out searchResult.NumberOfMatchedIons);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.TotalNumberOfIons], out searchResult.TotalNumberOfIons);
-
-                if (readingPsmFile)
-                {
-                    // ToDo: Populate searchResult.NumberOfMatchedIons and searchResult.TotalNumberOfIons using data loaded from the Dataset.tsv file(s)
-                }
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinStart], out searchResult.ProteinStart);
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinEnd], out searchResult.ProteinEnd);
@@ -2321,6 +2381,19 @@ namespace PeptideHitResultsProcessor.Processor
                     filteredSearchResults.Add(searchResults[index]);
                 }
             }
+        }
+
+        /// <summary>
+        /// Update targetValue if it is empty, but sourceValue is not empty
+        /// </summary>
+        /// <param name="targetValue"></param>
+        /// <param name="sourceValue"></param>
+        private void UpdateUndefinedValue(ref string targetValue, string sourceValue)
+        {
+            if (!string.IsNullOrWhiteSpace(targetValue) || string.IsNullOrWhiteSpace(sourceValue))
+                return;
+
+            targetValue = sourceValue;
         }
 
         /// <summary>
