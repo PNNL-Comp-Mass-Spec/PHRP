@@ -3253,6 +3253,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
             {
+                if (x == null || y == null)
+                    return 0;
+
                 // First sort on dataset name
                 var nameComparisonResult = string.CompareOrdinal(x.DatasetName, y.DatasetName);
                 if (nameComparisonResult != 0)
@@ -3311,6 +3314,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             public int Compare(MaxQuantSearchResult x, MaxQuantSearchResult y)
             {
+                if (x == null || y == null)
+                    return 0;
+
                 if (x.ScoreNum < y.ScoreNum)
                 {
                     return 1;
