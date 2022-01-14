@@ -732,7 +732,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (scanMapFiles.Count == 1)
                 {
-                    indexToScanMapFilePath = scanMapFiles.First().FullName;
+                    indexToScanMapFilePath = scanMapFiles[0].FullName;
                 }
                 else if (scanMapFiles.Count == 0)
                 {

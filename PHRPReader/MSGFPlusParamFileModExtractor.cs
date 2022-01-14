@@ -288,9 +288,10 @@ namespace PHRPReader
             if (unknownSymbols?.Count > 0)
             {
                 var errMsg = "Error parsing empirical formula '" + empiricalFormula + "', ";
+
                 if (unknownSymbols.Count == 1)
                 {
-                    ReportError(errMsg + "unknown element " + unknownSymbols.First());
+                    ReportError(errMsg + "unknown element " + unknownSymbols[0]);
                 }
                 else
                 {
