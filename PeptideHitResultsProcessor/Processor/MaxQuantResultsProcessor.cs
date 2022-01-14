@@ -2291,7 +2291,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
                 GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
                 GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SimpleMassErrorPPM], out searchResult.SimpleMassErrorPPM);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out searchResult.RetentionTime);
+                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out searchResult.ElutionTime);
 
                 if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PEP], out searchResult.PEP))
                 {
@@ -2774,7 +2774,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.TotalPeptideIntensity], out string totalPeptideIntensity);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MassAnalyzer], out string massAnalyzer);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorType], out string precursorType);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.RetentionTime], out string retentionTime);
+                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ElutionTime], out string elutionTime);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorScan], out string precursorScan);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorIntensity], out string precursorIntensity);
                 GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NumberOfMatches], out string numberOfMatches);
@@ -2809,7 +2809,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.TotalPeptideIntensity = totalPeptideIntensity;
                 searchResult.MassAnalyzer = massAnalyzer;
                 searchResult.PrecursorType = precursorType;
-                searchResult.RetentionTime = retentionTime;
+                searchResult.ElutionTime = elutionTime;
                 searchResult.PrecursorScanNumber = precursorScan;
                 searchResult.PrecursorIntensity = precursorIntensity;
                 searchResult.NumberOfMatches = numberOfMatches;
@@ -3216,7 +3216,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.TotalPeptideIntensity,
                     searchResult.MassAnalyzer,
                     searchResult.PrecursorType,
-                    searchResult.RetentionTime,
+                    searchResult.ElutionTime,
                     searchResult.PrecursorScanNumber,
                     searchResult.PrecursorIntensity,
                     searchResult.NumberOfMatches,

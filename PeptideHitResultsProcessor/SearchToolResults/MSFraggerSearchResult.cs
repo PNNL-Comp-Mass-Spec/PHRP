@@ -235,7 +235,7 @@
             Length = 0;
             Charge = string.Empty;
             ChargeNum = 0;
-            RetentionTime = string.Empty;
+            ElutionTime = string.Empty;
             PrecursorMonoMass = string.Empty;
             CalibratedObservedMass = string.Empty;
             PrecursorMZ = string.Empty;

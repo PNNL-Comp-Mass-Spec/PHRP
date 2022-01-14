@@ -415,7 +415,7 @@ namespace PeptideHitResultsProcessor.SearchToolResults
             MassErrorPpmMaxQuant = string.Empty;
             MassErrorDaMaxQuant = string.Empty;
             SimpleMassErrorPPM = string.Empty;
-            RetentionTime = string.Empty;
+            ElutionTime = string.Empty;
             PEP = string.Empty;
             PEPValue = 0;
             Score = string.Empty;

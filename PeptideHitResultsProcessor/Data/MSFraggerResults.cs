@@ -126,7 +126,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        public string RetentionTime { get; set; }
+        public string ElutionTime { get; set; }
+
 
         /// <summary>
         /// Number of missed enzymatic cleavages
@@ -193,7 +194,7 @@ namespace PeptideHitResultsProcessor.Data
             Hyperscore = string.Empty;
             Nextscore = string.Empty;
             PeptideProphetProbability = string.Empty;
-            RetentionTime = string.Empty;
+            ElutionTime = string.Empty;
             MissedCleavageCount = string.Empty;
             NumberOfMatchedIons = string.Empty;
             TotalNumberOfIons = string.Empty;

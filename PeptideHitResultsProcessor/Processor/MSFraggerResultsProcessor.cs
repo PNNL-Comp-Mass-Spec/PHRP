@@ -1532,13 +1532,13 @@ namespace PeptideHitResultsProcessor.Processor
                     // The aggregated results file reports retention time in seconds
                     if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out int retentionTimeSeconds))
                     {
-                        searchResult.RetentionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
+                        searchResult.ElutionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
                     }
                 }
                 else
                 {
                     // The single dataset results file reports retention time in minutes
-                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out searchResult.RetentionTime);
+                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out searchResult.ElutionTime);
                 }
 
                 GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
@@ -2022,7 +2022,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Hyperscore], out string hyperscore);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Nextscore], out string nextScore);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PeptideProphetProbability], out string peptideProphetProbability);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.RetentionTime], out string retentionTime);
+                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTime], out string elutionTime);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MissedCleavages], out string missedCleavages);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NumberOfMatchedIons], out string numberOfMatchedIons);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.TotalNumberOfIons], out string totalNumberOfIons);
@@ -2036,7 +2036,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Hyperscore = hyperscore;
                 searchResult.Nextscore = nextScore;
                 searchResult.PeptideProphetProbability = peptideProphetProbability;
-                searchResult.RetentionTime = retentionTime;
+                searchResult.ElutionTime = elutionTime;
                 searchResult.MissedCleavageCount = missedCleavages;
                 searchResult.NumberOfMatchedIons = numberOfMatchedIons;
                 searchResult.TotalNumberOfIons = totalNumberOfIons;
@@ -2519,7 +2519,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Hyperscore,
                     searchResult.Nextscore,
                     searchResult.PeptideProphetProbability,
-                    searchResult.RetentionTime,
+                    searchResult.ElutionTime,
                     searchResult.MissedCleavageCount,
                     searchResult.NumberOfMatchedIons,
                     searchResult.TotalNumberOfIons,

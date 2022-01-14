@@ -235,7 +235,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        public string RetentionTime { get; set; }
+        public string ElutionTime { get; set; }
 
         /// <summary>
         /// Scan number where the precursor ion was observed
@@ -352,7 +352,7 @@ namespace PeptideHitResultsProcessor.Data
             TotalPeptideIntensity = string.Empty;
             MassAnalyzer = string.Empty;
             PrecursorType = string.Empty;
-            RetentionTime = string.Empty;
+            ElutionTime = string.Empty;
             PrecursorScanNumber = string.Empty;
             PrecursorIntensity = string.Empty;
             NumberOfMatches = string.Empty;

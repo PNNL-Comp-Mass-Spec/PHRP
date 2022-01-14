@@ -469,7 +469,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        RetentionTime = 27,
+        ElutionTime = 27,
 
         /// <summary>
         /// Scan number where the precursor ion was observed
@@ -930,7 +930,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Elution time of the MS/MS spectrum
         /// </summary>
-        RetentionTime = 21,
+        ElutionTime = 21,
 
         /// <summary>
         /// Number of missed enzymatic cleavages

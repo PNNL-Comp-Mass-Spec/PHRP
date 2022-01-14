@@ -165,7 +165,7 @@ namespace PHRPReader.Reader
                 { "TotalPeptideIntensity", MaxQuantSynFileColumns.TotalPeptideIntensity },
                 { "MassAnalyzer", MaxQuantSynFileColumns.MassAnalyzer },
                 { "PrecursorType", MaxQuantSynFileColumns.PrecursorType },
-                { "RetentionTime", MaxQuantSynFileColumns.RetentionTime },
+                { "RetentionTime", MaxQuantSynFileColumns.ElutionTime },
                 { "PrecursorScan", MaxQuantSynFileColumns.PrecursorScan },
                 { "PrecursorIntensity", MaxQuantSynFileColumns.PrecursorIntensity },
                 { "NumberOfMatches", MaxQuantSynFileColumns.NumberOfMatches },
@@ -408,7 +408,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.TotalPeptideIntensity));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MassAnalyzer));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorType));
-                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.RetentionTime));
+                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ElutionTime));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorScan));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorIntensity));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NumberOfMatches));
