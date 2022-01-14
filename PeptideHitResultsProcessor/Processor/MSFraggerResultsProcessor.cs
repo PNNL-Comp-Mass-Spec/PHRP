@@ -636,6 +636,21 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        private void ComputeQValues(List<MSFraggerSearchResult> filteredSearchResults)
+        {
+            // Sort filteredSearchResults by E-value, Scan, and Peptide
+            filteredSearchResults.Sort(new MSFraggerSearchResultsComparerEValueScanChargePeptide());
+
+            var listForQValue = new List<ToolResultsBaseClass>();
+            foreach (var item in filteredSearchResults)
+            {
+                listForQValue.Add(item);
+            }
+
+            // Compute FDR values, then assign QValues
+            ComputeQValues(listForQValue);
+        }
+
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
@@ -684,6 +699,9 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var success = ReadMSFraggerResults(inputFile, errorMessages, out var filteredSearchResults);
+
+                // Sort the data in filteredSearchResults and compute Q Values
+                ComputeQValues(filteredSearchResults);
 
                 if (!success)
                 {
@@ -736,8 +754,8 @@ namespace PeptideHitResultsProcessor.Processor
                 // Write the header line to the output file
                 WriteSynFHTFileHeader(writer, errorMessages);
 
-                // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
+                // Write the search results to disk
+                WriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
 
                 filterPassingResultCount = filteredSearchResults.Count;
 
@@ -1039,6 +1057,8 @@ namespace PeptideHitResultsProcessor.Processor
                     successCountAdditionalFiles++;
                     filteredSearchResults.AddRange(additionalSearchResults);
                 }
+
+                ComputeQValues(filteredSearchResults);
 
                 return successCountAdditionalFiles >= additionalResultFiles.Count;
             }
@@ -2229,44 +2249,6 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Sort filteredSearchResults and write to disk
-        /// </summary>
-        /// <param name="baseNameByDatasetName">Keys are dataset names, values are dataset ID (or 0 if undefined)</param>
-        /// <param name="writer"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="errorMessages"></param>
-        private void SortAndWriteFilteredSearchResults(
-            Dictionary<string, string> baseNameByDatasetName,
-            TextWriter writer,
-            List<MSFraggerSearchResult> filteredSearchResults,
-            ICollection<string> errorMessages)
-        {
-            // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
-            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
-
-            // Sort filteredSearchResults by E-value, Scan, Peptide, and Razor Protein
-            filteredSearchResults.Sort(new MSFraggerSearchResultsComparerEValueScanChargePeptide());
-
-            var listForQValue = new List<ToolResultsBaseClass>();
-            foreach (var item in filteredSearchResults)
-            {
-                listForQValue.Add(item);
-            }
-
-            // Compute FDR values, then assign QValues
-            ComputeQValues(listForQValue);
-
-            var index = 1;
-            foreach (var result in filteredSearchResults)
-            {
-                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
-
-                WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
-                index++;
-            }
-        }
-
-        /// <summary>
         /// If proteinNameToCheck contains a space, extract the protein name and description, then return true
         /// Otherwise, store the string in proteinName, set proteinDescription to an empty string, and return false
         /// </summary>
@@ -2351,6 +2333,32 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     errorMessages.Add("Error writing synopsis / first hits header");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Write search results to disk
+        /// </summary>
+        /// <param name="baseNameByDatasetName">Keys are dataset names, values are dataset ID (or 0 if undefined)</param>
+        /// <param name="writer"></param>
+        /// <param name="filteredSearchResults"></param>
+        /// <param name="errorMessages"></param>
+        private void WriteFilteredSearchResults(
+            Dictionary<string, string> baseNameByDatasetName,
+            TextWriter writer,
+            List<MSFraggerSearchResult> filteredSearchResults,
+            ICollection<string> errorMessages)
+        {
+            // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
+            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
+
+            var index = 1;
+            foreach (var result in filteredSearchResults)
+            {
+                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
+
+                WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
+                index++;
             }
         }
 
