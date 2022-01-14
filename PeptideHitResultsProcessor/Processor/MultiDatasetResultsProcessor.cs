@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using PeptideHitResultsProcessor.SearchToolResults;
 using PRISM;
 
 namespace PeptideHitResultsProcessor.Processor
