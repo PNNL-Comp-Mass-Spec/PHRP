@@ -1616,7 +1616,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (readingPsmFile)
                 {
                     // The aggregated results file reports retention time in seconds
-                    if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out int retentionTimeSeconds))
+                    if (DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out double retentionTimeSeconds))
                     {
                         searchResult.ElutionTime = PRISM.StringUtilities.DblToString(retentionTimeSeconds / 60.0, 4);
                     }
