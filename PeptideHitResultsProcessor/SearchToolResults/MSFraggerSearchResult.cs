@@ -10,6 +10,11 @@
     {
         // Ignore Spelling: Hyperscore, sp
 
+        /// <summary>
+        /// Average elution time of MS/MS spectra when reading results from a multi-dataset search, in minutes
+        /// </summary>
+        public string ElutionTimeAverage;
+
         // ReSharper disable CommentTypo
 
         /// <summary>
@@ -236,6 +241,7 @@
             Charge = string.Empty;
             ChargeNum = 0;
             ElutionTime = string.Empty;
+            ElutionTimeAverage = string.Empty;
             PrecursorMonoMass = string.Empty;
             CalibratedObservedMass = string.Empty;
             PrecursorMZ = string.Empty;
@@ -266,6 +272,8 @@
             ProteinDescription = string.Empty;
             AdditionalGenes = string.Empty;
             AdditionalProteins = string.Empty;
+            NumberOfMatchedIons = string.Empty;
+            TotalNumberOfIons = string.Empty;
         }
 
         /// <summary>

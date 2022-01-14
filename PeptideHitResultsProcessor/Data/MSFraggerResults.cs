@@ -128,6 +128,10 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public string ElutionTime { get; set; }
 
+        /// <summary>
+        /// Average elution time of MS/MS spectra (only applicable for a multi-dataset based search)
+        /// </summary>
+        public string ElutionTimeAverage { get; set; }
 
         /// <summary>
         /// Number of missed enzymatic cleavages
@@ -195,6 +199,7 @@ namespace PeptideHitResultsProcessor.Data
             Nextscore = string.Empty;
             PeptideProphetProbability = string.Empty;
             ElutionTime = string.Empty;
+            ElutionTimeAverage = string.Empty;
             MissedCleavageCount = string.Empty;
             NumberOfMatchedIons = string.Empty;
             TotalNumberOfIons = string.Empty;

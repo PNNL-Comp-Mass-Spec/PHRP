@@ -651,6 +651,55 @@ namespace PeptideHitResultsProcessor.Processor
             ComputeQValues(listForQValue);
         }
 
+        private IDictionary<int, double> ComputeScanToElutionTimeMap(Dictionary<int, List<double>> elutionTimesByScanNumber)
+        {
+            var startScan = elutionTimesByScanNumber.Keys.Min();
+            var endScan = elutionTimesByScanNumber.Keys.Max();
+
+            var elutionTimeByScanNumber = new SortedDictionary<int, double>();
+
+            foreach (var item in elutionTimesByScanNumber)
+            {
+                if (item.Value.Count == 0)
+                    continue;
+
+                var averageElutionTime = item.Value.Average();
+                elutionTimeByScanNumber.Add(item.Key, averageElutionTime);
+            }
+
+            if (elutionTimeByScanNumber.Count < 2)
+                return elutionTimeByScanNumber;
+
+            var interpolationTool = new BinarySearchFindNearest();
+            interpolationTool.AddData(elutionTimeByScanNumber);
+
+            for (var scan = startScan; scan <= endScan; scan++)
+            {
+                if (elutionTimeByScanNumber.ContainsKey(scan))
+                    continue;
+
+                var elutionTime = interpolationTool.GetYForX(scan);
+
+                elutionTimeByScanNumber.Add(scan, elutionTime);
+            }
+
+            // Apply a moving average smooth to the times in elutionTimeByScanNumber
+            // Note that the keys in the SortedDictionary are sorted ascending and are in the same order as the Values
+
+            var smoothedTimes = DataUtilities.MovingAverageSmooth(elutionTimeByScanNumber.Values);
+
+            var elutionTimeByScanNumberSmoothed = new Dictionary<int, double>();
+
+            var i = 0;
+            foreach (var item in elutionTimeByScanNumber)
+            {
+                elutionTimeByScanNumberSmoothed.Add(item.Key, smoothedTimes[i]);
+                i++;
+            }
+
+            return elutionTimeByScanNumberSmoothed;
+        }
+
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
@@ -1244,6 +1293,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var matchDatasetNames = additionalResultFiles.Count > 1;
 
+                // This dictionary tracks elution times observed for each scan number, across all datasets
+                var elutionTimesByScanNumber = new Dictionary<int, List<double>>();
+
                 foreach (var additionalFile in additionalResultFiles)
                 {
                     if (!ReadMSFraggerResults(additionalFile.Key, errorMessages, out var additionalSearchResults))
@@ -1264,6 +1316,17 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         var key = ConstructKeyForPSM(additionalResult);
                         searchResultsLookup.Add(key, additionalResult);
+
+                        if (!double.TryParse(additionalResult.ElutionTime, out var elutionTime))
+                            continue;
+
+                        if (elutionTimesByScanNumber.TryGetValue(additionalResult.ScanNum, out var elutionTimes))
+                        {
+                            elutionTimes.Add(elutionTime);
+                            continue;
+                        }
+
+                        elutionTimesByScanNumber.Add(additionalResult.ScanNum, new List<double> { elutionTime });
                     }
 
                     var datasetNameFilter = additionalFile.Value;
@@ -1283,11 +1346,34 @@ namespace PeptideHitResultsProcessor.Processor
                         UpdateUndefinedValue(ref item.TotalNumberOfIons, additionalResult.TotalNumberOfIons);
                         UpdateUndefinedValue(ref item.PeptideProphetProbability, additionalResult.PeptideProphetProbability);
 
-                        if (targetResultsAreFromPsmFile && additionalResult.QValue > 0)
-                        {
+                        if (!targetResultsAreFromPsmFile)
+                            continue;
+
+                        if (additionalResult.QValue > 0)
                             item.QValue = additionalResult.QValue;
-                        }
+
+                        if (string.IsNullOrWhiteSpace(item.ElutionTime))
+                            item.ElutionTime = additionalResult.ElutionTime;
                     }
+                }
+
+                if (!targetResultsAreFromPsmFile)
+                    return true;
+
+                // Obtain a dictionary of average elution time by scan number (a moving average smooth is applied to smooth out variations)
+                var averageElutionTimeByScanNumber = ComputeScanToElutionTimeMap(elutionTimesByScanNumber);
+
+                foreach (var item in filteredSearchResults)
+                {
+                    if (!averageElutionTimeByScanNumber.TryGetValue(item.ScanNum, out var elutionTime))
+                        continue;
+
+                    var elutionTimeText = PRISM.StringUtilities.DblToString(elutionTime, 4);
+
+                    if (string.IsNullOrWhiteSpace(item.ElutionTime))
+                        item.ElutionTime = elutionTimeText;
+
+                    item.ElutionTimeAverage = elutionTimeText;
                 }
 
                 return true;
@@ -1733,41 +1819,41 @@ namespace PeptideHitResultsProcessor.Processor
             // Columns in _psm.tsv files
             var columnNames = new SortedDictionary<string, MSFraggerPsmFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"Spectrum", MSFraggerPsmFileColumns.Spectrum},
-                {"Spectrum File", MSFraggerPsmFileColumns.SpectrumFile},
-                {"Peptide", MSFraggerPsmFileColumns.Peptide},
-                {"Modified Peptide", MSFraggerPsmFileColumns.ModifiedPeptide},
-                {"Prev AA", MSFraggerPsmFileColumns.PrevAA},
-                {"Next AA", MSFraggerPsmFileColumns.NextAA},
-                {"Peptide Length", MSFraggerPsmFileColumns.PeptideLength},
-                {"Charge", MSFraggerPsmFileColumns.Charge},
-                {"Retention", MSFraggerPsmFileColumns.RetentionTime},
-                {"Observed Mass", MSFraggerPsmFileColumns.ObservedMass},
-                {"Calibrated Observed Mass", MSFraggerPsmFileColumns.CalibratedObservedMass},
-                {"Observed M/Z", MSFraggerPsmFileColumns.ObservedMZ},
-                {"Calibrated Observed M/Z", MSFraggerPsmFileColumns.CalibratedObservedMZ},
-                {"Calculated Peptide Mass", MSFraggerPsmFileColumns.CalculatedPeptideMass},
-                {"Calculated M/Z", MSFraggerPsmFileColumns.CalculatedMZ},
-                {"Delta Mass", MSFraggerPsmFileColumns.DeltaMass},
-                {"Expectation", MSFraggerPsmFileColumns.Expectation},
-                {"Hyperscore", MSFraggerPsmFileColumns.Hyperscore},
-                {"Nextscore", MSFraggerPsmFileColumns.Nextscore},
-                {"PeptideProphet Probability", MSFraggerPsmFileColumns.PeptideProphetProbability},
-                {"Number of Enzymatic Termini", MSFraggerPsmFileColumns.NumberOfEnzymaticTermini},
-                {"Number of Missed Cleavages", MSFraggerPsmFileColumns.NumberOfMissedCleavages},
-                {"Protein Start", MSFraggerPsmFileColumns.ProteinStart},
-                {"Protein End", MSFraggerPsmFileColumns.ProteinEnd},
-                {"Intensity", MSFraggerPsmFileColumns.Intensity},
-                {"Assigned Modifications", MSFraggerPsmFileColumns.AssignedModifications},
-                {"Observed Modifications", MSFraggerPsmFileColumns.ObservedModifications},
-                {"Is Unique", MSFraggerPsmFileColumns.IsUnique},
-                {"Protein", MSFraggerPsmFileColumns.Protein},
-                {"Protein ID", MSFraggerPsmFileColumns.ProteinID},
-                {"Entry Name", MSFraggerPsmFileColumns.EntryName},
-                {"Gene", MSFraggerPsmFileColumns.Gene},
-                {"Protein Description", MSFraggerPsmFileColumns.ProteinDescription},
-                {"Mapped Genes", MSFraggerPsmFileColumns.MappedGenes},
-                {"Mapped Proteins", MSFraggerPsmFileColumns.MappedProteins},
+                { "Spectrum", MSFraggerPsmFileColumns.Spectrum },
+                { "Spectrum File", MSFraggerPsmFileColumns.SpectrumFile },
+                { "Peptide", MSFraggerPsmFileColumns.Peptide },
+                { "Modified Peptide", MSFraggerPsmFileColumns.ModifiedPeptide },
+                { "Prev AA", MSFraggerPsmFileColumns.PrevAA },
+                { "Next AA", MSFraggerPsmFileColumns.NextAA },
+                { "Peptide Length", MSFraggerPsmFileColumns.PeptideLength },
+                { "Charge", MSFraggerPsmFileColumns.Charge },
+                { "Retention", MSFraggerPsmFileColumns.RetentionTime },
+                { "Observed Mass", MSFraggerPsmFileColumns.ObservedMass },
+                { "Calibrated Observed Mass", MSFraggerPsmFileColumns.CalibratedObservedMass },
+                { "Observed M/Z", MSFraggerPsmFileColumns.ObservedMZ },
+                { "Calibrated Observed M/Z", MSFraggerPsmFileColumns.CalibratedObservedMZ },
+                { "Calculated Peptide Mass", MSFraggerPsmFileColumns.CalculatedPeptideMass },
+                { "Calculated M/Z", MSFraggerPsmFileColumns.CalculatedMZ },
+                { "Delta Mass", MSFraggerPsmFileColumns.DeltaMass },
+                { "Expectation", MSFraggerPsmFileColumns.Expectation },
+                { "Hyperscore", MSFraggerPsmFileColumns.Hyperscore },
+                { "Nextscore", MSFraggerPsmFileColumns.Nextscore },
+                { "PeptideProphet Probability", MSFraggerPsmFileColumns.PeptideProphetProbability },
+                { "Number of Enzymatic Termini", MSFraggerPsmFileColumns.NumberOfEnzymaticTermini },
+                { "Number of Missed Cleavages", MSFraggerPsmFileColumns.NumberOfMissedCleavages },
+                { "Protein Start", MSFraggerPsmFileColumns.ProteinStart },
+                { "Protein End", MSFraggerPsmFileColumns.ProteinEnd },
+                { "Intensity", MSFraggerPsmFileColumns.Intensity },
+                { "Assigned Modifications", MSFraggerPsmFileColumns.AssignedModifications },
+                { "Observed Modifications", MSFraggerPsmFileColumns.ObservedModifications },
+                { "Is Unique", MSFraggerPsmFileColumns.IsUnique },
+                { "Protein", MSFraggerPsmFileColumns.Protein },
+                { "Protein ID", MSFraggerPsmFileColumns.ProteinID },
+                { "Entry Name", MSFraggerPsmFileColumns.EntryName },
+                { "Gene", MSFraggerPsmFileColumns.Gene },
+                { "Protein Description", MSFraggerPsmFileColumns.ProteinDescription },
+                { "Mapped Genes", MSFraggerPsmFileColumns.MappedGenes },
+                { "Mapped Proteins", MSFraggerPsmFileColumns.MappedProteins }
             };
 
             // ReSharper disable StringLiteralTypo
@@ -2023,6 +2109,7 @@ namespace PeptideHitResultsProcessor.Processor
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Nextscore], out string nextScore);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PeptideProphetProbability], out string peptideProphetProbability);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTime], out string elutionTime);
+                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTimeAverage], out string elutionTimeAverage);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MissedCleavages], out string missedCleavages);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NumberOfMatchedIons], out string numberOfMatchedIons);
                 GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.TotalNumberOfIons], out string totalNumberOfIons);
@@ -2037,6 +2124,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Nextscore = nextScore;
                 searchResult.PeptideProphetProbability = peptideProphetProbability;
                 searchResult.ElutionTime = elutionTime;
+                searchResult.ElutionTimeAverage = elutionTimeAverage;
                 searchResult.MissedCleavageCount = missedCleavages;
                 searchResult.NumberOfMatchedIons = numberOfMatchedIons;
                 searchResult.TotalNumberOfIons = totalNumberOfIons;
@@ -2520,6 +2608,7 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Nextscore,
                     searchResult.PeptideProphetProbability,
                     searchResult.ElutionTime,
+                    searchResult.ElutionTimeAverage,
                     searchResult.MissedCleavageCount,
                     searchResult.NumberOfMatchedIons,
                     searchResult.TotalNumberOfIons,

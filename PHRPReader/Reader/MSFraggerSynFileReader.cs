@@ -164,6 +164,7 @@ namespace PHRPReader.Reader
                 { "Nextscore", MSFraggerSynFileColumns.Nextscore },
                 { "PeptideProphetProbability", MSFraggerSynFileColumns.PeptideProphetProbability },
                 { "ElutionTime", MSFraggerSynFileColumns.ElutionTime },
+                { "ElutionTimeAverage", MSFraggerSynFileColumns.ElutionTimeAverage },
                 { "MissedCleavages", MSFraggerSynFileColumns.MissedCleavages },
                 { "MatchedIons", MSFraggerSynFileColumns.NumberOfMatchedIons },
                 { "TotalIons", MSFraggerSynFileColumns.TotalNumberOfIons },
@@ -474,6 +475,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Nextscore));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.PeptideProphetProbability));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.ElutionTime));
+                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.ElutionTimeAverage));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MissedCleavages));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.NumberOfMatchedIons));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.TotalNumberOfIons));

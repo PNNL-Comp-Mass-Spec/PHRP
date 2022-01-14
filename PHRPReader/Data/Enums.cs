@@ -933,9 +933,14 @@ namespace PHRPReader.Data
         ElutionTime = 21,
 
         /// <summary>
+        /// Average elution time of MS/MS spectra (only applicable for a multi-dataset based search)
+        /// </summary>
+        ElutionTimeAverage = 22,
+
+        /// <summary>
         /// Number of missed enzymatic cleavages
         /// </summary>
-        MissedCleavages = 22,
+        MissedCleavages = 23,
 
         /// <summary>
         /// Number of matched ions in the fragmentation spectrum
@@ -943,7 +948,7 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Read from the Dataset.tsv file since not in the _psm.tsv file
         /// </remarks>
-        NumberOfMatchedIons = 23,
+        NumberOfMatchedIons = 24,
 
         /// <summary>
         /// Total number of ions in the fragmentation spectrum
@@ -951,12 +956,12 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Read from the Dataset.tsv file since not in the _psm.tsv file
         /// </remarks>
-        TotalNumberOfIons = 24,
+        TotalNumberOfIons = 25,
 
         /// <summary>
         /// Q-Value (computed by PHRP)
         /// </summary>
-        QValue = 25
+        QValue = 26
     }
 
     /// <summary>
