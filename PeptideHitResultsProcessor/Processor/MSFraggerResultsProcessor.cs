@@ -1641,6 +1641,19 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var peptideWithPrefixAndSuffix = GetPeptideSequence(searchResult);
 
+                // ReSharper disable once CommentTypo
+
+                // The missed cleavage count listed in _psm.tsv files is sometimes wrong
+                // For example, peptide R.TEMENEFVLIKK.D has a missed cleavage count of 1 in the Dataset.tsv file but 0 in the Dataset_psm.tsv file
+                // Use the peptide cleavage state calculator to compute the value and update if required
+
+                var missedCleavageCount = mPeptideCleavageStateCalculator.ComputeNumberOfMissedCleavages(peptideWithPrefixAndSuffix);
+
+                if (int.TryParse(searchResult.MissedCleavageCount, out var missedCleavageCountMSFragger) && missedCleavageCount != missedCleavageCountMSFragger)
+                {
+                    searchResult.MissedCleavageCount = missedCleavageCount.ToString();
+                }
+
                 var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(peptideWithPrefixAndSuffix);
 
                 var ntt = cleavageState switch

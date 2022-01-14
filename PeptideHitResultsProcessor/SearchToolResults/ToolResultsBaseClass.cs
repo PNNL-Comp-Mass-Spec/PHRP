@@ -196,7 +196,7 @@
         /// Number of missed enzymatic cleavages
         /// </summary>
         /// <remarks>
-        /// From column "Number of Missed Cleavages"
+        /// For MSFragger, from column "Number of Missed Cleavages", but may be updated by PHRP (since sometimes wrong for _psm.tsv files)
         /// </remarks>
         public string MissedCleavageCount;
 
