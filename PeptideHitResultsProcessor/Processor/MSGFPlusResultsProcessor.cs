@@ -1823,11 +1823,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 rowIndex = splitLine[0];
 
-                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpectrumFile], out udtSearchResult.SpectrumFileName))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpectrumFile], out udtSearchResult.SpectrumFileName))
                 {
                     ReportError("SpectrumFile column is missing or invalid", true);
                 }
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpecIndex], out udtSearchResult.SpecIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpecIndex], out udtSearchResult.SpecIndex);
 
                 if (isMsgfPlus)
                 {
@@ -1860,12 +1860,12 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Scan], out udtSearchResult.Scan))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
                     ReportError("Scan column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
                 var slashIndex = udtSearchResult.Scan.IndexOf('/');
                 int scanCount;
@@ -1919,9 +1919,9 @@ namespace PeptideHitResultsProcessor.Processor
                     scanCount = 1;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Precursor mass error could be in PPM or Da
@@ -1931,21 +1931,21 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (columnMapping[MSGFPlusResultsFileColumns.PMErrorPPM] >= 0)
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorPPM], out udtSearchResult.PMErrorPPM);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorPPM], out udtSearchResult.PMErrorPPM);
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
                     precursorErrorDa = StringUtilities.CDblSafe(udtSearchResult.PMErrorDa, 0);
                     udtSearchResult.PMErrorPPM = string.Empty; // We'll populate this column later in this method
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Protein], out udtSearchResult.Protein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Protein], out udtSearchResult.Protein);
 
                 // MS-GF+ .tsv files may have a semicolon separated list of protein names; check for this
                 udtSearchResult.Protein = SplitProteinList(udtSearchResult.Protein, proteinInfo);
@@ -2029,33 +2029,33 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.DeNovoScore], out udtSearchResult.DeNovoScore);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.MSGFScore], out udtSearchResult.MSGFScore);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpecProb_EValue], out udtSearchResult.SpecEValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.DeNovoScore], out udtSearchResult.DeNovoScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.MSGFScore], out udtSearchResult.MSGFScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.SpecProb_EValue], out udtSearchResult.SpecEValue);
                 if (!double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum))
                     udtSearchResult.SpecEValueNum = 0;
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PValue_EValue], out udtSearchResult.EValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PValue_EValue], out udtSearchResult.EValue);
                 if (!double.TryParse(udtSearchResult.EValue, out udtSearchResult.EValueNum))
                     udtSearchResult.EValueNum = 0;
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.FDR_QValue], out udtSearchResult.QValue);
+                var targetDecoyFDRValid = DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.FDR_QValue], out udtSearchResult.QValue);
                 if (!double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum))
                     udtSearchResult.QValueNum = 0;
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PepFDR_PepQValue], out udtSearchResult.PepQValue);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PepFDR_PepQValue], out udtSearchResult.PepQValue);
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.EFDR], out udtSearchResult.QValue);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.EFDR], out udtSearchResult.QValue);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IsotopeError], out udtSearchResult.IsotopeError);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IsotopeError], out udtSearchResult.IsotopeError);
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IMSScan], out udtSearchResult.IMSScan);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IMSDriftTime], out udtSearchResult.IMSDriftTime);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IMSScan], out udtSearchResult.IMSScan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.IMSDriftTime], out udtSearchResult.IMSDriftTime);
 
                 udtSearchResult.NTT = ComputeCleavageState(udtSearchResult.Peptide).ToString();
 
@@ -2274,7 +2274,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.ResultID], out string value))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.ResultID], out string value))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2287,13 +2287,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2304,11 +2304,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Protein], out string proteinName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelM], out string msgfPlusComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelM], out string msgfPlusComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MSGFPlusComputedDelM = msgfPlusComputedDelM;
@@ -2341,19 +2341,19 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecIndex], out string specIndex);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecIndex], out string specIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecEValue], out string specEValue);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.RankSpecEValue], out string rankSpecEValue);
-                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EValue], out string eValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MH], out string peptideMh);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.NTT], out string ntt);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecEValue], out string specEValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.RankSpecEValue], out string rankSpecEValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EValue], out string eValue);
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.QValue], out string qValue);
+                var targetDecoyFDRValid = DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.QValue], out string qValue);
 
                 searchResult.FragMethod = fragMethod;
                 searchResult.SpecIndex = specIndex;
@@ -2369,18 +2369,18 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PepQValue], out string pepQValue);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PepQValue], out string pepQValue);
                     searchResult.PepQValue = pepQValue;
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EFDR], out string efdr);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EFDR], out string efdr);
                     searchResult.QValue = efdr;
                 }
 
                 if (columnMapping[MSGFPlusSynFileColumns.IsotopeError] >= 0)
                 {
-                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
                     searchResult.IsotopeError = isotopeError;
                     searchResult.UsedMSGFPlus = true;
                 }

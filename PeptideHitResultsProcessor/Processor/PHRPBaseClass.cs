@@ -1915,65 +1915,6 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to string.Empty
-        /// </summary>
-        /// <returns>True if columnIndex >= 0</returns>
-        protected bool GetColumnValue(string[] splitLine, int columnIndex, out string value)
-        {
-            return GetColumnValue(splitLine, columnIndex, out value, string.Empty);
-        }
-
-        /// <summary>
-        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to 0
-        /// </summary>
-        /// <returns>True if columnIndex >= 0 and an integer value is present</returns>
-        protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value)
-        {
-            return GetColumnValue(splitLine, columnIndex, out value, 0);
-        }
-
-        /// <summary>
-        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to valueIfMissing
-        /// </summary>
-        /// <returns>True if columnIndex >= 0</returns>
-        protected bool GetColumnValue(string[] splitLine, int columnIndex, out string value, string valueIfMissing)
-        {
-            if (columnIndex >= 0 && columnIndex < splitLine.Length)
-            {
-                value = splitLine[columnIndex];
-                return true;
-            }
-
-            value = valueIfMissing;
-            return false;
-        }
-
-        /// <summary>
-        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to valueIfMissing
-        /// </summary>
-        /// <returns>True if columnIndex >= 0 and an integer value is present</returns>
-        protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value, int valueIfMissing)
-        {
-            if (GetColumnValue(splitLine, columnIndex, out var valueText, valueIfMissing.ToString()))
-            {
-                if (int.TryParse(valueText, out value))
-                {
-                    return true;
-                }
-
-                value = valueIfMissing;
-                return false;
-            }
-
-            value = valueIfMissing;
-            return false;
-        }
-
-        /// <summary>
         /// Get the error message, or an empty string if no error
         /// </summary>
         protected string GetErrorMessage()

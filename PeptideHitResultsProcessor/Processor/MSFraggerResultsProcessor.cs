@@ -1557,7 +1557,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.SpectrumFile], out string spectrumFile);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.SpectrumFile], out string spectrumFile);
 
                 if (!string.IsNullOrWhiteSpace(spectrumFile))
                 {
@@ -1579,7 +1579,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.DatasetName = currentDatasetName;
 
-                if (!GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Spectrum], out searchResult.Scan))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Spectrum], out searchResult.Scan))
                 {
                     ReportError("Scan column is missing or invalid on line " + lineNumber, true);
                 }
@@ -1589,24 +1589,24 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Scan column is not numeric on line " + lineNumber, true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Charge], out searchResult.Charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Charge], out searchResult.Charge);
                 searchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(searchResult.Charge, 0));
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSFragger
-                if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalculatedPeptideMass], out searchResult.CalculatedMonoMass))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalculatedPeptideMass], out searchResult.CalculatedMonoMass))
                 {
                     double.TryParse(searchResult.CalculatedMonoMass, out searchResult.CalculatedMonoMassValue);
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Peptide], out searchResult.Sequence))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Peptide], out searchResult.Sequence))
                 {
                     ReportError("Peptide column is missing or invalid on line " + lineNumber, true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ModifiedPeptide], out searchResult.ModifiedPeptide);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PrevAA], out searchResult.PrefixResidue);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NextAA], out searchResult.SuffixResidue);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideLength], out searchResult.Length);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ModifiedPeptide], out searchResult.ModifiedPeptide);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PrevAA], out searchResult.PrefixResidue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NextAA], out searchResult.SuffixResidue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideLength], out searchResult.Length);
 
                 if (searchResult.Length == 0)
                 {
@@ -1624,15 +1624,15 @@ namespace PeptideHitResultsProcessor.Processor
                 else
                 {
                     // The single dataset results file reports retention time in minutes
-                    GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out searchResult.ElutionTime);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.RetentionTime], out searchResult.ElutionTime);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMass], out searchResult.CalibratedObservedMass);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMZ], out searchResult.PrecursorMZ);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMZ], out searchResult.CalibratedObservedMZ);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalculatedMZ], out searchResult.CalculatedMZ);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.DeltaMass], out searchResult.MassErrorDaMSFragger);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMass], out searchResult.PrecursorMonoMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMass], out searchResult.CalibratedObservedMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedMZ], out searchResult.PrecursorMZ);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalibratedObservedMZ], out searchResult.CalibratedObservedMZ);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.CalculatedMZ], out searchResult.CalculatedMZ);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.DeltaMass], out searchResult.MassErrorDaMSFragger);
 
                 if (string.IsNullOrWhiteSpace(searchResult.PrecursorMZ) && double.TryParse(searchResult.PrecursorMonoMass, out var precursorMonoMass))
                 {
@@ -1650,35 +1650,35 @@ namespace PeptideHitResultsProcessor.Processor
                 // This is (M+H)+ when the charge carrier is a proton
                 searchResult.MH = ComputeMH(searchResult);
 
-                if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Expectation], out searchResult.Expectation))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Expectation], out searchResult.Expectation))
                 {
                     double.TryParse(searchResult.Expectation, out searchResult.EValue);
                 }
 
-                if (GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Hyperscore], out searchResult.Hyperscore))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Hyperscore], out searchResult.Hyperscore))
                 {
                     double.TryParse(searchResult.Hyperscore, out searchResult.HyperscoreValue);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Nextscore], out searchResult.Nextscore);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideProphetProbability], out searchResult.PeptideProphetProbability);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Nextscore], out searchResult.Nextscore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.PeptideProphetProbability], out searchResult.PeptideProphetProbability);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfEnzymaticTermini], out searchResult.NumberOfTrypticTermini);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMissedCleavages], out searchResult.MissedCleavageCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfEnzymaticTermini], out searchResult.NumberOfTrypticTermini);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMissedCleavages], out searchResult.MissedCleavageCount);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMatchedIons], out searchResult.NumberOfMatchedIons);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.TotalNumberOfIons], out searchResult.TotalNumberOfIons);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.NumberOfMatchedIons], out searchResult.NumberOfMatchedIons);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.TotalNumberOfIons], out searchResult.TotalNumberOfIons);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinStart], out searchResult.ProteinStart);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinEnd], out searchResult.ProteinEnd);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinStart], out searchResult.ProteinStart);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinEnd], out searchResult.ProteinEnd);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Intensity], out searchResult.Intensity, "0");
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Intensity], out searchResult.Intensity, "0");
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.AssignedModifications], out searchResult.ModificationList);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedModifications], out searchResult.ObservedModifications);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.AssignedModifications], out searchResult.ModificationList);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ObservedModifications], out searchResult.ObservedModifications);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.IsUnique], out searchResult.IsUnique);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Protein], out searchResult.Protein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.IsUnique], out searchResult.IsUnique);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Protein], out searchResult.Protein);
 
                 // The Protein column in Dataset.tsv files has both protein name and description; extract out the protein description
                 // For _psm.tsv files, .Protein should just have a single protein name, but we'll check for a space anyway
@@ -1688,15 +1688,15 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.Protein = proteinName;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinID], out searchResult.ProteinID);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.EntryName], out searchResult.EntryName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinID], out searchResult.ProteinID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.EntryName], out searchResult.EntryName);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Gene], out searchResult.Gene);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Gene], out searchResult.Gene);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinDescription], out searchResult.ProteinDescription, proteinDescription);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.ProteinDescription], out searchResult.ProteinDescription, proteinDescription);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedGenes], out searchResult.AdditionalGenes);
-                GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedProteins], out searchResult.AdditionalProteins);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedGenes], out searchResult.AdditionalGenes);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.MappedProteins], out searchResult.AdditionalProteins);
 
                 if (string.IsNullOrWhiteSpace(searchResult.IsUnique))
                 {
@@ -1996,7 +1996,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ResultID], out string value))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ResultID], out string value))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2008,11 +2008,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Dataset], out string dataset);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DatasetID], out int datasetId);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Dataset], out string dataset);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DatasetID], out int datasetId);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Charge], out string charge);
 
                 searchResult.DatasetName = dataset;
                 searchResult.DatasetID = datasetId;
@@ -2020,7 +2020,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Peptide], out string peptideSequence))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Peptide], out string peptideSequence))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2030,9 +2030,9 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Protein], out string proteinName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Protein], out string proteinName);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.AdditionalProteins], out string additionalProteins);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.AdditionalProteins], out string additionalProteins);
 
                 if (!string.IsNullOrWhiteSpace(proteinName))
                 {
@@ -2066,19 +2066,19 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
                 }
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MH], out string parentIonMH);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Mass], out string monoisotopicMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MH], out string parentIonMH);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Mass], out string monoisotopicMass);
 
                 searchResult.PrecursorMZ = precursorMz;
                 searchResult.ParentIonMH = parentIonMH;
                 searchResult.CalculatedMonoMass = monoisotopicMass;
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM], out string phrpComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM_PPM], out string phrpComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM], out string phrpComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM_PPM], out string phrpComputedDelMppm);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM_MSFragger], out string MSFraggerComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.DelM_MSFragger], out string MSFraggerComputedDelM);
 
                 searchResult.PeptideDeltaMass = phrpComputedDelM;
                 searchResult.PHRPComputedDelM = phrpComputedDelM;
@@ -2101,19 +2101,19 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Read the remaining data values
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Modifications], out string modifications);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Modifications], out string modifications);
 
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.EValue], out string eValue);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Hyperscore], out string hyperscore);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Nextscore], out string nextScore);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PeptideProphetProbability], out string peptideProphetProbability);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTime], out string elutionTime);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTimeAverage], out string elutionTimeAverage);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MissedCleavages], out string missedCleavages);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NumberOfMatchedIons], out string numberOfMatchedIons);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.TotalNumberOfIons], out string totalNumberOfIons);
-                GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.QValue], out string qValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NTT], out string ntt);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.EValue], out string eValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Hyperscore], out string hyperscore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.Nextscore], out string nextScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PeptideProphetProbability], out string peptideProphetProbability);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTime], out string elutionTime);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.ElutionTimeAverage], out string elutionTimeAverage);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.MissedCleavages], out string missedCleavages);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.NumberOfMatchedIons], out string numberOfMatchedIons);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.TotalNumberOfIons], out string totalNumberOfIons);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.QValue], out string qValue);
 
                 // Store the data
                 searchResult.Modifications = modifications;

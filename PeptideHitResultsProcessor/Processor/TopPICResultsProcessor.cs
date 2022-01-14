@@ -987,16 +987,16 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
                 {
                     ReportError("Prsm_ID column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
-                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
                 {
                     ReportError("Scan(s) column is missing or invalid", true);
                 }
@@ -1021,12 +1021,12 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Monoisotopic mass value of the observed precursor_mz
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
 
                 var precursorMZ = 0.0;
 
@@ -1046,7 +1046,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
                     // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-                    GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                     double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
                 }
@@ -1055,18 +1055,18 @@ namespace PeptideHitResultsProcessor.Processor
                     peptideMonoMassTopPIC = 0;
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out udtSearchResult.Feature_Score);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out udtSearchResult.Feature_Score);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
 
-                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
@@ -1109,13 +1109,13 @@ namespace PeptideHitResultsProcessor.Processor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.PValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.PValue);
                 if (!double.TryParse(udtSearchResult.PValue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
 
@@ -1125,11 +1125,11 @@ namespace PeptideHitResultsProcessor.Processor
                 udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                    // Matched_Peak_Count
                 udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
                 if (!double.TryParse(udtSearchResult.Evalue, out udtSearchResult.EValueNum))
                     udtSearchResult.EValueNum = 0;
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
 
                 if (string.Equals(udtSearchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1140,7 +1140,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.Qvalue = string.Empty;
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_QValue], out udtSearchResult.Proteoform_QValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_QValue], out udtSearchResult.Proteoform_QValue);
 
                 return true;
             }
@@ -1322,7 +1322,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.ResultID], out string value))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.ResultID], out string value))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -1335,13 +1335,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -1352,11 +1352,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Protein], out string proteinName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.TopPICComputedDelM = msAlignComputedDelM;
@@ -1397,24 +1397,24 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Prsm_ID], out string prsmId);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Prsm_ID], out string prsmId);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.MH], out string parentIonMH);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.MH], out string parentIonMH);
 
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Rank_PValue], out string rankPValue);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.EValue], out string eValue);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.QValue], out string qValue);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Proteoform_QValue], out string proteoformFDR);
-                GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Peak_Count], out string peakCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.PValue], out string pValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Rank_PValue], out string rankPValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.EValue], out string eValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.QValue], out string qValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.FragMethod], out string fragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.Proteoform_QValue], out string proteoformFDR);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
 
                 searchResult.Prsm_ID = prsmId;
                 searchResult.Spectrum_ID = spectrumId;

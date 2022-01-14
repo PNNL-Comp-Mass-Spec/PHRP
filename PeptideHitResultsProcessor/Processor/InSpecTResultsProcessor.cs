@@ -1346,15 +1346,15 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.ResultID], out int resultId))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.ResultID], out int resultId))
                 {
                     ReportError("ResultID column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Charge], out string charge);
 
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Protein], out string proteinName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Protein], out string proteinName);
 
                 searchResult.ResultID = resultId;
                 searchResult.Scan = scan;
@@ -1363,7 +1363,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Peptide], out peptideSequenceWithMods);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Peptide], out peptideSequenceWithMods);
 
                 // Calling this method will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
@@ -1377,7 +1377,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // will all be based on the first protein since InSpecT only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
-                if (GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorError], out string peptideDeltaMass))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorError], out string peptideDeltaMass))
                 {
                     searchResult.PeptideDeltaMass = peptideDeltaMass;
                     // Note: .peptideDeltaMass is stored in the InSpecT results file as "Observed_Mass - Theoretical_Mass"
@@ -1397,30 +1397,30 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.PeptideDeltaMass = "0";
                 }
 
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MQScore], out string mqScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MQScore], out string mqScore);
 
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Length], out string length);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.TotalPRMScore], out string totalPrmScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MedianPRMScore], out string medianPrmScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FractionY], out string fractionY);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FractionB], out string fractionB);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Intensity], out string intensity);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FScore], out string fScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaScore], out string deltaScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaScoreOther], out string deltaScoreOther);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaNormMQScore], out string deltaNormMqScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaNormTotalPRMScore], out string deltaNormTotalPrmScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RankTotalPRMScore], out string rankTotalPrmScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RankFScore], out string rankFScore);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RecordNumber], out string recordNumber);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DBFilePos], out string dbFilePos);
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.SpecFilePos], out string specFilePos);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Length], out string length);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.TotalPRMScore], out string totalPrmScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MedianPRMScore], out string medianPrmScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FractionY], out string fractionY);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FractionB], out string fractionB);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.Intensity], out string intensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.NTT], out string ntt);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PValue], out string pValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.FScore], out string fScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaScore], out string deltaScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaScoreOther], out string deltaScoreOther);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaNormMQScore], out string deltaNormMqScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DeltaNormTotalPRMScore], out string deltaNormTotalPrmScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RankTotalPRMScore], out string rankTotalPrmScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RankFScore], out string rankFScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.MH], out string peptideMh);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.RecordNumber], out string recordNumber);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.DBFilePos], out string dbFilePos);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.SpecFilePos], out string specFilePos);
 
                 // Note: .PrecursorError was processed earlier in this method
-                GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[InspectSynFileColumns.PrecursorMZ], out string precursorMz);
 
                 searchResult.MQScore = mqScore;
                 searchResult.Length = length;

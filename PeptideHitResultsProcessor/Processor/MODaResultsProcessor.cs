@@ -1035,9 +1035,9 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
                 {
                     ReportError("Index column is missing or invalid", true);
                 }
@@ -1058,8 +1058,8 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Monoisotopic mass value of the observed precursor_mz
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Charge], out udtSearchResult.Charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
 
                 // Observed m/z, converted to monoisotopic mass
@@ -1072,26 +1072,26 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
 
                 // Theoretical peptide monoisotopic mass, including mods, as computed by MODa
                 double.TryParse(udtSearchResult.CalculatedMonoMass, out var peptideMonoMassMODa);
 
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Score], out udtSearchResult.Score);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Score], out udtSearchResult.Score);
 
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Probability], out udtSearchResult.Probability);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Probability], out udtSearchResult.Probability);
                 if (!double.TryParse(udtSearchResult.Probability, out udtSearchResult.ProbabilityNum))
                     udtSearchResult.ProbabilityNum = 0;
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Protein], out udtSearchResult.Protein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.Protein], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
-                GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.PeptidePosition], out udtSearchResult.PeptidePosition);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaResultsFileColumns.PeptidePosition], out udtSearchResult.PeptidePosition);
 
                 // Parse the sequence to determine the total mod mass
                 // Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
@@ -1308,7 +1308,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.ResultID], out string value))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.ResultID], out string value))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -1320,13 +1320,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -1336,11 +1336,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Protein], out string proteinName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM], out string moDaComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM_PPM], out string moDaComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM], out string moDaComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.DelM_PPM], out string moDaComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MODaComputedDelM = moDaComputedDelM;
@@ -1373,14 +1373,14 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Spectrum_Index], out string spectrumIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Spectrum_Index], out string spectrumIndex);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.MH], out string parentIonMh);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.MH], out string parentIonMh);
 
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Score], out string moDaScore);
-                GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Probability], out string probability);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Score], out string moDaScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MODaSynFileColumns.Probability], out string probability);
 
                 searchResult.Spectrum_Index = spectrumIndex;
                 searchResult.Precursor_mz = precursorMz;

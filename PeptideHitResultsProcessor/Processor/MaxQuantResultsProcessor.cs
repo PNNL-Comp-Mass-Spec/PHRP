@@ -1057,21 +1057,6 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
-        /// Otherwise, updates value to string.Empty
-        /// </summary>
-        /// <returns>True if columnIndex >= 0</returns>
-        protected bool GetColumnValueCheckNaN(string[] splitLine, int columnIndex, out string value)
-        {
-            var valueDefined = GetColumnValue(splitLine, columnIndex, out value, string.Empty);
-
-            if (valueDefined && value.Equals("NaN", StringComparison.OrdinalIgnoreCase))
-                value = string.Empty;
-
-            return valueDefined;
-        }
-
-        /// <summary>
         /// Examine the dataset names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
@@ -1945,7 +1930,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (splitLine.Length < 30)
                         continue;
 
-                    if (!GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Id], out var peptideId, -1))
+                    if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Id], out var peptideId, -1))
                     {
                         OnWarningEvent("Line {0} in file {1} does not have an integer in the id column", lineNumber, inputFile.Name);
                         continue;
@@ -1953,7 +1938,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var peptideInfo = new MaxQuantPeptideInfo(peptideId);
 
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Sequence], out peptideInfo.Sequence);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Sequence], out peptideInfo.Sequence);
 
                     if (string.IsNullOrWhiteSpace(peptideInfo.Sequence))
                     {
@@ -1963,10 +1948,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                     maxQuantPeptides.Add(peptideInfo.Sequence, peptideInfo);
 
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Prefix], out peptideInfo.Prefix);
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Suffix], out peptideInfo.Suffix);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Prefix], out peptideInfo.Prefix);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Suffix], out peptideInfo.Suffix);
 
-                    if (GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Proteins], out string proteinList))
+                    if (DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.Proteins], out string proteinList))
                     {
                         foreach (var protein in proteinList.Split(';'))
                         {
@@ -1975,12 +1960,12 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.LeadingRazorProtein], out peptideInfo.LeadingRazorProtein);
-                    GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.TotalPeptideIntensity], out peptideInfo.TotalPeptideIntensity);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.LeadingRazorProtein], out peptideInfo.LeadingRazorProtein);
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantPeptidesFileColumns.TotalPeptideIntensity], out peptideInfo.TotalPeptideIntensity);
 
                     foreach (var item in intensityByExperimentColumns)
                     {
-                        GetColumnValue(splitLine, item.Key, out string experimentIntensity);
+                        DataUtilities.GetColumnValue(splitLine, item.Key, out string experimentIntensity);
                         peptideInfo.IntensityByExperiment.Add(item.Value, experimentIntensity);
                     }
                 }
@@ -2236,9 +2221,9 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RawFile], out searchResult.DatasetName);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RawFile], out searchResult.DatasetName);
 
-                if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Scan], out searchResult.Scan))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Scan], out searchResult.Scan))
                 {
                     ReportError("Scan column is missing or invalid on line " + lineNumber, true);
                 }
@@ -2248,82 +2233,82 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Scan column is not numeric on line " + lineNumber, true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out searchResult.ScanIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out searchResult.ScanIndex);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out searchResult.Charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out searchResult.Charge);
                 searchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(searchResult.Charge, 0));
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MaxQuant
-                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out searchResult.CalculatedMonoMass))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out searchResult.CalculatedMonoMass))
                 {
                     double.TryParse(searchResult.CalculatedMonoMass, out searchResult.CalculatedMonoMassValue);
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Sequence], out searchResult.Sequence))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Sequence], out searchResult.Sequence))
                 {
                     ReportError("Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
-                // Note that for several columns we use GetColumnValueCheckNaN() to replace NaN (not-a-number) with an empty string
+                // Note that for several columns we use DataUtilities.GetColumnValueCheckNaN() to replace NaN (not-a-number) with an empty string
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out searchResult.Length);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavageCount], out searchResult.MissedCleavageCount);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out searchResult.ModificationSummary);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModifiedSequence], out searchResult.ModifiedSequence);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out searchResult.Proteins);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out searchResult.Fragmentation);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassAnalyzer], out searchResult.MassAnalyzer);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorType], out searchResult.PrecursorType);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out searchResult.ScanEventNumber);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out searchResult.IsotopeIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Length], out searchResult.Length);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MissedCleavageCount], out searchResult.MissedCleavageCount);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Modifications], out searchResult.ModificationSummary);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModifiedSequence], out searchResult.ModifiedSequence);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Proteins], out searchResult.Proteins);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Fragmentation], out searchResult.Fragmentation);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MassAnalyzer], out searchResult.MassAnalyzer);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorType], out searchResult.PrecursorType);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanEventNumber], out searchResult.ScanEventNumber);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IsotopeIndex], out searchResult.IsotopeIndex);
 
                 // Skip searchResult.PrecursorMZ here; it is populated later
 
                 // Note that this is the theoretical value for the precursor ion m/z
                 // It is not the observed precursor ion m/z (i.e., it is not the parent m/z isolated when the MS/MS spectrum was acquired)
                 // Furthermore, it does not account for the mass of any isobaric mods present
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MaxQuantPrecursorMZ], out searchResult.PrecursorMZ_MaxQuant);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.MaxQuantPrecursorMZ], out searchResult.PrecursorMZ_MaxQuant);
 
                 // Store the monoisotopic MH value in .MH
                 // This is (M+H)+ when the charge carrier is a proton
                 searchResult.MH = ComputeMH(searchResult);
 
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SimpleMassErrorPPM], out searchResult.SimpleMassErrorPPM);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out searchResult.ElutionTime);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorPPM], out searchResult.MassErrorPpmMaxQuant);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.MassErrorDa], out searchResult.MassErrorDaMaxQuant);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.SimpleMassErrorPPM], out searchResult.SimpleMassErrorPPM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.RetentionTime], out searchResult.ElutionTime);
 
-                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PEP], out searchResult.PEP))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PEP], out searchResult.PEP))
                 {
                     double.TryParse(searchResult.PEP, out searchResult.PEPValue);
                 }
 
-                if (GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Score], out searchResult.Score))
+                if (DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Score], out searchResult.Score))
                 {
                     double.TryParse(searchResult.Score, out searchResult.ScoreNum);
                 }
 
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out searchResult.DeltaScore);
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.ScoreDiff], out searchResult.ScoreDiff);
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.LocalizationProb], out searchResult.LocalizationProb);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Combinatorics], out searchResult.Combinatorics);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PIF], out searchResult.PIF);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.FractionOfTotalSpectrum], out searchResult.FractionOfTotalSpectrum);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.BasePeakFraction], out searchResult.BasePeakFraction);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorScanNumber], out searchResult.PrecursorScanNumber);
-                GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out searchResult.PrecursorIntensity);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexFraction], out searchResult.PrecursorApexFraction);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffset], out searchResult.PrecursorApexOffset);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffsetTime], out searchResult.PrecursorApexOffsetTime);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.NumberOfMatches], out searchResult.NumberOfMatches);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out searchResult.IntensityCoverage);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out searchResult.PeakCoverage);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.DeltaScore], out searchResult.DeltaScore);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.ScoreDiff], out searchResult.ScoreDiff);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.LocalizationProb], out searchResult.LocalizationProb);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Combinatorics], out searchResult.Combinatorics);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PIF], out searchResult.PIF);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.FractionOfTotalSpectrum], out searchResult.FractionOfTotalSpectrum);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.BasePeakFraction], out searchResult.BasePeakFraction);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorScanNumber], out searchResult.PrecursorScanNumber);
+                DataUtilities.GetColumnValueCheckNaN(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorIntensity], out searchResult.PrecursorIntensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexFraction], out searchResult.PrecursorApexFraction);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffset], out searchResult.PrecursorApexOffset);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PrecursorApexOffsetTime], out searchResult.PrecursorApexOffsetTime);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.NumberOfMatches], out searchResult.NumberOfMatches);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.IntensityCoverage], out searchResult.IntensityCoverage);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeakCoverage], out searchResult.PeakCoverage);
 
                 // Round the coverage values
                 searchResult.IntensityCoverage = RoundValue(searchResult.IntensityCoverage);
                 searchResult.PeakCoverage = RoundValue(searchResult.PeakCoverage);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out string reverseFlag);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Reverse], out string reverseFlag);
                 if (reverseFlag == "+")
                 {
                     searchResult.Reverse = true;
@@ -2333,11 +2318,11 @@ namespace PeptideHitResultsProcessor.Processor
                     OnWarningEvent("Unexpected symbol in the Reverse column, line {0}: {1}", lineNumber, reverseFlag);
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out searchResult.MsMsID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinGroupIDs], out searchResult.ProteinGroupIDs);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeptideID], out searchResult.PeptideID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModPeptideID], out searchResult.ModPeptideID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EvidenceID], out searchResult.EvidenceID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ID], out searchResult.MsMsID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ProteinGroupIDs], out searchResult.ProteinGroupIDs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.PeptideID], out searchResult.PeptideID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ModPeptideID], out searchResult.ModPeptideID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.EvidenceID], out searchResult.EvidenceID);
 
                 // Parse the modification list to determine the total mod mass
                 var totalModMass = ComputeTotalModMass(searchResult, modList, staticModPresent);
@@ -2666,7 +2651,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ResultID], out string value))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ResultID], out string value))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2678,11 +2663,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Dataset], out string dataset);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DatasetID], out int datasetId);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Dataset], out string dataset);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DatasetID], out int datasetId);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Charge], out string charge);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Scan], out string scan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Charge], out string charge);
 
                 searchResult.DatasetName = dataset;
                 searchResult.DatasetID = datasetId;
@@ -2690,7 +2675,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out string peptideSequence))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out string peptideSequence))
                 {
                     if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                     {
@@ -2700,7 +2685,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Proteins], out string proteinNames);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Proteins], out string proteinNames);
 
                 if (!string.IsNullOrWhiteSpace(proteinNames))
                 {
@@ -2722,22 +2707,22 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ], out string precursorMz);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ_MaxQuant], out string precursorMzMaxQuant);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ], out string precursorMz);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorMZ_MaxQuant], out string precursorMzMaxQuant);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MH], out string parentIonMH);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Mass], out string monoisotopicMass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MH], out string parentIonMH);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Mass], out string monoisotopicMass);
 
                 searchResult.PrecursorMZ = precursorMz;
                 searchResult.PrecursorMZ_MaxQuant = precursorMzMaxQuant;
                 searchResult.ParentIonMH = parentIonMH;
                 searchResult.CalculatedMonoMass = monoisotopicMass;
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM], out string phrpComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM], out string phrpComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM], out string phrpComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM], out string phrpComputedDelMppm);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_MaxQuant], out string maxquantComputedDelM);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM_MaxQuant], out string maxquantComputedDelMppm);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_MaxQuant], out string maxquantComputedDelM);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DelM_PPM_MaxQuant], out string maxquantComputedDelMppm);
 
                 searchResult.PeptideDeltaMass = phrpComputedDelM;
                 searchResult.PHRPComputedDelM = phrpComputedDelM;
@@ -2761,31 +2746,31 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Read the remaining data values
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.SpecIndex], out string specIndex);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.FragMethod], out string fragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.SpecIndex], out string specIndex);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DynamicModifications], out string dynamicModifications);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.LeadingRazorProtein], out string leadingRazorProtein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DynamicModifications], out string dynamicModifications);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.LeadingRazorProtein], out string leadingRazorProtein);
 
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PEP], out string posteriorErrorProbability);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Score], out string andromedaScore);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DeltaScore], out string deltaScore);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.TotalPeptideIntensity], out string totalPeptideIntensity);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MassAnalyzer], out string massAnalyzer);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorType], out string precursorType);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ElutionTime], out string elutionTime);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorScan], out string precursorScan);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorIntensity], out string precursorIntensity);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NumberOfMatches], out string numberOfMatches);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.IntensityCoverage], out string intensityCoverage);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MissedCleavages], out string missedCleavages);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MsMsID], out string msMsID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ProteinGroupIDs], out string proteinGroupIDs);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PeptideID], out string peptideID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ModPeptideID], out string modPeptideID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.EvidenceID], out string evidenceID);
-                GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.QValue], out string qValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NTT], out string ntt);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PEP], out string posteriorErrorProbability);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Score], out string andromedaScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.DeltaScore], out string deltaScore);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.TotalPeptideIntensity], out string totalPeptideIntensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MassAnalyzer], out string massAnalyzer);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorType], out string precursorType);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ElutionTime], out string elutionTime);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorScan], out string precursorScan);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PrecursorIntensity], out string precursorIntensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.NumberOfMatches], out string numberOfMatches);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.IntensityCoverage], out string intensityCoverage);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MissedCleavages], out string missedCleavages);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.MsMsID], out string msMsID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ProteinGroupIDs], out string proteinGroupIDs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.PeptideID], out string peptideID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.ModPeptideID], out string modPeptideID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.EvidenceID], out string evidenceID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.QValue], out string qValue);
 
                 // Store the data
                 searchResult.FragMethod = fragMethod;
