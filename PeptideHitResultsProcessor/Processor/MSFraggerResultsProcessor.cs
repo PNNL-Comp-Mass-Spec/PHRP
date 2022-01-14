@@ -776,13 +776,13 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Find the Dataset.tsv files that correspond to a Aggregation_psm.tsv file
+        /// Find the Dataset.tsv files that correspond to an Aggregation_psm.tsv file
         /// </summary>
         /// <param name="inputFile"></param>
-        /// <returns>List of matching files</returns>
-        private List<FileInfo> FindAggregationPsmSourceFiles(FileInfo inputFile)
+        /// <returns>Dictionary with the matching files, along with the dataset name for each file</returns>
+        private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile)
         {
-            var sourceFiles = new List<FileInfo>();
+            var sourceFiles = new Dictionary<FileInfo, string>();
 
             if (inputFile.Directory == null)
             {
@@ -810,13 +810,26 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (tsvFileFormat == ResultsFileFormat.MSFraggerTSVFile)
                 {
-                    sourceFiles.Add(candidateFile);
+                    var datasetName = GetDatasetName(candidateFile.Name);
+
+                    sourceFiles.Add(candidateFile, datasetName);
                 }
 
                 break;
             }
 
             return sourceFiles;
+        }
+
+        private string GetDatasetName(string fileName)
+        {
+            var psmSuffixWithoutExtension = Path.GetFileNameWithoutExtension(PSM_FILE_SUFFIX);
+
+            var baseName = Path.GetFileNameWithoutExtension(fileName);
+
+            return baseName.EndsWith(psmSuffixWithoutExtension, StringComparison.OrdinalIgnoreCase)
+                ? baseName.Substring(0, baseName.Length - psmSuffixWithoutExtension.Length)
+                : baseName;
         }
 
         /// <summary>
@@ -1016,7 +1029,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                List<FileInfo> additionalResultFiles;
+                Dictionary<FileInfo, string> additionalResultFiles;
 
                 if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1024,15 +1037,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    additionalResultFiles = new List<FileInfo>();
+                    additionalResultFiles = new Dictionary<FileInfo, string>();
 
-                    var tsvToFind = new FileInfo(Path.Combine(
-                        inputFile.Directory.FullName,
-                        inputFile.Name.Substring(0, inputFile.Name.Length - PSM_FILE_SUFFIX.Length)) + ".tsv");
+                    var datasetName = GetDatasetName(inputFile.Name);
+                    var tsvToFind = new FileInfo(Path.Combine(inputFile.Directory.FullName, datasetName + ".tsv"));
 
                     if (tsvToFind.Exists)
                     {
-                        additionalResultFiles.Add(tsvToFind);
+                        additionalResultFiles.Add(tsvToFind, datasetName);
                     }
                 }
 
@@ -1044,14 +1056,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnWarningEvent("The _psm.tsv file does not have any filter passing data; loading data from {0} instead",
                     additionalResultFiles.Count == 1
-                        ? additionalResultFiles[0].Name
+                        ? additionalResultFiles.First().Key.Name
                         : string.Format("{0} Dataset.tsv files", additionalResultFiles.Count));
 
                 var successCountAdditionalFiles = 0;
 
                 foreach (var additionalFile in additionalResultFiles)
                 {
-                    if (!ReadMSFraggerResults(additionalFile, errorMessages, out var additionalSearchResults))
+                    if (!ReadMSFraggerResults(additionalFile.Key, errorMessages, out var additionalSearchResults))
                         continue;
 
                     successCountAdditionalFiles++;
@@ -1151,7 +1163,8 @@ namespace PeptideHitResultsProcessor.Processor
                 // Check whether the input file ends with _psm.tsv
                 var readingPsmFile = inputFile.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase);
 
-                List<FileInfo> additionalResultFiles;
+                // Keys are FileInfo objects, values are the dataset name for the given file
+                Dictionary<FileInfo, string> additionalResultFiles;
 
                 if (inputFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1159,17 +1172,19 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
+                    var datasetName = GetDatasetName(inputFile.Name);
+
                     var nameToFind = readingPsmFile
-                        ? inputFile.Name.Substring(0, inputFile.Name.Length - PSM_FILE_SUFFIX.Length) + ".tsv"
-                        : Path.GetFileNameWithoutExtension(inputFile.Name) + PSM_FILE_SUFFIX;
+                        ? datasetName + ".tsv"
+                        : datasetName + PSM_FILE_SUFFIX;
 
                     var tsvToFind = new FileInfo(Path.Combine(inputFile.Directory.FullName, nameToFind));
 
-                    additionalResultFiles = new List<FileInfo>();
+                    additionalResultFiles = new Dictionary<FileInfo, string>();
 
                     if (tsvToFind.Exists)
                     {
-                        additionalResultFiles.Add(tsvToFind);
+                        additionalResultFiles.Add(tsvToFind, datasetName);
                     }
                 }
 
