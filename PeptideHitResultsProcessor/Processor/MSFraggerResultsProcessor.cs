@@ -1357,7 +1357,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                if (!targetResultsAreFromPsmFile)
+                if (!targetResultsAreFromPsmFile || datasetNames.Count < 2)
                     return true;
 
                 // Obtain a dictionary of average elution time by scan number (a moving average smooth is applied to smooth out variations)
