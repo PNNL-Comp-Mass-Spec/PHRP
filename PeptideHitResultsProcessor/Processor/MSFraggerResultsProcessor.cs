@@ -842,7 +842,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFile"></param>
         /// <param name="datasetNames"></param>
         /// <returns>Dictionary with the matching files, along with the dataset name for each file</returns>
-        private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile, List<string> datasetNames)
+        private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile, IEnumerable<string> datasetNames)
         {
             var sourceFiles = new Dictionary<FileInfo, string>();
 
@@ -1097,7 +1097,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(inputFile),
-                    string.Format("The file name does not end with {0}; invalid method call", inputFile.Name));
+                    string.Format("The file name does not end with {0}; invalid call to method LoadNonPsmResults", inputFile.Name));
             }
 
             if (filteredSearchResults.Count > 0)
