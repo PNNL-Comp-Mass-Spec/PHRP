@@ -14,7 +14,7 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PHRPReaderTests
     {
-        // Ignore Spelling: Da, gb, gi
+        // Ignore Spelling: Da, gb, gi, Hyperscore
 
         private struct MSGFPlusInfo
         {
@@ -35,6 +35,178 @@ namespace PHRP_UnitTests
             public double? EValue;
             public double? QValue;
             public double? ProteoformQValue;
+        }
+
+        [Test]
+        [TestCase(
+            @"MXQ202103181341_Auto1878805\QC_Shew_16_01-15f_08_4Nov16_Tiger_16-02-14_maxq_syn.txt",
+            0,
+            "K.QSEWQAYLDWAVNAFK.L|R.TAMNFIQTLSGVATLTK.H|K.FNQIGSLTETLAAIR.M|K.NSASIANSIFEVIQNIVAR.Y|K.KSAQSALYQLYR.N",
+            "1.26E-73|2.09E-47|9.97E-47|1.38E-40|2.06E-35",
+            "12.36589|4.01741|13.47918|5.69358|6.06656")]
+        public void TestMaxQuantReader(
+            string inputFilePath,
+            int expectedResultCount,
+            string initialPeptides,
+            string initialPEPValues,
+            string initialDelMPPM,
+            int countToDisplay = 5)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var options = new StartupOptions
+            {
+                LoadMSGFResults = true,
+                LoadModsAndSeqInfo = true,
+                LoadScanStatsData = false
+            };
+
+            var expectedPeptides = initialPeptides.Split('|').ToList();
+
+            var expectedPEPValues = SplitDelimitedDoubles(initialPEPValues);
+            var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
+
+            var reader = new ReaderFactory(inputFile.FullName, options);
+            var resultCount = 0;
+            var peptideMatchCount = 0;
+            var pepMatchCount = 0;
+            var delMMatchCount = 0;
+
+            Console.WriteLine();
+            Console.WriteLine("{0,-50} {1,-14} {2,-14}", "Peptide", "PEP", "DelM_PPM");
+
+            while (reader.MoveNext())
+            {
+                var peptide = reader.CurrentPSM.Peptide;
+                var posteriorErrorProbability = reader.CurrentPSM.GetScore("PEP");
+                var delMPPM = reader.CurrentPSM.MassErrorPPM;
+
+                if (resultCount < countToDisplay)
+                {
+                    Console.WriteLine("{0,-50} {1,-14} {2,-14}", peptide, posteriorErrorProbability, delMPPM);
+                }
+
+                if (resultCount < expectedPeptides.Count && expectedPeptides[resultCount].Length > 0)
+                {
+                    Assert.AreEqual(expectedPeptides[resultCount], peptide);
+                    peptideMatchCount++;
+                }
+
+                if (resultCount < expectedPEPValues.Count)
+                {
+                    AssertValuesMatch(expectedPEPValues[resultCount], posteriorErrorProbability, "PEP", resultCount + 2);
+                    pepMatchCount++;
+                }
+
+                if (resultCount < expectedDelMPPM.Count)
+                {
+                    AssertValuesMatch(expectedDelMPPM[resultCount], delMPPM, "DelM PPM", resultCount + 2);
+                    delMMatchCount++;
+                }
+
+                resultCount++;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Read {0:N0} results", resultCount);
+            Console.WriteLine("{0} peptides matched expected values", peptideMatchCount);
+            Console.WriteLine("{0} SpecEValues matched expected values", pepMatchCount);
+            Console.WriteLine("{0} DelMPPM values expected values", delMMatchCount);
+
+            if (expectedResultCount > 0)
+                Assert.AreEqual(expectedResultCount, resultCount);
+        }
+        [Test]
+        [TestCase(
+            @"MSF202008051507_Auto1822588\MCF7Cell_O-GlcNAc_Petyuk_R1_15May20_Rage_Rep-20-05-01_msfragger_syn.txt",
+            0,
+            "R.KDLYANTVLSGGTTMYPGIADR.M|K.TPVEPEVAIHR.I|K.HFVALSTNTTK.V|R.IFGLLMGTLQK.F|R.VSLDVNHFAPDELTVK.T|K.TSFFQALGITTK.I|K.YGLIYHASLVGQTSPK.H|K.TVAGQDAVIVLLGTR.N|K.VPDGMVGFIIGR.G|K.QSLGELIGTLNAAK.V|R.HQGVMVGMGQK.D|R.IFGLLMGTLQK.F|K.TGVAVNKPAEFTVDAK.H|R.TLMNLGGLAVAR.D|R.VALTGLTVAEYFR.D|K.SRLEQEIATYR.S",
+            "40.103|25.155|36.05|21.203|31.232|24.058|31.621|28.151|23.075|30.579|30.868|22.124|30.701|25.411|33.862|21.67|22.413|19.873|28.828|28.065|23.243|24.455|29.676|25.016|19.285|28.911|32.922|22.52|30.016|18.196|19.231|23.43|24.037|19.069|25.025|22.485|21.927|23.232|23.932|31.947|21.399|27.546|28.499|24.255",
+            "1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0.9999|1|1|0.9997|1|1|1|0.9956|0.9999|0.9999|0.9963|0.9999|0.9988|0.9929|0.9985",
+            "-1.19424|-1.72579|-1.74787|-1.82725|-2.38748|-3.49777|-0.03762|-0.67151|-0.95544|-0.86517|-1.22818|-1.50355|0.80006|-1.71956|-1.04092|-1.0164"
+            , 135)]
+        public void TestMSFraggerReader(
+            string inputFilePath,
+            int expectedResultCount,
+            string initialPeptides,
+            string initialHyperscoreValues,
+            string initialPeptideProphetValues,
+            string initialDelMPPM,
+            int countToDisplay = 5)
+        {
+            var inputFile = FindFile(inputFilePath);
+
+            var options = new StartupOptions
+            {
+                LoadMSGFResults = true,
+                LoadModsAndSeqInfo = true,
+                LoadScanStatsData = false
+            };
+
+            var expectedPeptides = initialPeptides.Split('|').ToList();
+
+            var hyperscoreValues = SplitDelimitedDoubles(initialHyperscoreValues);
+            var peptideProphetValues = SplitDelimitedDoubles(initialPeptideProphetValues);
+            var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
+
+            var reader = new ReaderFactory(inputFile.FullName, options);
+            var resultCount = 0;
+            var peptideMatchCount = 0;
+            var hyperscoreMatchCount = 0;
+            var peptideProphetMatchCount = 0;
+            var delMMatchCount = 0;
+
+            Console.WriteLine();
+            Console.WriteLine("{0,-50} {1,-14} {2,-14} {3,-14}", "Peptide", "Hyperscore", "PepProphetProb", "DelM_PPM");
+
+            while (reader.MoveNext())
+            {
+                var peptide = reader.CurrentPSM.Peptide;
+                var hyperscore = reader.CurrentPSM.GetScore("Hyperscore");
+                var peptideProphetProbability = reader.CurrentPSM.GetScore("PeptideProphetProbability");
+                var delMPPM = reader.CurrentPSM.MassErrorPPM;
+
+                if (resultCount < countToDisplay)
+                {
+                    Console.WriteLine("{0,-50} {1,-14} {2,-14} {3,-14}", peptide, hyperscore, peptideProphetProbability, delMPPM);
+                }
+
+                if (resultCount < expectedPeptides.Count && expectedPeptides[resultCount].Length > 0)
+                {
+                    Assert.AreEqual(expectedPeptides[resultCount], peptide);
+                    peptideMatchCount++;
+                }
+
+                if (resultCount < hyperscoreValues.Count)
+                {
+                    AssertValuesMatch(hyperscoreValues[resultCount], hyperscore, "Hyperscore", resultCount + 2);
+                    hyperscoreMatchCount++;
+                }
+
+                if (resultCount < peptideProphetValues.Count)
+                {
+                    AssertValuesMatch(peptideProphetValues[resultCount], peptideProphetProbability, "PeptideProphetProbability", resultCount + 2);
+                    peptideProphetMatchCount++;
+                }
+
+                if (resultCount < expectedDelMPPM.Count)
+                {
+                    AssertValuesMatch(expectedDelMPPM[resultCount], delMPPM, "DelM PPM", resultCount + 2);
+                    delMMatchCount++;
+                }
+
+                resultCount++;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Read {0:N0} results", resultCount);
+            Console.WriteLine("{0} peptides matched expected values", peptideMatchCount);
+            Console.WriteLine("{0} hyperscore values matched expected values", hyperscoreMatchCount);
+            Console.WriteLine("{0} peptide prophet probabilities matched expected values", peptideProphetMatchCount);
+            Console.WriteLine("{0} DelMPPM values expected values", delMMatchCount);
+
+            if (expectedResultCount > 0)
+                Assert.AreEqual(expectedResultCount, resultCount);
         }
 
         [Test]
@@ -61,7 +233,8 @@ namespace PHRP_UnitTests
             int expectedResultCount,
             string initialPeptides,
             string initialSpecEValues,
-            string initialDelMPPM)
+            string initialDelMPPM,
+            int countToDisplay = 5)
         {
             var inputFile = FindFile(inputFilePath);
 
@@ -77,11 +250,14 @@ namespace PHRP_UnitTests
             var expectedSpecEValues = SplitDelimitedDoubles(initialSpecEValues);
             var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
 
-            var reader = new PHRPReader.ReaderFactory(inputFile.FullName, options);
+            var reader = new ReaderFactory(inputFile.FullName, options);
             var resultCount = 0;
             var peptideMatchCount = 0;
             var specEValueMatchCount = 0;
             var delMMatchCount = 0;
+
+            Console.WriteLine();
+            Console.WriteLine("{0,-50} {1,-14} {2,-14}", "Peptide", "SpecEvalue", "DelM_PPM");
 
             while (reader.MoveNext())
             {
@@ -89,7 +265,12 @@ namespace PHRP_UnitTests
                 var specEvalue = reader.CurrentPSM.MSGFSpecEValue;
                 var delMPPM = reader.CurrentPSM.MassErrorPPM;
 
-                if (resultCount < expectedPeptides.Count)
+                if (resultCount < countToDisplay)
+                {
+                    Console.WriteLine("{0,-50} {1,-14} {2,-14}", peptide, specEvalue, delMPPM);
+                }
+
+                if (resultCount < expectedPeptides.Count && expectedPeptides[resultCount].Length > 0)
                 {
                     Assert.AreEqual(expectedPeptides[resultCount], peptide);
                     peptideMatchCount++;
@@ -183,7 +364,7 @@ namespace PHRP_UnitTests
                 infoByResultID.Add(resultId, msgfPlusInfo);
             }
 
-            var reader = new PHRPReader.ReaderFactory(inputFile.FullName, options);
+            var reader = new ReaderFactory(inputFile.FullName, options);
             var resultCount = 0;
             var resultIDsExamined = 0;
 
@@ -514,7 +695,7 @@ namespace PHRP_UnitTests
             var expectedEValues = SplitDelimitedDoubles(initialEValues);
             var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
 
-            var reader = new PHRPReader.ReaderFactory(inputFile.FullName, options);
+            var reader = new ReaderFactory(inputFile.FullName, options);
             var resultCount = 0;
             var peptideMatchCount = 0;
             var specEValueMatchCount = 0;
@@ -615,7 +796,7 @@ namespace PHRP_UnitTests
                 infoByResultID.Add(resultId, topPICInfo);
             }
 
-            var reader = new PHRPReader.ReaderFactory(inputFile.FullName, options);
+            var reader = new ReaderFactory(inputFile.FullName, options);
             var resultCount = 0;
             var resultIDsExamined = 0;
 
@@ -738,6 +919,9 @@ namespace PHRP_UnitTests
         {
             var splitList = delimitedValues.Split(delimiter).ToList();
             var parsedValues = new List<double?>();
+
+            if (string.IsNullOrWhiteSpace(delimitedValues))
+                return parsedValues;
 
             foreach (var item in splitList)
             {
