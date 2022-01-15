@@ -3128,6 +3128,7 @@ namespace PHRPReader
                                   "  _msgfplus_fht.txt\n" +
                                   "  _msgfplus_syn.txt\n" +
                                   "  _maxq_syn.txt\n" +
+                                  "  _msfragger_syn.txt\n" +
                                   "  _mspath_syn.txt\n" +
                                   "  _toppic_syn.txt\n" +
                                   "  _xt.txt");
