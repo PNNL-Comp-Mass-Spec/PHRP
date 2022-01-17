@@ -5,6 +5,8 @@
     /// </summary>
     public class AminoAcidModInfo
     {
+        // Ignore Spelling: Da
+
         /// <summary>
         /// Symbol used by DMS for tracking the N-terminus of a peptide
         /// </summary>
@@ -126,6 +128,17 @@
             ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = endResidueLocInPeptide;
             TerminusState = residueTerminusState;
+        }
+
+        /// <summary>
+        /// Show amino acid symbol and modification info
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("{0}: {1:F4} Da ({2})",
+                Residue,
+                ModDefinition.ModificationMass,
+                string.IsNullOrWhiteSpace(ModDefinition.UniModName) ? ModDefinition.MassCorrectionTag : ModDefinition.UniModName);
         }
     }
 }

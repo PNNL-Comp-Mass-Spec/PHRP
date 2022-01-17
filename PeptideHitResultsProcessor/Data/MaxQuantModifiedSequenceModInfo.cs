@@ -70,5 +70,12 @@ namespace PeptideHitResultsProcessor.Data
             MatchedModName = string.Empty;
         }
 
+        /// <summary>
+        /// Show the modification name
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("{0}", MaxQuantModName);
+        }
     }
 }
