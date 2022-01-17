@@ -24,31 +24,86 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     internal class TopPICResults : SearchResultsBaseClass
     {
+        // Ignore Spelling: Proteoform
+
+        /// <summary>
+        ///  Result ID
+        /// </summary>
         public string Prsm_ID { get; set; }
+
+        /// <summary>
+        /// Spectrum ID
+        /// </summary>
         public string Spectrum_ID { get; set; }
 
+        /// <summary>
+        /// Unexpected modification count
+        /// </summary>
         public string Unexpected_Mod_Count { get; set; }
 
+        /// <summary>
+        /// Number of peaks (m/z values) in the MS/MS spectrum
+        /// </summary>
         public string Peak_Count { get; set; }
+
+        /// <summary>
+        /// Matched peak count
+        /// </summary>
         public string Matched_Peak_Count { get; set; }
+
+        /// <summary>
+        /// Matched fragment ion count
+        /// </summary>
         public string Matched_Fragment_Ion_Count { get; set; }
 
+        /// <summary>
+        /// p-value
+        /// </summary>
         public string PValue { get; set; }
+
+        /// <summary>
+        /// Rank p-value
+        /// </summary>
         public string Rank_PValue { get; set; }
 
+        /// <summary>
+        /// E-value
+        /// </summary>
         public string EValue { get; set; }
+
+        /// <summary>
+        /// Q-value
+        /// </summary>
         public string QValue { get; set; }
 
+        /// <summary>
+        /// Fragmentation method
+        /// </summary>
         public string FragMethod { get; set; }
 
+        /// <summary>
+        /// Proteoform level FDR
+        /// </summary>
         public string ProteoformFDR { get; set; }
+
+        /// <summary>
+        /// Dynamic modifications
+        /// </summary>
         public string VariablePTMs { get; set; }
 
         /// <summary>
         /// Observed precursor_mz
         /// </summary>
         public string Precursor_mz { get; set; }
+
+        /// <summary>
+        /// Mass error, as computed by TopPIC
+        /// </summary>
         public string TopPICComputedDelM { get; set; }
+
+        /// <summary>
+        /// Mass error (in ppm), as computed by TopPIC
+        /// </summary>
         public string TopPICComputedDelMPPM { get; set; }
 
         /// <summary>

@@ -93,6 +93,9 @@ namespace PeptideHitResultsProcRunner
             return PathUtils.CompactPathString(filePath, maxPathLength);
         }
 
+        /// <summary>
+        /// Get the default file extensions to parse
+        /// </summary>
         public override IList<string> GetDefaultExtensionsToParse()
         {
             return new List<string>

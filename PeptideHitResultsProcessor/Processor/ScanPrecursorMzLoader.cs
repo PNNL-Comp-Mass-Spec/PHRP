@@ -25,6 +25,10 @@ namespace PeptideHitResultsProcessor.Processor
     {
         private string InputDirectoryPath { get; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="inputDirectoryPath"></param>
         public ScanPrecursorMzLoader(string inputDirectoryPath)
         {
             InputDirectoryPath = inputDirectoryPath;

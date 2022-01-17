@@ -276,9 +276,19 @@ namespace PeptideHitResultsProcessor.Processor
 
         internal struct ModNameAndResidueLoc
         {
+            /// <summary>
+            /// Modification name
+            /// </summary>
             public string ModName;
+
+            /// <summary>
+            /// Residue number
+            /// </summary>
             public int ResidueLocInPeptide;
 
+            /// <summary>
+            /// Show residue number and modification name
+            /// </summary>
             public override string ToString()
             {
                 return ResidueLocInPeptide + ": " + ModName;

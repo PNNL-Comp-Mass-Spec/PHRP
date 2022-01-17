@@ -5,6 +5,9 @@ using PeptideHitResultsProcessor.Processor;
 
 namespace PHRP_UnitTests
 {
+    /// <summary>
+    /// Unit tests for MultiDatasetResultsProcessor.GetDatasetNameMap and various StringUtilities methods
+    /// </summary>
     public class ResultsProcessorTests
     {
         // ReSharper disable once CommentTypo

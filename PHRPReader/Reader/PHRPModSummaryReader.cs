@@ -10,18 +10,42 @@ namespace PHRPReader.Reader
     /// </summary>
     public class PHRPModSummaryReader
     {
-#pragma warning disable 1591
-
+        /// <summary>
+        /// Modification symbol column in ModSummary.txt files
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Modification_Symbol = "Modification_Symbol";
+
+        /// <summary>
+        /// Modification mass column
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Modification_Mass = "Modification_Mass";
+
+        /// <summary>
+        /// Target residues column
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Target_Residues = "Target_Residues";
+
+        /// <summary>
+        /// Modification type column
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Modification_Type = "Modification_Type";
+
+        /// <summary>
+        /// Mass correction tag column
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Mass_Correction_Tag = "Mass_Correction_Tag";
+
+        /// <summary>
+        /// Occurrence count column
+        /// </summary>
         public const string MOD_SUMMARY_COLUMN_Occurrence_Count = "Occurrence_Count";
 
-#pragma warning restore 1591
-
-        // The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
+        /// <summary>
+        /// Dictionary tracking mass correction tag names and masses
+        /// </summary>
+        /// <remarks>
+        /// Keys are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
+        /// </remarks>
         private readonly Dictionary<string, string> mModDefMassesAsText;
 
         /// <summary>

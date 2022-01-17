@@ -27,7 +27,7 @@ namespace PeptideHitResultsProcessor.Data
         // Ignore Spelling: Dehydro
 
         /// <summary>
-        /// Most abundance isotope m/z
+        /// Most abundant isotope m/z
         /// </summary>
         public string MostAbundantIsotopeMz { get; set; }
 
