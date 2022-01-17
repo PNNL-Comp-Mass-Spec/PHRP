@@ -22,7 +22,7 @@ namespace PHRPReader
         /// </summary>
         public const char PROTEIN_TERMINUS_SYMBOL_PHRP = '-';
 
-#pragma warning disable 1591
+#pragma warning disable CS1591
 
         public const string MSGF_RESULT_COLUMN_SpectrumFile = "#SpectrumFile";
         public const string MSGF_RESULT_COLUMN_Title = "Title";
@@ -38,7 +38,7 @@ namespace PHRPReader
         public const string SCAN_STATS_FILENAME_SUFFIX = "_ScanStats.txt";
         public const string EXTENDED_SCAN_STATS_FILENAME_SUFFIX = "_ScanStatsEx.txt";
 
-#pragma warning restore 1591
+#pragma warning restore CS1591
 
         #endregion
 
@@ -744,9 +744,9 @@ namespace PHRPReader
         /// <summary>
         /// Used to detect redundant calls
         /// </summary>
-#pragma warning disable 414
+#pragma warning disable CS0414
         private bool mDisposedValue;
-#pragma warning restore 414
+#pragma warning restore CS0414
 
         /// <summary>
         /// Dispose of this class

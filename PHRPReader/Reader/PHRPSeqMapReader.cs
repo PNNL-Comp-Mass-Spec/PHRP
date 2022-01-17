@@ -14,7 +14,7 @@ namespace PHRPReader.Reader
     {
         // Ignore Spelling: PepToProtMap
 
-#pragma warning disable 1591
+#pragma warning disable CS1591
 
         public const string SEQ_PROT_MAP_COLUMN_Unique_Seq_ID = "Unique_Seq_ID";
         public const string SEQ_PROT_MAP_COLUMN_Cleavage_State = "Cleavage_State";
@@ -29,7 +29,7 @@ namespace PHRPReader.Reader
         public const string SEQ_INFO_COLUMN_Mod_Description = "Mod_Description";
         public const string SEQ_INFO_COLUMN_Monoisotopic_Mass = "Monoisotopic_Mass";
 
-#pragma warning restore 1591
+#pragma warning restore CS1591
 
         private readonly string mSeqInfoFilename;
 

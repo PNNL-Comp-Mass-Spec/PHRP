@@ -41,7 +41,7 @@ namespace PHRPReader
         /// </summary>
         public const char PROTEIN_TERMINUS_SYMBOL_PHRP = '-';
 
-#pragma warning disable 1591
+#pragma warning disable CS1591
 
         public const string MSGF_RESULT_COLUMN_SpectrumFile = "#SpectrumFile";
         public const string MSGF_RESULT_COLUMN_Title = "Title";
@@ -61,7 +61,7 @@ namespace PHRPReader
 
         public const string NON_EXISTENT_FILE_PLACEHOLDER_NAME = "NonExistent_PHRP_InputFile.xyz";
 
-#pragma warning restore 1591
+#pragma warning restore CS1591
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
         // ${ParentMZ} will hold the last parent ion m/z found
