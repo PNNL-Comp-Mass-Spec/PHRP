@@ -18,6 +18,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using PHRPReader.Data;
 
+// ReSharper disable UnusedMember.Global
+
 namespace PHRPReader
 {
     /// <summary>
@@ -173,17 +175,6 @@ namespace PHRPReader
         /// <summary>
         /// Compute the monoisotopic mass of the given empirical formula
         /// </summary>
-        /// <param name="empiricalFormula"></param>
-        [Obsolete("Use ComputeMonoisotopicMass")]
-        // ReSharper disable once IdentifierTypo
-        public static double ComputeMonoistopicMass(EmpiricalFormula empiricalFormula)
-        {
-            return ComputeMonoisotopicMass(empiricalFormula);
-        }
-
-        /// <summary>
-        /// Compute the monoisotopic mass of the given empirical formula
-        /// </summary>
         /// <remarks>Throws an exception if an unknown symbol is encountered</remarks>
         /// <param name="empiricalFormula"></param>
         public static double ComputeMonoisotopicMass(EmpiricalFormula empiricalFormula)
@@ -210,22 +201,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="elementalComposition"></param>
         /// <param name="unknownSymbols"></param>
-        [Obsolete("Use ComputeMonoisotopicMass")]
-        // ReSharper disable once IdentifierTypo
-
-        public static double ComputeMonoistopicMass(Dictionary<string, int> elementalComposition,
-                                                    out List<string> unknownSymbols)
-        {
-            return ComputeMonoisotopicMass(elementalComposition, out unknownSymbols);
-        }
-
-        /// <summary>
-        /// Compute the monoisotopic mass of the compound represented by elementalComposition
-        /// </summary>
-        /// <param name="elementalComposition"></param>
-        /// <param name="unknownSymbols"></param>
-        public static double ComputeMonoisotopicMass(Dictionary<string, int> elementalComposition,
-                                                    out List<string> unknownSymbols)
+        public static double ComputeMonoisotopicMass(Dictionary<string, int> elementalComposition, out List<string> unknownSymbols)
         {
             double monoisotopicMass = 0;
 
@@ -306,30 +282,6 @@ namespace PHRPReader
             }
 
             return mass;
-        }
-
-        /// <summary>
-        /// Compute the mass of the peptide sequence; uses the information in residueModificationInfo() to determine modification masses
-        /// </summary>
-        /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-        /// <param name="sequence"></param>
-        /// <param name="modCount"></param>
-        /// <param name="residueModificationInfo">Array of modified residues; index 0 to modCount-1</param>
-        /// <returns>The computed mass, or -1 if an error</returns>
-        [Obsolete("This version uses an array for modified residues; use the version that takes a list")]
-        public double ComputeSequenceMass(string sequence, int modCount, ref PeptideSequenceModInfo[] residueModificationInfo)
-        {
-            var modifiedResidues = new List<PeptideSequenceModInfo>();
-
-            if (modCount > 0)
-            {
-                for (var index = 0; index <= modCount - 1; index++)
-                {
-                    modifiedResidues.Add(residueModificationInfo[index]);
-                }
-            }
-
-            return ComputeSequenceMass(sequence, modifiedResidues);
         }
 
         /// <summary>
