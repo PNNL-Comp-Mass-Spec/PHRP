@@ -114,8 +114,6 @@ namespace PHRPReader
 
         // Typically mPeptideNTerminusMass + mPeptideCTerminusMass = 18.0105633 (the mass of water)
 
-        private string mErrorMessage;
-
         /// <summary>
         /// Regular expression for parsing an empirical formula
         /// </summary>
@@ -134,7 +132,7 @@ namespace PHRPReader
         /// <summary>
         /// Most recent error message
         /// </summary>
-        public string ErrorMessage => mErrorMessage;
+        public string ErrorMessage { get; private set; }
 
         /// <summary>
         /// Peptide C-terminus mass
@@ -167,7 +165,7 @@ namespace PHRPReader
         public PeptideMassCalculator()
         {
             ChargeCarrierMass = MASS_PROTON;
-            mErrorMessage = string.Empty;
+            ErrorMessage = string.Empty;
             RemovePrefixAndSuffixIfPresent = true;
             InitializeAminoAcidData();
         }
@@ -251,7 +249,7 @@ namespace PHRPReader
                 primarySequence = sequence;
             }
 
-            mErrorMessage = string.Empty;
+            ErrorMessage = string.Empty;
             foreach (var chChar in primarySequence)
             {
                 // Use Convert.ToInt16 to convert to the ASCII value, then subtract 65
@@ -261,7 +259,7 @@ namespace PHRPReader
                 {
                     if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                     {
-                        mErrorMessage = "Unknown symbol " + chChar + " in sequence " + primarySequence;
+                        ErrorMessage = "Unknown symbol " + chChar + " in sequence " + primarySequence;
                         validResidueCount = 0;
                         mass = -1;
                         break;
@@ -325,7 +323,7 @@ namespace PHRPReader
 
                 if (!mElementMonoMasses.ContainsKey(modifiedResidue.AffectedAtom.ToString()))
                 {
-                    mErrorMessage = "Unknown Affected Atom '" + modifiedResidue.AffectedAtom + "'";
+                    ErrorMessage = "Unknown Affected Atom '" + modifiedResidue.AffectedAtom + "'";
                     mass = -1;
                     break;
                 }
@@ -517,7 +515,7 @@ namespace PHRPReader
                 {
                     if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                     {
-                        mErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + sequence;
+                        ErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + sequence;
                         break;
                     }
 
