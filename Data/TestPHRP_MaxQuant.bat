@@ -22,4 +22,8 @@ xcopy \\gigasax\DMS_FASTA_File_Archive\dynamic\forward\ID_003456_9B916A8B.fasta 
 del TestData\MXQ202105151319_Auto1899827_Compare\PHRP_LogFile.txt
 %ExePath% TestData\MXQ202105151319_Auto1899827\txt\msms.txt /AltBasePath:..\..\Data /O:TestData\MXQ202105151319_Auto1899827_Compare\ /T:TestData\MXQ202105151319_Auto1899827\Mass_Correction_Tags.txt /N:TestData\MXQ202105151319_Auto1899827\MaxQuant_Tryp_Dyn_MetOx_NTermAcet_Stat_CysAlk_TMT_6Plex_20ppmParTol.xml /SynPvalue:0.2  /SynProb:0.05  /L:TestData\MXQ202105151319_Auto1899827_Compare\PHRP_LogFile.txt /ProteinMods /F:TestData\FASTA\ID_003456_9B916A8B.fasta
 
+xcopy \\gigasax\DMS_FASTA_File_Archive\dynamic\forward\ID_004225_C1CEE570.fasta TestData\FASTA\ /D
+del TestData\MXQ202106031228_Auto1904606_Compare\PHRP_LogFile.txt
+%ExePath% TestData\MXQ202106031228_Auto1904606\txt\msms.txt /AltBasePath:..\..\Data /O:TestData\MXQ202106031228_Auto1904606_Compare\ /T:TestData\MXQ202106031228_Auto1904606\Mass_Correction_Tags.txt /N:TestData\MXQ202106031228_Auto1904606\MaxQuant_Tryp_Stat_CysAlk_Dyn_MetOx_NTermAcet_20ppmParTol.xml /SynPvalue:0.2  /SynProb:0.05  /L:TestData\MXQ202106031228_Auto1904606_Compare\PHRP_LogFile.txt /ProteinMods /F:TestData\FASTA\ID_004225_C1CEE570.fasta
+
 :Done
