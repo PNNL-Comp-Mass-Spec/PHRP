@@ -1,5 +1,8 @@
 Peptide Hit Results Processor Runner Revision History
 
+Version 3.1.8056; January 22, 2022
+	- Updated ProteinFileReader that uses a new version of CsvHelper
+
 Version 3.1.8049; January 14, 2022
 	- Add support for MSFragger
 
