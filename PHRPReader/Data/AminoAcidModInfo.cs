@@ -62,7 +62,6 @@
             /// </summary>
             // ReSharper disable once IdentifierTypo
             ProteinNandCCTerminus = 5
-
         }
 
         /// <summary>

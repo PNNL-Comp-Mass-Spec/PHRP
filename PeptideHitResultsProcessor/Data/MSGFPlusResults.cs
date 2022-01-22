@@ -103,7 +103,7 @@ namespace PeptideHitResultsProcessor.Data
         public string PepQValue { get; set; }
 
         /// <summary>
-        /// Isotope error
+        /// Isotope error (integer value)
         /// </summary>
         /// <remarks>Only reported by MS-GF+</remarks>
         public string IsotopeError { get; set; }

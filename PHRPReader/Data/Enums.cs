@@ -1148,6 +1148,7 @@ namespace PHRPReader.Data
         EFDR = 19,
 
         // ReSharper disable UnusedMember.Global
+
         /// <summary>
         /// IMS scan
         /// </summary>
@@ -1161,6 +1162,7 @@ namespace PHRPReader.Data
         IMSDriftTime = 21,
 
         // ReSharper restore UnusedMember.Global
+
         /// <summary>
         /// Isotope error
         /// </summary>
