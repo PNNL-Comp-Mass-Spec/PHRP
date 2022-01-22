@@ -446,7 +446,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Overall processing percent complete (value between 0 and 100)
         /// </summary>
-        public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
+        public float ProgressPercentComplete => (float)(Math.Round(mProgressPercentComplete, 2));
 
         /// <summary>
         /// The calling procedure can call this method to request that processing should be aborted
@@ -1079,7 +1079,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (forwardPeptideCount > 0)
                 {
-                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                    fdr = reversePeptideCount / (double)(forwardPeptideCount);
                 }
 
                 searchResult.FDR = fdr;
@@ -1848,7 +1848,9 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // .NET by default will double the size of the list to accommodate these new items
                 // Instead, expand the list by 20% of the current size
-                items.Capacity += Convert.ToInt32(items.Count / 5);
+
+                // Note that integer division rounds down
+                items.Capacity += (items.Count / 5);
             }
         }
 
