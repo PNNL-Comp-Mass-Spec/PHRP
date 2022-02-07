@@ -1,4 +1,4 @@
-# Peptide Hit Results Processor
+a# Peptide Hit Results Processor
 
 The Peptide Hit Results Processor (PHRP) converts search results from various
 MS/MS identification tools into a series of tab-delimited text files
@@ -36,6 +36,7 @@ for example `mono PeptideHitResultsProcRunner.exe`
 ```
 PeptideHitResultsProcRunner.exe
  InputFilePath [/O:OutputDirectoryPath]
+ [/BaseName:OutputFileBaseName]
  [/S:[MaxLevel]]
  [/P:ParameterFilePath]
  [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]
@@ -74,6 +75,11 @@ The input file should be one of the following:
 Optionally use `/O` to specify the output directory
 * If omitted, the output file will be created in the same directory as the input file
 
+Optionally use `/BaseName` (or `/B`) to define the base name for the output files
+* If omitted, the base name will be auto-defined based on the input file name
+* For MaxQuant and MSFragger results, if the input file has multiple datasets, the base name will be either the base name defined by `/BaseName` or the longest string in common for the dataset names
+* This parameter should not be used when the input file spec is a wildcard
+
 Use `/S` to process all valid files in the input directory and subdirectories
 * Include a number after `/S` (like `/S:2`) to limit the level of subdirectories to examine
 
@@ -96,7 +102,7 @@ third column listing the residues that can be modified with the given mass
 
 Use `/N` to specify the parameter file provided to the search tool
 * This is used when processing results from MS-GF+, MSPathFinder, MaxQuant, MSFragger, MODa, MODPlus, MSAlign, TopPIC, and InSpecT
-* For MaxQuant, provide either an XML-based parameter file (root element is <MaxQuantParams>) or provide the parameters.txt file created in the txt results directory
+* For MaxQuant, provide either an XML-based parameter file (root element is `<MaxQuantParams>`) or provide the parameters.txt file created in the txt results directory
   * The XML-based parameter file is preferred, since it is required to allow PHRP to accurately compute monoisotopic masses of peptides identified by MaxQuant
 
 Use `/F` to specify the path to the FASTA file
