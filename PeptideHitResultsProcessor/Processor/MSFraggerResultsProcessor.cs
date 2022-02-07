@@ -799,15 +799,19 @@ namespace PeptideHitResultsProcessor.Processor
                 // If baseNameByDatasetName has multiple items, will use either Options.OutputFileBaseName,
                 // or the longest string in common for the keys in baseNameByDatasetName
 
-                baseName = baseNameByDatasetName.Count switch
+                if (string.IsNullOrWhiteSpace(Options.OutputFileBaseName))
                 {
-                    0 => "Dataset_msfragger",
-                    1 => baseNameByDatasetName.First().Key + "_msfragger",
-                    _ => string.Format("{0}_msfragger",
-                        string.IsNullOrWhiteSpace(Options.OutputFileBaseName)
-                            ? longestCommonBaseName
-                            : Options.OutputFileBaseName)
-                };
+                    baseName = baseNameByDatasetName.Count switch
+                    {
+                        0 => "Dataset_msfragger",
+                        1 => baseNameByDatasetName.First().Key + "_msfragger",
+                        _ => longestCommonBaseName + "_msfragger"
+                    };
+                }
+                else
+                {
+                    baseName = Options.OutputFileBaseName;
+                }
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
