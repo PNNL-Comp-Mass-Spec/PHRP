@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "January 14, 2022";
+            FileDate = "February 7, 2022";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -796,13 +796,17 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // The synopsis file name will be of the form DatasetName_msfragger_syn.txt
                 // If baseNameByDatasetName only has one item, will use the full dataset name
-                // If baseNameByDatasetName has multiple items, will use the longest string in common for the keys in baseNameByDatasetName
+                // If baseNameByDatasetName has multiple items, will use either Options.OutputFileBaseName,
+                // or the longest string in common for the keys in baseNameByDatasetName
 
                 baseName = baseNameByDatasetName.Count switch
                 {
                     0 => "Dataset_msfragger",
                     1 => baseNameByDatasetName.First().Key + "_msfragger",
-                    _ => longestCommonBaseName + "_msfragger"
+                    _ => string.Format("{0}_msfragger",
+                        string.IsNullOrWhiteSpace(Options.OutputFileBaseName)
+                            ? longestCommonBaseName
+                            : Options.OutputFileBaseName)
                 };
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);

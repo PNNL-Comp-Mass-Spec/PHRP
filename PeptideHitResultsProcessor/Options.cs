@@ -35,6 +35,18 @@ namespace PeptideHitResultsProcessor
         public string OutputDirectoryPath { get; set; }
 
         /// <summary>
+        /// Base name for output files
+        /// </summary>
+        [Option("OutputFileBaseName", "OutputBaseName", "BaseName", "B", HelpShowsDefault = false,
+            HelpText = "Output file base name\n" +
+                       "If an empty string, the output file base name will be auto-defined based on the input file name.\n" +
+                       "For MaxQuant and MSFragger results, if the input file has multiple datasets, " +
+                       "the base name will be either the base name defined here, " +
+                       "or the longest string in common for the dataset names.\n" +
+                       "This parameter should not be used when the input file spec is a wildcard.")]
+        public string OutputFileBaseName { get; set; }
+
+        /// <summary>
         /// Alternate base path for input files
         /// </summary>
         [Option("AlternateBasePath", "AltBasePath", "BasePath", HelpShowsDefault = false,
@@ -459,7 +471,10 @@ namespace PeptideHitResultsProcessor
         public void UpdateAll(PHRPOptions sourceOptions)
         {
             InputFilePath = sourceOptions.InputFilePath;
+
             OutputDirectoryPath = sourceOptions.OutputDirectoryPath;
+            OutputFileBaseName = sourceOptions.OutputFileBaseName;
+
             AlternateBasePath = sourceOptions.AlternateBasePath;
             ParameterFilePath = sourceOptions.ParameterFilePath;
 

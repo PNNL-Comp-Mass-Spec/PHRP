@@ -259,6 +259,12 @@ namespace PeptideHitResultsProcRunner
                     "Output directory:", PathUtils.CompactPathString(outputDirectoryPath, 110)));
             }
 
+            if (!string.IsNullOrWhiteSpace(Options.OutputFileBaseName))
+            {
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Output file base name:", Options.OutputFileBaseName));
+            }
+
             if (!string.IsNullOrWhiteSpace(parameterFilePath))
             {
                 LogMessage(string.Format("{0,-45} {1}",

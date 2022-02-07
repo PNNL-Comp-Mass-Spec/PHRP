@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "January 14, 2022";
+            FileDate = "February 7, 2022";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -1022,7 +1022,10 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     0 => "Dataset_maxq",
                     1 => baseNameByDatasetName.First().Key + "_maxq",
-                    _ => longestCommonBaseName + "_maxq"
+                    _ => string.Format("{0}_maxq",
+                        string.IsNullOrWhiteSpace(Options.OutputFileBaseName)
+                            ? longestCommonBaseName
+                            : Options.OutputFileBaseName)
                 };
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
