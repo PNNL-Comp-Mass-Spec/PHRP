@@ -810,7 +810,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    baseName = Options.OutputFileBaseName;
+                    baseName = Options.OutputFileBaseName + "_msfragger";
                 }
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
