@@ -50,10 +50,7 @@ namespace PeptideHitResultsProcessor.Processor
                 inputDirectory
             };
 
-            foreach (var subDirectory in inputDirectory.GetDirectories())
-            {
-                directoriesToCheck.Add(subDirectory);
-            }
+            directoriesToCheck.AddRange(inputDirectory.GetDirectories());
 
             if (inputDirectory.Parent != null)
             {

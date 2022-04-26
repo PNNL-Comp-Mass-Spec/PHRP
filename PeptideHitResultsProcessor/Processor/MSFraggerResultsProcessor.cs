@@ -642,10 +642,7 @@ namespace PeptideHitResultsProcessor.Processor
             filteredSearchResults.Sort(new MSFraggerSearchResultsComparerEValueScanChargePeptide());
 
             var listForQValue = new List<ToolResultsBaseClass>();
-            foreach (var item in filteredSearchResults)
-            {
-                listForQValue.Add(item);
-            }
+            listForQValue.AddRange(filteredSearchResults);
 
             // Compute FDR values, then assign QValues
             ComputeQValues(listForQValue);
