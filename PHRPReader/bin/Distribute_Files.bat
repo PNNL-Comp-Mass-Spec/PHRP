@@ -2,7 +2,7 @@
 
 if "%1"=="NoPause" Goto StartCopy
 echo Be sure to build PHRPReader.dll in Debug mode
-pause
+if not "%1"=="NoPause" pause
 
 :StartCopy
 
@@ -62,6 +62,6 @@ call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_Console\bi
 :SkipAscore
 
 if "%1"=="NoPause" Goto Exit
-pause
+if not "%1"=="NoPause" pause
 
 :Exit

@@ -3,7 +3,7 @@
 echo.
 echo Build PeptideHitResultsProcessor.dll in Debug mode prior to calling this batch file
 echo.
-pause
+if not "%1"=="NoPause" pause
 
 @echo on
 
@@ -53,7 +53,7 @@ echo.
 echo.
 echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
 echo.
-pause
+if not "%1"=="NoPause" pause
 @echo on
 
 xcopy Debug\*.dll \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
@@ -64,4 +64,4 @@ xcopy Debug\PeptideHitResultsProcRunner.pdb \\pnl\projects\OmicsSW\DMS_Programs\
 xcopy Debug\PHRPReader.pdb \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
 xcopy Debug\PHRPReader.xml \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
 
-pause
+if not "%1"=="NoPause" pause
