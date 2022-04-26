@@ -19,7 +19,7 @@ call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\A
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Plugin\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerDLL\bin\Debug"
-call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerExe\bin\Debug
+call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerExe\bin\Debug"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGFDB_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSXML_Gen_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin"
