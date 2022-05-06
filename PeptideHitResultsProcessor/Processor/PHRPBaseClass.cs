@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "April 26, 2022";
+        public const string PROGRAM_DATE = "May 6, 2022";
 
         /// <summary>
         /// Constructor
@@ -1079,7 +1079,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (forwardPeptideCount > 0)
                 {
-                    fdr = reversePeptideCount / (double)(forwardPeptideCount);
+                    fdr = reversePeptideCount / (double)forwardPeptideCount;
                 }
 
                 searchResult.FDR = fdr;

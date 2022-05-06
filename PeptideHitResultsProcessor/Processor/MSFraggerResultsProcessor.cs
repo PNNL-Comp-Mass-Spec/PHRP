@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "February 7, 2022";
+            FileDate = "May 6, 2022";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -1296,21 +1296,41 @@ namespace PeptideHitResultsProcessor.Processor
                     return true;
                 }
 
-                var matchDatasetNames = additionalResultFiles.Count > 1;
+                // additionalResultFiles may have a mix of both Dataset.tsv and Dataset_psm.tsv files
+                // Preferentially use the Dataset.tsv files
+
+                var additionalResultFilesByDataset = new Dictionary<string, KeyValuePair<FileInfo, string>>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var additionalFile in additionalResultFiles)
+                {
+                    if (!additionalResultFilesByDataset.TryGetValue(additionalFile.Value, out var datasetInfo))
+                    {
+                        additionalResultFilesByDataset.Add(additionalFile.Value, additionalFile);
+                        continue;
+                    }
+
+                    if (datasetInfo.Key.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase) &&
+                        !additionalFile.Key.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+                    {
+                        additionalResultFilesByDataset[additionalFile.Value] = additionalFile;
+                    }
+                }
+
+                var matchDatasetNames = additionalResultFilesByDataset.Count > 1;
 
                 // This dictionary tracks elution times observed for each scan number, across all datasets
                 var elutionTimesByScanNumber = new Dictionary<int, List<double>>();
 
-                foreach (var additionalFile in additionalResultFiles)
+                foreach (var additionalFile in additionalResultFilesByDataset.Values)
                 {
                     if (!ReadMSFraggerResults(additionalFile.Key, errorMessages, out var additionalSearchResults))
                         continue;
 
-                    if (targetResultsAreFromPsmFile)
+                    // If the input file is a _psm.tsv file and this additional file is a Dataset.tsv file, compute Q-Values
+                    if (targetResultsAreFromPsmFile && !additionalFile.Key.Name.EndsWith(PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Additional search results were loaded from a Dataset.tsv file, which should have reverse hits
-                        // Thus, we can compute Q-Values for data in additionalSearchResults
-                        // In contrast, PSM files do not have reverse hits
+                        // When search results are loaded from a Dataset.tsv file, it should have reverse hits,
+                        // allowing for computing Q-Values using additionalSearchResults
                         ComputeQValues(additionalSearchResults);
                     }
 
