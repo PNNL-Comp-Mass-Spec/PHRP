@@ -1,4 +1,4 @@
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by John Sandoval for the Department of Energy (PNNL, Richland, WA)
 // Program started August 12, 2008
 //
@@ -1676,11 +1676,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
         /// </summary>
-        /// <param name="peptide"></param>
-        /// <param name="inspectModInfo"></param>
         /// <remarks>
         /// This method assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined
         /// </remarks>
+        /// <param name="peptide"></param>
+        /// <param name="inspectModInfo"></param>
         private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<ModInfo> inspectModInfo)
         {
             var prefix = string.Empty;

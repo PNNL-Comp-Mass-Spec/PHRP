@@ -2828,10 +2828,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Show a warning periodically
         /// </summary>
+        /// <remarks>As the warning count surpasses, 1000, 10000, etc., the warning is shown less frequently</remarks>
         /// <param name="warningCount">Number of times this warning has been encountered</param>
         /// <param name="thresholdCountAlwaysShow">Always show the warning up to this many times</param>
         /// <param name="warningMessage">Warning message</param>
-        /// <remarks>As the warning count surpasses, 1000, 10000, etc., the warning is shown less frequently</remarks>
         protected void ShowPeriodicWarning(int warningCount, int thresholdCountAlwaysShow, string warningMessage)
         {
             if (warningCount <= thresholdCountAlwaysShow ||
