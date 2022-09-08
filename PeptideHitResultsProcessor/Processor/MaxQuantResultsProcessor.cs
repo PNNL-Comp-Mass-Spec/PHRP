@@ -2365,6 +2365,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Lookup the Prefix and Suffix residues
                 var peptideInfoFound = LookupMaxQuantPeptideInfo(maxQuantPeptides, searchResult.Sequence, out var peptideInfo);
+
                 if (peptideInfoFound)
                 {
                     searchResult.PrefixResidue = peptideInfo.Prefix;
@@ -2971,6 +2972,7 @@ namespace PeptideHitResultsProcessor.Processor
                         else
                         {
                             // Use a higher match error threshold since some peptides reported by MaxQuant don't perfectly match the FASTA file
+                            // MaxQuant also adds additional contaminant proteins, so for small FASTA files, set the threshold will be set even higher
                             const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
                             const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
 

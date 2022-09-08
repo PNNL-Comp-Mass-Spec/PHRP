@@ -665,6 +665,7 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 var success = mPeptideHitResultsProcessor.ProcessFile(inputFilePath, outputDirectoryPath, parameterFilePath);
+
                 if (!success)
                 {
                     ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage);
