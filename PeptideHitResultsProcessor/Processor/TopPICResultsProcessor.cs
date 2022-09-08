@@ -116,7 +116,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created directly by TopPIC
+        /// This data structure holds rows read from the tab-delimited file (_TopPIC_PrSMs.txt) created directly by TopPIC
         /// </summary>
         /// <remarks>
         /// These columns hold data that this class will use when creating the synopsis file
@@ -1068,7 +1068,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
                 {
-                    ReportError("Peptide column is missing or invalid", true);
+                    ReportError("Proteoform column is missing or invalid", true);
                 }
 
                 // Add the standard terminus symbols to the peptide sequence
@@ -1164,7 +1164,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse the header line of a TopPIC results file, populating columnMapping
+        /// Parse the header line of a TopPIC results file (Dataset_TopPIC_PrSMs.txt), populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
