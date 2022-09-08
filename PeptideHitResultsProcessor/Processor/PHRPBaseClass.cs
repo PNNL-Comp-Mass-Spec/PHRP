@@ -1215,7 +1215,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
-        /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50
+        /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
         /// </param>
         /// <param name="matchErrorPercentWarningThreshold">
         /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
@@ -1262,6 +1262,20 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     OnWarningEvent(warningMessage);
                     return false;
+                }
+
+                // MaxQuant also adds additional contaminant proteins, so for small FASTA files, set the error threshold even higher
+                if (maximumAllowableMatchErrorPercentThreshold >= 25)
+                {
+                    maximumAllowableMatchErrorPercentThreshold = proteinCount switch
+                    {
+                        < 20 when maximumAllowableMatchErrorPercentThreshold < 85 => 85,
+                        < 50 when maximumAllowableMatchErrorPercentThreshold < 77 => 77,
+                        < 100 when maximumAllowableMatchErrorPercentThreshold < 70 => 70,
+                        < 250 when maximumAllowableMatchErrorPercentThreshold < 60 => 60,
+                        < 500 when maximumAllowableMatchErrorPercentThreshold < 50 => 50,
+                        _ => maximumAllowableMatchErrorPercentThreshold
+                    };
                 }
 
                 Console.WriteLine();
@@ -1714,6 +1728,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="phrpResultType"></param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
+        /// This is typically 0.1, but for MaxQuant we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
         /// </param>
         /// <param name="matchErrorPercentWarningThreshold">
         /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
@@ -3092,7 +3107,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="ignorePeptideToProteinMapperErrors">When true, return true even if one or more peptides did not match to a known protein</param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
-        /// This is typically 0.1, but for MaxQuant we set this to 50
+        /// This is typically 0.1, but for MaxQuant we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
         /// </param>
         /// <param name="matchErrorPercentWarningThreshold">
         /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
