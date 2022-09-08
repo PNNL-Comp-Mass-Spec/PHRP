@@ -1260,6 +1260,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!success)
                 {
+                    OnWarningEvent(warningMessage);
                     return false;
                 }
 
@@ -3239,20 +3240,6 @@ namespace PeptideHitResultsProcessor.Processor
 
         /// <summary>
         /// Verify that the FASTA file exists and has amino acid based proteins
-        /// </summary>
-        /// <param name="fastaFilePath"></param>
-        /// <returns>True if found and valid, otherwise false</returns>
-        protected bool ValidateProteinFastaFile(string fastaFilePath)
-        {
-            var success = ValidateProteinFastaFile(fastaFilePath, out var warningMessage);
-
-            if (!success)
-            {
-                OnWarningEvent(warningMessage);
-            }
-
-            return success;
-        }
         /// Additionally, count the total number of proteins in the FASTA file
         /// </summary>
         /// <remarks>
