@@ -372,12 +372,15 @@ namespace PHRPReader.Reader
 
                 var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
 
+                // Convert the precursor m/z value to monoisotopic mass (uncharged)
                 if (Math.Abs(precursorMZ) > float.Epsilon)
                 {
+                    // The precursor ion m/z value is the observed m/z value, read from a _PrecursorInfo.txt file
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
                 }
                 else
                 {
+                    // The precursor ion m/z value is 0; use the value reported by MaxQuant instead
                     var precursorMZ_MaxQuant = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorMZ_MaxQuant), mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ_MaxQuant, psm.Charge, 0);
                 }

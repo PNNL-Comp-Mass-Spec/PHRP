@@ -508,6 +508,8 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!precursorsByScan.TryGetValue(searchResult.ScanNum, out var precursorMz))
                     continue;
 
+                // MaxQuant often reports a precursor m/z value several Da away from the one listed in the .raw file
+                // Store the precursor ion m/z read from a _PrecursorInfo.txt
                 searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMz, 5);
 
                 var observedPrecursorMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMz, searchResult.ChargeNum, 0);
@@ -2236,6 +2238,12 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Scan column is not numeric on line " + lineNumber, true);
                 }
 
+                if (searchResult.ScanNum == 12582)
+                {
+                    // Uncomment to debug
+                    // Console.WriteLine("Check this PSM");
+                }
+
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out searchResult.ScanIndex);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out searchResult.Charge);
@@ -2678,6 +2686,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
+
+                if (scan.Equals("12582"))
+                {
+                    // Uncomment to debug
+                    // Console.WriteLine("Check this PSM");
+                }
 
                 if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantSynFileColumns.Peptide], out string peptideSequence))
                 {
