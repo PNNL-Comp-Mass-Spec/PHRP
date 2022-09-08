@@ -1256,7 +1256,8 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Verify that the FASTA file is not a DNA-sequence based FASTA file
-                success = ValidateProteinFastaFile(fastaFilePath);
+                success = ValidateProteinFastaFile(fastaFilePath, out var warningMessage, out var proteinCount);
+
                 if (!success)
                 {
                     return false;
@@ -3252,9 +3253,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             return success;
         }
-
-        /// <summary>
-        /// Verify that the FASTA file exists and has amino acid based proteins
+        /// Additionally, count the total number of proteins in the FASTA file
         /// </summary>
         /// <remarks>
         /// <para>
@@ -3269,8 +3268,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         /// <param name="fastaFilePath"></param>
         /// <param name="warningMessage"></param>
+        /// <param name="proteinCount">Output: number of proteins in the FASTA file</param>
         /// <returns>True if found and valid, otherwise false</returns>
-        public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage)
+        public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage, out int proteinCount)
         {
             // This RegEx looks for standard amino acids, skipping A, T, C, and G
             var definiteAminoAcidMatcher = new Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -3283,6 +3283,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var validProteinCount = 0;
             var invalidProteinCount = 0;
+            proteinCount = 0;
 
             try
             {
@@ -3311,6 +3312,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Read the first 500 proteins and confirm that each contains amino acid residues
+                // After that, continue reading to the end of the file to determine the number of proteins
                 while (fastaFile.ReadNextProteinEntry())
                 {
                     var definiteAminoAcidCount = definiteAminoAcidMatcher.Matches(fastaFile.ProteinSequence).Count;
@@ -3326,10 +3328,19 @@ namespace PeptideHitResultsProcessor.Processor
                         invalidProteinCount++;
                     }
 
-                    if (validProteinCount + invalidProteinCount >= 500)
+                    proteinCount++;
+
+                    if (validProteinCount + invalidProteinCount < 500)
                     {
-                        break;
+                        continue;
                     }
+
+                    while (fastaFile.ReadNextProteinEntry())
+                    {
+                        proteinCount++;
+                    }
+
+                    break;
                 }
 
                 if (validProteinCount < invalidProteinCount)
