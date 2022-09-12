@@ -59,6 +59,7 @@
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
     <Compile Include="Data\MaxQuantResults.cs" />
     <Compile Include="Data\MSFraggerResults.cs" />
+    <Compile Include="Data\TopPICPrSMs.cs" />
     <Compile Include="Processor\BinarySearchFindNearest.cs" />
     <Compile Include="Processor\MultiDatasetResultsProcessor.cs" />
     <Compile Include="Processor\DataUtilities.cs" />

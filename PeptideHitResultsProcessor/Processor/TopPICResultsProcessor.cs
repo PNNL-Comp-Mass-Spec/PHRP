@@ -114,104 +114,6 @@ namespace PeptideHitResultsProcessor.Processor
             Qvalue = 25,                     //  Spectral FDR, or PepFDR
             Proteoform_QValue = 26
         }
-
-        /// <summary>
-        /// This data structure holds rows read from the tab-delimited file (_TopPIC_PrSMs.txt) created directly by TopPIC
-        /// </summary>
-        /// <remarks>
-        /// These columns hold data that this class will use when creating the synopsis file
-        /// </remarks>
-        private struct TopPICSearchResult
-        {
-            // ReSharper disable NotAccessedField.Local
-            public string SpectrumFileName;
-            public string Prsm_ID;
-            public string Spectrum_ID;
-            public string FragMethod;
-            public string Scans;
-            public int ScanNum;
-            public string Peaks;
-            public string Charge;
-            public short ChargeNum;
-            public string Precursor_mass;               // Monoisotopic mass value of the observed precursor_mz
-            public string PrecursorMZ;                  // Computed from Precursor_mass
-            public string Adjusted_precursor_mass;      // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-            public string MH;                           // Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
-            public string DelM;                         // Computed using Precursor_mass - Adjusted_precursor_mass
-            public string DelM_PPM;                     // Computed using DelM and Adjusted_precursor_mass
-            public string Proteoform_ID;
-            public string Feature_Intensity;
-            public string Feature_Score;
-            public string Protein;
-            public string ProteinDescription;
-            public string ResidueStart;                 // First_residue
-            public string ResidueEnd;                   // Last_residue
-            public string Proteoform;
-            public string Unexpected_Mod_Count;         // unexpected modifications
-            public string MIScore;
-            public string VariablePTMs;
-            public string Matched_peaks;
-            public string Matched_fragment_ions;
-            public string PValue;
-            public double PValueNum;
-            public int RankPValue;
-            public string Evalue;
-            public double EValueNum;
-            public string Qvalue;
-            public string Proteoform_QValue;
-
-            // ReSharper restore NotAccessedField.Local
-
-            /// <summary>
-            /// Reset stored values to empty strings and zeros
-            /// </summary>
-            // ReSharper disable once UnusedMember.Local
-            public void Clear()
-            {
-                SpectrumFileName = string.Empty;
-                Prsm_ID = string.Empty;
-                Spectrum_ID = string.Empty;
-                FragMethod = string.Empty;
-                Scans = string.Empty;
-                ScanNum = 0;
-                Peaks = string.Empty;
-                Charge = string.Empty;
-                ChargeNum = 0;
-                Precursor_mass = string.Empty;
-                PrecursorMZ = string.Empty;
-                Adjusted_precursor_mass = string.Empty;
-                MH = string.Empty;
-                DelM = string.Empty;
-                DelM_PPM = string.Empty;
-                Proteoform_ID = string.Empty;
-                Feature_Intensity = string.Empty;
-                Feature_Score = string.Empty;
-                Protein = string.Empty;
-                ProteinDescription = string.Empty;
-                ResidueStart = string.Empty;
-                ResidueEnd = string.Empty;
-                Proteoform = string.Empty;
-                Unexpected_Mod_Count = string.Empty;
-                MIScore = string.Empty;
-                VariablePTMs = string.Empty;
-                Matched_peaks = string.Empty;
-                Matched_fragment_ions = string.Empty;
-                PValue = string.Empty;
-                PValueNum = 0;
-                RankPValue = 0;
-                Evalue = string.Empty;
-                EValueNum = 0;
-                Qvalue = string.Empty;
-                Proteoform_QValue = string.Empty;
-            }
-
-            /// <summary>
-            /// Show scan, proteoform, and p-value
-            /// </summary>
-            public override string ToString()
-            {
-                return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, Proteoform, PValue);
-            }
         }
 
         private int mDeltaMassWarningCount;
@@ -437,7 +339,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="endIndex"></param>
         /// <param name="sortOnPValue"></param>
         private void AssignRankByScore(
-            IList<TopPICSearchResult> searchResults,
+            IList<TopPICPrSMs> searchResults,
             int startIndex,
             int endIndex,
             bool sortOnPValue)
@@ -445,21 +347,19 @@ namespace PeptideHitResultsProcessor.Processor
             if (startIndex == endIndex)
             {
                 // Only one result
-                var currentResult = searchResults[startIndex];
-                currentResult.RankPValue = 1;
-                searchResults[startIndex] = currentResult;
+                searchResults[startIndex].RankPValue = 1;
                 return;
             }
 
             // Duplicate a portion of searchResults so that we can sort by PValue
 
-            var resultsSubset = new Dictionary<int, TopPICSearchResult>();
+            var resultsSubset = new Dictionary<int, TopPICPrSMs>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
             }
 
-            List<KeyValuePair<int, TopPICSearchResult>> resultsByProbability;
+            List<KeyValuePair<int, TopPICPrSMs>> resultsByProbability;
 
             if (sortOnPValue)
             {
@@ -494,7 +394,6 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 result.RankPValue = currentRank;
-                searchResults[entry.Key] = result;
             }
         }
 
@@ -600,10 +499,11 @@ namespace PeptideHitResultsProcessor.Processor
                 mDeltaMassWarningCount = 0;
 
                 // Initialize array that will hold all of the records in the TopPIC result file
-                var searchResultsUnfiltered = new List<TopPICSearchResult>();
+                var searchResultsUnfiltered = new List<TopPICPrSMs>();
 
                 // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                var filteredSearchResults = new List<TopPICSearchResult>();
+                var filteredSearchResults = new List<TopPICPrSMs>();
+
 
                 // Parse the input file
                 while (!reader.EndOfStream && !AbortProcessing)
@@ -963,17 +863,17 @@ namespace PeptideHitResultsProcessor.Processor
         /// Parses an entry from the TopPIC results file
         /// </summary>
         /// <param name="lineIn"></param>
-        /// <param name="udtSearchResult"></param>
+        /// <param name="searchResult"></param>
         /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
-            out TopPICSearchResult udtSearchResult,
+            out TopPICPrSMs searchResult,
             ICollection<string> errorMessages,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
-            udtSearchResult = new TopPICSearchResult();
+            searchResult = new TopPICPrSMs();
 
             string[] splitLine = null;
 
@@ -987,25 +887,25 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.SpectrumFileName], out searchResult.SpectrumFileName);
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Prsm_ID], out searchResult.Prsm_ID))
                 {
                     ReportError("Prsm_ID column is missing or invalid", true);
                 }
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Spectrum_ID], out searchResult.Spectrum_ID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.FragMethod], out searchResult.FragMethod);
 
-                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Scans], out searchResult.Scans))
                 {
                     ReportError("Scan(s) column is missing or invalid", true);
                 }
 
-                if (!int.TryParse(udtSearchResult.Scans, out udtSearchResult.ScanNum))
+                if (!string.IsNullOrWhiteSpace(searchResult.Scans) && !int.TryParse(searchResult.Scans, out searchResult.ScanNum))
                 {
                     // .Scans may have a list of scan numbers; extract the first scan number from .scans
                     var scanNumberDigits = string.Empty;
-                    foreach (var character in udtSearchResult.Scans)
+                    foreach (var character in searchResult.Scans)
                     {
                         if (char.IsDigit(character))
                         {
@@ -1013,60 +913,61 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (!int.TryParse(scanNumberDigits, out udtSearchResult.ScanNum))
+                    if (!int.TryParse(scanNumberDigits, out searchResult.ScanNum))
                     {
                         OnWarningEvent("Error parsing out the scan number from the scan list; could not find an integer: " +
-                                      udtSearchResult.Scans);
-                        udtSearchResult.ScanNum = 0;
+                                      searchResult.Scans);
+                        searchResult.ScanNum = 0;
                     }
                 }
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.RetentionTime], out searchResult.RetentionTime);
+
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out searchResult.Peaks);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out searchResult.Charge);
+                searchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(searchResult.Charge, 0));
 
                 // Monoisotopic mass value of the observed precursor_mz
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out searchResult.Precursor_mass);
 
                 var precursorMZ = 0.0;
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
-                if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
+                if (double.TryParse(searchResult.Precursor_mass, out var precursorMonoMass))
                 {
-                    if (udtSearchResult.ChargeNum > 0)
+                    if (searchResult.ChargeNum > 0)
                     {
-                        precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
-                        udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
+                        precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, searchResult.ChargeNum);
+                        searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
                     }
                 }
 
-                // peptideMonoMassTopPIC is Theoretical peptide monoisotopic mass, including mods, as computed by TopPIC
+                // peptideMonoMassTopPIC is theoretical peptide monoisotopic mass, including mods, as computed by TopPIC
                 double peptideMonoMassTopPIC;
 
                 if (columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
-                    // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-                    DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                    // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Proteoform_Mass
+                    DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass], out searchResult.Adjusted_precursor_mass);
 
-                    double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
+                    double.TryParse(searchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
                 }
                 else
                 {
                     peptideMonoMassTopPIC = 0;
                 }
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out udtSearchResult.Feature_Score);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
-                udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out searchResult.Proteoform_ID);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out searchResult.Feature_Intensity);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out searchResult.Feature_Score);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out searchResult.Protein);
+                searchResult.Protein = TruncateProteinName(searchResult.Protein);
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_description], out searchResult.ProteinDescription);
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out searchResult.ResidueStart);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out searchResult.ResidueEnd);
 
-                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
                 {
                     ReportError("Proteoform column is missing or invalid", true);
                 }
@@ -1106,41 +1007,42 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                // Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
+                // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Adjusted_precursor_mass
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_mass], out searchResult.Proteoform_mass);
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out searchResult.Unexpected_Mod_Count);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out searchResult.VariablePTMs);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.MIScore], out searchResult.MIScore);
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.PValue);
-                if (!double.TryParse(udtSearchResult.PValue, out udtSearchResult.PValueNum))
-                    udtSearchResult.PValueNum = 0;
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out searchResult.Matched_peaks);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out searchResult.Matched_fragment_ions);
 
-                // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
-                udtSearchResult.Unexpected_Mod_Count = AssureInteger(udtSearchResult.Unexpected_Mod_Count, 0);      // Unexpected_Mod_Count
-                udtSearchResult.Peaks = AssureInteger(udtSearchResult.Peaks, 0);                                    // Peak_count
-                udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                    // Matched_Peak_Count
-                udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out searchResult.PValue);
+                if (!double.TryParse(searchResult.PValue, out searchResult.PValueNum))
+                    searchResult.PValueNum = 0;
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
-                if (!double.TryParse(udtSearchResult.Evalue, out udtSearchResult.EValueNum))
-                    udtSearchResult.EValueNum = 0;
+                    // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
+                    searchResult.Unexpected_Mod_Count = AssureInteger(searchResult.Unexpected_Mod_Count, 0);   // Unexpected_Mod_Count
+                    searchResult.Peaks = AssureInteger(searchResult.Peaks, 0);                                 // Peak_count
+                    searchResult.Matched_peaks = AssureInteger(searchResult.Matched_peaks, 0);                 // Matched_Peak_Count
+                    searchResult.Matched_fragment_ions = AssureInteger(searchResult.Matched_fragment_ions, 0); // Matched_Fragment_Ion_Count
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out searchResult.Evalue);
+                if (!double.TryParse(searchResult.Evalue, out searchResult.EValueNum))
+                    searchResult.EValueNum = 0;
 
-                if (string.Equals(udtSearchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out searchResult.Qvalue);
+
+                if (string.Equals(searchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
-                    udtSearchResult.Qvalue = "10";
+                    searchResult.Qvalue = "10";
                 }
-                else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) && !double.TryParse(udtSearchResult.Qvalue, out _))
+                else if (!string.IsNullOrEmpty(searchResult.Qvalue) && !double.TryParse(searchResult.Qvalue, out _))
                 {
-                    udtSearchResult.Qvalue = string.Empty;
+                    searchResult.Qvalue = string.Empty;
                 }
 
-                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_QValue], out udtSearchResult.Proteoform_QValue);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_QValue], out searchResult.Proteoform_QValue);
 
                 return true;
             }
@@ -1598,11 +1500,11 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<TopPICSearchResult> filteredSearchResults,
+            IEnumerable<TopPICPrSMs> filteredSearchResults,
             ICollection<string> errorMessages,
             bool dataHasPValues)
         {
-            IOrderedEnumerable<TopPICSearchResult> query;
+            IOrderedEnumerable<TopPICPrSMs> query;
 
             if (dataHasPValues)
             {
@@ -1624,10 +1526,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void StoreSynMatches(
-            IList<TopPICSearchResult> searchResults,
+            IList<TopPICPrSMs> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<TopPICSearchResult> filteredSearchResults,
+            ICollection<TopPICPrSMs> filteredSearchResults,
             bool dataHasPValues)
         {
             AssignRankByScore(searchResults, startIndex, endIndex, dataHasPValues);
@@ -1686,13 +1588,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
+        /// <param name="searchResult"></param>
         /// <param name="dataHasPValues"></param>
         /// <param name="errorMessages"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            TopPICSearchResult udtSearchResult,
+            TopPICPrSMs searchResult,
             bool dataHasPValues,
             ICollection<string> errorMessages)
         {
@@ -1706,38 +1608,38 @@ namespace PeptideHitResultsProcessor.Processor
                 var data = new List<string>
                 {
                     resultID.ToString(),
-                    udtSearchResult.ScanNum.ToString(),
-                    udtSearchResult.Prsm_ID,
-                    udtSearchResult.Spectrum_ID,
-                    udtSearchResult.FragMethod,
-                    udtSearchResult.Charge,
-                    udtSearchResult.PrecursorMZ,
-                    udtSearchResult.DelM,
-                    udtSearchResult.DelM_PPM,
-                    udtSearchResult.MH,
-                    udtSearchResult.Proteoform,                // aka Peptide
-                    udtSearchResult.Proteoform_ID,
-                    udtSearchResult.Feature_Intensity,
-                    udtSearchResult.Feature_Score,
-                    udtSearchResult.Protein,
-                    udtSearchResult.ResidueStart,
-                    udtSearchResult.ResidueEnd,
-                    udtSearchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
-                    udtSearchResult.Peaks,                      // Peak_count
-                    udtSearchResult.Matched_peaks,              // Matched_Peak_Count
-                    udtSearchResult.Matched_fragment_ions       // Matched_Fragment_Ion_Count
+                    searchResult.ScanNum.ToString(),
+                    searchResult.Prsm_ID,
+                    searchResult.Spectrum_ID,
+                    searchResult.FragMethod,
+                    searchResult.Charge,
+                    searchResult.PrecursorMZ,
+                    searchResult.DelM,
+                    searchResult.DelM_PPM,
+                    searchResult.MH,                        // Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
+                    searchResult.Proteoform,                // aka Peptide
+                    searchResult.Proteoform_ID,
+                    searchResult.Feature_Intensity,
+                    searchResult.Feature_Score,
+                    searchResult.Protein,
+                    searchResult.ResidueStart,
+                    searchResult.ResidueEnd,
+                    searchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
+                    searchResult.Peaks,                      // Peak_count
+                    searchResult.Matched_peaks,              // Matched_Peak_Count
+                    searchResult.Matched_fragment_ions       // Matched_Fragment_Ion_Count
                 };
 
                 if (dataHasPValues)
                 {
-                    data.Add(udtSearchResult.PValue);
-                    data.Add(udtSearchResult.RankPValue.ToString());
+                    data.Add(searchResult.PValue);
+                    data.Add(searchResult.RankPValue.ToString());
                 }
 
-                data.Add(udtSearchResult.Evalue);
-                data.Add(udtSearchResult.Qvalue);
-                data.Add(udtSearchResult.Proteoform_QValue);
-                data.Add(udtSearchResult.VariablePTMs);
+                data.Add(searchResult.Evalue);
+                data.Add(searchResult.Qvalue);
+                data.Add(searchResult.Proteoform_QValue);
+                data.Add(searchResult.VariablePTMs);
 
                 writer.WriteLine(StringUtilities.CollapseList(data));
             }
@@ -1763,9 +1665,9 @@ namespace PeptideHitResultsProcessor.Processor
             SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
 
-        private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<TopPICSearchResult>
+        private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<TopPICPrSMs>
         {
-            public int Compare(TopPICSearchResult x, TopPICSearchResult y)
+            public int Compare(TopPICPrSMs x, TopPICPrSMs y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {
