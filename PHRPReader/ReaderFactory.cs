@@ -2832,8 +2832,10 @@ namespace PHRPReader
                                         {
                                             // Residue is already present in staticMods; this is unusual, but we'll allow it
                                             // We'll log a warning, but continue
-                                            ShowMessage("Warning: Residue '" + chChar + "' has more than one static mod defined; " +
-                                                        "this is not typically used, but will be allowed");
+                                            ShowMessage(string.Format(
+                                                "Warning: Residue '{0}' has more than one static mod defined; this is not typically used, but will be allowed",
+                                                chChar));
+
                                             modDefs.Add(modDef);
                                         }
                                     }
@@ -2848,7 +2850,7 @@ namespace PHRPReader
                                 }
                                 catch (Exception ex)
                                 {
-                                    HandleException("Exception adding static mod for " + chChar + " with ModMass=" + modMass, ex);
+                                    HandleException(string.Format("Exception adding static mod for {0} with mass {1}", chChar, modMass), ex);
                                 }
                             }
 
@@ -2861,7 +2863,7 @@ namespace PHRPReader
                             {
                                 if (dynamicMods.ContainsKey(modDef.ModificationSymbol))
                                 {
-                                    // Mod symbol already present in dynamicMods; this is unexpected, but can happen with MODa, which finds lots of mods
+                                    // Mod symbol already present in dynamicMods; this is unexpected, but can happen with MODa and TopPIC, which finds lots of mods
                                     if (duplicateModSymbolCounts.TryGetValue(modDef.ModificationSymbol, out var duplicateCount))
                                     {
                                         duplicateModSymbolCounts[modDef.ModificationSymbol] = duplicateCount + 1;
@@ -2871,8 +2873,9 @@ namespace PHRPReader
                                         duplicateModSymbolCounts.Add(modDef.ModificationSymbol, 1);
 
                                         // We'll log a warning, but continue
-                                        ShowMessage("Warning: Dynamic mod symbol '" + modDef.ModificationSymbol + "' is already defined; " +
-                                                    "it cannot have more than one associated mod mass (duplicate has ModMass=" + modMass + ")");
+                                        ShowMessage(string.Format(
+                                            "Warning: Dynamic mod symbol '{0}' is already defined, with mass {1}; it cannot have more than one associated mod mass (duplicate has mass {2})",
+                                            modDef.ModificationSymbol, dynamicMods[modDef.ModificationSymbol].ModificationMass, modMass));
                                     }
                                 }
                                 else
@@ -2882,7 +2885,7 @@ namespace PHRPReader
                             }
                             catch (Exception ex)
                             {
-                                HandleException("Exception adding dynamic mod for " + modDef.ModificationSymbol + " with ModMass=" + modMass, ex);
+                                HandleException(string.Format("Exception adding dynamic mod for {0} with mass {1}", modDef.ModificationSymbol, modMass), ex);
                             }
 
                             break;
