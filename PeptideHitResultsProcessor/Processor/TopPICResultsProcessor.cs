@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "January 13, 2022";
+            FileDate = "September 12, 2022";
         }
 
         /// <summary>
@@ -607,15 +607,18 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This routine creates a first hits file or synopsis file from the output from TopPIC
+        /// This routine creates a first hits file and/or a synopsis file from the output from TopPIC
         /// The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
         /// The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
-        private bool CreateSynResultsFile(
+        /// <param name="inputFilePath">TopPIC results file (Dataset_TopPIC_PrSMs.txt)</param>
+        /// <param name="fhtFilePath">First-hits file path (Dataset_toppic_fht.txt)</param>
+        /// <param name="synFilePath">Synopsis file path (Dataset_toppic_syn.txt)</param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
-            string outputFilePath)
+            string fhtFilePath,
+            string synFilePath)
         {
             var columnMapping = new Dictionary<TopPICResultsFileColumns, int>();
 
@@ -623,10 +626,20 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var errorMessages = new List<string>();
 
+                // Initialize a SortedSet that tracks each combo of scan and charge
+                var scanChargeFirstHit = new SortedSet<string>();
+
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream writer
                 using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                using var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var firstHitsFileWriter = string.IsNullOrWhiteSpace(fhtFilePath)
+                    ? null
+                    : new StreamWriter(new FileStream(fhtFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                var synopsisFileWriter = string.IsNullOrWhiteSpace(synFilePath)
+                    ? null
+                    : new StreamWriter(new FileStream(synFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
                 var headerParsed = false;
                 var dataHasPValues = false;
@@ -664,8 +677,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                         dataHasPValues = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
 
-                        // Write the header line
-                        WriteSynFHTFileHeader(writer, dataHasPValues, errorMessages);
+                        // Write the header line to each file
+                        WriteSynFHTFileHeader(firstHitsFileWriter, dataHasPValues, errorMessages);
+
+                        WriteSynFHTFileHeader(synopsisFileWriter, dataHasPValues, errorMessages);
 
                         continue;
                     }
@@ -676,13 +691,23 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         if (isAdditionalProtein)
                         {
-                            if (CloneScores(previousSearchResult, searchResult))
+                            // If creating the synopsis file, copy scores from the previous search result to searchResult
+                            // (both should have the same Prsm_ID value; CloneScores will return false if they do not)
+
+                            if (synopsisFileWriter != null && CloneScores(previousSearchResult, searchResult))
                             {
                                 searchResultsUnfiltered.Add(searchResult);
                             }
                         }
                         else
                         {
+                            var scanChargeKey = searchResult.Scans + "_" + searchResult.Charge;
+
+                            if (!scanChargeFirstHit.Contains(scanChargeKey))
+                            {
+                                scanChargeFirstHit.Add(scanChargeKey);
+                                searchResult.StoreInFirstHitsFile = true;
+                            }
 
                             searchResultsUnfiltered.Add(searchResult);
                             previousSearchResult = searchResult;
@@ -717,7 +742,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, errorMessages, dataHasPValues);
+                SortAndWriteFilteredSearchResults(firstHitsFileWriter, synopsisFileWriter, filteredSearchResults, errorMessages, dataHasPValues);
 
                 // Inform the user if any errors occurred
                 if (errorMessages.Count > 0)
@@ -729,7 +754,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateSynResultsFile", ex);
+                SetErrorMessage("Error in CreateFHTorSYNResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
@@ -1639,44 +1664,74 @@ namespace PeptideHitResultsProcessor.Processor
                         break;
                     }
 
-                    // Do not create a first-hits file for TopPIC results
+                    if (!Options.CreateFirstHitsFile && !Options.CreateSynopsisFile)
+                    {
+                        OnWarningEvent("Both 'CreateFirstHitsFile' and 'CreateSynopsisFile' are false; aborting since nothing to do");
+                        return true;
+                    }
 
-                    // Create the synopsis output file
-                    ResetProgress("Creating the SYN file", true);
+                    string fhtOutputFilePath;
+                    string synOutputFilePath;
 
-                    // The synopsis file name will be of the form BasePath_msalign_syn.txt
-                    var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
+                    if (Options.CreateFirstHitsFile)
+                    {
+                        fhtOutputFilePath = Path.Combine(outputDirectoryPath, baseName + FIRST_HITS_FILE_SUFFIX);
+                    }
+                    else
+                    {
+                        fhtOutputFilePath = string.Empty;
+                    }
 
-                    success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
+                    if (Options.CreateSynopsisFile)
+                    {
+                        // The synopsis file name will be of the form BasePath_msalign_syn.txt
+                        synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
+                    }
+                    else
+                    {
+                        synOutputFilePath = string.Empty;
+                    }
+
+                    // Create the first hits output file
+                    ResetProgress("Creating the FHT and SYN files", true);
+
+                    success = CreateFHTorSYNResultsFile(inputFilePath, fhtOutputFilePath, synOutputFilePath);
+
                     if (!success)
                     {
                         return false;
                     }
 
-                    // Create the other PHRP-specific files
-                    ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
-
-                    // Now parse the _syn.txt file that we just created to next create the other PHRP files
-                    success = ParseTopPICSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
-                    if (!success)
+                    if (Options.CreateSynopsisFile)
                     {
-                        return false;
-                    }
+                        // Create the other PHRP-specific files
+                        ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
-                    // Remove all items from pepToProteinMapping to reduce memory overhead
-                    pepToProteinMapping.Clear();
-                    pepToProteinMapping.TrimExcess();
+                        // Now parse the _syn.txt file that we just created to next create the other PHRP files
+                        success = ParseTopPICSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
 
-                    if (Options.CreateProteinModsFile)
-                    {
-                        // Use a higher match error threshold because some peptides reported by TopPIC don't perfectly match the FASTA file
-                        const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+                        if (!success)
+                        {
+                            return false;
+                        }
 
-                        success = CreateProteinModsFileWork(
-                            baseName, inputFile,
-                            synOutputFilePath, outputDirectoryPath,
-                            PeptideHitResultTypes.TopPIC,
-                            MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD);
+                        // Remove all items from pepToProteinMapping to reduce memory overhead
+                        pepToProteinMapping.Clear();
+                        pepToProteinMapping.TrimExcess();
+
+                        if (Options.CreateProteinModsFile)
+                        {
+                            // Use a higher match error threshold because some peptides reported by TopPIC don't perfectly match the FASTA file
+                            const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 50;
+
+                            success = CreateProteinModsFileWork(
+                                baseName, inputFile,
+                                synOutputFilePath, outputDirectoryPath,
+                                PeptideHitResultTypes.TopPIC,
+                                MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                                0,
+                                fhtOutputFilePath);
+                        }
                     }
 
                     if (success)
@@ -1715,7 +1770,8 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void SortAndWriteFilteredSearchResults(
-            TextWriter writer,
+            TextWriter firstHitsFileWriter,
+            TextWriter synopsisFileWriter,
             IEnumerable<TopPICPrSMs> filteredSearchResults,
             ICollection<string> errorMessages,
             bool dataHasPValues)
@@ -1736,7 +1792,16 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, dataHasPValues, errorMessages);
+                if (firstHitsFileWriter != null && result.StoreInFirstHitsFile)
+                {
+                    WriteSearchResultToFile(index, firstHitsFileWriter, result, dataHasPValues, errorMessages);
+                }
+
+                if (synopsisFileWriter != null)
+                {
+                    WriteSearchResultToFile(index, synopsisFileWriter, result, dataHasPValues, errorMessages);
+                }
+
                 index++;
             }
         }
@@ -1774,6 +1839,9 @@ namespace PeptideHitResultsProcessor.Processor
             bool dataHasPValues,
             ICollection<string> errorMessages)
         {
+            if (writer == null)
+                return;
+
             try
             {
                 // Get the synopsis file headers
