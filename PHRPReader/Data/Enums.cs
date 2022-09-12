@@ -1881,44 +1881,66 @@ namespace PHRPReader.Data
         Feature_Score = 13,
 
         /// <summary>
+        /// Feature apex time (in minutes)
+        /// </summary>
+        Feature_Apex_Time = 14,
+
+        /// <summary>
+        /// Number of proteins for this peptide (aka proteoform)
+        /// </summary>
+        Protein_Count = 15,
+
+        /// <summary>
         /// Protein name
         /// </summary>
-        Protein = 14,
+        Protein = 16,
+
+        /// <summary>
+        /// Protein N-terminus state
+        /// </summary>
+        /// <remarks>
+        /// Examples:
+        ///   NONE
+        ///   M_ACETYLATION
+        ///   NME
+        ///   NME_ACETYLATION
+        /// </remarks>
+        Protein_Nterminal_Form = 17,
 
         /// <summary>
         /// Residue start
         /// </summary>
-        ResidueStart = 15,
+        ResidueStart = 18,
 
         /// <summary>
         /// Residue end
         /// </summary>
-        ResidueEnd = 16,
+        ResidueEnd = 19,
 
         /// <summary>
         /// Unexpected Mod Count
         /// </summary>
-        Unexpected_Mod_Count = 17,
+        Unexpected_Mod_Count = 20,
 
         /// <summary>
         /// Peak Count
         /// </summary>
-        Peak_Count = 18,
+        Peak_Count = 21,
 
         /// <summary>
         /// Matched peak count
         /// </summary>
-        Matched_Peak_Count = 19,
+        Matched_Peak_Count = 22,
 
         /// <summary>
         /// Matched fragment ion count
         /// </summary>
-        Matched_Fragment_Ion_Count = 20,
+        Matched_Fragment_Ion_Count = 23,
 
         /// <summary>
         /// P-value
         /// </summary>
-        PValue = 21,
+        PValue = 24,
 
         /// <summary>
         /// Ranked score
@@ -1926,27 +1948,27 @@ namespace PHRPReader.Data
         /// <remarks>
         /// Rank 1 means lowest (best) p-value, 2 means next higher p-value, etc. (ties get the same rank)
         /// </remarks>
-        Rank_PValue = 22,
+        Rank_PValue = 25,
 
         /// <summary>
         /// E-Value
         /// </summary>
-        EValue = 23,
+        EValue = 26,
 
         /// <summary>
         /// Q Value
         /// </summary>
-        QValue = 24,
+        QValue = 27,
 
         /// <summary>
         /// Proteoform Q Value
         /// </summary>
-        Proteoform_QValue = 25,
+        Proteoform_QValue = 28,
 
         /// <summary>
         /// Variable PTMs
         /// </summary>
-        VariablePTMs = 26
+        VariablePTMs = 29
     }
 
     /// <summary>
