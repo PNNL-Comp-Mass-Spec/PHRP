@@ -312,6 +312,7 @@ namespace PHRPReader.Data
             OccurrenceCount = 0;
             TargetResidues = string.Empty;
             UnknownModAutoDefined = false;
+            UniModName = string.Empty;
         }
 
         /// <summary>

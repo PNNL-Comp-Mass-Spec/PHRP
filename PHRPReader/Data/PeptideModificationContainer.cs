@@ -966,7 +966,7 @@ namespace PHRPReader.Data
 
         /// <summary>
         /// Resolve a modification name to a modification mass
-        /// Checks both selected UniMod names and the names in mMassCorrectionTags
+        /// Checks both names in mMassCorrectionTags and UniMod names
         /// </summary>
         /// <param name="modName">Modification name</param>
         /// <param name="modMass">Monoisotopic mass</param>
@@ -978,6 +978,16 @@ namespace PHRPReader.Data
                 if (string.Equals(item.Key, modName, StringComparison.OrdinalIgnoreCase))
                 {
                     modMass = item.Value;
+                    return true;
+                }
+            }
+
+            foreach (var item in Modifications)
+            {
+                if (item.UniModName?.Equals(modName, StringComparison.OrdinalIgnoreCase) == true ||
+                    item.MassCorrectionTag?.Equals(modName, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    modMass = item.ModificationMass;
                     return true;
                 }
             }
