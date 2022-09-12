@@ -420,6 +420,137 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Copy values from sourceResult to targetResult, but only if both have the same Prsm_ID value
+        /// </summary>
+        /// <remarks>Does not copy protein name or description</remarks>
+        /// <param name="sourceResult"></param>
+        /// <param name="targetResult"></param>
+        /// <returns>True if the results both have the same Prsm_ID and scores were thus cloned, otherwise false</returns>
+        private bool CloneScores(TopPICPrSMs sourceResult, TopPICPrSMs targetResult)
+        {
+            if (sourceResult.Prsm_ID != targetResult.Prsm_ID)
+            {
+                OnWarningEvent(
+                    "Source and target TopPIC search results do not have the same Prsm_ID: {0} vs. {1}; will not clone scores",
+                    sourceResult.Prsm_ID, targetResult.Prsm_ID);
+
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(targetResult.Spectrum_ID))
+                targetResult.Spectrum_ID = sourceResult.Spectrum_ID;
+
+            if (string.IsNullOrWhiteSpace(targetResult.FragMethod))
+                targetResult.FragMethod = sourceResult.FragMethod;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Scans))
+                targetResult.Scans = sourceResult.Scans;
+
+            targetResult.ScanNum = sourceResult.ScanNum;
+
+            if (string.IsNullOrWhiteSpace(targetResult.RetentionTime))
+                targetResult.RetentionTime = sourceResult.RetentionTime;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Peaks))
+                targetResult.Peaks = sourceResult.Peaks;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Charge))
+                targetResult.Charge = sourceResult.Charge;
+
+            targetResult.ChargeNum = sourceResult.ChargeNum;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Precursor_mass))
+                targetResult.Precursor_mass = sourceResult.Precursor_mass;
+
+            if (string.IsNullOrWhiteSpace(targetResult.PrecursorMZ))
+                targetResult.PrecursorMZ = sourceResult.PrecursorMZ;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Adjusted_precursor_mass))
+                targetResult.Adjusted_precursor_mass = sourceResult.Adjusted_precursor_mass;
+
+            if (string.IsNullOrWhiteSpace(targetResult.MH))
+                targetResult.MH = sourceResult.MH;
+
+            if (string.IsNullOrWhiteSpace(targetResult.DelM))
+                targetResult.DelM = sourceResult.DelM;
+
+            if (string.IsNullOrWhiteSpace(targetResult.DelM_PPM))
+                targetResult.DelM_PPM = sourceResult.DelM_PPM;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Proteoform_ID))
+                targetResult.Proteoform_ID = sourceResult.Proteoform_ID;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Feature_Intensity))
+                targetResult.Feature_Intensity = sourceResult.Feature_Intensity;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Feature_Score))
+                targetResult.Feature_Score = sourceResult.Feature_Score;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Feature_Apex_Time))
+                targetResult.Feature_Apex_Time = sourceResult.Feature_Apex_Time;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Protein_Hits))
+                targetResult.Protein_Hits = sourceResult.Protein_Hits;
+
+            // Skip targetResult.Protein
+            // Skip targetResult.ProteinDescription
+
+            if (string.IsNullOrWhiteSpace(targetResult.ResidueStart))
+                targetResult.ResidueStart = sourceResult.ResidueStart;
+
+            if (string.IsNullOrWhiteSpace(targetResult.ResidueEnd))
+                targetResult.ResidueEnd = sourceResult.ResidueEnd;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Special_amino_acids))
+                targetResult.Special_amino_acids = sourceResult.Special_amino_acids;
+
+            // The prefix and suffix residues in the proteoform sequence correspond to the first protein listed in the TopPIC_PrSMs.txt file
+            if (string.IsNullOrWhiteSpace(targetResult.Proteoform))
+                targetResult.Proteoform = sourceResult.Proteoform;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Protein_Nterminal_Form))
+                targetResult.Protein_Nterminal_Form = sourceResult.Protein_Nterminal_Form;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Proteoform_mass))
+                targetResult.Proteoform_mass = sourceResult.Proteoform_mass;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Unexpected_Mod_Count))
+                targetResult.Unexpected_Mod_Count = sourceResult.Unexpected_Mod_Count;
+
+            if (string.IsNullOrWhiteSpace(targetResult.MIScore))
+                targetResult.MIScore = sourceResult.MIScore;
+
+            if (string.IsNullOrWhiteSpace(targetResult.VariablePTMs))
+                targetResult.VariablePTMs = sourceResult.VariablePTMs;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Matched_peaks))
+                targetResult.Matched_peaks = sourceResult.Matched_peaks;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Matched_fragment_ions))
+                targetResult.Matched_fragment_ions = sourceResult.Matched_fragment_ions;
+
+            if (string.IsNullOrWhiteSpace(targetResult.PValue))
+                targetResult.PValue = sourceResult.PValue;
+
+            targetResult.PValueNum = sourceResult.PValueNum;
+
+            targetResult.RankPValue = sourceResult.RankPValue;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Evalue))
+                targetResult.Evalue = sourceResult.Evalue;
+
+            targetResult.EValueNum = sourceResult.EValueNum;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Qvalue))
+                targetResult.Qvalue = sourceResult.Qvalue;
+
+            if (string.IsNullOrWhiteSpace(targetResult.Proteoform_QValue))
+                targetResult.Proteoform_QValue = sourceResult.Proteoform_QValue;
+
+            return true;
+        }
+
+        /// <summary>
         /// Compute the peptide mass
         /// </summary>
         /// <param name="peptide">Sequence with mods, which can be either numeric or named ([15.98154] or [Acetyl])</param>
@@ -508,6 +639,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize the array that will hold all of the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<TopPICPrSMs>();
 
+                var previousSearchResult = new TopPICPrSMs();
 
                 // Parse the input file
                 while (!reader.EndOfStream && !AbortProcessing)
@@ -538,11 +670,23 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, out var udtSearchResult, errorMessages, columnMapping);
+                    var validSearchResult = ParseTopPICResultsFileEntry(lineIn, out var searchResult, out var isAdditionalProtein, errorMessages, columnMapping);
 
                     if (validSearchResult)
                     {
-                        searchResultsUnfiltered.Add(udtSearchResult);
+                        if (isAdditionalProtein)
+                        {
+                            if (CloneScores(previousSearchResult, searchResult))
+                            {
+                                searchResultsUnfiltered.Add(searchResult);
+                            }
+                        }
+                        else
+                        {
+
+                            searchResultsUnfiltered.Add(searchResult);
+                            previousSearchResult = searchResult;
+                        }
                     }
 
                     // Update the progress
@@ -864,20 +1008,23 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parses an entry from the TopPIC results file
+        /// Parses an entry from the TopPIC results file (Dataset_TopPIC_PrSMs.txt)
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
+        /// <param name="isAdditionalProtein">Output: true if this is an additional protein for the current PSM</param>
         /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
             out TopPICPrSMs searchResult,
+            out bool isAdditionalProtein,
             ICollection<string> errorMessages,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
             searchResult = new TopPICPrSMs();
+            isAdditionalProtein = false;
 
             string[] splitLine = null;
 
@@ -974,43 +1121,87 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out searchResult.ResidueStart);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out searchResult.ResidueEnd);
 
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Special_amino_acids], out searchResult.Special_amino_acids);
+
+                if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out searchResult.Proteoform))
                 {
-                    ReportError("Proteoform column is missing or invalid", true);
-                }
+                    // Starting with TopPIC 1.5, proteoforms that map to multiple proteins will be listed multiple times in the _TopPIC_PrSMs.txt file
+                    // The first protein will be in a result line with all of the scores
+                    // Subsequent proteins will be in a line with Data File Name, Prism ID, Protein accession, and Protein description, while all of the other columns are blank
 
-                // Add the standard terminus symbols to the peptide sequence
-                udtSearchResult.Proteoform = ReplaceTerminus(udtSearchResult.Proteoform);
+                    var emptyColumns = 0;
 
-                // Parse the sequence to determine the total mod mass
-                // Note that we do not remove any of the mod symbols since TopPIC since mods can ambiguously apply to residues
-                var totalModMass = ComputeTotalModMass(udtSearchResult.Proteoform);
+                    if (string.IsNullOrWhiteSpace(searchResult.Spectrum_ID))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.FragMethod))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Scans))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.RetentionTime))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Peaks))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Charge))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Precursor_mass))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Proteoform_ID))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Feature_Intensity))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Feature_Score))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Feature_Apex_Time))
+                        emptyColumns++;
+                    if (string.IsNullOrWhiteSpace(searchResult.Protein_Hits))
+                        emptyColumns++;
 
-                // Compute theoretical peptide monoisotopic mass, including mods, as computed by PHRP
-                var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Proteoform, totalModMass);
-
-                if (Math.Abs(peptideMonoMassTopPIC) < double.Epsilon)
-                {
-                    peptideMonoMassTopPIC = peptideMonoMassPHRP;
-                }
-
-                // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
-                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Proteoform, peptideMonoMassPHRP, peptideMonoMassTopPIC, ref mDeltaMassWarningCount);
-
-                if (peptideMonoMassTopPIC > 0)
-                {
-                    // Compute DelM and DelM_PPM
-                    var delM = precursorMonoMass - peptideMonoMassTopPIC;
-                    udtSearchResult.DelM = StringUtilities.MassErrorToString(delM);
-
-                    if (precursorMZ > 0)
-                    {
-                        udtSearchResult.DelM_PPM =
-                            PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
-                    }
+                    if (emptyColumns > 5)
+                        isAdditionalProtein = true;
                     else
+                        ReportError("Proteoform column is missing or invalid", true);
+                }
+
+                if (!isAdditionalProtein)
+                {
+                    // Add the standard terminus symbols to the peptide sequence
+                    searchResult.Proteoform = ReplaceTerminus(searchResult.Proteoform);
+
+                    // Parse the sequence to determine the total mod mass
+                    // Note that we do not remove any of the mod symbols since TopPIC since mods can ambiguously apply to residues
+                    var totalModMass = ComputeTotalModMass(searchResult.Proteoform);
+
+                    // Compute theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+                    var peptideMonoMassPHRP = ComputePeptideMass(searchResult.Proteoform, totalModMass);
+
+                    if (Math.Abs(peptideMonoMassTopPIC) < double.Epsilon)
                     {
-                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
+                        peptideMonoMassTopPIC = peptideMonoMassPHRP;
                     }
+
+                    // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
+                    ValidateMatchingMonoisotopicMass(TOOL_NAME, searchResult.Proteoform, peptideMonoMassPHRP, peptideMonoMassTopPIC,
+                        ref mDeltaMassWarningCount);
+
+                    if (peptideMonoMassTopPIC > 0)
+                    {
+                        // Compute DelM and DelM_PPM
+                        var delM = precursorMonoMass - peptideMonoMassTopPIC;
+                        searchResult.DelM = StringUtilities.MassErrorToString(delM);
+
+                        if (precursorMZ > 0)
+                        {
+                            searchResult.DelM_PPM =
+                                PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
+                        }
+                        else
+                        {
+                            searchResult.DelM_PPM = PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
+                        }
+                    }
+
+                    // Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                    searchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
                 }
 
                 // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Adjusted_precursor_mass
@@ -1029,11 +1220,14 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!double.TryParse(searchResult.PValue, out searchResult.PValueNum))
                     searchResult.PValueNum = 0;
 
+                if (!isAdditionalProtein)
+                {
                     // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
                     searchResult.Unexpected_Mod_Count = AssureInteger(searchResult.Unexpected_Mod_Count, 0);   // Unexpected_Mod_Count
                     searchResult.Peaks = AssureInteger(searchResult.Peaks, 0);                                 // Peak_count
                     searchResult.Matched_peaks = AssureInteger(searchResult.Matched_peaks, 0);                 // Matched_Peak_Count
                     searchResult.Matched_fragment_ions = AssureInteger(searchResult.Matched_fragment_ions, 0); // Matched_Fragment_Ion_Count
+                }
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out searchResult.Evalue);
                 if (!double.TryParse(searchResult.Evalue, out searchResult.EValueNum))
