@@ -94,26 +94,30 @@ namespace PeptideHitResultsProcessor.Processor
             RetentionTime = 5,
             Peaks = 6,
             Charge = 7,
-            Precursor_mass = 8,              // Monoisotopic mass value of the observed precursor_mz
-            Adjusted_precursor_mass = 9,     // Theoretical monoisotopic mass of the peptide (including mods)
+            Precursor_mass = 8,             // Monoisotopic mass value of the observed precursor_mz
+            Adjusted_precursor_mass = 9,    // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Proteoform_mass
             Proteoform_ID = 10,
             Feature_intensity = 11,
             Feature_score = 12,
-            Protein_accession = 13,
-            Protein_description = 14,
-            First_residue = 15,
-            Last_residue = 16,
-            Proteoform = 17,
-            Unexpected_modifications = 18,
-            MIScore = 19,
-            Variable_PTMs = 20,
-            Matched_peaks = 21,
-            Matched_fragment_ions = 22,
-            Pvalue = 23,
-            Evalue = 24,
-            Qvalue = 25,                     //  Spectral FDR, or PepFDR
-            Proteoform_QValue = 26
-        }
+            Feature_apex_time = 13,         // Feature apex in v1.4; Feature apex time in v1.5
+            Protein_hits = 14,
+            Protein_accession = 15,
+            Protein_description = 16,
+            First_residue = 17,
+            Last_residue = 18,
+            Special_amino_acids = 19,
+            Proteoform = 20,
+            Proteoform_mass = 21,           // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Adjusted_precursor_mass
+            Protein_Nterminal_form = 22,
+            Unexpected_modifications = 23,
+            Variable_PTMs = 24,
+            MIScore = 25,
+            Matched_peaks = 26,
+            Matched_fragment_ions = 27,
+            Pvalue = 28,                    // Deprecated with 1.5
+            Evalue = 29,
+            Qvalue = 30,                    // Spectral FDR, or PepFDR, or Spectrum-level Q-value
+            Proteoform_QValue = 31          // Proteoform-level Q-value
         }
 
         private int mDeltaMassWarningCount;
@@ -960,6 +964,8 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out searchResult.Proteoform_ID);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out searchResult.Feature_Intensity);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out searchResult.Feature_Score);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_apex_time], out searchResult.Feature_Apex_Time);
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_hits], out searchResult.Protein_Hits);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out searchResult.Protein);
                 searchResult.Protein = TruncateProteinName(searchResult.Protein);
 
@@ -1009,6 +1015,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC; typically identical to Adjusted_precursor_mass
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_mass], out searchResult.Proteoform_mass);
+
+                DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_Nterminal_form], out searchResult.Protein_Nterminal_Form);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out searchResult.Unexpected_Mod_Count);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out searchResult.VariablePTMs);
@@ -1073,15 +1081,23 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
-            // Header prior to November 2018:
-            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue    Proteoform    #unexpected modifications    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
+            // Headers prior to November 2018:
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue                                                                                                                                Proteoform                                                  #unexpected modifications                                 #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
 
-            // Header for TopPIC 1.2 and 1.3
-            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR
+            // Headers for TopPIC 1.2 and 1.3
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity                                                           Protein accession    Protein description    First residue    Last residue                           Proteoform                                                  #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR
 
-            // Header for TopPIC 1.4
+            // Headers for TopPIC 1.4
             // The P-Value column has been removed and the Q-Value and "Proteoform FDR" columns have been renamed
-            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Feature score    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    E-value    Spectrum-level Q-value    Proteoform-level Q-value
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Feature score                                          Protein accession    Protein description    First residue    Last residue                           Proteoform                                                  #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    E-value    Spectrum-level Q-value    Proteoform-level Q-value
+
+            // Headers for TopPIC 1.4.13
+            // Column Feature apex was added
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Feature score    Feature apex                          Protein accession    Protein description    First residue    Last residue                           Proteoform                                                  #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    E-value    Spectrum-level Q-value    Proteoform-level Q-value
+
+            // Headers for TopPIC 1.5.4
+            // "Feature apex" was renamed to "Feature apex time", columns "MIScore" and "#variable PTMs" swapped places, and four columns were added
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Feature score    Feature apex time    #Protein hits    Protein accession    Protein description    First residue    Last residue    Special amino acids    Proteoform    Proteoform mass    Protein N-terminal form    #unexpected modifications    #variable PTMs    MIScore    #matched peaks    #matched fragment ions    E-value    Spectrum-level Q-value    Proteoform-level Q-value
 
             var columnNames = new SortedDictionary<string, TopPICResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1098,15 +1114,21 @@ namespace PeptideHitResultsProcessor.Processor
                 {"Proteoform ID", TopPICResultsFileColumns.Proteoform_ID},
                 {"Feature intensity", TopPICResultsFileColumns.Feature_intensity},
                 {"Feature score", TopPICResultsFileColumns.Feature_score},
+                {"Feature apex", TopPICResultsFileColumns.Feature_apex_time},
+                {"Feature apex time", TopPICResultsFileColumns.Feature_apex_time},
+                {"#Protein hits", TopPICResultsFileColumns.Protein_hits},
                 {"Protein name", TopPICResultsFileColumns.Protein_accession},
                 {"Protein accession", TopPICResultsFileColumns.Protein_accession},
                 {"Protein description", TopPICResultsFileColumns.Protein_description},
                 {"First residue", TopPICResultsFileColumns.First_residue},
                 {"Last residue", TopPICResultsFileColumns.Last_residue},
+                {"Special amino acids", TopPICResultsFileColumns.Special_amino_acids},
                 {"Proteoform", TopPICResultsFileColumns.Proteoform},
+                {"Proteoform mass", TopPICResultsFileColumns.Proteoform_mass},
+                {"Protein N-terminal form", TopPICResultsFileColumns.Protein_Nterminal_form},
                 {"#unexpected modifications", TopPICResultsFileColumns.Unexpected_modifications},
-                {"MIScore", TopPICResultsFileColumns.MIScore},
                 {"#variable PTMs", TopPICResultsFileColumns.Variable_PTMs},
+                {"MIScore", TopPICResultsFileColumns.MIScore},
                 {"#matched peaks", TopPICResultsFileColumns.Matched_peaks},
                 {"#matched fragment ions", TopPICResultsFileColumns.Matched_fragment_ions},
                 {"P-value", TopPICResultsFileColumns.Pvalue},
