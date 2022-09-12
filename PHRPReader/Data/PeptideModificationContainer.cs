@@ -31,7 +31,7 @@ namespace PHRPReader.Data
     /// </remarks>
     public class PeptideModificationContainer
     {
-        // Ignore Spelling: acetyl, deamidated, phospho, Sequest, UniMod
+        // Ignore Spelling: acetyl, carbamyl, deamidated, didehydro, dimethylation, methylation, phospho, phosphorylation, Sequest, UniMod
 
         /// <summary>
         /// Default modification symbols
@@ -994,21 +994,40 @@ namespace PHRPReader.Data
 
             switch (modName.ToLower())
             {
+                case "carbamyl-n":          // Used in TopPIC parameter file TopPIC_18Mods_15ppmParTol_0.8DaClusters_NumShift1_FASTA_has_decoy_EValue_0.5_2022-09-08.txt
+                    modMass = 43.005814;
+                    return true;
+
                 case "deamidated":
                     modMass = 0.984016;
                     return true;
+
+                case "dimethylation":
+                    modMass = 28.0313;
+                    return true;
+
+                case "disulfide":           // Didehydro
+                    modMass = -2.01565;
+                    return true;
+
                 case "methyl":
+                case "methylation":
                     modMass = 14.01565;
                     return true;
+
                 case "oxidation":
                     modMass = 15.994915;
                     return true;
+
                 case "acetyl":
                     modMass = 42.010567;
                     return true;
+
                 case "phospho":
+                case "phosphorylation":
                     modMass = 79.966331;
                     return true;
+
                 default:
                     modMass = 0;
                     return false;
@@ -1588,8 +1607,9 @@ namespace PHRPReader.Data
 
                 // ReSharper disable StringLiteralTypo
                 StoreMassCorrectionTag("4xDeut  ", 4.025107);
-                StoreMassCorrectionTag("6C134N15", 10.008269);
+                StoreMassCorrectionTag("6C134N15", 10.008269);      // HeavyR
                 StoreMassCorrectionTag("6xC13N15", 7.017164);
+                StoreMassCorrectionTag("6C132N15", 8.014199);       // HeavyK
                 StoreMassCorrectionTag("AcetAmid", 41.02655);
                 StoreMassCorrectionTag("Acetyl  ", 42.010567);
                 StoreMassCorrectionTag("Acrylmid", 71.037117);
@@ -1614,6 +1634,8 @@ namespace PHRPReader.Data
                 StoreMassCorrectionTag("GalNAMan", 664.2551);
                 StoreMassCorrectionTag("Gluthone", 305.068146);
                 StoreMassCorrectionTag("Guanid  ", 42.021797);
+                StoreMassCorrectionTag("HeavyK  ", 8.014199);
+                StoreMassCorrectionTag("HeavyR  ", 10.008269);
                 StoreMassCorrectionTag("Heme_615", 615.169458);
                 StoreMassCorrectionTag("Hexosam ", 203.079376);
                 StoreMassCorrectionTag("Hexose  ", 162.052826);
