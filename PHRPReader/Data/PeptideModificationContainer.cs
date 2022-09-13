@@ -995,6 +995,7 @@ namespace PHRPReader.Data
             switch (modName.ToLower())
             {
                 case "carbamyl-n":          // Used in TopPIC parameter file TopPIC_18Mods_15ppmParTol_0.8DaClusters_NumShift1_FASTA_has_decoy_EValue_0.5_2022-09-08.txt
+                case "carbamyl_n":          // Used in TopPIC parameter file TopPIC_12Mods_15ppmParTol_0.8DaClusters_NumShift1_FASTA_has_decoy_EValue_0.5_2022-09-07.txt
                     modMass = 43.005814;
                     return true;
 

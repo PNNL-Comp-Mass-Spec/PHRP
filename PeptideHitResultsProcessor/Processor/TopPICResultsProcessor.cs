@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options"></param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "September 12, 2022";
+            FileDate = "September 13, 2022";
         }
 
         /// <summary>
