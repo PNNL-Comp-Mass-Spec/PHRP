@@ -1,4 +1,4 @@
-a# Peptide Hit Results Processor
+# Peptide Hit Results Processor
 
 The Peptide Hit Results Processor (PHRP) converts search results from various
 MS/MS identification tools into a series of tab-delimited text files
