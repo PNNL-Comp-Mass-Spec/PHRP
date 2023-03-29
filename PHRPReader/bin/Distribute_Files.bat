@@ -15,7 +15,7 @@ call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\AM_Shared
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\AM_Program\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_Extraction_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_IDPicker_PlugIn\bin"
-call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_Mage_PlugIn\bin\Debug"
+call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_Mage_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Plugin\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerDLL\bin\Debug"
@@ -24,7 +24,6 @@ call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\A
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_MSXML_Gen_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_Converter_PlugIn\bin"
-call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_MzXML_PlugIn\bin"
 
 call Distribute_Files_Work.bat "..\..\..\MASICResultsMerger\bin"
 call Distribute_Files_Work.bat "..\..\..\MASICResultsMerger\Lib"
