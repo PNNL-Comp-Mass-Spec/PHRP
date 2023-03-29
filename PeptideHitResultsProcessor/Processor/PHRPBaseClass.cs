@@ -744,7 +744,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                var appDirPath = ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
+                var appDirPath = AppUtils.GetAppDirectoryPath();
                 if (string.IsNullOrWhiteSpace(appDirPath))
                 {
                     return false;
@@ -1911,7 +1911,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public static string GetAppVersion()
         {
-            return ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+            return AppUtils.GetAppVersion(PROGRAM_DATE);
         }
 
         /// <summary>
