@@ -740,8 +740,6 @@ namespace PeptideHitResultsProcessor.Processor
             out string synOutputFilePath,
             out int filterPassingResultCount)
         {
-            baseName = string.Empty;
-            synOutputFilePath = string.Empty;
             filterPassingResultCount = 0;
 
             try
@@ -753,6 +751,10 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+
+                    baseName = string.Empty;
+                    synOutputFilePath = string.Empty;
+
                     return false;
                 }
 
@@ -763,6 +765,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!success)
                 {
+                    baseName = string.Empty;
+                    synOutputFilePath = string.Empty;
+
                     return false;
                 }
 
@@ -772,7 +777,12 @@ namespace PeptideHitResultsProcessor.Processor
                     // Instead, load data from the Dataset.tsv file (or files)
 
                     if (!LoadNonPsmResults(inputFile, errorMessages, filteredSearchResults))
+                    {
+                        baseName = string.Empty;
+                        synOutputFilePath = string.Empty;
+
                         return false;
+                    }
                 }
                 else
                 {
@@ -780,7 +790,12 @@ namespace PeptideHitResultsProcessor.Processor
                     // If we loaded results from a Dataset.tsv file, merge in peptide prophet values and other scores from the _psm.tsv file (if it exists)
 
                     if (!MergeRelatedMSFraggerResults(inputFile, errorMessages, filteredSearchResults))
+                    {
+                        baseName = string.Empty;
+                        synOutputFilePath = string.Empty;
+
                         return false;
+                    }
                 }
 
                 Console.WriteLine();
@@ -796,19 +811,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // If baseNameByDatasetName has multiple items, will use either Options.OutputFileBaseName,
                 // or the longest string in common for the keys in baseNameByDatasetName
 
-                if (string.IsNullOrWhiteSpace(Options.OutputFileBaseName))
-                {
-                    baseName = baseNameByDatasetName.Count switch
-                    {
-                        0 => "Dataset_msfragger",
-                        1 => baseNameByDatasetName.First().Key + "_msfragger",
-                        _ => longestCommonBaseName + "_msfragger"
-                    };
-                }
-                else
-                {
-                    baseName = Options.OutputFileBaseName + "_msfragger";
-                }
+                baseName = GetBaseNameForOutputFiles(baseNameByDatasetName, "msfragger", longestCommonBaseName);
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
@@ -837,6 +840,10 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+
+                baseName = string.Empty;
+                synOutputFilePath = string.Empty;
+
                 return false;
             }
         }

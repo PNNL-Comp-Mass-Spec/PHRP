@@ -900,8 +900,6 @@ namespace PeptideHitResultsProcessor.Processor
             out string synOutputFilePath,
             out int filterPassingResultCount)
         {
-            baseName = string.Empty;
-            synOutputFilePath = string.Empty;
             filterPassingResultCount = 0;
 
             try
@@ -914,6 +912,10 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+
+                    baseName = string.Empty;
+                    synOutputFilePath = string.Empty;
+
                     return false;
                 }
 
@@ -952,6 +954,9 @@ namespace PeptideHitResultsProcessor.Processor
                             {
                                 SetErrorMessage("Invalid header line in " + inputFile.Name);
                             }
+
+                            baseName = string.Empty;
+                            synOutputFilePath = string.Empty;
 
                             return false;
                         }
@@ -1020,15 +1025,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // If baseNameByDatasetName only has one item, will use the full dataset name
                 // If baseNameByDatasetName has multiple items, will use the longest string in common for the keys in baseNameByDatasetName
 
-                baseName = baseNameByDatasetName.Count switch
-                {
-                    0 => "Dataset_maxq",
-                    1 => baseNameByDatasetName.First().Key + "_maxq",
-                    _ => string.Format("{0}_maxq",
-                        string.IsNullOrWhiteSpace(Options.OutputFileBaseName)
-                            ? longestCommonBaseName
-                            : Options.OutputFileBaseName)
-                };
+                baseName = GetBaseNameForOutputFiles(baseNameByDatasetName, "maxq", longestCommonBaseName);
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
@@ -1057,6 +1054,10 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage("Error in CreateSynResultsFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+
+                baseName = string.Empty;
+                synOutputFilePath = string.Empty;
+
                 return false;
             }
         }

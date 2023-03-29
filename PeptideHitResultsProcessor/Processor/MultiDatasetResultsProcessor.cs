@@ -71,6 +71,34 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Get the base name to use for output files
+        /// </summary>
+        /// <remarks>If baseNameByDatasetName is empty, or if longestCommonBaseName and Options.OutputFileBaseName are empty, uses a generic base name</remarks>
+        /// <param name="baseNameByDatasetName"></param>
+        /// <param name="toolNameAbbreviation"></param>
+        /// <param name="longestCommonBaseName"></param>
+        /// <returns>Base name</returns>
+        protected string GetBaseNameForOutputFiles(Dictionary<string, string> baseNameByDatasetName, string toolNameAbbreviation, string longestCommonBaseName)
+        {
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            if (baseNameByDatasetName.Count == 0 || baseNameByDatasetName.Count > 1 && string.IsNullOrWhiteSpace(Options.OutputFileBaseName) && string.IsNullOrWhiteSpace(longestCommonBaseName))
+            {
+                return string.Format("Dataset_{0}", toolNameAbbreviation);
+            }
+
+            if (baseNameByDatasetName.Count == 1)
+            {
+                return string.Format("{0}_{1}", baseNameByDatasetName.First().Key, toolNameAbbreviation);
+            }
+
+            // baseNameByDatasetName.Count is greater than 1 and either longestCommonBaseName has text or Options.OutputFileBaseName has text
+
+            return string.Format("{0}_{1}",
+                string.IsNullOrWhiteSpace(Options.OutputFileBaseName) ? longestCommonBaseName : Options.OutputFileBaseName,
+                toolNameAbbreviation);
+        }
+
+        /// <summary>
         /// Examine the names in datasetNames
         /// Create a mapping from full name to abbreviated name
         /// </summary>
