@@ -800,6 +800,250 @@ namespace PHRPReader.Data
     }
 
     /// <summary>
+    /// DIA-NN synopsis file columns
+    /// </summary>
+    public enum DiaNNSynFileColumns
+    {
+        /// <summary>
+        /// Result ID
+        /// </summary>
+        ResultID = 0,
+
+        /// <summary>
+        /// Dataset name (abbreviated dataset name, as assigned by the analysis manager)
+        /// </summary>
+        Dataset = 1,
+
+        /// <summary>
+        /// Dataset ID
+        /// </summary>
+        DatasetID = 2,
+
+        /// <summary>
+        /// MS/MS scan number in the dataset
+        /// </summary>
+        Scan = 3,
+
+        /// <summary>
+        /// Ion Mobility
+        /// </summary>
+        IonMobility = 4,
+
+        /// <summary>
+        /// Charge state of the precursor ion
+        /// </summary>
+        Charge = 5,
+
+        /// <summary>
+        /// Precursor ion m/z (computed from peptide mass and charge by PHRP)
+        /// </summary>
+        PrecursorMZ = 6,
+
+        /// <summary>
+        /// Monoisotopic (M+H)+ value, computed from peptide mass by PHRP
+        /// </summary>
+        /// <remarks>
+        /// This is (M+H)+
+        /// </remarks>
+        MH = 9,
+
+        /// <summary>
+        /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
+        /// </summary>
+        Mass = 10,
+
+        /// <summary>
+        /// Peptide sequence, without any modifications
+        /// </summary>
+        Peptide = 11,
+
+        /// <summary>
+        /// ost-translational modifications contained within the identified peptide
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For DIA-NN, this is read from column Modified.Sequence in report.tsv, then converted into MSFragger style modification names
+        /// </para>
+        /// <para>
+        /// DIA-NN Examples:
+        ///   15M(15.9949)
+        ///   1M(15.9949), 5C(57.0215)
+        ///   N-term(42.0106)
+        /// </para>
+        /// </remarks>
+        Modifications = 12,
+
+        /// <summary>
+        /// Protein group name
+        /// </summary>
+        ProteinGroup = 13,
+
+        /// <summary>
+        /// Protein names (from the FASTA file)
+        /// </summary>
+        ProteinIDs = 14,
+
+        /// <summary>
+        /// Protein names, as determined by DIA-NN, typically corresponding to UniProt Name
+        /// </summary>
+        ProteinNames = 15,
+
+        /// <summary>
+        /// Gene names associated with the peptide
+        /// </summary>
+        GeneNames = 16,
+
+        /// <summary>
+        /// Number of tryptic terminii
+        /// </summary>
+        NTT = 17,
+
+        /// <summary>
+        /// Protein Group Quantity
+        /// </summary>
+        ProteinGroupQuantity = 18,
+
+        /// <summary>
+        /// Protein Group Normalized
+        /// </summary>
+        ProteinGroupNormalized = 19,
+
+        /// <summary>
+        /// Protein Group Max LFQ
+        /// </summary>
+        ProteinGroupMaxLFQ = 20,
+
+        /// <summary>
+        /// Genes Quantity
+        /// </summary>
+        GenesQuantity = 21,
+
+         /// <summary>
+        /// Genes Normalized
+        /// </summary>
+        GenesNormalized = 22,
+
+        /// <summary>
+        /// Genes Max LFQ
+        /// </summary>
+        GenesMaxLFQ = 23,
+
+        /// <summary>
+        /// Genes Max LFQ Unique
+        /// </summary>
+        GenesMaxLFQUnique = 24,
+
+        /// <summary>
+        /// QValue computed by DIA-NN
+        /// </summary>
+        QValue = 25,
+        /// <summary>
+        /// PEP (posterior error probability)
+        /// </summary>
+        PEP = 26,
+        /// <summary>
+        /// Global QValue
+        /// </summary>
+        GlobalQValue = 27,
+
+        /// <summary>
+        /// Protein QValue
+        /// </summary>
+        ProteinQValue = 28,
+
+        /// <summary>
+        /// Protein Group QValue
+        /// </summary>
+        ProteinGroupQValue = 29,
+
+        /// <summary>
+        /// Global Protein Group QValue
+        /// </summary>
+        GlobalProteinGroupQValue = 30,
+
+        /// <summary>
+        /// Gene Group QValue
+        /// </summary>
+        GeneGroupQValue = 31,
+
+        /// <summary>
+        /// Precursor Quantity
+        /// </summary>
+        PrecursorQuantity = 32,
+
+        /// <summary>
+        /// Precursor Normalized
+        /// </summary>
+        PrecursorNormalized = 33,
+
+        /// <summary>
+        /// Precursor Translated
+        /// </summary>
+        PrecursorTranslated = 34,
+
+        /// <summary>
+        /// Elution time
+        /// </summary>
+        ElutionTime = 35,
+
+        /// <summary>
+        /// Elution Time Start
+        /// </summary>
+        ElutionTimeStart = 36,
+
+        /// <summary>
+        /// Elution Time Stop
+        /// </summary>
+        ElutionTimeStop = 37,
+        /// <summary>
+        /// MS1 Profile Correlation
+        /// </summary>
+        MS1ProfileCorrelation = 38,
+
+        /// <summary>
+        /// MS1 Area
+        /// </summary>
+        MS1Area = 39,
+
+        /// <summary>
+        /// Evidence (score)
+        /// </summary>
+        /// <remarks>Higher values are better</remarks>
+        Evidence = 40,
+
+        /// <summary>
+        /// Spectrum Similarity
+        /// </summary>
+        SpectrumSimilarity = 41,
+
+        /// <summary>
+        /// Averagine
+        /// </summary>
+        Averagine = 42,
+
+        /// <summary>
+        /// Mass Evidence
+        /// </summary>
+        /// <remarks>Higher values are better</remarks>
+        MassEvidence = 43,
+
+        /// <summary>
+        /// CScore
+        /// </summary>
+        CScore = 44,
+
+        /// <summary>
+        /// Decoy Evidence
+        /// </summary>
+        DecoyEvidence = 45,
+
+        /// <summary>
+        /// Decoy CScore
+        /// </summary>
+        DecoyCScore = 46
+    }
+
+    /// <summary>
     /// MSFragger synopsis file columns
     /// </summary>
     public enum MSFraggerSynFileColumns

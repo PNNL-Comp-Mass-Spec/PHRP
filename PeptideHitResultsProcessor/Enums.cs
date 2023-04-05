@@ -169,6 +169,11 @@
         /// <summary>
         /// MSFragger
         /// </summary>
-        MSFraggerTSVFile = 12
+        MSFraggerTSVFile = 12,
+
+        /// <summary>
+        /// DIA-NN
+        /// </summary>
+        DiannTSVFile = 13
     }
 }

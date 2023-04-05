@@ -1,7 +1,7 @@
 ﻿namespace PeptideHitResultsProcessor.SearchToolResults
 {
     /// <summary>
-    /// This class is used to track search results loaded from a MaxQuant or MSFragger result file
+    /// This class is used to track search results loaded from a MaxQuant, MSFragger, or DIA-NN result file
     /// </summary>
     public abstract class ToolResultsBaseClass
     {
@@ -15,11 +15,15 @@
         /// For MaxQuant, the .raw file name, without the extension
         /// </para>
         /// <para>
-        /// For MSFragger, comes from column "Spectrum File", typically extracted from interact-Dataset.pep.xml
+        /// For MSFragger, comes from column "Spectrum File" in Dataset_psm.tsv (typically extracted from interact-Dataset.pep.xml)
         /// </para>
         /// <para>
         /// For MSFragger, the _psm.tsv file will typically only show this for the first result for each dataset,
         /// but MSFraggerResultsProcessor stores the correct name for each PSM
+        /// </para>
+        /// <para>
+        /// For DIA-NN, comes from column Run in the report.tsv file
+        /// This is an abbreviated dataset name, as assigned by the analysis manager
         /// </para>
         /// </remarks>
         public string DatasetName;
@@ -46,6 +50,9 @@
         /// </para>
         /// <para>
         /// For MSFragger, from column "Peptide"
+        /// </para>
+        /// <para>
+        /// For DIA-NN, from column "Stripped.Sequence"
         /// </para>
         /// </remarks>
         public string Sequence;
@@ -81,6 +88,8 @@
         /// </summary>
         public int Length;
 
+        // ReSharper disable CommentTypo
+
         /// <summary>
         /// Post-translational modifications contained within the identified peptide
         /// </summary>
@@ -91,6 +100,9 @@
         /// <para>
         /// For MSFragger, this includes both static and dynamic modifications
         /// and comes from column "Assigned Modifications"
+        /// </para>
+        /// <para>
+        /// For DIA-NN, this is read from column Modified.Sequence in report.tsv
         /// </para>
         /// <para>
         /// MaxQuant Examples:
@@ -112,8 +124,15 @@
         ///   N-term(42.0106)
         ///   6M(15.9949), N-term(42.0106)
         /// </para>
+        /// <para>
+        /// DIA-NN Examples:
+        ///   AAAGDLGGDHLAFSC(UniMod:4)DVAK
+        ///   AAGVGLVDC(UniMod:4)HC(UniMod:4)HLSAPDFDR
+        /// </para>
         /// </remarks>
         public string ModificationList;
+
+        // ReSharper restore CommentTypo
 
         /// <summary>
         /// Charge state of the precursor ion
@@ -132,6 +151,7 @@
         /// For MaxQuant, in the msms.txt file, column "Retention time" is in minutes
         /// For MSFragger, in the Dataset_psm.tsv file, column "Retention" is in seconds
         /// For MSFragger, in the MSFragger results file, column "retention_time" is in minutes
+        /// For DIA-NN, in the report.tsv file, column "RT" is in minutes
         /// </remarks>
         public string ElutionTime;
 
@@ -262,7 +282,7 @@
         /// FDR
         /// </summary>
         /// <remarks>
-        /// Computed by PHRP
+        /// Computed by PHRP for MSFragger, MaxQuant, and DIA-NN
         /// </remarks>
         public double FDR;
 
@@ -270,7 +290,8 @@
         /// Q-Value
         /// </summary>
         /// <remarks>
-        /// Computed by PHRP
+        /// Computed by PHRP for MSFragger and MaxQuant
+        /// From column Q.Value for DIA-NN
         /// </remarks>
         public double QValue;
     }

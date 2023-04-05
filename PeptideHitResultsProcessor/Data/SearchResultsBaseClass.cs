@@ -205,7 +205,7 @@ namespace PeptideHitResultsProcessor.Data
         /// For MS-GF+, mod symbols are single characters, like *, #, @, etc.
         /// </para>
         /// <para>
-        /// For MSPathFinder and MaxQuant, mod symbols are not added to the peptide; instead, modifications are listed in a separate column
+        /// For MSPathFinder, MaxQuant, and DIA-NN, mod symbols are not added to the peptide; instead, modifications are listed in a separate column
         /// </para>
         /// <para>
         /// For MSAlign and TopPIC, mod masses are embedded in the peptide, using square brackets, e.g. NRE(WYI)[30.01443]HIH
@@ -216,6 +216,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Cleavage state of the peptide
         /// </summary>
+        /// <remarks>
+        /// Some tools refer to this as NTT (number of tryptic terminii)
+        /// </remarks>
         public PeptideCleavageStateCalculator.PeptideCleavageState CleavageState => mPeptideCleavageState;
 
         /// <summary>
