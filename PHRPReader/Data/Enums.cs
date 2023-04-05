@@ -379,7 +379,7 @@ namespace PHRPReader.Data
         Mass = 14,
 
         /// <summary>
-        /// Peptide sequence, including modification symbols
+        /// Peptide sequence, without modification symbols
         /// </summary>
         Peptide = 15,
 
@@ -1110,7 +1110,7 @@ namespace PHRPReader.Data
         Mass = 10,
 
         /// <summary>
-        /// Peptide sequence, including modification symbols
+        /// Peptide sequence, without modification symbols
         /// </summary>
         Peptide = 11,
 

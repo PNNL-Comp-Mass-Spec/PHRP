@@ -353,7 +353,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// These columns correspond to the MSFragger PSM results file
+        /// These columns correspond to the MSFragger dataset.tsv file
         /// </summary>
         private enum MSFraggerDatasetTsvFileColumns
         {
