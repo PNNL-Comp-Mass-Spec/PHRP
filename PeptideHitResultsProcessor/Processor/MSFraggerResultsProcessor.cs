@@ -361,7 +361,6 @@ namespace PeptideHitResultsProcessor.Processor
             /// Scan number
             /// </summary>
             ScanNumber = 0,
-
             PrecursorNeutralMass = 1,
             RetentionTimeMinutes = 2,
             Charge = 3,
