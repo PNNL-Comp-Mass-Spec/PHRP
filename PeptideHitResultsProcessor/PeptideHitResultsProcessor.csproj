@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DiaNNResults.cs" />
     <Compile Include="Data\MaxQuantModifiedSequenceModInfo.cs" />
     <Compile Include="Data\MaxQuantModInfo.cs" />
     <Compile Include="Data\MaxQuantPeptideInfo.cs" />
@@ -61,8 +62,10 @@
     <Compile Include="Data\MSFraggerResults.cs" />
     <Compile Include="Data\TopPICPrSMs.cs" />
     <Compile Include="Processor\BinarySearchFindNearest.cs" />
+    <Compile Include="Processor\DiaNNResultsProcessor.cs" />
     <Compile Include="Processor\MultiDatasetResultsProcessor.cs" />
     <Compile Include="Processor\DataUtilities.cs" />
+    <Compile Include="SearchToolResults\DiaNNSearchResult.cs" />
     <Compile Include="SearchToolResults\MaxQuantSearchResult.cs" />
     <Compile Include="SearchToolResults\MSFraggerSearchResult.cs" />
     <Compile Include="Data\PrecursorMassTolerance.cs" />
