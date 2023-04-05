@@ -386,6 +386,11 @@ namespace PHRPReader.Data
         /// <summary>
         /// Comma separated list of dynamic modifications in the peptide
         /// </summary>
+        /// <remarks>
+        /// MaxQuant modification examples:
+        ///   Oxidation 8
+        ///   Oxidation 11,Oxidation 26
+        /// </remarks>
         DynamicModifications = 16,
 
         /// <summary>
@@ -1117,6 +1122,12 @@ namespace PHRPReader.Data
         /// <summary>
         /// Comma separated list of static and dynamic modifications in the peptide
         /// </summary>
+        /// <remarks>
+        /// MSFragger modification examples:
+        ///   7M(15.9949)
+        ///   11M(15.9949), 1M(15.9949)
+        ///   12K(229.1629), 18K(229.1629), 6K(229.1629), N-term(229.1629)
+        /// </remarks>
         Modifications = 12,
 
         /// <summary>
