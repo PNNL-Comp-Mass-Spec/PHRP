@@ -233,6 +233,9 @@ namespace PeptideHitResultsProcessor
 
         // | Tool         | Filter Rules                 |
         // |--------------|------------------------------|
+        // | DIA-NN       | Keep if QValue < 0.10        |
+        // |              |      or CScore < 0.25        |
+        // |--------------|------------------------------|
         // | MaxQuant     | Keep if Andromeda Score > 50 |
         // |              |      or PepValue < 0.01      |
         // |--------------|------------------------------|
@@ -255,6 +258,28 @@ namespace PeptideHitResultsProcessor
         // |  X!Tandem    | Keep all results             |
         // |              |                              |
         // |--------------|------------------------------|
+
+        /// <summary>
+        /// DIA-NN Q-Value threshold to use when creating the synopsis file
+        /// </summary>
+        /// <remarks>
+        /// A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold
+        /// </remarks>
+        [Option("DiaNNQValueThreshold", "DiaNNQValue",
+            HelpText = "When processing DIA-NN results, the Q-Value threshold used to determine which peptides are written to the synopsis file.\n" +
+                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold.")]
+        public double DiaNNQValueThreshold { get; set; }
+
+        /// <summary>
+        /// DIA-NN confidence score (CScore) threshold to use when creating the synopsis file
+        /// </summary>
+        /// <remarks>
+        /// A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold
+        /// </remarks>
+        [Option("DiaNNCScoreThreshold", "DiaNNCScore",
+            HelpText = "When processing DIA-NN results, the confidence score threshold used to determine which peptides are written to the synopsis file.\n" +
+                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold.")]
+        public double DiaNNConfidenceScoreThreshold { get; set; }
 
         /// <summary>
         /// MaxQuant Andromeda score threshold to use when creating the synopsis file
@@ -431,6 +456,9 @@ namespace PeptideHitResultsProcessor
 
             CreateFirstHitsFile = true;
             CreateSynopsisFile = true;
+
+            DiaNNQValueThreshold = DiaNNResultsProcessor.DEFAULT_QVALUE_THRESHOLD;
+            DiaNNConfidenceScoreThreshold = DiaNNResultsProcessor.DEFAULT_CONFIDENCE_SCORE_THRESHOLD;
 
             MaxQuantAndromedaScoreThreshold = MaxQuantResultsProcessor.DEFAULT_ANDROMEDA_SCORE_THRESHOLD;
             MaxQuantPosteriorErrorProbabilityThreshold = MaxQuantResultsProcessor.DEFAULT_PEP_THRESHOLD;

@@ -76,7 +76,17 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// DiaNN tool name
+        /// Default Q-Value threshold to use when creating the synopsis file
+        /// </summary>
+        public const double DEFAULT_QVALUE_THRESHOLD = 0.10;
+
+        /// <summary>
+        /// Default confidence score (CScore) threshold to use when creating the synopsis file
+        /// </summary>
+        public const double DEFAULT_CONFIDENCE_SCORE_THRESHOLD = 0.25;
+
+        /// <summary>
+        /// DIA-NN tool name
         /// </summary>
         public const string TOOL_NAME = "DIA-NN";
 
