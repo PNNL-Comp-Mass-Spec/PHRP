@@ -850,126 +850,147 @@ namespace PHRPReader.Data
         /// <remarks>
         /// This is (M+H)+
         /// </remarks>
-        MH = 9,
+        MH = 7,
 
         /// <summary>
         /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
         /// </summary>
-        Mass = 10,
+        Mass = 8,
 
         /// <summary>
         /// Peptide sequence, without any modifications
         /// </summary>
-        Peptide = 11,
+        Peptide = 9,
 
         /// <summary>
-        /// ost-translational modifications contained within the identified peptide
+        /// Comma-separated list of static and dynamic modification names and affected residue number
         /// </summary>
         /// <remarks>
         /// <para>
-        /// For DIA-NN, this is read from column Modified.Sequence in report.tsv, then converted into MSFragger style modification names
+        /// This is read from column Modified.Sequence in report.tsv, then converted into MSFragger style modification names by PHRP
         /// </para>
         /// <para>
-        /// DIA-NN Examples:
+        /// DIA-NN modification examples:
         ///   15M(15.9949)
+        ///   8C(57.0215)
+        ///   5M(15.9949), 8M(15.9949)
         ///   1M(15.9949), 5C(57.0215)
+        ///   12M(15.9949), 2M(15.9949), 8M(15.9949)
         ///   N-term(42.0106)
         /// </para>
         /// </remarks>
-        Modifications = 12,
+        Modifications = 10,
 
         /// <summary>
         /// Protein group name
         /// </summary>
-        ProteinGroup = 13,
+        ProteinGroup = 11,
 
         /// <summary>
         /// Protein names (from the FASTA file)
         /// </summary>
-        ProteinIDs = 14,
+        ProteinIDs = 12,
 
         /// <summary>
         /// Protein names, as determined by DIA-NN, typically corresponding to UniProt Name
         /// </summary>
-        ProteinNames = 15,
+        ProteinNames = 13,
 
         /// <summary>
-        /// Gene names associated with the peptide
+        /// Gene names
         /// </summary>
-        GeneNames = 16,
+        GeneNames = 14,
 
         /// <summary>
-        /// Number of tryptic terminii
+        /// Number of tryptic termini
         /// </summary>
-        NTT = 17,
+        NTT = 15,
 
         /// <summary>
         /// Protein Group Quantity
         /// </summary>
-        ProteinGroupQuantity = 18,
+        ProteinGroupQuantity = 16,
 
         /// <summary>
         /// Protein Group Normalized
         /// </summary>
-        ProteinGroupNormalized = 19,
+        ProteinGroupNormalized = 17,
 
         /// <summary>
         /// Protein Group Max LFQ
         /// </summary>
-        ProteinGroupMaxLFQ = 20,
+        ProteinGroupMaxLFQ = 18,
 
         /// <summary>
         /// Genes Quantity
         /// </summary>
-        GenesQuantity = 21,
+        GenesQuantity = 19,
 
-         /// <summary>
+        /// <summary>
         /// Genes Normalized
         /// </summary>
-        GenesNormalized = 22,
+        GenesNormalized = 20,
 
         /// <summary>
         /// Genes Max LFQ
         /// </summary>
-        GenesMaxLFQ = 23,
+        GenesMaxLFQ = 21,
 
         /// <summary>
         /// Genes Max LFQ Unique
         /// </summary>
-        GenesMaxLFQUnique = 24,
+        GenesMaxLFQUnique = 22,
 
         /// <summary>
         /// QValue computed by DIA-NN
         /// </summary>
-        QValue = 25,
+        QValue = 23,
+
         /// <summary>
         /// PEP (posterior error probability)
         /// </summary>
-        PEP = 26,
+        PEP = 24,
+
         /// <summary>
         /// Global QValue
         /// </summary>
-        GlobalQValue = 27,
+        GlobalQValue = 25,
 
         /// <summary>
         /// Protein QValue
         /// </summary>
-        ProteinQValue = 28,
+        ProteinQValue = 26,
 
         /// <summary>
         /// Protein Group QValue
         /// </summary>
-        ProteinGroupQValue = 29,
+        ProteinGroupQValue = 27,
 
         /// <summary>
         /// Global Protein Group QValue
         /// </summary>
-        GlobalProteinGroupQValue = 30,
+        GlobalProteinGroupQValue = 28,
 
         /// <summary>
         /// Gene Group QValue
         /// </summary>
-        GeneGroupQValue = 31,
+        GeneGroupQValue = 29,
+
+        /// <summary>
+        /// Translated QValue
+        /// </summary>
+        /// <remarks>
+        /// Translation involves sequence propagation
+        /// </remarks>
+        TranslatedQValue = 30,
+
+        /// <summary>
+        /// Proteotypic
+        /// </summary>
+        /// <remarks>
+        /// 1 if the peptide is specific to a given protein or gene, otherwise 0
+        /// </remarks>
+        Proteotypic = 31,
 
         /// <summary>
         /// Precursor Quantity
@@ -987,65 +1008,101 @@ namespace PHRPReader.Data
         PrecursorTranslated = 34,
 
         /// <summary>
-        /// Elution time
+        /// Translated Quality
         /// </summary>
-        ElutionTime = 35,
+        TranslatedQuality = 35,
+
+        /// <summary>
+        /// MS1 Translated
+        /// </summary>
+        MS1Translated = 36,
+
+        /// <summary>
+        /// Quantity Quality
+        /// </summary>
+        QuantityQuality = 37,
+
+        /// <summary>
+        /// Elution Time (aka retention time)
+        /// </summary>
+        ElutionTime = 38,
 
         /// <summary>
         /// Elution Time Start
         /// </summary>
-        ElutionTimeStart = 36,
+        ElutionTimeStart = 39,
 
         /// <summary>
         /// Elution Time Stop
         /// </summary>
-        ElutionTimeStop = 37,
+        ElutionTimeStop = 40,
+
+        /// <summary>
+        /// Indexed Retention Time (iRT)
+        /// </summary>
+        IndexedRT = 41,
+
+        /// <summary>
+        /// Indexed Ion Mobility
+        /// </summary>
+        IndexedIonMobility = 42,
+
+        /// <summary>
+        /// Predicted Retention Time
+        /// </summary>
+        PredictedRT = 43,
+
+        /// <summary>
+        /// Predicted Indexed Retention Time
+        /// </summary>
+        PredictedIndexedRT = 44,
+
         /// <summary>
         /// MS1 Profile Correlation
         /// </summary>
-        MS1ProfileCorrelation = 38,
+        MS1ProfileCorrelation = 45,
 
         /// <summary>
         /// MS1 Area
         /// </summary>
-        MS1Area = 39,
+        MS1Area = 46,
 
         /// <summary>
         /// Evidence (score)
         /// </summary>
         /// <remarks>Higher values are better</remarks>
-        Evidence = 40,
+        Evidence = 47,
 
         /// <summary>
         /// Spectrum Similarity
         /// </summary>
-        SpectrumSimilarity = 41,
+        SpectrumSimilarity = 48,
 
         /// <summary>
         /// Averagine
         /// </summary>
-        Averagine = 42,
+        Averagine = 49,
 
         /// <summary>
         /// Mass Evidence
         /// </summary>
         /// <remarks>Higher values are better</remarks>
-        MassEvidence = 43,
+        MassEvidence = 50,
 
         /// <summary>
         /// CScore
         /// </summary>
-        CScore = 44,
+        CScore = 51,
 
         /// <summary>
         /// Decoy Evidence
         /// </summary>
-        DecoyEvidence = 45,
+        DecoyEvidence = 52,
 
         /// <summary>
         /// Decoy CScore
         /// </summary>
-        DecoyCScore = 46
+        DecoyCScore = 53
     }
 
     /// <summary>

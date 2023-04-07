@@ -146,29 +146,59 @@ namespace PHRPReader.Reader
                 { "Dataset", DiaNNSynFileColumns.Dataset },
                 { "DatasetID", DiaNNSynFileColumns.DatasetID },
                 { "Scan", DiaNNSynFileColumns.Scan },
+                { "IonMobility", DiaNNSynFileColumns.IonMobility },
                 { "Charge", DiaNNSynFileColumns.Charge },
                 { "PrecursorMZ", DiaNNSynFileColumns.PrecursorMZ },
-                { "DelM", DiaNNSynFileColumns.DelM },
-                { "DelM_PPM", DiaNNSynFileColumns.DelM_PPM },
-                { "DelM_DiaNN", DiaNNSynFileColumns.DelM_DiaNN },
                 { "MH", DiaNNSynFileColumns.MH },
                 { "Mass", DiaNNSynFileColumns.Mass },
                 { "Peptide", DiaNNSynFileColumns.Peptide },
                 { "Modifications", DiaNNSynFileColumns.Modifications },
-                { "Protein", DiaNNSynFileColumns.Protein },
-                { "AdditionalProteins", DiaNNSynFileColumns.AdditionalProteins },
+                { "Peptide", DiaNNSynFileColumns.Peptide },
+                { "Modifications", DiaNNSynFileColumns.Modifications },
+                { "ProteinGroup", DiaNNSynFileColumns.ProteinGroup },
+                { "ProteinIDs", DiaNNSynFileColumns.ProteinIDs },
+                { "ProteinNames", DiaNNSynFileColumns.ProteinNames },
+                { "Genes", DiaNNSynFileColumns.GeneNames },
                 { "NTT", DiaNNSynFileColumns.NTT },
-                { "EValue", DiaNNSynFileColumns.EValue },
-                { "Rank_EValue", DiaNNSynFileColumns.RankEValue },
-                { "Hyperscore", DiaNNSynFileColumns.Hyperscore },
-                { "Nextscore", DiaNNSynFileColumns.Nextscore },
-                { "PeptideProphetProbability", DiaNNSynFileColumns.PeptideProphetProbability },
+                { "ProteinGroupQuantity", DiaNNSynFileColumns.ProteinGroupQuantity },
+                { "ProteinGroupNormalized", DiaNNSynFileColumns.ProteinGroupNormalized },
+                { "ProteinGroupMaxLFQ", DiaNNSynFileColumns.ProteinGroupMaxLFQ },
+                { "GenesQuantity", DiaNNSynFileColumns.GenesQuantity },
+                { "GenesNormalized", DiaNNSynFileColumns.GenesNormalized },
+                { "GenesMaxLFQ", DiaNNSynFileColumns.GenesMaxLFQ },
+                { "GenesMaxLFQUnique", DiaNNSynFileColumns.GenesMaxLFQUnique },
+                { "QValue", DiaNNSynFileColumns.QValue },
+                { "PEP", DiaNNSynFileColumns.PEP },
+                { "GlobalQValue", DiaNNSynFileColumns.GlobalQValue },
+                { "ProteinQValue", DiaNNSynFileColumns.ProteinQValue },
+                { "ProteinGroupQValue", DiaNNSynFileColumns.ProteinGroupQValue },
+                { "GlobalProteinGroupQValue", DiaNNSynFileColumns.GlobalProteinGroupQValue },
+                { "GeneGroupQValue", DiaNNSynFileColumns.GeneGroupQValue },
+                { "TranslatedQValue", DiaNNSynFileColumns.TranslatedQValue },
+                { "PrecursorQuantity", DiaNNSynFileColumns.PrecursorQuantity },
+                { "PrecursorNormalized", DiaNNSynFileColumns.PrecursorNormalized },
+                { "PrecursorTranslated", DiaNNSynFileColumns.PrecursorTranslated },
+                { "TranslatedQuality", DiaNNSynFileColumns.TranslatedQuality },
+                { "MS1Translated", DiaNNSynFileColumns.MS1Translated },
+                { "QuantityQuality", DiaNNSynFileColumns.QuantityQuality },
                 { "ElutionTime", DiaNNSynFileColumns.ElutionTime },
-                { "ElutionTimeAverage", DiaNNSynFileColumns.ElutionTimeAverage },
-                { "MissedCleavages", DiaNNSynFileColumns.MissedCleavages },
-                { "MatchedIons", DiaNNSynFileColumns.NumberOfMatchedIons },
-                { "TotalIons", DiaNNSynFileColumns.TotalNumberOfIons },
-                { "QValue", DiaNNSynFileColumns.QValue }
+                { "ElutionTimeStart", DiaNNSynFileColumns.ElutionTimeStart },
+                { "ElutionTimeStop", DiaNNSynFileColumns.ElutionTimeStop },
+                { "IndexedRT", DiaNNSynFileColumns.IndexedRT },
+                { "PredictedRT", DiaNNSynFileColumns.PredictedRT },
+                { "PredictedIndexedRT", DiaNNSynFileColumns.PredictedIndexedRT },
+                { "MS1ProfileCorrelation", DiaNNSynFileColumns.MS1ProfileCorrelation },
+                { "MS1Area", DiaNNSynFileColumns.MS1Area },
+                { "Evidence", DiaNNSynFileColumns.Evidence },
+                { "SpectrumSimilarity", DiaNNSynFileColumns.SpectrumSimilarity },
+                { "Averagine", DiaNNSynFileColumns.Averagine },
+                { "MassEvidence", DiaNNSynFileColumns.MassEvidence },
+                { "CScore", DiaNNSynFileColumns.CScore },
+                { "DecoyEvidence", DiaNNSynFileColumns.DecoyEvidence },
+                { "DecoyCScore", DiaNNSynFileColumns.DecoyCScore },
+                { "Scan", DiaNNSynFileColumns.Scan },
+                { "IonMobility", DiaNNSynFileColumns.IonMobility },
+                { "IndexedIonMobility", DiaNNSynFileColumns.IndexedIonMobility }
             };
         }
 
@@ -503,115 +533,57 @@ namespace PHRPReader.Reader
                     return false;
                 }
 
-                string enzymeName;
-
-                // Starting with DiaNN v3.4, enzyme name is specified by parameter search_enzyme_name_1
-                // Previous versions used search_enzyme_name
-                if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name_1", out var enzymeNameA))
+                if (!searchEngineParams.Parameters.TryGetValue("CleavageSpecificity", out var cleavageSpecificity))
                 {
-                    enzymeName = enzymeNameA;
-                }
-                else
-                {
-                    if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name", out var enzymeNameB))
-                    {
-                        enzymeName = enzymeNameB;
-                    }
-                    else
-                    {
-                        enzymeName = string.Empty;
-                        ReportWarning("The DiaNN parameter file does not have parameter 'search_enzyme_name' or 'search_enzyme_name_1'");
-                    }
+                    cleavageSpecificity = string.Empty;
+                    ReportWarning("The DIA-NN parameter file does not have parameter 'CleavageSpecificity'");
                 }
 
                 // Determine the enzyme name
-                if (!string.IsNullOrWhiteSpace(enzymeName))
+                if (!string.IsNullOrWhiteSpace(cleavageSpecificity))
                 {
-                    searchEngineParams.Enzyme = enzymeName;
 
                     // ReSharper disable StringLiteralTypo
 
-                    switch (searchEngineParams.Enzyme)
+                    switch (cleavageSpecificity)
                     {
-                        case "argc":
-                        case "aspn":
-                        case "chymotrypsin":
-                        case "cnbr":
-                        case "elastase":
-                        case "formicacid":
-                        case "gluc":
-                        case "gluc_bicarb":
-                        case "lysc":
-                        case "lysc-p":
-                        case "lysn":
-                        case "lysn_promisc":
-                        case "nonspecific":
-                        case "null":
-                        case "stricttrypsin":
-                        case "thermolysin":
-                        case "trypsin":
-                        case "trypsin/chymotrypsin":
-                        case "trypsin/cnbr":
-                        case "trypsin_gluc":
-                        case "trypsin_k":
-                        case "trypsin_r":
+                        case "K*,R*":           // Trypsin (ignore the proline rule)
+                        case "K*,R*,!*P":       // Strict trypsin
+                            searchEngineParams.Enzyme = "trypsin";
+                            break;
+
+                        case "K*":              // Lys/C
+                            searchEngineParams.Enzyme = "lysc";
+                            break;
+
+                        case "F*,W*,Y*,L*":     // Chymotrypsin
+                            searchEngineParams.Enzyme = "chymotrypsin";
+                            break;
+
+                        case "D*":              // Asp-N
+                            searchEngineParams.Enzyme = "aspn";
+                            break;
+
+                        case "E*,D*":           // Glu-C
+                            searchEngineParams.Enzyme = "gluc";
                             break;
 
                         default:
-                            ReportWarning(string.Format("Unrecognized enzyme '{0}' in the DiaNN parameter file", searchEngineParams.Enzyme));
+                            ReportWarning(string.Format("Unrecognized cleavage specificity '{0}' in the DIA-NN parameter file", cleavageSpecificity));
+                            searchEngineParams.Enzyme = cleavageSpecificity;
                             break;
                     }
 
                     // ReSharper restore StringLiteralTypo
                 }
 
-                // Determine the cleavage specificity
+                // Assume fully-tryptic
+                searchEngineParams.MinNumberTermini = 2;
 
-                if (!searchEngineParams.Parameters.TryGetValue("num_enzyme_termini", out var numTermini))
+                if (searchEngineParams.Parameters.TryGetValue("MissedCleavages", out var missedCleavages) && int.TryParse(missedCleavages, out var cleavageCount))
                 {
-                    ReportWarning("'num_enzyme_termini' parameter not found in the DiaNN parameter file");
+                    searchEngineParams.MaxNumberInternalCleavages = cleavageCount;
                 }
-                else
-                {
-                    switch (numTermini)
-                    {
-                        case "2":
-                            // Fully-enzymatic (fully tryptic)
-                            searchEngineParams.MinNumberTermini = 2;
-                            break;
-
-                        case "1":
-                            // Semi-enzymatic
-                            searchEngineParams.MinNumberTermini = 1;
-                            break;
-
-                        case "0":
-                            // non-enzymatic (non-tryptic)
-                            searchEngineParams.MinNumberTermini = 0;
-                            break;
-
-                        default:
-                            ReportWarning(string.Format("Unrecognized value for num_enzyme_termini in the DiaNN parameter file: {0}", numTermini));
-                            break;
-                    }
-                }
-
-                // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-
-                var validTolerance = GetPrecursorSearchTolerances(
-                    searchEngineParams,
-                    out var toleranceLower, out var toleranceUpper,
-                    out var ppmBased, out _);
-
-                if (!validTolerance)
-                {
-                    searchEngineParams.PrecursorMassToleranceDa = 0;
-                    searchEngineParams.PrecursorMassTolerancePpm = 0;
-
-                    return true;
-                }
-
-                UpdatePrecursorMassTolerance(searchEngineParams, toleranceLower, toleranceUpper, ppmBased);
 
                 return true;
             }
@@ -622,41 +594,5 @@ namespace PHRPReader.Reader
             }
         }
 
-        /// <summary>
-        /// Update PrecursorMassToleranceDa and PrecursorMassTolerancePpm in searchEngineParams
-        /// </summary>
-        /// <param name="searchEngineParams">Search engine parameters</param>
-        /// <param name="massToleranceLower">Tolerance to the left, e.g. -20</param>
-        /// <param name="massToleranceUpper">Tolerance to the right, e.g. 20</param>
-        /// <param name="ppmBased">True if ppm-based tolerances</param>
-        private void UpdatePrecursorMassTolerance(
-            SearchEngineParameters searchEngineParams,
-            double massToleranceLower,
-            double massToleranceUpper,
-            bool ppmBased)
-        {
-            double toleranceToStore;
-
-            if (Math.Abs(Math.Abs(massToleranceLower) - Math.Abs(massToleranceUpper)) < float.Epsilon)
-            {
-                toleranceToStore = Math.Abs(massToleranceUpper);
-            }
-            else
-            {
-                // Tolerances are not symmetric; store the average value
-                toleranceToStore = (Math.Abs(massToleranceLower) + Math.Abs(massToleranceUpper)) / 2.0;
-            }
-
-            if (ppmBased)
-            {
-                searchEngineParams.PrecursorMassToleranceDa = PeptideMassCalculator.PPMToMass(toleranceToStore, 2000);
-                searchEngineParams.PrecursorMassTolerancePpm = toleranceToStore;
-            }
-            else
-            {
-                searchEngineParams.PrecursorMassToleranceDa = toleranceToStore;
-                searchEngineParams.PrecursorMassTolerancePpm = PeptideMassCalculator.MassToPPM(toleranceToStore, 1000);
-            }
-        }
     }
 }

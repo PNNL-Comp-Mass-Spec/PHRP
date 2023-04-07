@@ -33,27 +33,12 @@ namespace PeptideHitResultsProcessor.Data
         public string IonMobility { get; set; }
 
         /// <summary>
-        /// Indexed Ion Mobility
-        /// </summary>
-        public string IndexedIonMobility { get; set; }
-
-        /// <summary>
-        /// Precursor ion m/z (observed)
+        /// Precursor ion m/z (computed from peptide mass and charge by PHRP)
         /// </summary>
         public string PrecursorMZ { get; set; }
 
         /// <summary>
-        /// Mass error, in Da, as computed by PHRP
-        /// </summary>
-        public string PHRPComputedDelM { get; set; }
-
-        /// <summary>
-        /// Mass error, in ppm, as computed by PHRP
-        /// </summary>
-        public string PHRPComputedDelMPPM { get; set; }
-
-        /// <summary>
-        /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by DiaNN
+        /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
         /// </summary>
         public string CalculatedMonoMass { get; set; }
 
@@ -62,7 +47,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Modification names use MSFragger style notation and are assigned by PHRP
+        /// This is read from column Modified.Sequence in report.tsv, then converted into MSFragger style modification names by PHRP
         /// </para>
         /// <para>
         /// Example values:
@@ -77,7 +62,7 @@ namespace PeptideHitResultsProcessor.Data
         public string Modifications { get; set; }
 
         /// <summary>
-        /// Protein group
+        /// Protein group name
         /// </summary>
         public string ProteinGroup { get; set; }
 
@@ -92,13 +77,13 @@ namespace PeptideHitResultsProcessor.Data
         /// <remarks>
         /// Corresponds to the protein names in the FASTA file
         /// </remarks>
-        public List<string> Proteins { get; } = new();
+        public List<string> ProteinIDs { get; } = new();
 
         /// <summary>
-        /// Protein names associated with this peptide
+        /// UniProt protein names associated with this peptide
         /// </summary>
         /// <remarks>
-        /// Protein names, as determined by DIA-NN, typically corresponding to UniProt Name
+        /// Determined by DIA-NN, typically corresponding to UniProt Name
         /// </remarks>
         public List<string> ProteinNames { get; } = new();
 
@@ -146,12 +131,12 @@ namespace PeptideHitResultsProcessor.Data
         public string GenesMaxLFQ { get; set; }
 
         /// <summary>
-        /// Genes Max LFQUnique
+        /// Genes Max LFQ Unique
         /// </summary>
         public string GenesMaxLFQUnique { get; set; }
 
         /// <summary>
-        /// QValue
+        /// QValue computed by DIA-NN
         /// </summary>
         public string QValue { get; set; }
 
@@ -186,8 +171,19 @@ namespace PeptideHitResultsProcessor.Data
         public string GeneGroupQValue { get; set; }
 
         /// <summary>
-        /// 1 if the peptide is specific to a given protein or gene, otherwise 0
+        /// Translated QValue
         /// </summary>
+        /// <remarks>
+        /// Translation involves sequence propagation
+        /// </remarks>
+        public string TranslatedQValue;
+
+        /// <summary>
+        /// Proteotypic
+        /// </summary>
+        /// <remarks>
+        /// 1 if the peptide is specific to a given protein or gene, otherwise 0
+        /// </remarks>
         public string Proteotypic { get; set; }
 
         /// <summary>
@@ -206,6 +202,21 @@ namespace PeptideHitResultsProcessor.Data
         public string PrecursorTranslated { get; set; }
 
         /// <summary>
+        /// Translated Quality
+        /// </summary>
+        public string TranslatedQuality;
+
+        /// <summary>
+        /// MS1 Translated
+        /// </summary>
+        public string MS1Translated;
+
+        /// <summary>
+        /// Quantity Quality
+        /// </summary>
+        public string QuantityQuality;
+
+        /// <summary>
         /// Elution Time (aka retention time)
         /// </summary>
         public string ElutionTime { get; set; }
@@ -221,9 +232,24 @@ namespace PeptideHitResultsProcessor.Data
         public string ElutionTimeStop { get; set; }
 
         /// <summary>
-        /// Indexed retention time
+        /// Indexed Retention Time (iRT)
         /// </summary>
         public string IndexedRT { get; set; }
+
+        /// <summary>
+        /// Indexed Ion Mobility
+        /// </summary>
+        public string IndexedIonMobility { get; set; }
+
+        /// <summary>
+        /// Predicted Retention Time
+        /// </summary>
+        public string PredictedRT { get; set; }
+
+        /// <summary>
+        /// Predicted Indexed Retention Time
+        /// </summary>
+        public string PredictedIndexedRT { get; set; }
 
         /// <summary>
         /// MS1 Profile Correlation
@@ -296,15 +322,12 @@ namespace PeptideHitResultsProcessor.Data
             DatasetName = string.Empty;
             DatasetID = 0;
             IonMobility = string.Empty;
-            IndexedIonMobility = string.Empty;
             PrecursorMZ = string.Empty;
-            PHRPComputedDelM = string.Empty;
-            PHRPComputedDelMPPM = string.Empty;
             CalculatedMonoMass = string.Empty;
             Modifications = string.Empty;
             ProteinGroup = string.Empty;
             Protein = string.Empty;
-            Proteins.Clear();
+            ProteinIDs.Clear();
             ProteinNames.Clear();
             GeneNames.Clear();
             NTT = string.Empty;
@@ -322,14 +345,21 @@ namespace PeptideHitResultsProcessor.Data
             ProteinGroupQValue = string.Empty;
             GlobalProteinGroupQValue = string.Empty;
             GeneGroupQValue = string.Empty;
+            TranslatedQValue = string.Empty;
             Proteotypic = string.Empty;
             PrecursorQuantity = string.Empty;
             PrecursorNormalized = string.Empty;
             PrecursorTranslated = string.Empty;
+            TranslatedQuality = string.Empty;
+            MS1Translated = string.Empty;
+            QuantityQuality = string.Empty;
             ElutionTime = string.Empty;
             ElutionTimeStart = string.Empty;
             ElutionTimeStop = string.Empty;
             IndexedRT = string.Empty;
+            IndexedIonMobility = string.Empty;
+            PredictedRT = string.Empty;
+            PredictedIndexedRT = string.Empty;
             MS1ProfileCorrelation = string.Empty;
             MS1Area = string.Empty;
             Evidence = string.Empty;

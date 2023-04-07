@@ -33,7 +33,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
@@ -46,7 +45,7 @@ namespace PHRPReader
     public class MSGFPlusParamFileModExtractor : PRISM.EventNotifier
     {
         // Ignore Spelling: Acetyl, Acetylation, Acetylhexosamine, Carbamidomethyl, Carbamidomethylation, cterm, defs, Dehydro
-        // Ignore Spelling: Hexosam, Hydroxyproline, itrac, nterm, num, phospho, phosphorylation, Prot, protcterm, protnterm, UniMod
+        // Ignore Spelling: Hexosam, Hydroxyproline, itrac, nterm, num, phospho, Phosphorylated, phosphorylation, Prot, protcterm, protnterm, UniMod
 
         /// <summary>
         /// Unknown MS-GF+ mod symbols
@@ -122,14 +121,40 @@ namespace PHRPReader
         public enum ModSpecFormats
         {
             /// <summary>
-            /// MS-GF+ or MSPathFinder
+            /// MS-GF+, MSPathFinder, and DIA-NN
             /// </summary>
+            /// <remarks>
+            /// Examples:
+            ///            # Mass or Formula, Residues, ModType, Position, Name
+            ///   DynamicMod=O1,         M, opt, any, Oxidation         # Oxidized methionine
+            ///   DynamicMod=C2H3N1O1,   C, opt, any, Carbamidomethyl   # Carbamidomethyl C
+            ///   DynamicMod=199.955,    C, opt, any, Mercury           # Mercury Hg(II) adduct (+199.955)
+            ///   StaticMod=229.1629,    *,  fix, N-term,    TMT6plex
+            /// </remarks>
             MSGFPlusAndMSPathFinder = 0,
 
             /// <summary>
             /// TopPIC
             /// </summary>
-            TopPIC = 1
+            /// <remarks>
+            /// Examples:
+            ///           # Name,            Mass,  Residues, Position, UniModID
+            ///   StaticMod=Carbamidomethyl, 57.021464,  C,   any,      4
+            ///   DynamicMod=Acetyl,         42.010565,  K,   any,      1      # Acetyl
+            /// </remarks>
+            TopPIC = 1,
+
+            /// <summary>
+            /// DIA-NN
+            /// </summary>
+            /// <remarks>
+            /// Examples:
+            ///            # Name,        Mass,  Residues
+            ///   DynamicMod=UniMod:35,   15.994915,  M       # Oxidized methionine
+            ///   DynamicMod=UniMod:1,    42.010565,  *n      # Acetylation protein N-term
+            ///   DynamicMod=UniMod:21,   79.966331,  STY     # Phosphorylated STY
+            /// </remarks>
+            DiaNN = 2,
         }
 
         /// <summary>
@@ -305,7 +330,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from a MS-GF+ or MSPathFinder param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from a MS-GF+, MSPathFinder, MSFragger, or DIA-NN param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="modSpecFormat"></param>
@@ -395,6 +420,7 @@ namespace PHRPReader
                         // The line does not start with StaticMod, DynamicMod, or CustomAA
                         // This method also supports MSGFPlus_Mods.txt files, which specify mods with ,opt, or ,fix,
                         var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
+
                         if (lineInNoSpaces.Contains(",opt,"))
                         {
                             modType = MSGFPlusModType.DynamicMod;
@@ -440,6 +466,10 @@ namespace PHRPReader
                             minimumModDefParts = 5;
                             break;
 
+                        case ModSpecFormats.DiaNN:
+                            minimumModDefParts = 3;
+                            break;
+
                         default:
                             // Unrecognized format
                             ReportError(string.Format("Mod spec format {0} not recognized; unable to extract mods from {1}",
@@ -467,6 +497,13 @@ namespace PHRPReader
                                 modList.Add(udtTopPICModInfo);
                             }
                             break;
+
+                        case ModSpecFormats.DiaNN:
+                            if (ParseModSpecDiaNN(paramFilePath, splitLine, modType, ref unnamedModID, out var udtDiannModInfo))
+                            {
+                                modList.Add(udtDiannModInfo);
+                            }
+                            break;
                     }
                 }
 
@@ -481,6 +518,77 @@ namespace PHRPReader
             }
 
             return true;
+        }
+
+
+        /// <summary>
+        /// Parse the mod spec definition from a DIA-NN parameter file
+        /// </summary>
+        /// <param name="paramFilePath"></param>
+        /// <param name="splitLine"></param>
+        /// <param name="modType">MSGFPlusModType.DynamicMod or MSGFPlusModType.StaticMod</param>
+        /// <param name="unnamedModID"></param>
+        /// <param name="udtModInfo"></param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool ParseModSpecDiaNN(
+            string paramFilePath,
+            IReadOnlyList<string> splitLine,
+            MSGFPlusModType modType,
+            ref int unnamedModID,
+            out ModInfo udtModInfo)
+        {
+            // Modification definition format:
+            //   ModName:   UniMod ID (e.g. UniMod:35) or a custom name
+            //   Mass:      Mod mass
+            //   Residues:  affected residues *
+
+            udtModInfo = new ModInfo();
+
+            try
+            {
+                udtModInfo.ModMass = splitLine[1].Trim();
+
+                // udtModInfo.ModMass should be a number
+                if (!double.TryParse(udtModInfo.ModMass, out udtModInfo.ModMassVal))
+                {
+                    ReportWarning("Non-numeric mod mass in the " + mToolName + " parameter file: " + string.Join(",", splitLine));
+                    return false;
+                }
+
+                udtModInfo.Residues = splitLine[2].Trim();
+                udtModInfo.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
+
+                udtModInfo.ModType = modType;
+                udtModInfo.ModTypeInParameterFile = udtModInfo.ModType;
+
+                if (udtModInfo.Residues == "*n")
+                {
+                    // N-terminal protein mod
+                    if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                    {
+                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        udtModInfo.ModType = MSGFPlusModType.DynamicMod;
+                    }
+
+                    udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+
+                    if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                        udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;
+                }
+
+                udtModInfo.ModName = ParseModSpecGetName(splitLine[0], ref unnamedModID);
+                udtModInfo.ShortName = string.Empty;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ReportError(string.Format(
+                                "Error reading mod info from the {0} parameter file ({1}): {2}",
+                                mToolName, Path.GetFileName(paramFilePath), ex.Message));
+
+                return false;
+            }
         }
 
         /// <summary>

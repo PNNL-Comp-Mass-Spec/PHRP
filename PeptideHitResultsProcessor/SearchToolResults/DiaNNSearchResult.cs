@@ -15,6 +15,9 @@
         /// </summary>
         public string DatasetFile;
 
+        // Dataset Name (from the Run column) is tracked in the base class
+        // It is an abbreviated dataset name, as assigned by the analysis manager
+
         /// <summary>
         /// Protein group name
         /// </summary>
@@ -32,9 +35,9 @@
         public string ProteinNames;
 
         /// <summary>
-        /// Gene names associated with the peptide
+        /// Gene names
         /// </summary>
-        public string Genes;
+        public string GeneNames;
 
         /// <summary>
         /// Protein Group Quantity
@@ -86,12 +89,13 @@
         // ReSharper restore CommentTypo
 
         // Stripped.Sequence is tracked by Sequence in the base class
-        // public string StrippedSequence;
 
         /// <summary>
         /// Precursor sequence (unused by PHRP)
         /// </summary>
         public string PrecursorId;
+
+        // PrecursorCharge is tracked by Charge in the base class
 
         /// <summary>
         /// QValue computed by DIA-NN
@@ -131,11 +135,17 @@
         /// <summary>
         /// Translated QValue
         /// </summary>
+        /// <remarks>
+        /// Translation involves sequence propagation
+        /// </remarks>
         public string TranslatedQValue;
 
         /// <summary>
-        /// 1 if the peptide is specific to a given protein or gene, otherwise 0
+        /// Proteotypic
         /// </summary>
+        /// <remarks>
+        /// 1 if the peptide is specific to a given protein or gene, otherwise 0
+        /// </remarks>
         public string Proteotypic;
 
         /// <summary>
@@ -154,22 +164,21 @@
         public string PrecursorTranslated;
 
         /// <summary>
-        /// Translated Quality (unused by PHRP)
+        /// Translated Quality
         /// </summary>
         public string TranslatedQuality;
 
         /// <summary>
-        /// MS1 Translated (unused by PHRP)
+        /// MS1 Translated
         /// </summary>
-        public string Ms1Translated;
+        public string MS1Translated;
 
         /// <summary>
-        /// Quantity Quality (unused by PHRP)
+        /// Quantity Quality
         /// </summary>
         public string QuantityQuality;
 
         // Elution time (aka retention time) is tracked by ElutionTime in the base class
-        // public string RT;
 
         /// <summary>
         /// Elution Time Start
@@ -182,44 +191,44 @@
         public string RTStop;
 
         /// <summary>
-        /// Indexed retention time (iRT)
+        /// Indexed Retention Time (iRT)
         /// </summary>
         public string IndexedRT;
 
         /// <summary>
-        /// Predicted retention time (unused by PHRP)
+        /// Predicted Retention Time (unused by PHRP)
         /// </summary>
         public string PredictedRT;
 
         /// <summary>
-        /// Predicted indexed retention time (unused by PHRP)
+        /// Predicted Indexed Retention Time (unused by PHRP)
         /// </summary>
-        public string PredictedIRT;
+        public string PredictedIndexedRT;
 
         /// <summary>
-        /// First protein description (unused by PHRP)
+        /// First Protein Description (unused by PHRP)
         /// </summary>
         public string FirstProteinDescription;
 
         /// <summary>
-        /// Spectral Library QValue
+        /// Spectral Library QValue(unused by PHRP)
         /// </summary>
         public string LibQValue;
 
         /// <summary>
-        /// Spectral Library Protein Group QValue
+        /// Spectral Library Protein Group QValue(unused by PHRP)
         /// </summary>
         public string LibProteinGroupQValue;
 
         /// <summary>
         /// MS1 Profile Correlation
         /// </summary>
-        public string Ms1ProfileCorr;
+        public string MS1ProfileCorr;
 
         /// <summary>
         /// MS1 Area
         /// </summary>
-        public string Ms1Area;
+        public string MS1Area;
 
         /// <summary>
         /// Evidence (score)
@@ -249,6 +258,14 @@
         public string CScore;
 
         /// <summary>
+        /// Confidence score (from CScore)
+        /// </summary>
+        /// <remarks>
+        /// Value between 0 and 1, where higher values are better
+        /// </remarks>
+        public double ConfidenceScore;
+
+        /// <summary>
         /// Decoy Evidence
         /// </summary>
         public string DecoyEvidence;
@@ -259,54 +276,55 @@
         public string DecoyCScore;
 
         /// <summary>
-        /// Fragmentation Ion Abundances
+        /// Fragmentation Ion Abundances (unused by PHRP)
         /// </summary>
         public string FragmentQuantRaw;
 
         /// <summary>
-        /// Corrected Fragmentation Ion Abundances
+        /// Corrected Fragmentation Ion Abundances (unused by PHRP)
         /// </summary>
         public string FragmentQuantCorrected;
 
         /// <summary>
-        /// Fragmentation ion correlations
+        /// Fragmentation Ion Correlations (unused by PHRP)
         /// </summary>
         public string FragmentCorrelations;
+
+        // MS2.Scan is tracked by the base class
 
         /// <summary>
         /// Ion Mobility
         /// </summary>
-        public string IM;
+        public string IonMobility;
 
         /// <summary>
         /// Indexed Ion Mobility
         /// </summary>
-        public string IndexedIM;
+        public string IndexedIonMobility;
 
         /// <summary>
         /// Predicted Ion Mobility
         /// </summary>
-        public string PredictedIM;
+        public string PredictedIonMobility;
 
         /// <summary>
         /// Predicted Indexed Ion Mobility
         /// </summary>
-        public string PredictedIndexedIM;
+        public string PredictedIndexedIonMobility;
 
         /// <summary>
         /// Reset stored values to empty strings and zeros
         /// </summary>
         public void Clear()
         {
-            Scan = string.Empty;
+            Scan = string.Empty;                // MS2.Scan
             ScanNum = 0;
             DatasetFile = string.Empty;
             DatasetName = string.Empty;
-
             ProteinGroup = string.Empty;
             ProteinIDs = string.Empty;
             ProteinNames = string.Empty;
-            Genes = string.Empty;
+            GeneNames = string.Empty;
             ProteinGroupQuantity = string.Empty;
             ProteinGroupNormalized = string.Empty;
             ProteinGroupMaxLFQ = string.Empty;
@@ -315,9 +333,9 @@
             GenesMaxLFQ = string.Empty;
             GenesMaxLFQUnique = string.Empty;
             ModifiedSequence = string.Empty;
-            Sequence = string.Empty;
+            Sequence = string.Empty;            // Stripped.Sequence
             PrecursorId = string.Empty;
-            Charge = string.Empty;
+            Charge = string.Empty;              // Precursor.Charge
             ChargeNum = 0;
             QValueDiaNN = string.Empty;
             PEP = string.Empty;
@@ -332,19 +350,19 @@
             PrecursorNormalized = string.Empty;
             PrecursorTranslated = string.Empty;
             TranslatedQuality = string.Empty;
-            Ms1Translated = string.Empty;
+            MS1Translated = string.Empty;
             QuantityQuality = string.Empty;
             ElutionTime = string.Empty;
             RTStart = string.Empty;
             RTStop = string.Empty;
             IndexedRT = string.Empty;
             PredictedRT = string.Empty;
-            PredictedIRT = string.Empty;
+            PredictedIndexedRT = string.Empty;
             FirstProteinDescription = string.Empty;
             LibQValue = string.Empty;
             LibProteinGroupQValue = string.Empty;
-            Ms1ProfileCorr = string.Empty;
-            Ms1Area = string.Empty;
+            MS1ProfileCorr = string.Empty;
+            MS1Area = string.Empty;
             Evidence = string.Empty;
             SpectrumSimilarity = string.Empty;
             Averagine = string.Empty;
@@ -355,10 +373,10 @@
             FragmentQuantRaw = string.Empty;
             FragmentQuantCorrected = string.Empty;
             FragmentCorrelations = string.Empty;
-            IM = string.Empty;
-            IndexedIM = string.Empty;
-            PredictedIM = string.Empty;
-            PredictedIndexedIM = string.Empty;
+            IonMobility = string.Empty;
+            IndexedIonMobility = string.Empty;
+            PredictedIonMobility = string.Empty;
+            PredictedIndexedIonMobility = string.Empty;
 
             PrefixResidue = string.Empty;
             SuffixResidue = string.Empty;

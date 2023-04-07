@@ -78,7 +78,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="toolNameAbbreviation"></param>
         /// <param name="longestCommonBaseName"></param>
         /// <returns>Base name</returns>
-        protected string GetBaseNameForOutputFiles(Dictionary<string, string> baseNameByDatasetName, string toolNameAbbreviation, string longestCommonBaseName)
+        protected string GetBaseNameForOutputFiles(
+            Dictionary<string, string> baseNameByDatasetName,
+            string toolNameAbbreviation,
+            string longestCommonBaseName)
         {
             // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (baseNameByDatasetName.Count == 0 || baseNameByDatasetName.Count > 1 && string.IsNullOrWhiteSpace(Options.OutputFileBaseName) && string.IsNullOrWhiteSpace(longestCommonBaseName))

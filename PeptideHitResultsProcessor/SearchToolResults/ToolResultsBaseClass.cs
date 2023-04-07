@@ -178,6 +178,9 @@
         /// <para>
         /// For MSFragger, from column "Calculated Peptide Mass"
         /// </para>
+        /// <para>
+        /// For DIA-NN, this value is computed by PHRP and is identical to CalculatedMonoMassPHRP
+        /// </para>
         /// </remarks>
         public double CalculatedMonoMassValue;
 
@@ -244,8 +247,11 @@
         /// For MaxQuant, this is the Leading Razor Protein
         /// </para>
         /// <para>
-        /// </para>
         /// For MSFragger, comes from the Protein column
+        /// </para>
+        /// <para>
+        /// For DIA-NN, the first protein in the Protein.Ids column
+        /// </para>
         /// </remarks>
         public string Protein;
 
