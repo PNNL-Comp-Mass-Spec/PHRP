@@ -79,7 +79,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
-        /// <remarks>This only populated for MSAlign, MODa, and MODPlus</remarks>
+        /// <remarks>This only populated for MSAlign, MODa, MODPlus, and DIA-NN</remarks>
         public List<ModificationDefinition> ModList { get; }
 
         /// <summary>

@@ -115,6 +115,11 @@ namespace PHRPReader
         /// <summary>
         /// MSFragger
         /// </summary>
-        MSFragger = 11
+        MSFragger = 11,
+
+        /// <summary>
+        /// DIA-NN
+        /// </summary>
+        DiaNN = 12
     }
 }

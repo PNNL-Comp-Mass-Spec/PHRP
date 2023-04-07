@@ -579,19 +579,9 @@ namespace PeptideHitResultsProcRunner
 
                 switch (peptideHitResultsFormat)
                 {
-                    case ResultsFileFormat.SequestFirstHitsFile:
-                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
-                        LogMessage("Detected SEQUEST First Hits file");
-                        break;
-
-                    case ResultsFileFormat.SequestSynopsisFile:
-                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
-                        LogMessage("Detected SEQUEST Synopsis file");
-                        break;
-
-                    case ResultsFileFormat.XTandemXMLFile:
-                        mPeptideHitResultsProcessor = new XTandemResultsProcessor(Options);
-                        LogMessage("Detected X!Tandem XML file");
+                    case ResultsFileFormat.DiannTSVFile:
+                        mPeptideHitResultsProcessor = new DiaNNResultsProcessor(Options);
+                        LogMessage("Detected DIA-NN results file");
                         break;
 
                     case ResultsFileFormat.InspectTXTFile:
@@ -599,14 +589,9 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected InSpecT results file");
                         break;
 
-                    case ResultsFileFormat.MSGFPlusTXTFile:
-                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor(Options);
-                        LogMessage("Detected MS-GF+ results file");
-                        break;
-
-                    case ResultsFileFormat.MSAlignTXTFile:
-                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor(Options);
-                        LogMessage("Detected MSAlign results file");
+                    case ResultsFileFormat.MaxQuantTXTFile:
+                        mPeptideHitResultsProcessor = new MaxQuantResultsProcessor(Options);
+                        LogMessage("Detected MaxQuant results file");
                         break;
 
                     case ResultsFileFormat.MODaTXTFile:
@@ -619,9 +604,34 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected MODPlus results file");
                         break;
 
+                    case ResultsFileFormat.MSAlignTXTFile:
+                        mPeptideHitResultsProcessor = new MSAlignResultsProcessor(Options);
+                        LogMessage("Detected MSAlign results file");
+                        break;
+
+                    case ResultsFileFormat.MSFraggerTSVFile:
+                        mPeptideHitResultsProcessor = new MSFraggerResultsProcessor(Options);
+                        LogMessage("Detected MSFragger results file");
+                        break;
+
+                    case ResultsFileFormat.MSGFPlusTXTFile:
+                        mPeptideHitResultsProcessor = new MSGFPlusResultsProcessor(Options);
+                        LogMessage("Detected MS-GF+ results file");
+                        break;
+
                     case ResultsFileFormat.MSPathFinderTSVFile:
                         mPeptideHitResultsProcessor = new MSPathFinderResultsProcessor(Options);
                         LogMessage("Detected MSPathFinder results file");
+                        break;
+
+                    case ResultsFileFormat.SequestFirstHitsFile:
+                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
+                        LogMessage("Detected SEQUEST First Hits file");
+                        break;
+
+                    case ResultsFileFormat.SequestSynopsisFile:
+                        mPeptideHitResultsProcessor = new SequestResultsProcessor(Options);
+                        LogMessage("Detected SEQUEST Synopsis file");
                         break;
 
                     case ResultsFileFormat.TopPICTXTFile:
@@ -629,14 +639,9 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected TopPIC results file");
                         break;
 
-                    case ResultsFileFormat.MaxQuantTXTFile:
-                        mPeptideHitResultsProcessor = new MaxQuantResultsProcessor(Options);
-                        LogMessage("Detected MaxQuant results file");
-                        break;
-
-                    case ResultsFileFormat.MSFraggerTSVFile:
-                        mPeptideHitResultsProcessor = new MSFraggerResultsProcessor(Options);
-                        LogMessage("Detected MSFragger results file");
+                    case ResultsFileFormat.XTandemXMLFile:
+                        mPeptideHitResultsProcessor = new XTandemResultsProcessor(Options);
+                        LogMessage("Detected X!Tandem XML file");
                         break;
 
                     case ResultsFileFormat.AutoDetermine:

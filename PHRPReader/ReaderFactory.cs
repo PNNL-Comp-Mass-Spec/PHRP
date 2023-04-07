@@ -479,6 +479,10 @@ namespace PHRPReader
             string datasetName)
         {
             var phrpFilename = getPhrpFilenameMethod(datasetName);
+
+            if (string.IsNullOrWhiteSpace(phrpFilename))
+                return;
+
             filesToFind.Add(new KeyValuePair<string, PeptideHitResultTypes>(phrpFilename, resultType));
         }
 
@@ -708,6 +712,9 @@ namespace PHRPReader
 
                 AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPFirstHitsFileName, dataset);
+
+                AddFileToFind(filesToFind, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.GetPHRPFirstHitsFileName, dataset);
                 AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPSynopsisFileName, dataset);
@@ -815,6 +822,7 @@ namespace PHRPReader
 
             switch (resultType)
             {
+                case PeptideHitResultTypes.DiaNN:
                 case PeptideHitResultTypes.Inspect:
                 case PeptideHitResultTypes.MaxQuant:
                 case PeptideHitResultTypes.MODa:
@@ -831,7 +839,14 @@ namespace PHRPReader
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 4);
 
-                        if (resultType == PeptideHitResultTypes.Inspect)
+                        if (resultType == PeptideHitResultTypes.DiaNN)
+                        {
+                            if (datasetName.EndsWith("_diann", StringComparison.OrdinalIgnoreCase))
+                            {
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_diann".Length);
+                            }
+                        }
+                        else if (resultType == PeptideHitResultTypes.Inspect)
                         {
                             if (datasetName.EndsWith("_inspect", StringComparison.OrdinalIgnoreCase))
                             {
@@ -930,13 +945,17 @@ namespace PHRPReader
             var filePathLCase = filePath.ToLower();
 
             var suffixesToCheck = new List<KeyValuePair<string, PeptideHitResultTypes>>();
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.XTandem, XTandemSynFileReader.FILENAME_SUFFIX_SYN);
+
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
@@ -949,8 +968,7 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.XTandem, XTandemSynFileReader.FILENAME_SUFFIX_SYN);
 
             foreach (var item in suffixesToCheck)
             {
@@ -971,6 +989,14 @@ namespace PHRPReader
             {
                 // Error reading the header line; assume MSGFPlus
                 return PeptideHitResultTypes.MSGFPlus;
+            }
+
+            if (LineContainsColumns(columnNames,
+                    DiaNNSynFileReader.GetColumnNameByID(DiaNNSynFileColumns.PrecursorQuantity),
+                    DiaNNSynFileReader.GetColumnNameByID(DiaNNSynFileColumns.CScore)))
+            {
+                // The header line has columns PrecursorQuantity and CScore
+                return PeptideHitResultTypes.DiaNN;
             }
 
             if (LineContainsColumns(columnNames,
@@ -3130,6 +3156,7 @@ namespace PHRPReader
                     ReportWarning("Standard input file suffixes include: \n" +
                                   "  _msgfplus_fht.txt\n" +
                                   "  _msgfplus_syn.txt\n" +
+                                  "  _diann_syn.txt\n" +
                                   "  _maxq_syn.txt\n" +
                                   "  _msfragger_syn.txt\n" +
                                   "  _mspath_syn.txt\n" +

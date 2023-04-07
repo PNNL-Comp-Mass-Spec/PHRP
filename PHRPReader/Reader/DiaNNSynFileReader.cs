@@ -20,7 +20,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// DiaNN synopsis file suffix
         /// </summary>
-        public const string FILENAME_SUFFIX_SYN = "_DiaNN_syn.txt";
+        public const string FILENAME_SUFFIX_SYN = "_diann_syn.txt";
 
         /// <summary>
         /// DiaNN first hits file suffix
@@ -30,16 +30,16 @@ namespace PHRPReader.Reader
         /// This public constant is defined for compatibility with other classes
         /// </para>
         /// <para>
-        /// We don't actually create first-hits files for DiaNN results
+        /// We don't actually create first-hits files for DIA-NN results
         /// </para>
         /// </remarks>
-        public const string FILENAME_SUFFIX_FHT = "_DiaNN_fht.txt";
+        public const string FILENAME_SUFFIX_FHT = "_diann_fht.txt";
 
         /// <summary>
         /// Search engine name
         /// </summary>
         // ReSharper disable once IdentifierTypo
-        private const string DiaNN_SEARCH_ENGINE_NAME = "DiaNN";
+        private const string DiaNN_SEARCH_ENGINE_NAME = "DIA-NN";
 
         /// <summary>
         /// Mapping from enum to synopsis file column name for DiaNN
@@ -212,7 +212,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            // DiaNN does not have a first-hits file; just the _syn.txt file
+            // DIA-NN does not have a first-hits file; just the _syn.txt file
             return string.Empty;
         }
 
@@ -223,7 +223,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_syn_ModSummary.txt";
+            return datasetName + "_diann_syn_ModSummary.txt";
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_PepToProtMapMTS.txt";
+            return datasetName + "_diann_PepToProtMapMTS.txt";
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_syn_ProteinMods.txt";
+            return datasetName + "_diann_syn_ProteinMods.txt";
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_syn_ResultToSeqMap.txt";
+            return datasetName + "_diann_syn_ResultToSeqMap.txt";
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_syn_SeqInfo.txt";
+            return datasetName + "_diann_syn_SeqInfo.txt";
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace PHRPReader.Reader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return datasetName + "_DiaNN_syn_SeqToProteinMap.txt";
+            return datasetName + "_diann_syn_SeqToProteinMap.txt";
         }
 
         /// <summary>

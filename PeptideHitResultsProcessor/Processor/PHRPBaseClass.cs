@@ -880,6 +880,12 @@ namespace PeptideHitResultsProcessor.Processor
                     // MSFragger Dataset.tsv file
                     return ResultsFileFormat.MSFraggerTSVFile;
                 }
+
+                if (ReaderFactory.LineContainsColumns(columnNames, true, "Modified.Sequence", "Stripped.Sequence", "Q.Value"))
+                {
+                    // DIA-NN report.tsv file
+                    return ResultsFileFormat.DiannTSVFile;
+                }
             }
 
             if (fileName.EndsWith(MSFraggerResultsProcessor.PSM_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
