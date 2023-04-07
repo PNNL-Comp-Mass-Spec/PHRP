@@ -1004,14 +1004,14 @@ namespace PeptideHitResultsProcessor.Processor
                 Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
-                var baseNameByDatasetName = GetDatasetNameMap(inputFile.Name, filteredSearchResults, out var longestCommonBaseName);
+                var datasetNameToBaseNameMap = GetDatasetNameMap(inputFile.Name, filteredSearchResults, out var longestCommonBaseName);
 
                 // Load Precursor m/z masses (if an appropriate file can be found)
                 // If found, compute MassErrorPpm and MassErrorDa
                 var precursorMzLoader = new ScanPrecursorMzLoader(inputFile.Directory.FullName);
                 RegisterEvents(precursorMzLoader);
 
-                var precursorsByDataset = precursorMzLoader.LoadPrecursorIons(baseNameByDatasetName.Keys.ToList());
+                var precursorsByDataset = precursorMzLoader.LoadPrecursorIons(datasetNameToBaseNameMap.Keys.ToList());
 
                 if (precursorsByDataset.Count > 0)
                 {
@@ -1019,10 +1019,10 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // The synopsis file name will be of the form DatasetName_maxq_syn.txt
-                // If baseNameByDatasetName only has one item, will use the full dataset name
-                // If baseNameByDatasetName has multiple items, will use the longest string in common for the keys in baseNameByDatasetName
+                // If datasetNameToBaseNameMap only has one item, will use the full dataset name
+                // If datasetNameToBaseNameMap has multiple items, will use the longest string in common for the keys in datasetNameToBaseNameMap
 
-                baseName = GetBaseNameForOutputFiles(baseNameByDatasetName, "maxq", longestCommonBaseName);
+                baseName = GetBaseNameForOutputFiles(datasetNameToBaseNameMap, "maxq", longestCommonBaseName);
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
@@ -1035,7 +1035,7 @@ namespace PeptideHitResultsProcessor.Processor
                 WriteSynFHTFileHeader(writer, errorMessages);
 
                 // Sort the data in filteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
+                SortAndWriteFilteredSearchResults(datasetNameToBaseNameMap, writer, filteredSearchResults, errorMessages);
 
                 filterPassingResultCount = filteredSearchResults.Count;
 
@@ -3020,18 +3020,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Sort filteredSearchResults and write to disk
         /// </summary>
-        /// <param name="baseNameByDatasetName">Keys are dataset names, values are dataset ID (or 0 if undefined)</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="writer"></param>
         /// <param name="filteredSearchResults"></param>
         /// <param name="errorMessages"></param>
         private void SortAndWriteFilteredSearchResults(
-            Dictionary<string, string> baseNameByDatasetName,
+            Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
             List<MaxQuantSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
-            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
+            var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
             // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
             filteredSearchResults.Sort(new MaxQuantSearchResultsComparerScoreScanChargePeptide());
@@ -3045,7 +3045,7 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
-                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
+                GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;

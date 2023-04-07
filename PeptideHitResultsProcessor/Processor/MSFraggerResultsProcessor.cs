@@ -797,17 +797,17 @@ namespace PeptideHitResultsProcessor.Processor
                 Console.WriteLine();
 
                 // Keys in this dictionary are dataset names, values are abbreviated names
-                var baseNameByDatasetName = GetDatasetNameMap(inputFile.Name, filteredSearchResults, out var longestCommonBaseName);
+                var datasetNameToBaseNameMap = GetDatasetNameMap(inputFile.Name, filteredSearchResults, out var longestCommonBaseName);
 
                 // Compute MassErrorPpm and MassErrorDa
                 ComputeObservedMassErrors(filteredSearchResults);
 
                 // The synopsis file name will be of the form DatasetName_msfragger_syn.txt
-                // If baseNameByDatasetName only has one item, will use the full dataset name
-                // If baseNameByDatasetName has multiple items, will use either Options.OutputFileBaseName,
-                // or the longest string in common for the keys in baseNameByDatasetName
+                // If datasetNameToBaseNameMap only has one item, will use the full dataset name
+                // If datasetNameToBaseNameMap has multiple items, will use either Options.OutputFileBaseName,
+                // or the longest string in common for the keys in datasetNameToBaseNameMap
 
-                baseName = GetBaseNameForOutputFiles(baseNameByDatasetName, "msfragger", longestCommonBaseName);
+                baseName = GetBaseNameForOutputFiles(datasetNameToBaseNameMap, "msfragger", longestCommonBaseName);
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
@@ -820,7 +820,7 @@ namespace PeptideHitResultsProcessor.Processor
                 WriteSynFHTFileHeader(writer, errorMessages);
 
                 // Write the search results to disk
-                WriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
+                WriteFilteredSearchResults(datasetNameToBaseNameMap, writer, filteredSearchResults, errorMessages);
 
                 filterPassingResultCount = filteredSearchResults.Count;
 
@@ -2593,23 +2593,23 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write search results to disk
         /// </summary>
-        /// <param name="baseNameByDatasetName">Keys are dataset names, values are dataset ID (or 0 if undefined)</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="writer"></param>
         /// <param name="filteredSearchResults"></param>
         /// <param name="errorMessages"></param>
         private void WriteFilteredSearchResults(
-            Dictionary<string, string> baseNameByDatasetName,
+            Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
             List<MSFraggerSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
-            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
+            var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
-                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
+                GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;

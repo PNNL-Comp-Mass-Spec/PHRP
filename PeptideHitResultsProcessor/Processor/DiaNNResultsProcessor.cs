@@ -625,7 +625,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                var success = ReadDiaNNResults(inputFile, errorMessages, out var filteredSearchResults, out var baseNameByDatasetName);
+                var success = ReadDiaNNResults(inputFile, errorMessages, out var filteredSearchResults, out var datasetNameToBaseNameMap);
 
                 if (!success)
                 {
@@ -649,7 +649,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var datasetNames = new SortedSet<string>();
 
-                foreach (var datasetName in baseNameByDatasetName.Keys)
+                foreach (var datasetName in datasetNameToBaseNameMap.Keys)
                 {
                     datasetNames.Add(datasetName);
                 }
@@ -657,11 +657,11 @@ namespace PeptideHitResultsProcessor.Processor
                 GetDatasetNameMap(inputFile.Name, datasetNames, out var longestCommonBaseName);
 
                 // The synopsis file name will be of the form DatasetName_diann_syn.txt
-                // If baseNameByDatasetName only has one item, will use the full dataset name
-                // If baseNameByDatasetName has multiple items, will use either Options.OutputFileBaseName,
-                // or the longest string in common for the keys in baseNameByDatasetName
+                // If datasetNameToBaseNameMap only has one item, will use the full dataset name
+                // If datasetNameToBaseNameMap has multiple items, will use either Options.OutputFileBaseName,
+                // or the longest string in common for the keys in datasetNameToBaseNameMap
 
-                baseName = GetBaseNameForOutputFiles(baseNameByDatasetName, "diann", longestCommonBaseName);
+                baseName = GetBaseNameForOutputFiles(datasetNameToBaseNameMap, "diann", longestCommonBaseName);
 
                 synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
@@ -674,7 +674,7 @@ namespace PeptideHitResultsProcessor.Processor
                 WriteSynFHTFileHeader(writer, errorMessages);
 
                 // Write the search results to disk
-                WriteFilteredSearchResults(baseNameByDatasetName, writer, filteredSearchResults, errorMessages);
+                WriteFilteredSearchResults(datasetNameToBaseNameMap, writer, filteredSearchResults, errorMessages);
 
                 filterPassingResultCount = filteredSearchResults.Count;
 
@@ -1057,7 +1057,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorMessages"></param>
         /// <param name="columnMapping"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
-        /// <param name="baseNameByDatasetName">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="currentDatasetFile">Current dataset file path; updated by this method if the Spectrum File path is not an empty string</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNResultsFileEntry(
@@ -1066,7 +1066,7 @@ namespace PeptideHitResultsProcessor.Processor
             ICollection<string> errorMessages,
             IDictionary<DiaNNReportFileColumns, int> columnMapping,
             int lineNumber,
-            IDictionary<string, string> baseNameByDatasetName,
+            IDictionary<string, string> datasetNameToBaseNameMap,
             ref string currentDatasetFile)
         {
             searchResult = new DiaNNSearchResult();
@@ -1754,16 +1754,16 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFile">report.tsv file</param>
         /// <param name="errorMessages"></param>
         /// <param name="filteredSearchResults">Output: DIA-NN results</param>
-        /// <param name="baseNameByDatasetName">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ReadDiaNNResults(
             FileSystemInfo inputFile,
             ICollection<string> errorMessages,
             out List<DiaNNSearchResult> filteredSearchResults,
-            out Dictionary<string, string> baseNameByDatasetName)
+            out Dictionary<string, string> datasetNameToBaseNameMap)
         {
             filteredSearchResults = new List<DiaNNSearchResult>();
-            baseNameByDatasetName = new Dictionary<string, string>();
+            datasetNameToBaseNameMap = new Dictionary<string, string>();
 
             try
             {
@@ -1825,7 +1825,7 @@ namespace PeptideHitResultsProcessor.Processor
                         errorMessages,
                         columnMapping,
                         lineNumber,
-                        baseNameByDatasetName,
+                        datasetNameToBaseNameMap,
                         ref currentDatasetFile);
 
                     if (validSearchResult)
@@ -1950,23 +1950,23 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write search results to disk
         /// </summary>
-        /// <param name="baseNameByDatasetName">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="writer"></param>
         /// <param name="filteredSearchResults"></param>
         /// <param name="errorMessages"></param>
         private void WriteFilteredSearchResults(
-            Dictionary<string, string> baseNameByDatasetName,
+            Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
             List<DiaNNSearchResult> filteredSearchResults,
             ICollection<string> errorMessages)
         {
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
-            var datasetIDs = LookupDatasetIDs(baseNameByDatasetName.Keys.ToList());
+            var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
-                GetBaseNameAndDatasetID(baseNameByDatasetName, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
+                GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
 
                 WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
                 index++;

@@ -73,28 +73,28 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Get the base name to use for output files
         /// </summary>
-        /// <remarks>If baseNameByDatasetName is empty, or if longestCommonBaseName and Options.OutputFileBaseName are empty, uses a generic base name</remarks>
-        /// <param name="baseNameByDatasetName"></param>
+        /// <remarks>If datasetNameToBaseNameMap is empty, or if longestCommonBaseName and Options.OutputFileBaseName are empty, uses a generic base name</remarks>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="toolNameAbbreviation"></param>
         /// <param name="longestCommonBaseName"></param>
         /// <returns>Base name</returns>
         protected string GetBaseNameForOutputFiles(
-            Dictionary<string, string> baseNameByDatasetName,
+            Dictionary<string, string> datasetNameToBaseNameMap,
             string toolNameAbbreviation,
             string longestCommonBaseName)
         {
             // ReSharper disable once ConvertIfStatementToSwitchStatement
-            if (baseNameByDatasetName.Count == 0 || baseNameByDatasetName.Count > 1 && string.IsNullOrWhiteSpace(Options.OutputFileBaseName) && string.IsNullOrWhiteSpace(longestCommonBaseName))
+            if (datasetNameToBaseNameMap.Count == 0 || datasetNameToBaseNameMap.Count > 1 && string.IsNullOrWhiteSpace(Options.OutputFileBaseName) && string.IsNullOrWhiteSpace(longestCommonBaseName))
             {
                 return string.Format("Dataset_{0}", toolNameAbbreviation);
             }
 
-            if (baseNameByDatasetName.Count == 1)
+            if (datasetNameToBaseNameMap.Count == 1)
             {
-                return string.Format("{0}_{1}", baseNameByDatasetName.First().Key, toolNameAbbreviation);
+                return string.Format("{0}_{1}", datasetNameToBaseNameMap.First().Key, toolNameAbbreviation);
             }
 
-            // baseNameByDatasetName.Count is greater than 1 and either longestCommonBaseName has text or Options.OutputFileBaseName has text
+            // datasetNameToBaseNameMap.Count is greater than 1 and either longestCommonBaseName has text or Options.OutputFileBaseName has text
 
             return string.Format("{0}_{1}",
                 string.IsNullOrWhiteSpace(Options.OutputFileBaseName) ? longestCommonBaseName : Options.OutputFileBaseName,
@@ -133,14 +133,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
-            var baseNameByDatasetName = GetDatasetNameMap(datasetNames, out longestCommonBaseName, out var warnings);
+            var datasetNameToBaseNameMap = GetDatasetNameMap(datasetNames, out longestCommonBaseName, out var warnings);
 
             foreach (var warning in warnings)
             {
                 OnWarningEvent(warning);
             }
 
-            return baseNameByDatasetName;
+            return datasetNameToBaseNameMap;
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace PeptideHitResultsProcessor.Processor
             var baseDatasetNames = new SortedSet<string>();
 
             // Dictionary where keys are dataset names and values are abbreviated names
-            var baseNameByDatasetName = new Dictionary<string, string>();
+            var datasetNameToBaseNameMap = new Dictionary<string, string>();
 
             if (candidateBaseNames.Count == datasetNameKeys.Count)
             {
@@ -231,7 +231,7 @@ namespace PeptideHitResultsProcessor.Processor
                 foreach (var item in datasetNameParts)
                 {
                     var baseNameToAdd = CombineDatasetNameParts(item.Key, item.Value, partCountToUse, 12, 25);
-                    baseNameByDatasetName.Add(item.Key, baseNameToAdd);
+                    datasetNameToBaseNameMap.Add(item.Key, baseNameToAdd);
 
                     if (baseDatasetNames.Contains(baseNameToAdd))
                     {
@@ -251,12 +251,12 @@ namespace PeptideHitResultsProcessor.Processor
                 // Use full dataset names
                 foreach (var item in datasetNameParts)
                 {
-                    baseNameByDatasetName.Add(item.Key, item.Key);
+                    datasetNameToBaseNameMap.Add(item.Key, item.Key);
                     baseDatasetNames.Add(item.Key);
                 }
             }
 
-            longestCommonBaseName = StringUtilities.LongestCommonStringFromStart(baseNameByDatasetName.Values.ToList());
+            longestCommonBaseName = StringUtilities.LongestCommonStringFromStart(datasetNameToBaseNameMap.Values.ToList());
             longestCommonBaseName = longestCommonBaseName.TrimEnd('_', '-');
 
             if (longestCommonBaseName.Length > 7 && (
@@ -266,19 +266,19 @@ namespace PeptideHitResultsProcessor.Processor
                 longestCommonBaseName = longestCommonBaseName.Substring(0, longestCommonBaseName.Length - 2);
             }
 
-            return baseNameByDatasetName;
+            return datasetNameToBaseNameMap;
         }
 
         /// <summary>
         /// Lookup the base name and dataset ID for the given dataset name
         /// </summary>
-        /// <param name="baseNameByDatasetName"></param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="datasetIDs"></param>
         /// <param name="datasetName"></param>
         /// <param name="baseDatasetName">Output: base dataset name, or empty string if not found</param>
         /// <param name="datasetID">Output: dataset ID, or 0 if not found</param>
         protected void GetBaseNameAndDatasetID(
-            Dictionary<string, string> baseNameByDatasetName,
+            Dictionary<string, string> datasetNameToBaseNameMap,
             Dictionary<string, int> datasetIDs,
             string datasetName,
             out string baseDatasetName,
@@ -291,10 +291,10 @@ namespace PeptideHitResultsProcessor.Processor
                 return;
             }
 
-            if (!baseNameByDatasetName.TryGetValue(datasetName, out baseDatasetName))
+            if (!datasetNameToBaseNameMap.TryGetValue(datasetName, out baseDatasetName))
             {
                 ConsoleMsgUtils.ShowDebug(
-                    "The baseNameByDatasetName dictionary does not contain key {0}; this is unexpected",
+                    "The datasetNameToBaseNameMap dictionary does not contain key {0}; this is unexpected",
                     datasetName);
             }
 
