@@ -1,8 +1,5 @@
 ﻿// This class reads in a MaxQuant msms.txt results file and creates
-// a tab-delimited text file with the data.  It will insert modification symbols
-// into the peptide sequences for modified peptides.
-//
-// The modification definition information is determined from the MaxQuant parameter file
+// a tab-delimited text file with the data.
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)

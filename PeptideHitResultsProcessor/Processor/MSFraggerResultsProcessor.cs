@@ -1,8 +1,5 @@
-﻿// This class reads in an MSFragger PSM results file and creates
-// a tab-delimited text file with the data.  It will insert modification symbols
-// into the peptide sequences for modified peptides.
-//
-// The modification definition information is determined from the MSFragger parameter file
+﻿// This class reads in an MSFragger PSM results file (Dataset_psm.tsv) and creates
+// a tab-delimited text file with the data.
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)

@@ -217,7 +217,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Cleavage state of the peptide
         /// </summary>
         /// <remarks>
-        /// Some tools refer to this as NTT (number of tryptic terminii)
+        /// Some tools refer to this as NTT (number of tryptic termini)
         /// </remarks>
         public PeptideCleavageStateCalculator.PeptideCleavageState CleavageState => mPeptideCleavageState;
 
