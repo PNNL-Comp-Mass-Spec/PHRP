@@ -882,7 +882,8 @@ namespace PeptideHitResultsProcessor.Processor
                 if (candidateFile.Name.EndsWith("_ion.tsv", StringComparison.OrdinalIgnoreCase) ||
                     candidateFile.Name.EndsWith("_peptide.tsv", StringComparison.OrdinalIgnoreCase) ||
                     candidateFile.Name.EndsWith("_protein.tsv", StringComparison.OrdinalIgnoreCase) ||
-                    candidateFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase))
+                    candidateFile.Name.Equals("Aggregation_psm.tsv", StringComparison.OrdinalIgnoreCase) ||
+                    candidateFile.Name.Equals("Combined_Results_AllExperimentGroups_psm.tsv", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
