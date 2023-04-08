@@ -2722,14 +2722,15 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Charge is the same; check E-value
-                if (x.EValue < y.EValue)
-                {
-                    return -1;
-                }
-
+                // Sort ascending
                 if (x.EValue > y.EValue)
                 {
                     return 1;
+                }
+
+                if (x.EValue < y.EValue)
+                {
+                    return -1;
                 }
 
                 // E-value is the same; check sequence
@@ -2753,17 +2754,23 @@ namespace PeptideHitResultsProcessor.Processor
                 if (x == null || y == null)
                     return 0;
 
-                if (x.EValue < y.EValue)
-                {
-                    return -1;
-                }
-
+                // Sort ascending
                 if (x.EValue > y.EValue)
                 {
                     return 1;
                 }
 
+                if (x.EValue < y.EValue)
+                {
+                    return -1;
+                }
+
                 // E-value is the same; check scan number
+                if (x.ScanNum > y.ScanNum)
+                {
+                    return 1;
+                }
+
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;

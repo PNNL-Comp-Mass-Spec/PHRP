@@ -1738,14 +1738,14 @@ namespace PeptideHitResultsProcessor.Processor
         {
             public int Compare(MODPlusSearchResult x, MODPlusSearchResult y)
             {
-                if (x.ScoreNum < y.ScoreNum)
-                {
-                    return 1;
-                }
-
                 if (x.ScoreNum > y.ScoreNum)
                 {
                     return -1;
+                }
+
+                if (x.ScoreNum < y.ScoreNum)
+                {
+                    return 1;
                 }
 
                 // MODPlus score is the same; check scan number

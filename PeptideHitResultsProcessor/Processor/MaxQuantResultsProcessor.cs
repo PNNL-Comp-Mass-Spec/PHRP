@@ -3316,14 +3316,14 @@ namespace PeptideHitResultsProcessor.Processor
                 if (x == null || y == null)
                     return 0;
 
-                if (x.ScoreNum < y.ScoreNum)
-                {
-                    return 1;
-                }
-
                 if (x.ScoreNum > y.ScoreNum)
                 {
                     return -1;
+                }
+
+                if (x.ScoreNum < y.ScoreNum)
+                {
+                    return 1;
                 }
 
                 // Andromeda score is the same; check scan number
