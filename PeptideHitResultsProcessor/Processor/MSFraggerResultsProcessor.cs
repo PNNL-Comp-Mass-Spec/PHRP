@@ -1383,9 +1383,15 @@ namespace PeptideHitResultsProcessor.Processor
                     // Populate a dictionary mapping scan, charge, and peptide to each row in additionalSearchResults
                     var searchResultsLookup = new Dictionary<string, MSFraggerSearchResult>();
 
+                    var datasetNameFilter = additionalFile.Value;
+
                     foreach (var additionalResult in additionalSearchResults)
                     {
                         var key = ConstructKeyForPSM(additionalResult);
+
+                        if (matchDatasetNames && additionalResult.DatasetName.Length > 0 && !additionalResult.DatasetName.Equals(datasetNameFilter, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
                         if (searchResultsLookup.ContainsKey(key))
                             throw new DuplicateNameException(string.Format("searchResultsLookup already has key {0}", key));
 
@@ -1402,8 +1408,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                         elutionTimesByScanNumber.Add(additionalResult.ScanNum, new List<double> { elutionTime });
                     }
-
-                    var datasetNameFilter = additionalFile.Value;
 
                     // Merge information from additionalSearchResults into filteredSearchResults by matching on scan and peptide
 
