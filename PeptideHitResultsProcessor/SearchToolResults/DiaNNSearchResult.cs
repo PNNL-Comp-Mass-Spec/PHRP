@@ -15,6 +15,11 @@
         /// </summary>
         public string DatasetFile;
 
+        /// <summary>
+        /// Full dataset name
+        /// </summary>
+        public string FullDatasetName;
+
         // Dataset Name (from the Run column) is tracked in the base class
         // It is an abbreviated dataset name, as assigned by the analysis manager
 
@@ -95,6 +100,11 @@
         /// Precursor sequence (unused by PHRP)
         /// </summary>
         public string PrecursorId;
+
+        /// <summary>
+        /// This is the theoretical precursor m/z, as computed by PHRP
+        /// </summary>
+        public string PrecursorMZ;
 
         // PrecursorCharge is tracked by Charge in the base class
 
@@ -231,7 +241,7 @@
         /// <summary>
         /// MS1 Profile Correlation
         /// </summary>
-        public string MS1ProfileCorr;
+        public string MS1ProfileCorrelation;
 
         /// <summary>
         /// MS1 Area
@@ -329,6 +339,7 @@
             ScanNum = 0;
             DatasetFile = string.Empty;
             DatasetName = string.Empty;
+            FullDatasetName = string.Empty;
             ProteinGroup = string.Empty;
             ProteinIDs = string.Empty;
             ProteinNames = string.Empty;
@@ -343,6 +354,7 @@
             ModifiedSequence = string.Empty;
             Sequence = string.Empty;            // Stripped.Sequence
             PrecursorId = string.Empty;
+            PrecursorMZ = string.Empty;
             Charge = string.Empty;              // Precursor.Charge
             ChargeNum = 0;
             QValueDiaNN = string.Empty;
@@ -369,7 +381,7 @@
             FirstProteinDescription = string.Empty;
             LibQValue = string.Empty;
             LibProteinGroupQValue = string.Empty;
-            MS1ProfileCorr = string.Empty;
+            MS1ProfileCorrelation = string.Empty;
             MS1Area = string.Empty;
             Evidence = string.Empty;
             SpectrumSimilarity = string.Empty;

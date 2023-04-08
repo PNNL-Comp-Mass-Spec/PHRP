@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "March 29, 2023";
+        public const string PROGRAM_DATE = "April 7, 2023";
 
         /// <summary>
         /// Constructor
@@ -2424,6 +2424,22 @@ namespace PeptideHitResultsProcessor.Processor
         protected void OperationComplete()
         {
             ProgressComplete?.Invoke();
+        }
+
+        /// <summary>
+        /// Convert a list of delimited items to an enumerable list, trimming whitespace from each item
+        /// </summary>
+        /// <param name="delimitedList"></param>
+        /// <param name="delimiter"></param>
+        /// <param name="includeEmptyItems">If true, include empty items in the list</param>
+        /// <remarks>
+        /// If delimitedList is "Value1;;Value2" and includeEmptyItems is false, a 2 item list will be returned
+        /// If delimitedList is "Value1;;Value2" and includeEmptyItems is true,  a 3 item list will be returned
+        /// </remarks>
+        /// <returns>List of items</returns>
+        protected IEnumerable<string> ParseDelimitedList(string delimitedList, char delimiter, bool includeEmptyItems = false)
+        {
+            return SynFileReaderBaseClass.ParseDelimitedList(delimitedList, delimiter, includeEmptyItems);
         }
 
         /// <summary>

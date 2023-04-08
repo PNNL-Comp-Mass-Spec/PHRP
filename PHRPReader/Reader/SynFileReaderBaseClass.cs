@@ -950,6 +950,24 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
+        /// Convert a list of delimited items to an enumerable list, trimming whitespace from each item
+        /// </summary>
+        /// <param name="delimitedList"></param>
+        /// <param name="delimiter"></param>
+        /// <param name="includeEmptyItems">If true, include empty items in the list</param>
+        /// <remarks>
+        /// If delimitedList is "Value1;;Value2" and includeEmptyItems is false, a 2 item list will be returned
+        /// If delimitedList is "Value1;;Value2" and includeEmptyItems is true,  a 3 item list will be returned
+        /// </remarks>
+        /// <returns>List of items</returns>
+        public static IEnumerable<string> ParseDelimitedList(string delimitedList, char delimiter, bool includeEmptyItems = false)
+        {
+            return includeEmptyItems
+                ? delimitedList.Split(delimiter).Select(item => item.Trim()).ToList()
+                : (from item in delimitedList.Split(delimiter) where !string.IsNullOrWhiteSpace(item) select item.Trim()).ToList();
+        }
+
+        /// <summary>
         /// Splits text on text, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
         /// </summary>
         /// <remarks>Automatically trims whitespace</remarks>

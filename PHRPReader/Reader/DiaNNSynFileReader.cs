@@ -153,12 +153,10 @@ namespace PHRPReader.Reader
                 { "Mass", DiaNNSynFileColumns.Mass },
                 { "Peptide", DiaNNSynFileColumns.Peptide },
                 { "Modifications", DiaNNSynFileColumns.Modifications },
-                { "Peptide", DiaNNSynFileColumns.Peptide },
-                { "Modifications", DiaNNSynFileColumns.Modifications },
                 { "ProteinGroup", DiaNNSynFileColumns.ProteinGroup },
                 { "ProteinIDs", DiaNNSynFileColumns.ProteinIDs },
                 { "ProteinNames", DiaNNSynFileColumns.ProteinNames },
-                { "Genes", DiaNNSynFileColumns.GeneNames },
+                { "GeneNames", DiaNNSynFileColumns.GeneNames },
                 { "NTT", DiaNNSynFileColumns.NTT },
                 { "ProteinGroupQuantity", DiaNNSynFileColumns.ProteinGroupQuantity },
                 { "ProteinGroupNormalized", DiaNNSynFileColumns.ProteinGroupNormalized },
@@ -175,6 +173,7 @@ namespace PHRPReader.Reader
                 { "GlobalProteinGroupQValue", DiaNNSynFileColumns.GlobalProteinGroupQValue },
                 { "GeneGroupQValue", DiaNNSynFileColumns.GeneGroupQValue },
                 { "TranslatedQValue", DiaNNSynFileColumns.TranslatedQValue },
+                { "Proteotypic", DiaNNSynFileColumns.Proteotypic },
                 { "PrecursorQuantity", DiaNNSynFileColumns.PrecursorQuantity },
                 { "PrecursorNormalized", DiaNNSynFileColumns.PrecursorNormalized },
                 { "PrecursorTranslated", DiaNNSynFileColumns.PrecursorTranslated },
@@ -185,6 +184,7 @@ namespace PHRPReader.Reader
                 { "ElutionTimeStart", DiaNNSynFileColumns.ElutionTimeStart },
                 { "ElutionTimeStop", DiaNNSynFileColumns.ElutionTimeStop },
                 { "IndexedRT", DiaNNSynFileColumns.IndexedRT },
+                { "IndexedIonMobility", DiaNNSynFileColumns.IndexedIonMobility },
                 { "PredictedRT", DiaNNSynFileColumns.PredictedRT },
                 { "PredictedIndexedRT", DiaNNSynFileColumns.PredictedIndexedRT },
                 { "MS1ProfileCorrelation", DiaNNSynFileColumns.MS1ProfileCorrelation },
@@ -195,10 +195,7 @@ namespace PHRPReader.Reader
                 { "MassEvidence", DiaNNSynFileColumns.MassEvidence },
                 { "CScore", DiaNNSynFileColumns.CScore },
                 { "DecoyEvidence", DiaNNSynFileColumns.DecoyEvidence },
-                { "DecoyCScore", DiaNNSynFileColumns.DecoyCScore },
-                { "Scan", DiaNNSynFileColumns.Scan },
-                { "IonMobility", DiaNNSynFileColumns.IonMobility },
-                { "IndexedIonMobility", DiaNNSynFileColumns.IndexedIonMobility }
+                { "DecoyCScore", DiaNNSynFileColumns.DecoyCScore }
             };
         }
 
@@ -443,7 +440,9 @@ namespace PHRPReader.Reader
                 }
 
                 psm.ResultID = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.ResultID), mColumnHeaders, 0);
-                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.RankEValue), mColumnHeaders, 0);
+
+                // Since this is DIA data, always use 1 for score rank
+                psm.ScoreRank = 1;
 
                 var peptide = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.Peptide), mColumnHeaders);
 
@@ -458,23 +457,11 @@ namespace PHRPReader.Reader
 
                 psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.Charge), mColumnHeaders, 0);
 
-                var proteinName = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.Protein), mColumnHeaders);
+                var proteinIDs = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinIDs), mColumnHeaders);
 
-                if (!string.IsNullOrWhiteSpace(proteinName))
+                foreach (var proteinID in ParseDelimitedList(proteinIDs, ';'))
                 {
-                    psm.AddProtein(proteinName.Trim());
-                }
-
-                var additionalProteins = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.AdditionalProteins), mColumnHeaders);
-                if (!string.IsNullOrWhiteSpace(additionalProteins))
-                {
-                    foreach (var protein in additionalProteins.Split(';'))
-                    {
-                        if (string.IsNullOrWhiteSpace(protein))
-                            continue;
-
-                        psm.AddProtein(protein.Trim());
-                    }
+                    psm.AddProtein(proteinID);
                 }
 
                 var precursorMZ = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.PrecursorMZ), mColumnHeaders, 0.0);
@@ -484,8 +471,9 @@ namespace PHRPReader.Reader
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
                 }
 
-                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.DelM), mColumnHeaders);
-                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.DelM_PPM), mColumnHeaders);
+                // DIA-NN results do not have mass error information
+                // psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.DelM), mColumnHeaders);
+                // psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.DelM_PPM), mColumnHeaders);
 
                 if (!fastReadMode)
                 {
@@ -495,21 +483,53 @@ namespace PHRPReader.Reader
                 // Store the remaining data
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Dataset));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.DatasetID));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.DelM_DiaNN));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.IonMobility));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MH));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Mass));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Peptide));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Modifications));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinGroup));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinNames));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GeneNames));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.NTT));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.EValue));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Hyperscore));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Nextscore));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PeptideProphetProbability));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTime));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTimeAverage));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MissedCleavages));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.NumberOfMatchedIons));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.TotalNumberOfIons));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinGroupQuantity));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinGroupNormalized));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinGroupMaxLFQ));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GenesQuantity));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GenesNormalized));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GenesMaxLFQ));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GenesMaxLFQUnique));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.QValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PEP));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GlobalQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ProteinGroupQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GlobalProteinGroupQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.GeneGroupQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.TranslatedQValue));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Proteotypic));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PrecursorQuantity));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PrecursorNormalized));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PrecursorTranslated));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.TranslatedQuality));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MS1Translated));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.QuantityQuality));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTime));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTimeStart));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTimeStop));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.IndexedRT));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.IndexedIonMobility));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PredictedRT));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.PredictedIndexedRT));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MS1ProfileCorrelation));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MS1Area));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Evidence));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.SpectrumSimilarity));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Averagine));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MassEvidence));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.CScore));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.DecoyEvidence));
+                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.DecoyCScore));
 
                 return true;
             }
