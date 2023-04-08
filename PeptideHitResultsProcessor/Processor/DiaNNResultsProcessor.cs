@@ -1140,6 +1140,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="columnMapping"></param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="baseNameToFullDatasetNameMap">Keys are abbreviated dataset names, values are the full dataset names</param>
         /// <param name="currentDatasetFile">Current dataset file path; updated by this method if the Spectrum File path is not an empty string</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNResultsFileEntry(
@@ -1149,6 +1150,7 @@ namespace PeptideHitResultsProcessor.Processor
             IDictionary<DiaNNReportFileColumns, int> columnMapping,
             int lineNumber,
             IDictionary<string, string> datasetNameToBaseNameMap,
+            IDictionary<string, string> baseNameToFullDatasetNameMap,
             ref string currentDatasetFile)
         {
             searchResult = new DiaNNSearchResult();
@@ -1179,15 +1181,39 @@ namespace PeptideHitResultsProcessor.Processor
                     updateDatasetNameMapDictionary = false;
                 }
 
+                // Read the abbreviated dataset name
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.DatasetName], out searchResult.DatasetName);
 
-                if (updateDatasetNameMapDictionary)
+                if (!string.IsNullOrWhiteSpace(searchResult.DatasetName))
                 {
-                    var fullDatasetName = Path.GetFileNameWithoutExtension(spectrumFile);
-
-                    if (!baseNameByDatasetName.ContainsKey(fullDatasetName) && !string.IsNullOrWhiteSpace(searchResult.DatasetName))
+                    if (updateDatasetNameMapDictionary)
                     {
-                        baseNameByDatasetName.Add(fullDatasetName, searchResult.DatasetName);
+                        searchResult.FullDatasetName = Path.GetFileNameWithoutExtension(spectrumFile);
+
+                        if (!string.IsNullOrEmpty(searchResult.FullDatasetName))
+                        {
+                            if (!datasetNameToBaseNameMap.ContainsKey(searchResult.FullDatasetName))
+                            {
+                                datasetNameToBaseNameMap.Add(searchResult.FullDatasetName, searchResult.DatasetName);
+                            }
+
+                            if (!baseNameToFullDatasetNameMap.ContainsKey(searchResult.DatasetName))
+                            {
+                                baseNameToFullDatasetNameMap.Add(searchResult.DatasetName, searchResult.FullDatasetName);
+                            }
+                        }
+                    }
+                    else if (!baseNameToFullDatasetNameMap.TryGetValue(searchResult.DatasetName, out searchResult.FullDatasetName))
+                    {
+                        // This code should never be reached
+                        OnWarningEvent("Abbreviated dataset name not found in baseNameToFullDatasetNameMap; this is unexpected");
+
+                        searchResult.FullDatasetName = Path.GetFileNameWithoutExtension(spectrumFile);
+
+                        if (!string.IsNullOrEmpty(searchResult.FullDatasetName))
+                        {
+                            baseNameToFullDatasetNameMap.Add(searchResult.DatasetName, searchResult.FullDatasetName);
+                        }
                     }
                 }
 
@@ -1849,6 +1875,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             filteredSearchResults = new List<DiaNNSearchResult>();
             datasetNameToBaseNameMap = new Dictionary<string, string>();
+            var baseNameToFullDatasetNameMap = new Dictionary<string, string>();
 
             try
             {
@@ -1911,6 +1938,7 @@ namespace PeptideHitResultsProcessor.Processor
                         columnMapping,
                         lineNumber,
                         datasetNameToBaseNameMap,
+                        baseNameToFullDatasetNameMap,
                         ref currentDatasetFile);
 
                     if (validSearchResult)
@@ -2051,9 +2079,18 @@ namespace PeptideHitResultsProcessor.Processor
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
-                GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
+                GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.FullDatasetName, out var baseDatasetName, out var datasetID);
 
-                WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
+                if (string.IsNullOrEmpty(baseDatasetName))
+                {
+                    OnWarningEvent("Method GetBaseNameAndDatasetID returned an empty string for baseDatasetName for result {0}; this is unexpected", result);
+                    WriteSearchResultToFile(index, result.DatasetName, datasetID, writer, result, errorMessages);
+                }
+                else
+                {
+                    WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
+                }
+
                 index++;
             }
         }
