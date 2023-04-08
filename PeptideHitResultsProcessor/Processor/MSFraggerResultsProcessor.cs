@@ -2147,10 +2147,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                if (searchResult.Proteins.Count > 0)
-                {
-                    searchResult.MultipleProteinCount = (searchResult.Proteins.Count - 1).ToString();
-                }
+                searchResult.MultipleProteinCount = searchResult.Proteins.Count > 0
+                    ? (searchResult.Proteins.Count - 1).ToString()
+                    : "0";
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerSynFileColumns.PrecursorMZ], out string precursorMz);
 
@@ -2215,11 +2214,6 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.NumberOfMatchedIons = numberOfMatchedIons;
                 searchResult.TotalNumberOfIons = totalNumberOfIons;
                 searchResult.QValue = qValue;
-
-                if (string.IsNullOrWhiteSpace(searchResult.MultipleProteinCount))
-                {
-                    searchResult.MultipleProteinCount = "0";
-                }
 
                 return true;
             }
