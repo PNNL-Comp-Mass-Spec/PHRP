@@ -1957,6 +1957,9 @@ namespace PeptideHitResultsProcessor.Processor
         {
             public int Compare(TopPICPrSMs x, TopPICPrSMs y)
             {
+                if (x == null || y == null)
+                    return 0;
+
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;
