@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "May 6, 2022";
+            FileDate = "April 7, 2023";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -2635,6 +2635,9 @@ namespace PeptideHitResultsProcessor.Processor
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
             var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
+            // Sort filteredSearchResults by ascending QValue, descending Hyperscore, ascending Scan, Charge, and Peptide
+            filteredSearchResults.Sort(new MSFraggerSearchResultsComparerQValueHyperscoreScanChargePeptide());
+
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
@@ -2800,6 +2803,58 @@ namespace PeptideHitResultsProcessor.Processor
                     return 1;
                 }
 
+                if (x.ScanNum < y.ScanNum)
+                {
+                    return -1;
+                }
+
+                // Scan is the same, check charge
+                if (x.ChargeNum > y.ChargeNum)
+                {
+                    return 1;
+                }
+
+                if (x.ChargeNum < y.ChargeNum)
+                {
+                    return -1;
+                }
+
+                // Charge is the same; check peptide
+                return string.CompareOrdinal(x.Sequence, y.Sequence);
+            }
+        }
+
+        private class MSFraggerSearchResultsComparerQValueHyperscoreScanChargePeptide : IComparer<MSFraggerSearchResult>
+        {
+            public int Compare(MSFraggerSearchResult x, MSFraggerSearchResult y)
+            {
+                if (x == null || y == null)
+                    return 0;
+
+                // Sort ascending
+                if (x.QValue > y.QValue)
+                {
+                    return 1;
+                }
+
+                if (x.QValue < y.QValue)
+                {
+                    return -1;
+                }
+
+                // Q-value is the same; check hyperscore
+                // Sort descending
+                if (x.HyperscoreValue > y.HyperscoreValue)
+                {
+                    return -1;
+                }
+
+                if (x.HyperscoreValue < y.HyperscoreValue)
+                {
+                    return 1;
+                }
+
+                // Hyperscore is the same; check scan number
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;
