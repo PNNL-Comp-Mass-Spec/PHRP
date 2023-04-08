@@ -1019,7 +1019,8 @@ namespace PHRPReader.Reader
         {
             var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
-            var success = ReadKeyValuePairSearchEngineParamFile(searchEngineName, paramFilePath, peptideHitResultType, searchEngineParams,
+            var success = ReadKeyValuePairSearchEngineParamFile(
+                searchEngineName, paramFilePath, peptideHitResultType, searchEngineParams,
                 out var errorMessage, out var warningMessage);
 
             if (!string.IsNullOrWhiteSpace(errorMessage))

@@ -6,7 +6,7 @@ using System.IO;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP SynFileReader for DiaNN
+    /// PHRP SynFileReader for DIA-NN
     /// </summary>
     public class DiaNNSynFileReader : SynFileReaderBaseClass
     {
@@ -18,12 +18,12 @@ namespace PHRPReader.Reader
         // ReSharper restore CommentTypo
 
         /// <summary>
-        /// DiaNN synopsis file suffix
+        /// DIA-NN synopsis file suffix
         /// </summary>
         public const string FILENAME_SUFFIX_SYN = "_diann_syn.txt";
 
         /// <summary>
-        /// DiaNN first hits file suffix
+        /// DIA-NN first hits file suffix
         /// </summary>
         /// <remarks>
         /// <para>
@@ -42,7 +42,7 @@ namespace PHRPReader.Reader
         private const string DiaNN_SEARCH_ENGINE_NAME = "DIA-NN";
 
         /// <summary>
-        /// Mapping from enum to synopsis file column name for DiaNN
+        /// Mapping from enum to synopsis file column name for DIA-NN
         /// </summary>
         private static readonly Dictionary<DiaNNSynFileColumns, string> mSynopsisFileColumn = new();
 
@@ -382,7 +382,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Parses the specified DiaNN parameter file
+        /// Parses the specified DIA-NN parameter file
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
@@ -515,7 +515,7 @@ namespace PHRPReader.Reader
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + linesRead + " in the DiaNN data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the DIA-NN data file: " + ex.Message);
                 return false;
             }
         }
@@ -542,7 +542,6 @@ namespace PHRPReader.Reader
                 // Determine the enzyme name
                 if (!string.IsNullOrWhiteSpace(cleavageSpecificity))
                 {
-
                     // ReSharper disable StringLiteralTypo
 
                     switch (cleavageSpecificity)
@@ -593,6 +592,5 @@ namespace PHRPReader.Reader
                 return false;
             }
         }
-
     }
 }

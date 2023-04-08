@@ -296,8 +296,15 @@
         /// Q-Value
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// Smaller values (closer to zero) are higher confidence
+        /// </para>
+        /// <para>
         /// Computed by PHRP for MSFragger and MaxQuant
+        /// </para>
+        /// <para>
         /// From column Q.Value for DIA-NN
+        /// </para>
         /// </remarks>
         public double QValue;
     }

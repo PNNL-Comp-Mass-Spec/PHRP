@@ -143,6 +143,10 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// PEP (posterior error probability)
         /// </summary>
+        /// <remarks>
+        /// Similar to p-value
+        /// Smaller values (closer to zero) are higher confidence
+        /// </remarks>
         public string PEP { get; set; }
 
         /// <summary>

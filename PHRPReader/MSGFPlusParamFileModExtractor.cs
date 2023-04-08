@@ -520,7 +520,6 @@ namespace PHRPReader
             return true;
         }
 
-
         /// <summary>
         /// Parse the mod spec definition from a DIA-NN parameter file
         /// </summary>
@@ -889,7 +888,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Resolve MS-GF+, MSPathFinder, or TopPIC mods with mod definitions
+        /// Resolve MS-GF+, MSPathFinder, TopPIC, or DIA-NN mods with modification definitions
         /// </summary>
         /// <param name="modList"></param>
         /// <param name="peptideMods"></param>

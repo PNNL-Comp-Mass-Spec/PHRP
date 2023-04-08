@@ -2520,6 +2520,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Load the MS-GF+ Parameter File so that we can determine the modification names and masses
                     // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
                     var modInfoExtracted = ExtractModInfoFromParamFile(msgfPlusParameterFilePath, out var msgfPlusModInfo);
+
                     if (!modInfoExtracted)
                     {
                         return false;

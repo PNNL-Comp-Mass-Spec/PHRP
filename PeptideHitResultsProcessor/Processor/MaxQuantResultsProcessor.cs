@@ -3033,7 +3033,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
             var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
-            // Sort filteredSearchResults by descending Andromeda score, Scan, Peptide, and Razor Protein
+            // Sort filteredSearchResults by descending Andromeda score, ascending Scan, Charge, and Peptide
             filteredSearchResults.Sort(new MaxQuantSearchResultsComparerScoreScanChargePeptide());
 
             var listForQValue = new List<ToolResultsBaseClass>();

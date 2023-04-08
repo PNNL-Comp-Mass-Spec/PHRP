@@ -2532,7 +2532,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             AssignRankByScore(searchResults, startIndex, endIndex);
 
-            // The calling procedure already sorted by dataset name, scan, charge, and Score; no need to re-sort
+            // The calling procedure already sorted by dataset name, scan, charge, and score; no need to re-sort
 
             ExpandListIfRequired(filteredSearchResults, endIndex - startIndex + 1);
 

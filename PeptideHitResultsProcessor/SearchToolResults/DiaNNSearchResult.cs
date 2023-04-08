@@ -82,7 +82,8 @@
         /// <remarks>
         /// Examples:
         ///   AAALEAM(UniMod:35)K
-        ///   AAEAHVDAHYYEQNEQPTGTC(UniMod:4)AAC(UniMod:4)ITGDNR
+        ///   C(UniMod:4)TSYNIPC(UniMod:4)TSDM(UniMod:35)AK
+        ///   DIHFM(UniMod:35)PC(UniMod:4)SGLTGANLK
         /// </remarks>
         public string ModifiedSequence;
 
@@ -100,11 +101,18 @@
         /// <summary>
         /// QValue computed by DIA-NN
         /// </summary>
+        /// <remarks>
+        /// Smaller values (closer to zero) are higher confidence
+        /// </remarks>
         public string QValueDiaNN;
 
         /// <summary>
         /// PEP (posterior error probability)
         /// </summary>
+        /// <remarks>
+        /// Similar to p-value
+        /// Smaller values (closer to zero) are higher confidence
+        /// </remarks>
         public string PEP;
 
         /// <summary>

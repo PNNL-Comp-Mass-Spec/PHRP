@@ -94,7 +94,7 @@
         /// Expectation value (E-value)
         /// </summary>
         /// <remarks>
-        /// Smaller values (closer to zero) are better
+        /// Smaller values (closer to zero) are higher confidence
         /// </remarks>
         public string Expectation;
 
