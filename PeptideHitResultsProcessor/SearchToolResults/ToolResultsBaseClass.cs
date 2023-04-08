@@ -126,8 +126,9 @@
         /// </para>
         /// <para>
         /// DIA-NN Examples:
-        ///   AAAGDLGGDHLAFSC(UniMod:4)DVAK
-        ///   AAGVGLVDC(UniMod:4)HC(UniMod:4)HLSAPDFDR
+        ///   PHRP converts "AAAGDLGGDHLAFSC(UniMod:4)DVAK"            to "15C(57.0215)"
+        ///   PHRP converts "AAGVGLVDC(UniMod:4)HC(UniMod:4)HLSAPDFDR" to "9C(57.0215), 11C(57.0215)"
+        ///   PHRP converts "DIHFM(UniMod:35)PC(UniMod:4)SGLTGANLK"    to "5M(15.9949), 7C(57.0215)"
         /// </para>
         /// </remarks>
         public string ModificationList;

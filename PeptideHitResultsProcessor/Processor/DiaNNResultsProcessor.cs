@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using PeptideHitResultsProcessor.Data;
 using PeptideHitResultsProcessor.SearchToolResults;
 using PHRPReader;
@@ -197,7 +198,8 @@ namespace PeptideHitResultsProcessor.Processor
             /// <remarks>
             /// Examples:
             ///   AAALEAM(UniMod:35)K
-            ///   AAEAHVDAHYYEQNEQPTGTC(UniMod:4)AAC(UniMod:4)ITGDNR
+            ///   C(UniMod:4)TSYNIPC(UniMod:4)TSDM(UniMod:35)AK
+            ///   DIHFM(UniMod:35)PC(UniMod:4)SGLTGANLK
             /// </remarks>
             ModifiedSequence = 13,
 
@@ -426,24 +428,6 @@ namespace PeptideHitResultsProcessor.Processor
             PredictedIndexedIonMobility = 57
         }
 
-        private struct DiaNNModInfo
-        {
-            public double ModMass;
-            public char ResidueSymbol;
-            public int ResidueLocInPeptide;
-            public AminoAcidModInfo.ResidueTerminusState TerminusState;
-
-            /// <summary>
-            /// Show the residue symbol and mod mass
-            /// </summary>
-            public override string ToString()
-            {
-                return ResidueSymbol is default(char)
-                    ? string.Format("{0:F4}", ModMass)
-                    : string.Format("{0}: {1:F4}", ResidueSymbol, ModMass);
-            }
-        }
-
         /// <summary>
         /// Keys in this dictionary are modification names, values are modification masses
         /// </summary>
@@ -580,14 +564,54 @@ namespace PeptideHitResultsProcessor.Processor
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
         /// <param name="searchResult"></param>
-        private double ComputeTotalModMass(ToolResultsBaseClass searchResult)
+        /// <param name="modList">Output: list of modifications</param>
+        private double ComputeTotalModMass(DiaNNSearchResult searchResult, out List<MSFraggerResultsProcessor.MSFraggerModInfo> modList)
         {
-            if (string.IsNullOrWhiteSpace(searchResult.ModificationList))
+            if (string.IsNullOrWhiteSpace(searchResult.ModifiedSequence))
             {
+                modList = new List<MSFraggerResultsProcessor.MSFraggerModInfo>();
                 return 0;
             }
 
-            return GetPeptideModifications(searchResult).Sum(modEntry => modEntry.ModMass);
+            modList = GetPeptideModifications(searchResult);
+
+            return modList.Sum(modEntry => modEntry.ModMass);
+        }
+
+        private string ConvertModListToMSFraggerNotation(List<MSFraggerResultsProcessor.MSFraggerModInfo> modList)
+        {
+            var modificationList = new StringBuilder();
+
+            foreach (var modItem in modList)
+            {
+                if (modificationList.Length > 0)
+                    modificationList.Append(", ");
+
+                switch (modItem.TerminusState)
+                {
+                    case AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus:
+                        modificationList.AppendFormat("{0}({1:0.0###})", MSFraggerResultsProcessor.MOD_POSITION_NAME_N_TERMINUS, modItem.ModMass);
+                        break;
+
+                    case AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus:
+                        modificationList.AppendFormat("{0}({1:0.0###})", MSFraggerResultsProcessor.MOD_POSITION_NAME_C_TERMINUS, modItem.ModMass);
+                        modificationList.AppendFormat("11C(57.0215)");
+                        break;
+
+                    case AminoAcidModInfo.ResidueTerminusState.None:
+                    case AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus:
+                    case AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus:
+                    case AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus:
+                        throw new Exception(string.Format(
+                            "Unexpected terminus state for mod item: {0} ({1})", modItem.TerminusState, (int)modItem.TerminusState));
+
+                    default:
+                        modificationList.AppendFormat("{0}{1}({2:0.0###})", modItem.ResidueLocInPeptide, modItem.ResidueSymbol, modItem.ModMass);
+                        break;
+                }
+            }
+
+            return modificationList.ToString();
         }
 
         /// <summary>
@@ -755,17 +779,24 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private List<DiaNNModInfo> GetPeptideModifications(string cleanSequence, string peptideWithModifications)
+        /// <summary>
+        /// Get the list of static and dynamic modifications for a peptide read from the DIA-NN report.tsv file
+        /// </summary>
+        /// <param name="cleanSequence">Peptide sequence without modification symbols</param>
+        /// <param name="peptideWithModifications">Peptide sequence, with embedded modification names (DIA-NN style)</param>
+        /// <returns>List of modifications</returns>
+        private List<MSFraggerResultsProcessor.MSFraggerModInfo> ExtractModsFromModifiedSequence(string cleanSequence, string peptideWithModifications)
         {
             // ReSharper disable CommentTypo
 
             // peptideWithModifications should have the peptide sequence, including modification names; examples:
-            //   AAAGDLGGDHLAFSC(UniMod:4)DVAK
-            //   AAGVGLVDC(UniMod:4)HC(UniMod:4)HLSAPDFDR
+            //   AAALEAM(UniMod:35)K
+            //   C(UniMod:4)TSYNIPC(UniMod:4)TSDM(UniMod:35)AK
+            //   DIHFM(UniMod:35)PC(UniMod:4)SGLTGANLK
 
             // ReSharper enable CommentTypo
 
-            var mods = new List<DiaNNModInfo>();
+            var mods = new List<MSFraggerResultsProcessor.MSFraggerModInfo>();
 
             var finalResidueLoc = cleanSequence.Length;
 
@@ -809,7 +840,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var modMass = GetModificationMass(modificationName);
 
-                var currentMod = new DiaNNModInfo
+                var currentMod = new MSFraggerResultsProcessor.MSFraggerModInfo
                 {
                     ResidueSymbol = currentResidue,
                     ResidueLocInPeptide = residueNumber,
@@ -836,12 +867,81 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else if (currentMod.ResidueLocInPeptide > finalResidueLoc)
                 {
-                    currentMod.ResidueLocInPeptide = finalResidueLoc;
+                    throw new Exception(string.Format(
+                        "Residue number tracked by residueNumber is larger than the final residue location: {0} vs. {1} for {2}",
+                        residueNumber, finalResidueLoc, peptideWithModifications));
+                }
+
+                if (currentResidue != cleanSequence[residueNumber - 1])
+                {
+                    throw new Exception(string.Format(
+                        "Residue {0} tracked by currentResidue does not match the residue in the clean sequence: {1} vs. {2} for {3}",
+                        residueNumber, currentResidue, cleanSequence[residueNumber - 1], peptideWithModifications));
                 }
 
                 mods.Add(currentMod);
 
                 currentIndex = closingParenthesisIndex;
+            }
+
+            return mods;
+        }
+
+        private double GetModificationMass(string modificationName)
+        {
+            if (mModificationMassByName.TryGetValue(modificationName, out var modMass))
+                return modMass;
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Get the list of static and dynamic modifications for a peptide read from a DIA-NN synopsis file
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <returns>List of modifications</returns>
+        private List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(DiaNNResults searchResult)
+        {
+            // ToDo: Update this to call a method in a base class that can process a list of modifications of the form "9C(57.0215), 11C(57.0215)"
+            return GetPeptideModifications(searchResult.PeptideCleanSequence, searchResult.Modifications);
+        }
+
+        /// <summary>
+        /// Get the list of static and dynamic modifications for a peptide read from the DIA-NN report.tsv file
+        /// </summary>
+        /// <param name="searchResult"></param>
+        /// <returns>List of modifications</returns>
+        private List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(DiaNNSearchResult searchResult)
+        {
+            return ExtractModsFromModifiedSequence(searchResult.Sequence, searchResult.ModifiedSequence);
+        }
+
+        /// <summary>
+        /// Get the list of static and dynamic modifications for a peptide with MSFragger style modification descriptions
+        /// </summary>
+        /// <param name="cleanSequence">Peptide sequence without modification symbols</param>
+        /// <param name="modificationList">Comma separated list of modification info, e.g. 1M(15.9949), 5C(57.0215)</param>
+        /// <returns>List of modifications</returns>
+        internal List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(string cleanSequence, string modificationList)
+        {
+            // modificationList should have both the static and dynamic mods, as a comma separated list
+            // of residue number, residue symbol, and mod mass; examples:
+            //   15M(15.9949)
+            //   1M(15.9949), 5C(57.0215)
+            //   N-term(42.0106)
+
+            var mods = new List<MSFraggerResultsProcessor.MSFraggerModInfo>();
+            var finalResidueLoc = cleanSequence.Length;
+
+            foreach (var modEntry in modificationList.Split(','))
+            {
+                if (MSFraggerResultsProcessor.ParseModificationDescription(cleanSequence, finalResidueLoc, modEntry, out var modInfo, out var errorMessage))
+                {
+                    mods.Add(modInfo);
+                    continue;
+                }
+
+                ReportError(errorMessage);
             }
 
             return mods;
@@ -1199,7 +1299,10 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.Reverse = IsReversedProtein(searchResult.Protein);
 
                 // Parse the modification list to determine the total mod mass
-                var totalModMass = ComputeTotalModMass(searchResult);
+                // In addition, obtain the list of static and dynamic modifications in Modified.Sequence
+                var totalModMass = ComputeTotalModMass(searchResult, out var modList);
+
+                searchResult.ModificationList = ConvertModListToMSFraggerNotation(modList);
 
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMassForCleanSequence(searchResult.Sequence, totalModMass);
