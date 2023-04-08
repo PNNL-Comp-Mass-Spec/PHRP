@@ -698,22 +698,61 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private double GetModificationMass(string modificationName)
+        /// <summary>
+        /// Read mod info from the DIA-NN parameter file
+        /// </summary>
+        /// <remarks>The DMS-based parameter file for DIA-NN uses the same formatting as MS-GF+</remarks>
+        /// <param name="diannParamFilePath"></param>
+        /// <returns>True on success, false if an error</returns>
+        private bool ExtractModInfoFromParamFile(
+            string diannParamFilePath)
         {
-            if (mModificationMassByName.TryGetValue(modificationName, out var modMass))
-                return modMass;
+            var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
+            RegisterEvents(modFileProcessor);
 
-            return 0;
-        }
+            modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-        private List<DiaNNModInfo> GetPeptideModifications(DiaNNResults searchResult)
-        {
-            return GetPeptideModifications(searchResult.PeptideCleanSequence, searchResult.Modifications);
-        }
+            var success = modFileProcessor.ExtractModInfoFromParamFile(
+                diannParamFilePath,
+                MSGFPlusParamFileModExtractor.ModSpecFormats.DiaNN,
+                out var modList);
 
-        private List<DiaNNModInfo> GetPeptideModifications(ToolResultsBaseClass searchResult)
-        {
-            return GetPeptideModifications(searchResult.Sequence, searchResult.ModificationList);
+            if (!success || mErrorCode != PHRPErrorCode.NoError)
+            {
+                if (mErrorCode == PHRPErrorCode.NoError)
+                {
+                    SetErrorMessage("Unknown error extracting the modification definitions from the DIA-NN parameter file");
+                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                }
+                return false;
+            }
+
+            // ToDo: Verify the behavior of this call
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
+
+            mModificationMassByName.Clear();
+
+            // Cache the modification names and masses
+            foreach (var item in modList)
+            {
+                if (mModificationMassByName.TryGetValue(item.ModName, out var existingModMass))
+                {
+                    if (Math.Abs(existingModMass - item.ModMassVal) > 0.01)
+                    {
+                        OnWarningEvent(
+                            "The DIA-NN parameter file has two static and/or dynamic mods with the same name ({0}) but different masses ({1} and {2})",
+                            item.ModName, existingModMass, item.ModMassVal);
+
+                        return false;
+                    }
+
+                    continue;
+                }
+
+                mModificationMassByName.Add(item.ModName, item.ModMassVal);
+            }
+
+            return true;
         }
 
         private List<DiaNNModInfo> GetPeptideModifications(string cleanSequence, string peptideWithModifications)
@@ -852,63 +891,6 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Read mod info from the DIA-NN parameter file
-        /// </summary>
-        /// <remarks>The DMS-based parameter file for DIA-NN uses the same formatting as MS-GF+</remarks>
-        /// <param name="diannParamFilePath"></param>
-        /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromParamFile(
-            string diannParamFilePath)
-        {
-            var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
-            RegisterEvents(modFileProcessor);
-
-            modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
-
-            var success = modFileProcessor.ExtractModInfoFromParamFile(
-                diannParamFilePath,
-                MSGFPlusParamFileModExtractor.ModSpecFormats.DiaNN,
-                out var modList);
-
-            if (!success || mErrorCode != PHRPErrorCode.NoError)
-            {
-                if (mErrorCode == PHRPErrorCode.NoError)
-                {
-                    SetErrorMessage("Unknown error extracting the modification definitions from the DIA-NN parameter file");
-                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
-                }
-                return false;
-            }
-
-            // ToDo: Verify the behavior of this call
-            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
-
-            mModificationMassByName.Clear();
-
-            // Cache the modification names and masses
-            foreach (var item in modList)
-            {
-                if (mModificationMassByName.TryGetValue(item.ModName, out var existingModMass))
-                {
-                    if (Math.Abs(existingModMass - item.ModMassVal) > 0.01)
-                    {
-                        OnWarningEvent(
-                            "The DIA-NN parameter file has two static and/or dynamic mods with the same name ({0}) but different masses ({1} and {2})",
-                            item.ModName, existingModMass, item.ModMassVal);
-
-                        return false;
-                    }
-
-                    continue;
-                }
-
-                mModificationMassByName.Add(item.ModName, item.ModMassVal);
-            }
-
-            return true;
         }
 
         /// <summary>
