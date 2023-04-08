@@ -2013,7 +2013,14 @@ namespace PeptideHitResultsProcessor.Processor
             int endIndex,
             List<DiaNNSearchResult> filteredSearchResults)
         {
-            AssignRankByScore(searchResults, startIndex, endIndex);
+            // When processing peptides identified by isolating a specific precursor m/z, we assign the ranks using AssignRankByScore:
+            // AssignRankByScore(searchResults, startIndex, endIndex);
+
+            // Since this is DIA data, set RankScore to 1 for each result
+            for (var i = startIndex; i <= endIndex; i++)
+            {
+                searchResults[i].RankScore = 1;
+            }
 
             // The calling procedure already sorted by dataset name, scan, charge, and Score; no need to re-sort
 
