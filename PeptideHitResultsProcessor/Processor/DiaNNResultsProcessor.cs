@@ -2083,6 +2083,9 @@ namespace PeptideHitResultsProcessor.Processor
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
             var datasetIDs = LookupDatasetIDs(datasetNameToBaseNameMap.Keys.ToList());
 
+            // Sort filteredSearchResults by ascending QValue, ascending Scan, Charge, and Peptide
+            filteredSearchResults.Sort(new DiaNNSearchResultsComparerQValueScanChargePeptide());
+
             var index = 1;
             foreach (var result in filteredSearchResults)
             {
@@ -2213,14 +2216,15 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Charge is the same; check QValue
-                if (x.QValue < y.QValue)
-                {
-                    return -1;
-                }
-
+                // Sort ascending
                 if (x.QValue > y.QValue)
                 {
                     return 1;
+                }
+
+                if (x.QValue < y.QValue)
+                {
+                    return -1;
                 }
 
                 // QValue is the same; check sequence
@@ -2244,14 +2248,15 @@ namespace PeptideHitResultsProcessor.Processor
                 if (x == null || y == null)
                     return 0;
 
-                if (x.EValue < y.EValue)
-                {
-                    return -1;
-                }
-
-                if (x.EValue > y.EValue)
+                // Sort ascending
+                if (x.QValue > y.QValue)
                 {
                     return 1;
+                }
+
+                if (x.QValue < y.QValue)
+                {
+                    return -1;
                 }
 
                 // QValue is the same; check scan number
