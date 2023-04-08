@@ -314,63 +314,6 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Examine the DiaNN parameters to determine the precursor mass tolerance(s)
-        /// </summary>
-        /// <param name="searchEngineParams">DiaNN search engine parameters loaded from a Key=Value parameter file</param>
-        /// <param name="toleranceLower">Output: Tolerance to the left, e.g. -20</param>
-        /// <param name="toleranceUpper">Output: Tolerance to the right, e.g. 20</param>
-        /// <param name="ppmBased">Output: True if ppm-based tolerances</param>
-        /// <param name="singleTolerance">Output: true if a single tolerance is defined, false if two tolerances are defined</param>
-        /// <returns>True if the tolerance parameters were found, false if not found or an error</returns>
-        public bool GetPrecursorSearchTolerances(
-            SearchEngineParameters searchEngineParams,
-            out double toleranceLower,
-            out double toleranceUpper,
-            out bool ppmBased,
-            out bool singleTolerance)
-        {
-            // First look for the legacy symmetric tolerance parameter
-            searchEngineParams.Parameters.TryGetValue("precursor_true_tolerance", out var precursorTrueTolerance);
-            searchEngineParams.Parameters.TryGetValue("precursor_true_units", out var precursorTrueUnits);
-
-            // Next look for the newer tolerance parameters
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_lower", out var precursorMassLower);
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_upper", out var precursorMassUpper);
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_units", out var precursorMassUnits);
-
-            if (int.TryParse(precursorMassUnits, out var precursorMassUnitsVal) &&
-                double.TryParse(precursorMassLower, out var precursorMassLowerVal) &&
-                double.TryParse(precursorMassUpper, out var precursorMassUpperVal))
-            {
-                // Two tolerances are defined (though they may be equivalent)
-                ppmBased = MassToleranceUnitsArePPM(precursorMassUnitsVal, "precursor_mass_units");
-                singleTolerance = false;
-                toleranceLower = precursorMassLowerVal;
-                toleranceUpper = precursorMassUpperVal;
-
-                return true;
-            }
-
-            if (int.TryParse(precursorTrueUnits, out var precursorTrueUnitsVal) &&
-                double.TryParse(precursorTrueTolerance, out var precursorTrueToleranceVal))
-            {
-                // A single, symmetric tolerance is defined
-                ppmBased = MassToleranceUnitsArePPM(precursorTrueUnitsVal, "precursor_true_units");
-                singleTolerance = true;
-                toleranceLower = precursorTrueToleranceVal;
-                toleranceUpper = precursorTrueToleranceVal;
-
-                return true;
-            }
-
-            ppmBased = false;
-            singleTolerance = true;
-            toleranceLower = 0;
-            toleranceUpper = 0;
-            return false;
-        }
-
-        /// <summary>
         /// Search engine name
         /// </summary>
         public static string GetSearchEngineName()
@@ -389,27 +332,6 @@ namespace PHRPReader.Reader
             searchEngineParams = new SearchEngineParameters(DiaNN_SEARCH_ENGINE_NAME);
 
             return ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
-        }
-
-        private bool MassToleranceUnitsArePPM(int massToleranceUnits, string parameterName)
-        {
-            switch (massToleranceUnits)
-            {
-                case 0:
-                    // Dalton based
-                    return false;
-
-                case 1:
-                    // ppm based
-                    return true;
-
-                default:
-                    ReportWarning(string.Format(
-                        "Unrecognized value for parameter {0} in the DiaNN parameter file: {1}",
-                        parameterName, massToleranceUnits));
-
-                    return false;
-            }
         }
 
         /// <summary>
