@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -1316,6 +1317,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (tsvToFind.Exists)
                     {
+                        if (additionalResultFiles.ContainsKey(tsvToFind))
+                            throw new DuplicateNameException(string.Format("additionalResultFiles already has key {0}", tsvToFind));
+
                         additionalResultFiles.Add(tsvToFind, datasetName);
                     }
                 }
@@ -1344,6 +1348,9 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     if (!additionalResultFilesByDataset.TryGetValue(additionalFile.Value, out var datasetInfo))
                     {
+                        if (additionalResultFilesByDataset.ContainsKey(additionalFile.Value))
+                            throw new DuplicateNameException(string.Format("additionalResultFilesByDataset already has key {0}", additionalFile.Value));
+
                         additionalResultFilesByDataset.Add(additionalFile.Value, additionalFile);
                         continue;
                     }
@@ -1379,6 +1386,9 @@ namespace PeptideHitResultsProcessor.Processor
                     foreach (var additionalResult in additionalSearchResults)
                     {
                         var key = ConstructKeyForPSM(additionalResult);
+                        if (searchResultsLookup.ContainsKey(key))
+                            throw new DuplicateNameException(string.Format("searchResultsLookup already has key {0}", key));
+
                         searchResultsLookup.Add(key, additionalResult);
 
                         if (!double.TryParse(additionalResult.ElutionTime, out var elutionTime))
