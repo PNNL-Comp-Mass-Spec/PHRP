@@ -267,7 +267,7 @@ namespace PeptideHitResultsProcessor
         /// </remarks>
         [Option("DiaNNQValueThreshold", "DiaNNQValue",
             HelpText = "When processing DIA-NN results, the Q-Value threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold.")]
+                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the DiaNNCScore threshold.")]
         public double DiaNNQValueThreshold { get; set; }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace PeptideHitResultsProcessor
         /// </remarks>
         [Option("DiaNNCScoreThreshold", "DiaNNCScore",
             HelpText = "When processing DIA-NN results, the confidence score threshold used to determine which peptides are written to the synopsis file.\n" +
-                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the the DiaNNCScore threshold.")]
+                       "A PSM is stored if its Q-Value is below the DiaNNQValue threshold, or if its confidence score (CScore) is above the DiaNNCScore threshold.")]
         public double DiaNNConfidenceScoreThreshold { get; set; }
 
         /// <summary>
