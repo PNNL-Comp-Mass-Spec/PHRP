@@ -57,8 +57,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Hyperscore, massdiff
-        // Ignore Spelling: Nextscore, Prev, proline, scannum, sp, tryptic, txt
+        // Ignore Spelling: Averagine, diann, proteotypic, tryptic, txt
 
         // ReSharper restore CommentTypo
 
@@ -67,7 +66,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 7, 2023";
+            FileDate = "April 8, 2023";
 
             mModificationMassByName = new Dictionary<string, double>();
 

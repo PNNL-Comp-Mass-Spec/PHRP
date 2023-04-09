@@ -60,7 +60,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Hyperscore, massdiff
+        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Hyperscore, massdiff, msfragger
         // Ignore Spelling: Nextscore, Prev, proline, scannum, sp, tryptic, txt
 
         // ReSharper restore CommentTypo
@@ -1645,6 +1645,7 @@ namespace PeptideHitResultsProcessor.Processor
                     //   interact-Dataset.pin.pep.xml
 
                     var baseName = Path.GetFileNameWithoutExtension(spectrumFile);
+
                     if (baseName.StartsWith("interact-", StringComparison.OrdinalIgnoreCase))
                     {
                         currentDatasetName = baseName.Substring("interact-".Length);

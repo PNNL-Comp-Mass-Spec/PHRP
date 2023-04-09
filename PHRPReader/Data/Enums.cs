@@ -2,7 +2,8 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Da, Daltons, Hyperscore, MaxQuant, proteoform, novo, tda, tryptic
+    // Ignore Spelling: Averagine, Da, Daltons, Hyperscore, MaxQuant, novo,
+    // Ignore Spelling: proteoform, Proteotypic, novo, tda, tryptic
 
     /// <summary>
     /// These columns correspond to the tab-delimited _ScanStatsEx.txt file created by MASIC or MSFileInfoScanner

@@ -1378,8 +1378,9 @@ namespace PHRPReader.Reader
                 }
                 else
                 {
-                    matchFound = UpdatePSMFindMatchingModInfo(massCorrectionTag, favorTerminalMods, residueTerminusState,
-                                                                 out matchedModDef);
+                    matchFound = UpdatePSMFindMatchingModInfo(
+                        massCorrectionTag, favorTerminalMods,
+                        residueTerminusState, out matchedModDef);
                 }
 
                 if (matchFound)
@@ -1389,14 +1390,16 @@ namespace PHRPReader.Reader
                     if (matches.Count > 0)
                     {
                         // Ambiguous modification
-                        currentPSM.AddModifiedResidue(currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                                                  residueTerminusState, matchedModDef, matches.First().ResidueEnd);
+                        currentPSM.AddModifiedResidue(
+                            currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
+                            residueTerminusState, matchedModDef, matches.First().ResidueEnd);
                     }
                     else
                     {
                         // Normal, non-ambiguous modified residue
-                        currentPSM.AddModifiedResidue(currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                                                  residueTerminusState, matchedModDef);
+                        currentPSM.AddModifiedResidue(
+                            currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
+                            residueTerminusState, matchedModDef);
                     }
 
                     if (residueLoc == 1)
