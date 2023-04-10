@@ -43,9 +43,17 @@ namespace PHRPReader.Reader
             public int ResidueEnd;
 
             /// <summary>
-            /// Modification mass (as a string)
+            /// Modification mass (as a string) or modification name
             /// </summary>
             public string ModMassString;
+
+            /// <summary>
+            /// Show the modification mass
+            /// </summary>
+            public override string ToString()
+            {
+                return ModMassString;
+            }
         }
 
         /// <summary>
