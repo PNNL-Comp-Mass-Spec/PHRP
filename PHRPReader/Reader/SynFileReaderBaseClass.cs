@@ -650,21 +650,27 @@ namespace PHRPReader.Reader
                     udtCurrentMod.ResidueEnd = residueNumber;
                     parsingAmbiguousMod = false;
 
-                    // The mod mass should be next, in the form [-30.09]
-                    // Parse out the mod mass
+                    // The mod mass should be next, in the form [-30.09] or [Acetyl]
+                    // Parse out the mod mass or mod name
                     if (charIndex < primarySequence.Length - 2)
                     {
                         if (primarySequence[charIndex + 1] == '[')
                         {
-                            var modMassString = primarySequence.Substring(charIndex + 2);
-                            var bracketIndex = modMassString.IndexOf(']');
+                            var bracketIndex = primarySequence.IndexOf(']', charIndex + 2);
+
                             if (bracketIndex > 0)
                             {
                                 // Valid ambiguous mod found; store it
-                                modMassString = modMassString.Substring(0, bracketIndex);
-                                udtCurrentMod.ModMassString = modMassString;
+                                udtCurrentMod.ModMassString = primarySequence.Substring(charIndex + 2, bracketIndex - charIndex - 2);
 
                                 ambiguousMods.Add(udtCurrentMod.ResidueStart, udtCurrentMod);
+
+                                charIndex = bracketIndex;
+                            }
+                            else
+                            {
+                                OnWarningEvent("Opening bracket at index {0} does not have a matching closing bracket: {1}",
+                                    charIndex + 1, primarySequence);
                             }
                         }
                     }
