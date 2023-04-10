@@ -801,7 +801,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Reads the data in modSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
+        /// Reads the data in modSummaryFilePath. Populates mModInfo with the modification names, masses, and affected residues
         /// </summary>
         /// <returns>True if success; false if an error</returns>
         private void LoadModSummary()
@@ -809,6 +809,7 @@ namespace PHRPReader.Reader
             try
             {
                 var modSummaryFileName = ReaderFactory.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
+
                 if (string.IsNullOrEmpty(modSummaryFileName))
                 {
                     ReportWarning("ModSummaryFile name is empty; unable to continue");
@@ -1397,38 +1398,50 @@ namespace PHRPReader.Reader
                         residueTerminusState, out matchedModDef);
                 }
 
-                if (matchFound)
+                if (!matchFound)
                 {
-                    var matches = (from item in ambiguousMods where item.Key == residueLoc select item.Value).ToList();
+                    // Could not find a valid entry in mModInfo
+                    matchedModDef = new ModificationDefinition
+                    {
+                        MassCorrectionTag = massCorrectionTag
+                    };
 
-                    if (matches.Count > 0)
+                    switch (matchedModDef.MassCorrectionTag)
                     {
-                        // Ambiguous modification
-                        currentPSM.AddModifiedResidue(
-                            currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                            residueTerminusState, matchedModDef, matches.First().ResidueEnd);
-                    }
-                    else
-                    {
-                        // Normal, non-ambiguous modified residue
-                        currentPSM.AddModifiedResidue(
-                            currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                            residueTerminusState, matchedModDef);
-                    }
+                        case "MinusH2O":
+                            matchedModDef.ModificationMass = -18.010565;
+                            break;
 
-                    if (residueLoc == 1)
-                    {
-                        nTerminalModsAdded.Add(matchedModDef.MassCorrectionTag);
+                        default:
+                            ReportError("Unrecognized mass correction tag found in the SeqInfo file: " + massCorrectionTag);
+                            break;
                     }
-                    else if (residueLoc == peptideResidueCount)
-                    {
-                        cTerminalModsAdded.Add(matchedModDef.MassCorrectionTag);
-                    }
+                }
+
+                var matches = (from item in ambiguousMods where item.Key == residueLoc select item.Value).ToList();
+
+                if (matches.Count > 0)
+                {
+                    // Ambiguous modification
+                    currentPSM.AddModifiedResidue(
+                        currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
+                        residueTerminusState, matchedModDef, matches.First().ResidueEnd);
                 }
                 else
                 {
-                    // Could not find a valid entry in mModInfo
-                    ReportError("Unrecognized mass correction tag found in the SeqInfo file: " + massCorrectionTag);
+                    // Normal, non-ambiguous modified residue
+                    currentPSM.AddModifiedResidue(
+                        currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
+                        residueTerminusState, matchedModDef);
+                }
+
+                if (residueLoc == 1)
+                {
+                    nTerminalModsAdded.Add(matchedModDef.MassCorrectionTag);
+                }
+                else if (residueLoc == peptideResidueCount)
+                {
+                    cTerminalModsAdded.Add(matchedModDef.MassCorrectionTag);
                 }
             }
         }
@@ -1533,6 +1546,20 @@ namespace PHRPReader.Reader
                 if (string.Equals(massCorrectionTag, mod.MassCorrectionTag, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedDefs.Add(mod);
+                }
+            }
+
+            if (matchedDefs.Count == 0 && massCorrectionTag.Equals("MinusH2O"))
+            {
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach (var mod in mModInfo)
+                {
+                    if (Math.Abs(mod.ModificationMass + 18.010565) > 0.001)
+                        continue;
+
+                    OnWarningEvent("Mod {0} not found in mModInfo by name, but was found by modification mass");
+                    matchedDefs.Add(mod);
+                    break;
                 }
             }
 
