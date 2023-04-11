@@ -65,6 +65,7 @@ namespace PHRPReader
         /// <summary>
         /// Custom amino acid definition parameter file keyword
         /// </summary>
+        /// <remarks>Only used by MS-GF+</remarks>
         public const string PARAM_TAG_CUSTOM_AA = "CustomAA";
 
         // ReSharper disable CommentTypo
@@ -340,15 +341,19 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from a MS-GF+, MSPathFinder, MSFragger, or DIA-NN param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from a MS-GF+, MSPathFinder, TopPIC, or DIA-NN param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="modSpecFormat"></param>
         /// <param name="modList"></param>
         /// <returns>True if success; false if a problem</returns>
-        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<ModInfo> modList)
+        public bool ExtractModInfoFromParamFile(
+            string paramFilePath,
+            ModSpecFormats modSpecFormat,
+            out List<ModInfo> modList)
         {
-            var tagNamesToFind = new List<string> {
+            var tagNamesToFind = new List<string>
+            {
                 PARAM_TAG_MOD_STATIC,
                 PARAM_TAG_MOD_DYNAMIC,
                 PARAM_TAG_CUSTOM_AA,                 // "CustomAA" is only used by MS-GF+
@@ -403,6 +408,7 @@ namespace PHRPReader
                     {
                         // Check whether the line starts with StaticMod, DynamicMod, or CustomAA
                         modSpec = ValidateIsValidModSpec(trimmedLine, tagName);
+
                         if (string.IsNullOrEmpty(modSpec))
                             continue;
 
@@ -616,7 +622,7 @@ namespace PHRPReader
                     // N-terminal protein mod
                     if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
                     {
-                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                         udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                     }
 
@@ -704,8 +710,8 @@ namespace PHRPReader
 
                     default:
                         ReportWarning(string.Format(
-                                          "Unrecognized Mod Type {0} in the {1} parameter file; should be 'opt', 'fix', or 'custom'; will assume 'opt'",
-                                          splitLine[2], mToolName));
+                            "Unrecognized Mod Type {0} in the {1} parameter file; should be 'opt', 'fix', or 'custom'; will assume 'opt'",
+                            splitLine[2], mToolName));
 
                         udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         break;
@@ -724,7 +730,7 @@ namespace PHRPReader
                         case "nterm":
                             if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
-                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
 
@@ -737,7 +743,7 @@ namespace PHRPReader
                         case "cterm":
                             if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
-                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
@@ -750,7 +756,7 @@ namespace PHRPReader
                             // Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
                             if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
-                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
@@ -763,7 +769,7 @@ namespace PHRPReader
                             // Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
                             if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
-                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
@@ -774,9 +780,9 @@ namespace PHRPReader
 
                         default:
                             ReportWarning(string.Format(
-                                              "Unrecognized Mod Position {0} in the {1} parameter file; " +
-                                              "should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'",
-                                              splitLine[3], mToolName));
+                                "Unrecognized Mod Position {0} in the {1} parameter file; " +
+                                "should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'",
+                                splitLine[3], mToolName));
                             break;
                     }
                 }
@@ -870,7 +876,7 @@ namespace PHRPReader
                     case "nterm":
                         if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                         {
-                            // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                            // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                             udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
                         udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
@@ -882,7 +888,7 @@ namespace PHRPReader
                     case "cterm":
                         if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                         {
-                            // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                            // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                             udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
                         udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
@@ -893,9 +899,9 @@ namespace PHRPReader
 
                     default:
                         ReportWarning(string.Format(
-                                          "Unrecognized Mod Position {0} in the {1} parameter file; " +
-                                          "should be 'any', 'N-term', or 'C-term'",
-                                          splitLine[3], mToolName));
+                            "Unrecognized Mod Position {0} in the {1} parameter file; " +
+                            "should be 'any', 'N-term', or 'C-term'",
+                            splitLine[3], mToolName));
                         break;
                 }
 
@@ -1066,6 +1072,11 @@ namespace PHRPReader
             return value.Trim();
         }
 
+        /// <summary>
+        /// If the data line starts with text in parameter modTag followed by an equals sign, return the text after the equals sign
+        /// </summary>
+        /// <remarks>If the line has a comment (which starts with #), the comment will not be included in the returned text</remarks>
+        /// <param name="lineIn"></param>
         /// <param name="modTag"></param>
         /// <returns>Modification definition if found, otherwise an empty string</returns>
         private string ValidateIsValidModSpec(string lineIn, string modTag)

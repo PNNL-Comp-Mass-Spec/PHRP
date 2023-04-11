@@ -1245,7 +1245,7 @@ namespace PeptideHitResultsProcessor.Processor
                 case MaxQuantModPosition.AnyNterm:
                     if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
-                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                         modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
 
@@ -1258,7 +1258,7 @@ namespace PeptideHitResultsProcessor.Processor
                 case MaxQuantModPosition.AnyCterm:
                     if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
-                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                         modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
 
@@ -1271,7 +1271,7 @@ namespace PeptideHitResultsProcessor.Processor
                 case MaxQuantModPosition.ProteinNterm:
                     if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
-                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                         modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
 
@@ -1284,7 +1284,7 @@ namespace PeptideHitResultsProcessor.Processor
                 case MaxQuantModPosition.ProteinCterm:
                     if (modDef.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod && modDef.Residues != "-")
                     {
-                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                        // PHRP does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                         modDef.ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod;
                     }
 
