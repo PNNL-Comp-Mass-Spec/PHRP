@@ -67,6 +67,16 @@ namespace PHRPReader
         /// </summary>
         public const string PARAM_TAG_CUSTOM_AA = "CustomAA";
 
+        // ReSharper disable CommentTypo
+
+        /// <summary>
+        /// DIA-NN parameter indicating that static Cys carbamidomethyl (+57.021) was used (aka iodoacetamide alkylation)
+        /// </summary>
+        /// <remarks>Only used by DIA-NN</remarks>
+        public const string PARAM_TAG_STATIC_CYS_CARBAMIDOMETHYL = "StaticCysCarbamidomethyl";
+
+        // ReSharper restore CommentTypo
+
         private const string MSGFPLUS_COMMENT_CHAR = "#";
 
         /// <summary>
@@ -341,7 +351,9 @@ namespace PHRPReader
             var tagNamesToFind = new List<string> {
                 PARAM_TAG_MOD_STATIC,
                 PARAM_TAG_MOD_DYNAMIC,
-                PARAM_TAG_CUSTOM_AA };
+                PARAM_TAG_CUSTOM_AA,                 // "CustomAA" is only used by MS-GF+
+                PARAM_TAG_STATIC_CYS_CARBAMIDOMETHYL // "StaticCysCarbamidomethyl" is only used by DIA-NN
+            };
 
             // Initialization
             modList = new List<ModInfo>();
@@ -398,26 +410,65 @@ namespace PHRPReader
                         //   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
                         //   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
                         //   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
-                        //
+                        //   StaticCysCarbamidomethyl=True
+
                         // And modSpec will now be something like this:
                         //   C2H3N1O1,C,fix,any,Carbamidomethylation
                         //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
                         //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+                        //   True
 
-                        modType = tagName switch
+
+                        if (tagName.Equals(PARAM_TAG_MOD_STATIC, StringComparison.OrdinalIgnoreCase))
                         {
-                            PARAM_TAG_MOD_STATIC => MSGFPlusModType.StaticMod,
-                            PARAM_TAG_MOD_DYNAMIC => MSGFPlusModType.DynamicMod,
-                            PARAM_TAG_CUSTOM_AA => MSGFPlusModType.CustomAA,
-                            _ => MSGFPlusModType.Unknown
-                        };
+                            modType = MSGFPlusModType.StaticMod;
+                        }
+                        else if (tagName.Equals(PARAM_TAG_MOD_DYNAMIC, StringComparison.OrdinalIgnoreCase))
+                        {
+                            modType = MSGFPlusModType.DynamicMod;
+                        }
+                        else if (tagName.Equals(PARAM_TAG_CUSTOM_AA, StringComparison.OrdinalIgnoreCase))
+                        {
+                            modType = MSGFPlusModType.CustomAA;
+                        }
+                        else if (tagName.Equals(PARAM_TAG_STATIC_CYS_CARBAMIDOMETHYL, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (bool.TryParse(modSpec, out var cysAlkEnabled))
+                            {
+                                if (cysAlkEnabled)
+                                {
+                                    // The parameter file has "StaticCysCarbamidomethyl=True"
+                                    modType = MSGFPlusModType.StaticMod;
+
+                                    // Change modSpec from "True" to the DIA-NN style modification info for static sys Carbamidomethyl
+                                    modSpec = "UniMod:4, 57.021465, C";
+                                }
+                                else
+                                {
+                                    // The parameter file has "StaticCysCarbamidomethyl=False"
+                                    modSpec = string.Empty;
+                                }
+                            }
+                            else
+                            {
+                                ReportWarning(string.Format(
+                                    "{0} is not followed by True or False in the DIA-NN parameter file: {1}",
+                                    PARAM_TAG_STATIC_CYS_CARBAMIDOMETHYL, dataLine));
+
+                                modSpec = string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            modType = MSGFPlusModType.Unknown;
+                        }
 
                         break;
                     }
 
                     if (string.IsNullOrEmpty(modSpec))
                     {
-                        // The line does not start with StaticMod, DynamicMod, or CustomAA
+                        // The line does not start with StaticMod, DynamicMod, CustomAA, or StaticCysCarbamidomethyl
                         // This method also supports MSGFPlus_Mods.txt files, which specify mods with ,opt, or ,fix,
                         var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
 
