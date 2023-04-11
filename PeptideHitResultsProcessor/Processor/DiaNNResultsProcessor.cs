@@ -422,7 +422,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Keys in this dictionary are modification names, values are modification masses
         /// </summary>
-        private readonly Dictionary <string, double> mModificationMassByName;
+        private readonly Dictionary<string, double> mModificationMassByName;
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
@@ -520,8 +520,9 @@ namespace PeptideHitResultsProcessor.Processor
             foreach (var modItem in modList)
             {
                 if (modificationList.Length > 0)
-                    modificationList.Append(", ");
+                    modificationList.Append(",");
 
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (modItem.TerminusState)
                 {
                     case AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus:
@@ -530,10 +531,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                     case AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus:
                         modificationList.AppendFormat("{0}({1:0.0###})", MSFraggerResultsProcessor.MOD_POSITION_NAME_C_TERMINUS, modItem.ModMass);
-                        modificationList.AppendFormat("11C(57.0215)");
                         break;
 
-                    case AminoAcidModInfo.ResidueTerminusState.None:
                     case AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus:
                     case AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus:
                     case AminoAcidModInfo.ResidueTerminusState.ProteinNandCCTerminus:
@@ -541,6 +540,7 @@ namespace PeptideHitResultsProcessor.Processor
                             "Unexpected terminus state for mod item: {0} ({1})", modItem.TerminusState, (int)modItem.TerminusState));
 
                     default:
+                        // Includes: AminoAcidModInfo.ResidueTerminusState.None:
                         modificationList.AppendFormat("{0}{1}({2:0.0###})", modItem.ResidueLocInPeptide, modItem.ResidueSymbol, modItem.ModMass);
                         break;
                 }
@@ -686,7 +686,6 @@ namespace PeptideHitResultsProcessor.Processor
                 return false;
             }
 
-            // ToDo: Verify the behavior of this call
             modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modList, mPeptideMods);
 
             mModificationMassByName.Clear();
@@ -736,24 +735,36 @@ namespace PeptideHitResultsProcessor.Processor
             var finalResidueLoc = cleanSequence.Length;
 
             var currentIndex = -1;
-            var maxIndex = peptideWithModifications.Length - 1;
+            var maxIndexToExamine = peptideWithModifications.Length - 2;
 
             var residueNumber = 0;
             var currentResidue = '-';
 
-            while (currentIndex < maxIndex)
+            while (currentIndex < maxIndexToExamine)
             {
                 currentIndex++;
 
-                if (!peptideWithModifications[currentIndex + 1].Equals('('))
+                if (char.IsLetter(peptideWithModifications[currentIndex]))
                 {
-                    if (char.IsLetter(peptideWithModifications[currentIndex]))
-                    {
-                        currentResidue = peptideWithModifications[currentIndex];
-                        residueNumber++;
-                    }
+                    currentResidue = peptideWithModifications[currentIndex];
+                    residueNumber++;
+                }
 
+                int addon;
+
+                if (currentIndex == 0 && peptideWithModifications[currentIndex].Equals('('))
+                {
+                    // N-terminal peptide mod
+
+                    addon = 1;
+                }
+                else if (!peptideWithModifications[currentIndex + 1].Equals('('))
+                {
                     continue;
+                }
+                else
+                {
+                    addon = 2;
                 }
 
                 var closingParenthesisIndex = peptideWithModifications.IndexOf(')', currentIndex + 1);
@@ -764,14 +775,14 @@ namespace PeptideHitResultsProcessor.Processor
                     return mods;
                 }
 
-                if (closingParenthesisIndex == currentIndex + 1)
+                if (closingParenthesisIndex == currentIndex + addon)
                 {
                     OnWarningEvent("Empty modification name after index {0} in {1}", currentIndex, peptideWithModifications);
                     continue;
                 }
 
                 // Parse out the modification name
-                var modificationName = peptideWithModifications.Substring(currentIndex + 2, closingParenthesisIndex - currentIndex - 2);
+                var modificationName = peptideWithModifications.Substring(currentIndex + addon, closingParenthesisIndex - currentIndex - addon);
 
                 var modMass = GetModificationMass(modificationName);
 
@@ -782,11 +793,11 @@ namespace PeptideHitResultsProcessor.Processor
                     ModMass = modMass
                 };
 
-                if (currentMod.ResidueLocInPeptide <= 1)
+                if (currentMod.ResidueLocInPeptide < 1)
                 {
                     currentMod.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
                 }
-                else if (currentMod.ResidueLocInPeptide >= finalResidueLoc)
+                else if (currentMod.ResidueLocInPeptide > finalResidueLoc)
                 {
                     currentMod.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                 }
@@ -807,7 +818,7 @@ namespace PeptideHitResultsProcessor.Processor
                         residueNumber, finalResidueLoc, peptideWithModifications));
                 }
 
-                if (currentResidue != cleanSequence[residueNumber - 1])
+                if (residueNumber > 0 && currentResidue != cleanSequence[residueNumber - 1])
                 {
                     throw new Exception(string.Format(
                         "Residue {0} tracked by currentResidue does not match the residue in the clean sequence: {1} vs. {2} for {3}",
