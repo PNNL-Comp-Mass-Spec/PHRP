@@ -348,7 +348,7 @@ namespace PeptideHitResultsProcRunner
                 LogMessage(string.Format("{0,-49} {1:F3}",
                     "DIA-NN Synopsis File Q-Value Threshold:", resultsProcessor.Options.DiaNNQValueThreshold));
 
-                LogMessage(string.Format("{0,-49} {1:N0}",
+                LogMessage(string.Format("{0,-49} {1:F3}",
                     "DIA-NN Synopsis File Confidence Score Threshold:", resultsProcessor.Options.DiaNNConfidenceScoreThreshold));
             }
 
