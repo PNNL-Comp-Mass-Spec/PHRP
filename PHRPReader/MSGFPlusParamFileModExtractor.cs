@@ -1066,28 +1066,24 @@ namespace PHRPReader
             return value.Trim();
         }
 
+        /// <param name="modTag"></param>
+        /// <returns>Modification definition if found, otherwise an empty string</returns>
         private string ValidateIsValidModSpec(string lineIn, string modTag)
         {
-            var modSpec = string.Empty;
+            if (!lineIn.StartsWith(modTag, StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
 
-            if (lineIn.StartsWith(modTag, StringComparison.OrdinalIgnoreCase))
+            var kvSetting = SynFileReaderBaseClass.ParseKeyValueSetting(lineIn, '=', "#");
+
+            if (string.IsNullOrEmpty(kvSetting.Value) || string.Equals(kvSetting.Value, "none", StringComparison.OrdinalIgnoreCase))
             {
-                var kvSetting = SynFileReaderBaseClass.ParseKeyValueSetting(lineIn, '=', "#");
-
-                if (string.IsNullOrEmpty(kvSetting.Value) || string.Equals(kvSetting.Value, "none", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Not a valid mod spec
-                    modSpec = string.Empty;
-                }
-                else
-                {
-                    // Mod spec found
-                    // Note that there may be spaces before or after the commas separating the mod spec fields
-                    modSpec = kvSetting.Value;
-                }
+                // Not a valid mod spec
+                return string.Empty;
             }
 
-            return modSpec;
+            // Mod spec found
+            // Note that there may be spaces before or after the commas separating the mod spec fields
+            return kvSetting.Value;
         }
     }
 }
