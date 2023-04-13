@@ -106,6 +106,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Observed precursor m/z value converted to M+H
         /// </summary>
+        /// <remarks>
+        /// For DIA-NN, this is based on the theoretical monoisotopic mass
+        /// </remarks>
         public string ParentIonMH { get; set; }
 
         /// <summary>
@@ -229,14 +232,15 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// In X!Tandem this is the theoretical monoisotopic MH
         /// In SEQUEST it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
-        /// In InSpecT, MS-GF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
+        /// In MS-GF+ and InSpecT, this is the theoretical monoisotopic MH; note that this is (M+H)+
+        /// In other tools, this property will be an empty string
         /// </summary>
         public string PeptideMH { get; set; }
 
         /// <summary>
         /// Difference in mass between the computed peptide mass and the parent ion mass (i.e. the mass chosen for fragmentation)
         /// In SEQUEST this is Theoretical Mass - Observed Mass
-        /// In X!Tandem, InSpecT, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
+        /// In MS-GF+, MaxQuant, MSAlign, MSFragger, X!Tandem, and InSpecT the DelM value is listed as Observed - Theoretical,
         /// however, PHRP negates that value while reading the synopsis file to match SEQUEST
         /// </summary>
         public string PeptideDeltaMass { get; set; }

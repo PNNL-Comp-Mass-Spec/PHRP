@@ -165,7 +165,12 @@
         /// Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as reported by MaxQuant or MSFragger
         /// </summary>
         /// <remarks>
+        /// <para>
         /// For MaxQuant, this mass will be overridden by PHRP if isobaric mods were used
+        /// </para>
+        /// <para>
+        /// For DIA-NN, this value is computed by PHRP
+        /// </para>
         /// </remarks>
         public string CalculatedMonoMass;
 
