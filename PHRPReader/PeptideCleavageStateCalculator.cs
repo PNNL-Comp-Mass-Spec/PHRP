@@ -491,12 +491,9 @@ namespace PHRPReader
             // Use a RegEx to remove any characters that are not letters, then return the result
             // This method of string parsing is 4x faster than using a StringBuilder object
 
-            if (checkForPrefixAndSuffixResidues)
+            if (checkForPrefixAndSuffixResidues && SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
             {
-                if (SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
-                {
-                    return RegexNotLetter.Replace(primarySequence, string.Empty);
-                }
+                return RegexNotLetter.Replace(primarySequence, string.Empty);
             }
 
             return RegexNotLetter.Replace(sequenceWithMods, string.Empty);
