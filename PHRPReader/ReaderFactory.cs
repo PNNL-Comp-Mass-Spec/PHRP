@@ -949,16 +949,12 @@ namespace PHRPReader
 
             var suffixesToCheck = new List<KeyValuePair<string, PeptideHitResultTypes>>();
 
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.DiaNN, DiaNNSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MaxQuant, MaxQuantSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
@@ -967,6 +963,10 @@ namespace PHRPReader
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSFragger, MSFraggerSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
@@ -1652,14 +1652,15 @@ namespace PHRPReader
         {
             return resultTypeName.ToLower() switch
             {
+                "dnn_peptide_hit" => PeptideHitResultTypes.DiaNN,
                 "in_peptide_hit" => PeptideHitResultTypes.Inspect,
+                "mxq_peptide_hit" => PeptideHitResultTypes.MaxQuant,
                 "moda_peptide_hit" => PeptideHitResultTypes.MODa,
                 "modplus_peptide_hit" => PeptideHitResultTypes.MODPlus,
                 "msa_peptide_hit" => PeptideHitResultTypes.MSAlign,
                 "msf_peptide_hit" => PeptideHitResultTypes.MSFragger,
                 "msg_peptide_hit" => PeptideHitResultTypes.MSGFPlus,
                 "msp_peptide_hit" => PeptideHitResultTypes.MSPathFinder,
-                "mxq_peptide_hit" => PeptideHitResultTypes.MaxQuant,
                 "peptide_hit" => PeptideHitResultTypes.Sequest,
                 "tpc_peptide_hit" => PeptideHitResultTypes.TopPIC,
                 "xt_peptide_hit" => PeptideHitResultTypes.XTandem,
@@ -1694,6 +1695,7 @@ namespace PHRPReader
 
             mCachedReader = resultType switch
             {
+                PeptideHitResultTypes.DiaNN => new DiaNNSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.Inspect => new InspectSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MaxQuant => new MaxQuantSynFileReader(datasetName, string.Empty),
                 PeptideHitResultTypes.MODa => new MODaSynFileReader(datasetName, string.Empty),
@@ -1853,6 +1855,10 @@ namespace PHRPReader
 
             switch (resultType)
             {
+                case PeptideHitResultTypes.DiaNN:
+                    toolVersionFileNames.Add("Tool_Version_Info_DiaNN.txt");
+                    break;
+
                 case PeptideHitResultTypes.Inspect:
                     toolVersionFileNames.Add("Tool_Version_Info_Inspect.txt");
                     break;
@@ -2140,6 +2146,10 @@ namespace PHRPReader
 
                 switch (resultType)
                 {
+                    case PeptideHitResultTypes.DiaNN:
+                        SynFileReader = new DiaNNSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
                     case PeptideHitResultTypes.Inspect:
                         SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
