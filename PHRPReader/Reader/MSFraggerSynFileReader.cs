@@ -463,6 +463,14 @@ namespace PHRPReader.Reader
                     UpdatePSMUsingSeqInfo(psm);
                 }
 
+                var elutionTime = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.ElutionTime), mColumnHeaders, string.Empty);
+
+                if (float.TryParse(elutionTime, out var elutionTimeMinutes))
+                {
+                    // Update the elution time
+                    psm.ElutionTimeMinutes = elutionTimeMinutes;
+                }
+
                 // Store the remaining data
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Dataset));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.DatasetID));
@@ -475,7 +483,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Hyperscore));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.Nextscore));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.PeptideProphetProbability));
-                AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.ElutionTime));
+                AddScore(psm, columns, elutionTime);
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.ElutionTimeAverage));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.MissedCleavages));
                 AddScore(psm, columns, GetColumnNameByID(MSFraggerSynFileColumns.NumberOfMatchedIons));

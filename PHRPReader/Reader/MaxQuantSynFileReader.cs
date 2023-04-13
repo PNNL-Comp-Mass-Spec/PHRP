@@ -394,6 +394,14 @@ namespace PHRPReader.Reader
                     UpdatePSMUsingSeqInfo(psm);
                 }
 
+                var elutionTime = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.ElutionTime), mColumnHeaders, string.Empty);
+
+                if (float.TryParse(elutionTime, out var elutionTimeMinutes))
+                {
+                    // Update the elution time
+                    psm.ElutionTimeMinutes = elutionTimeMinutes;
+                }
+
                 // Store the remaining data
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.Dataset));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.DatasetID));
@@ -412,7 +420,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.TotalPeptideIntensity));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.MassAnalyzer));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorType));
-                AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.ElutionTime));
+                AddScore(psm, columns, elutionTime);
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorScan));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.PrecursorIntensity));
                 AddScore(psm, columns, GetColumnNameByID(MaxQuantSynFileColumns.NumberOfMatches));

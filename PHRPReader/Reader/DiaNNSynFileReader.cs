@@ -410,6 +410,14 @@ namespace PHRPReader.Reader
                     UpdatePSMUsingSeqInfo(psm);
                 }
 
+                var elutionTime = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTime), mColumnHeaders, string.Empty);
+
+                if (float.TryParse(elutionTime, out var elutionTimeMinutes))
+                {
+                    // Update the elution time
+                    psm.ElutionTimeMinutes = elutionTimeMinutes;
+                }
+
                 // Store the remaining data
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.Dataset));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.DatasetID));
@@ -444,7 +452,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.TranslatedQuality));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.MS1Translated));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.QuantityQuality));
-                AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTime));
+                AddScore(psm, columns, elutionTime);
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTimeStart));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.ElutionTimeStop));
                 AddScore(psm, columns, GetColumnNameByID(DiaNNSynFileColumns.IndexedRT));
