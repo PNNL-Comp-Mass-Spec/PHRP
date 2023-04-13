@@ -496,9 +496,17 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public void ComputePeptideCleavageStateInProtein()
         {
+            ComputePeptideCleavageStateInProtein(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues);
+        }
+
+        /// <summary>
+        /// Update mPeptideCleavageState and mPeptideTerminusState based on the provided clean sequence, prefix residue(s) and suffix residue(s)
+        /// </summary>
+        public void ComputePeptideCleavageStateInProtein(string cleanSequence, string prefixResidues, string suffixResidues)
+        {
             // Determine the peptide terminus state and cleavage state within the protein
-            mPeptideCleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues);
-            mPeptideTerminusState = mPeptideCleavageStateCalculator.ComputeTerminusState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues);
+            mPeptideCleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(cleanSequence, prefixResidues, suffixResidues);
+            mPeptideTerminusState = mPeptideCleavageStateCalculator.ComputeTerminusState(cleanSequence, prefixResidues, suffixResidues);
         }
 
         /// <summary>

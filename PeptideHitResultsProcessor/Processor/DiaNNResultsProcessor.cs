@@ -1578,7 +1578,17 @@ namespace PeptideHitResultsProcessor.Processor
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 
                 // Now that the peptide location in the protein has been determined, re-compute the cleavage state and terminus state
-                searchResult.ComputePeptideCleavageStateInProtein();
+
+                if (string.IsNullOrWhiteSpace(searchResult.PeptidePreResidues) && string.IsNullOrWhiteSpace(searchResult.PeptidePostResidues))
+                {
+                    // Peptide sequences identified by DIA-NN do not include prefix or suffix residues
+                    // Assume the peptide is fully tryptic (preceded by a K or R), then compute cleavage state and missed cleavages
+                    searchResult.ComputePeptideCleavageStateInProtein(searchResult.PeptideCleanSequence, "K", "A");
+                }
+                else
+                {
+                    searchResult.ComputePeptideCleavageStateInProtein();
+                }
 
                 // Read the remaining data values
 
