@@ -1809,18 +1809,17 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                         else
                         {
-                            // ToDo: validate this statement, or remove
-                            // ToDo: Use a higher match error threshold since some peptides reported by DIA-NN don't perfectly match the FASTA file
-
-                            const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 15;
-                            const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
+                            // Uncomment to use a higher match error threshold in case some peptides reported by DIA-NN don't perfectly match the FASTA file
+                            // const int MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD = 15;
+                            // const int MATCH_ERROR_PERCENT_WARNING_THRESHOLD = 5;
 
                             success = CreateProteinModsFileWork(
                                 baseName, inputFile,
                                 synOutputFilePath, outputDirectoryPath,
-                                PeptideHitResultTypes.DiaNN,
-                                MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
-                                MATCH_ERROR_PERCENT_WARNING_THRESHOLD);
+                                PeptideHitResultTypes.DiaNN
+                                // MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                                // MATCH_ERROR_PERCENT_WARNING_THRESHOLD
+                            );
                         }
                     }
 
