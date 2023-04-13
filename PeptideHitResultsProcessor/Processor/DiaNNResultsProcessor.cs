@@ -1289,7 +1289,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Assume the peptide is fully tryptic (preceded by a K or R), then compute cleavage state and missed cleavages
 
-                var peptideWithPrefixAndSuffix = "K." + searchResult.Sequence + ".-";
+                var peptideWithPrefixAndSuffix = "K." + searchResult.Sequence + ".A";
 
                 // Use the peptide cleavage state calculator to compute the missed cleavage count
 
