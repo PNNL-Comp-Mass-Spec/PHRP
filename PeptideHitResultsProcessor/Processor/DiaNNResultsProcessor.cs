@@ -66,7 +66,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 8, 2023";
+            FileDate = "April 13, 2023";
 
             mModificationMassByName = new Dictionary<string, double>();
 

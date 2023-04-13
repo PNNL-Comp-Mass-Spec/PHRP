@@ -527,7 +527,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                // Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
+                // Set this to true since SEQUEST param files can have the same mod mass on different residues, and those residues may use different symbols
                 mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = true;
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
