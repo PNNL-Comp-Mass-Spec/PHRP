@@ -1278,6 +1278,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Compute monoisotopic mass of the peptide
                 searchResult.CalculatedMonoMassPHRP = ComputePeptideMassForCleanSequence(searchResult.Sequence, totalModMass);
 
+                searchResult.CalculatedMonoMass = PRISM.StringUtilities.DblToString(searchResult.CalculatedMonoMassPHRP, 6);
                 searchResult.CalculatedMonoMassValue = searchResult.CalculatedMonoMassPHRP;
 
                 searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0, searchResult.ChargeNum), 6);
