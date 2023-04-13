@@ -275,6 +275,7 @@ namespace PeptideHitResultsProcessor.Processor
             var residueLocInPeptide = 0;
 
             var sequence = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
                 var character = sequence[index];
@@ -709,10 +710,12 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
                     var dataLine = lineIn.Trim();
+
                     if (dataLine.Length == 0)
                         continue;
 
@@ -822,6 +825,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var match = RegexScanNumberRegEx.Match(spectrumFile);
+
                 if (match.Success && match.Groups.Count > 1)
                 {
                     scanNum = match.Groups[1].Value;
@@ -935,6 +939,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1015,6 +1020,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -1022,6 +1028,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -1032,6 +1039,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
+
                             if (validHeader)
                             {
                                 dataLine = false;
@@ -1091,6 +1099,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1494,6 +1503,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1570,6 +1580,7 @@ namespace PeptideHitResultsProcessor.Processor
                         synOutputFilePath = Path.Combine(outputDirectoryPath, synOutputFilePath + SYNOPSIS_FILE_SUFFIX);
 
                         success = CreateFHTorSYNResultsFile(inputFilePath, synOutputFilePath, inspectModInfo, FilteredOutputFileTypeConstants.SynFile);
+
                         if (!success)
                         {
                             return false;
@@ -1587,6 +1598,7 @@ namespace PeptideHitResultsProcessor.Processor
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                         success = ParseInspectSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
+
                         if (!success)
                         {
                             return false;
@@ -1650,6 +1662,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             var match = RegexAllZeroes.Match(value);
+
             if (match.Success && match.Index > 0)
             {
                 value = value.Substring(0, match.Index);
@@ -1893,6 +1906,7 @@ namespace PeptideHitResultsProcessor.Processor
             var query = from item in filteredSearchResults orderby item.TotalPRMScoreNum descending, item.ScanNum, item.ChargeNum, item.PeptideAnnotation, item.Protein select item;
 
             var index = 1;
+
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, errorMessages);

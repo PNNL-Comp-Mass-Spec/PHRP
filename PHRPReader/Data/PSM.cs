@@ -537,6 +537,7 @@ namespace PHRPReader.Data
         public double GetScoreDbl(string scoreName, double valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
+
             if (!string.IsNullOrEmpty(scoreValue) && double.TryParse(scoreValue, out var score))
             {
                 return score;
@@ -565,6 +566,7 @@ namespace PHRPReader.Data
         public int GetScoreInt(string scoreName, int valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
+
             if (!string.IsNullOrEmpty(scoreValue) && int.TryParse(scoreValue, out var score))
             {
                 return score;

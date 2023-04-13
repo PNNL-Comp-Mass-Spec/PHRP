@@ -148,6 +148,7 @@ namespace PHRPReader.Data
                     if (matchFound)
                     {
                         var mod = Modifications[modificationIndex];
+
                         if (mod.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.StaticMod)
                         {
                             // Matching dynamic or static modification definitions
@@ -557,6 +558,7 @@ namespace PHRPReader.Data
                     foreach (var massCorrectionTag in mMassCorrectionTags)
                     {
                         var massDiff = Math.Abs(modificationMass - massCorrectionTag.Value);
+
                         if (massDiff < closestMassCorrectionTagMassDiff)
                         {
                             closestMassCorrectionTag = massCorrectionTag.Key;
@@ -1178,6 +1180,7 @@ namespace PHRPReader.Data
 
                     // Append modificationDefinition to mModifications()
                     var newModIndex = AddModification(modificationDefinition, true);
+
                     if (newModIndex >= 0)
                     {
                         return Modifications[newModIndex];
@@ -1270,6 +1273,7 @@ namespace PHRPReader.Data
                 while (!massCorrectionTagsReader.EndOfStream)
                 {
                     var dataLine = massCorrectionTagsReader.ReadLine();
+
                     if (string.IsNullOrEmpty(dataLine) || dataLine.StartsWith("Mass_Correction_Tag"))
                         continue;
 
@@ -1374,6 +1378,7 @@ namespace PHRPReader.Data
                 while (!modFileReader.EndOfStream)
                 {
                     var dataLine = modFileReader.ReadLine();
+
                     if (string.IsNullOrEmpty(dataLine))
                         continue;
 
@@ -1437,6 +1442,7 @@ namespace PHRPReader.Data
                         var residues = targetResidues.Trim().ToUpper();
 
                         var residuesClean = string.Empty;
+
                         foreach (var residue in residues)
                         {
                             if (char.IsUpper(residue))
@@ -1527,6 +1533,7 @@ namespace PHRPReader.Data
 
                     // Validate some of the settings if the modification type is IsotopicMod or TerminalPeptideStaticMod or ProteinTerminusStaticMod
                     var validMod = true;
+
                     switch (modificationDefinition.ModificationType)
                     {
                         case ModificationDefinition.ResidueModificationType.IsotopicMod:
@@ -1829,6 +1836,7 @@ namespace PHRPReader.Data
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
                     var indexCompare = 0;
+
                     while (indexCompare < defaultModificationSymbolCount)
                     {
                         if (Modifications[index].ModificationSymbol == chDefaultModificationSymbols[indexCompare])

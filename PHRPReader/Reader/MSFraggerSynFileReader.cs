@@ -436,6 +436,7 @@ namespace PHRPReader.Reader
                 }
 
                 var additionalProteins = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MSFraggerSynFileColumns.AdditionalProteins), mColumnHeaders);
+
                 if (!string.IsNullOrWhiteSpace(additionalProteins))
                 {
                     foreach (var protein in additionalProteins.Split(';'))

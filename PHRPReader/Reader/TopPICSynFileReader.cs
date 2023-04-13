@@ -434,6 +434,7 @@ namespace PHRPReader.Reader
                 var qValueColumn = GetColumnNameByID(TopPICSynFileColumns.Proteoform_QValue);
 
                 var proteoformQValue = ReaderFactory.LookupColumnValue(columns, qValueColumn, mColumnHeaders, NOT_FOUND);
+
                 if (proteoformQValue != NOT_FOUND)
                 {
                     psm.SetScore(qValueColumn, proteoformQValue);

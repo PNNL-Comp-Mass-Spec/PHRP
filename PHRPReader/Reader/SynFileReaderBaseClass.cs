@@ -433,6 +433,7 @@ namespace PHRPReader.Reader
             }
 
             var datasetName = ReaderFactory.AutoDetermineDatasetName(inputFilePath);
+
             if (string.IsNullOrEmpty(datasetName))
             {
                 throw new Exception("Unable to auto-determine the Dataset Name for " + inputFilePath);
@@ -921,6 +922,7 @@ namespace PHRPReader.Reader
             {
                 HandleException("Error loading PHRP Seq Info", ex);
                 success = false;
+
                 if (!mInitialized)
                     throw new Exception(mErrorMessage, ex);
             }
@@ -939,6 +941,7 @@ namespace PHRPReader.Reader
         public static string NumToStringPlusMinus(double value, int digitsOfPrecision)
         {
             var formatString = "+0;-0";
+
             if (digitsOfPrecision > 0)
             {
                 formatString = "+0." + new string('0', digitsOfPrecision) + ";-0." + new string('0', digitsOfPrecision);
@@ -1008,6 +1011,7 @@ namespace PHRPReader.Reader
                 return new KeyValuePair<string, string>(string.Empty, string.Empty);
 
             var charIndex = text.IndexOf(chDelimiter);
+
             if (charIndex <= 0)
                 return new KeyValuePair<string, string>(string.Empty, string.Empty);
 
@@ -1021,6 +1025,7 @@ namespace PHRPReader.Reader
                 {
                     // Look for the comment character
                     var commentCharIndex = value.IndexOf(commentChar, StringComparison.Ordinal);
+
                     if (commentCharIndex > 0)
                     {
                         // Trim off the comment
@@ -1111,6 +1116,7 @@ namespace PHRPReader.Reader
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
 
@@ -1222,6 +1228,7 @@ namespace PHRPReader.Reader
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
 
@@ -1247,6 +1254,7 @@ namespace PHRPReader.Reader
                             if (!reader.EndOfStream)
                             {
                                 var searchEngineLine = reader.ReadLine();
+
                                 if (!string.IsNullOrEmpty(searchEngineLine))
                                 {
                                     searchEngineVersion = searchEngineLine.Trim();
@@ -1346,6 +1354,7 @@ namespace PHRPReader.Reader
                     continue;
 
                 var massCorrectionTag = kvModDetails.Key;
+
                 if (!int.TryParse(kvModDetails.Value, out var residueLoc))
                     continue;
 

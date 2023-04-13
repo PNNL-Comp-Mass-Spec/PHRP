@@ -139,6 +139,7 @@ namespace PeptideHitResultsProcessor.Processor
             for (var length = string1.Length; length > 0; length--)
             {
                 var startOfString = string1.Substring(0, length);
+
                 if (string2.StartsWith(startOfString, comparisonType))
                 {
                     return string1.Substring(0, length);
@@ -172,9 +173,11 @@ namespace PeptideHitResultsProcessor.Processor
             var comparisonType = caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
             var charCount = 1;
+
             while (charCount <= shortestItem.Length)
             {
                 var matchingItems = 0;
+
                 foreach (var item in items)
                 {
                     if (item.Equals(shortestItem))

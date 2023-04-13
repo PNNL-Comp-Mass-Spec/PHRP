@@ -428,12 +428,14 @@ namespace PHRP_UnitTests
             }
 
             var initialPrecursors = new List<double>();
+
             foreach (var item in initialPrecursorMzValues.Split(';'))
             {
                 initialPrecursors.Add(double.Parse(item));
             }
 
             var scansShown = 0;
+
             foreach (var item in precursorInfoData)
             {
                 Console.WriteLine("Scan {0,-2} has {1:F2} m/z precursor; {2}", item.Key, item.Value.PrecursorMz, item.Value.ScanFilterText);
@@ -467,6 +469,7 @@ namespace PHRP_UnitTests
             }
 
             var scanCount = 0;
+
             foreach (var item in scanStatsData)
             {
                 scanCount++;
@@ -495,6 +498,7 @@ namespace PHRP_UnitTests
             }
 
             var scanCount = 0;
+
             foreach (var item in extendedScanStatsData)
             {
                 scanCount++;
@@ -530,6 +534,7 @@ namespace PHRP_UnitTests
             }
 
             var scanCount = 0;
+
             foreach (var item in sicStatsData)
             {
                 scanCount++;
@@ -602,6 +607,7 @@ namespace PHRP_UnitTests
             }
 
             var scanCount = 0;
+
             foreach (var item in reporterIonData)
             {
                 scanCount++;
@@ -611,6 +617,7 @@ namespace PHRP_UnitTests
                 Console.WriteLine("Scan {0,-4}, collision mode {1}, max intensity {2:F2}", item.Key, item.Value.CollisionMode, item.Value.ReporterIonIntensityMax);
 
                 var observedIonCount = 0;
+
                 foreach (var reporterIon in item.Value.ReporterIons)
                 {
                     if (reporterIon.Intensity > 0)
@@ -882,6 +889,7 @@ namespace PHRP_UnitTests
 
             // Look for the file on Proto-2
             var remoteFile = new FileInfo(Path.Combine(remoteDirPath, relativeFilePath));
+
             if (remoteFile.Exists)
             {
                 return remoteFile;

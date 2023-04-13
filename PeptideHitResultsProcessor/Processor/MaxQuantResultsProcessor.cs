@@ -311,6 +311,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
+
                 if (residueLocInPeptide <= 1)
                 {
                     residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
@@ -438,6 +439,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by descending Andromeda Score
 
             var resultsSubset = new Dictionary<int, MaxQuantSearchResult>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -704,6 +706,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var modWithParentheses = string.Format("({0})", modItem.Value.MaxQuantModName);
 
                 var charIndex = maskedModifiedSequence.IndexOf(modWithParentheses, StringComparison.Ordinal);
+
                 if (charIndex >= 0)
                 {
                     maskedModifiedSequence = maskedModifiedSequence.Replace(modWithParentheses, new string('_', modWithParentheses.Length));
@@ -723,6 +726,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var altModNameWithParentheses = string.Format("({0})", altModName);
 
                 var charIndex2 = maskedModifiedSequence.IndexOf(altModNameWithParentheses, StringComparison.Ordinal);
+
                 if (charIndex2 >= 0)
                 {
                     maskedModifiedSequence = maskedModifiedSequence.Replace(altModNameWithParentheses, new string('_', altModNameWithParentheses.Length));
@@ -771,6 +775,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var matchedModNameWithParentheses = modItem.Value.MatchedModNameWithParentheses;
 
                 var startIndex = 0;
+
                 while (startIndex < matchedModNameWithParentheses.Length)
                 {
                     var charIndex = searchResult.ModifiedSequence.IndexOf(matchedModNameWithParentheses, startIndex, StringComparison.Ordinal);
@@ -842,9 +847,11 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     var existingModFound = false;
+
                     for (var i = 0; i < modList.Count; i++)
                     {
                         var paramFileMod = modList[i];
+
                         if (!paramFileMod.ModName.Equals(maxQuantModName, StringComparison.OrdinalIgnoreCase))
                         {
                             continue;
@@ -905,6 +912,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var errorMessages = new List<string>();
 
                 var inputFile = new FileInfo(inputFilePath);
+
                 if (inputFile.Directory == null)
                 {
                     SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
@@ -945,6 +953,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         // Parse the header line
                         var success = ParseMaxQuantResultsFileHeaderLine(lineIn, columnMapping);
+
                         if (!success)
                         {
                             if (string.IsNullOrEmpty(mErrorMessage))
@@ -988,6 +997,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // MaxQuant will typically report just one match
 
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -1077,6 +1087,7 @@ namespace PeptideHitResultsProcessor.Processor
             foreach (var item in filteredSearchResults)
             {
                 var datasetName = item.DatasetName;
+
                 if (string.IsNullOrWhiteSpace(datasetName))
                     continue;
 
@@ -1192,6 +1203,7 @@ namespace PeptideHitResultsProcessor.Processor
                 foreach (var modItem in mMaxQuantMods)
                 {
                     var shortModName = MaxQuantModifiedSequenceModInfo.GetModNameWithoutResidues(modItem.Key);
+
                     if (string.Equals(shortModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
                         modMass = modItem.Value.MonoisotopicMass;
@@ -1469,6 +1481,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 FileInfo modificationDefinitionFile;
                 var candidateFiles = inputDirectory.GetFiles("modifications.xml").ToList();
+
                 if (candidateFiles.Count > 0)
                 {
                     modificationDefinitionFile = candidateFiles[0];
@@ -1616,6 +1629,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     var modificationSiteNodes = modificationNode.Elements("modification_site").ToList();
+
                     if (modificationSiteNodes.Count == 0)
                     {
                         OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file 'modification_site' elements", maxQuantMod.Title);
@@ -1634,6 +1648,7 @@ namespace PeptideHitResultsProcessor.Processor
                             else
                             {
                                 var residue = modificationSite[0];
+
                                 if (maxQuantMod.Residues.Contains(residue))
                                 {
                                     OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file has multiple modification_site elements with the same 'site' attribute value", maxQuantMod.Title);
@@ -1889,6 +1904,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var inputFile = new FileInfo(Path.Combine(inputDirectory.FullName, PEPTIDES_FILE_NAME));
+
                 if (!inputFile.Exists)
                 {
                     OnWarningEvent("MaxQuant peptides.txt file not found: " + inputFile.FullName);
@@ -1920,6 +1936,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!headerParsed)
                     {
                         var validHeader = ParseMaxQuantPeptidesFileHeaderLine(lineIn, columnMapping, intensityByExperimentColumns);
+
                         if (!validHeader)
                             return;
 
@@ -1995,6 +2012,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var sourceFile = new FileInfo(maxQuantParamFilePath);
+
                 if (!sourceFile.Exists)
                 {
                     SetErrorMessage("MaxQuant parameter file not found: " + maxQuantParamFilePath);
@@ -2088,6 +2106,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
 
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -2104,6 +2123,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMaxQuantSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -2125,6 +2145,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, true, modList, staticModPresent);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -2464,6 +2485,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var intensityColumnIndex = columnMapping[MaxQuantPeptidesFileColumns.TotalPeptideIntensity];
+
                 if (intensityColumnIndex < 0)
                 {
                     OnWarningEvent("Intensity column not found in the MaxQuant peptides.txt file");
@@ -2877,6 +2899,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -2884,6 +2907,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Check whether inputFilePath is a directory path
                 var candidateDirectory = new DirectoryInfo(inputFilePath);
+
                 if (candidateDirectory.Exists)
                 {
                     ResetProgress("Parsing " + candidateDirectory.FullName);
@@ -2903,6 +2927,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+
                     if (inputFile.Directory == null)
                     {
                         SetErrorMessage("Unable to determine the parent directory of the input file: " + inputFilePath);
@@ -2925,6 +2950,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         // Load MaxQuant modifications from the modifications.xml file (if it can be found)
                         var modificationDefinitionSuccess = LoadMaxQuantModificationDefinitions(inputFile.Directory);
+
                         if (!modificationDefinitionSuccess)
                         {
                             return false;
@@ -2934,6 +2960,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Examine the MaxQuant parameter file to determine the modification names and precursor match tolerance
                         var modInfoExtracted = LoadSearchEngineParamFile(maxQuantParameterFilePath, out modList);
+
                         if (!modInfoExtracted)
                         {
                             return false;
@@ -2969,6 +2996,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMaxQuantSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modList);
+
                     if (!success)
                     {
                         return false;
@@ -3043,6 +3071,7 @@ namespace PeptideHitResultsProcessor.Processor
             ComputeQValues(listForQValue);
 
             var index = 1;
+
             foreach (var result in filteredSearchResults)
             {
                 GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
@@ -3257,6 +3286,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // First sort on dataset name
                 var nameComparisonResult = string.CompareOrdinal(x.DatasetName, y.DatasetName);
+
                 if (nameComparisonResult != 0)
                 {
                     return nameComparisonResult;

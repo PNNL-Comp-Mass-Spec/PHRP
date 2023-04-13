@@ -427,6 +427,7 @@ namespace PHRPReader.Data
                 {
                     // See if each of the residues in residues2 is in residues1
                     var matchCount = 0;
+
                     foreach (var chChar in residues2)
                     {
                         if (residues1.IndexOf(chChar) >= 0)

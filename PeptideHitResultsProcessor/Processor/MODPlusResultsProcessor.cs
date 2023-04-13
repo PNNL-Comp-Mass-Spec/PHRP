@@ -202,6 +202,7 @@ namespace PeptideHitResultsProcessor.Processor
             var residueLocInPeptide = 0;
 
             var sequence = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
                 var character = sequence[index];
@@ -334,6 +335,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!success)
                 {
                     var errorMessage = searchResult.ErrorMessage;
+
                     if (string.IsNullOrEmpty(errorMessage))
                     {
                         errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassDigits;
@@ -369,6 +371,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by descending ScoreNum
 
             var resultsSubset = new Dictionary<int, MODPlusSearchResult>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -543,6 +546,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // Parse the header line
 
                         var success = ParseMODPlusResultsFileHeaderLine(lineIn, columnMapping);
+
                         if (!success)
                         {
                             if (string.IsNullOrEmpty(mErrorMessage))
@@ -582,6 +586,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -637,6 +642,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var paramFile = new FileInfo(modPlusParamFilePath);
+
                 if (!paramFile.Exists)
                 {
                     SetErrorMessage("MODPlus param file not found: " + modPlusParamFilePath);
@@ -648,6 +654,7 @@ namespace PeptideHitResultsProcessor.Processor
                 doc.Load(paramFile.FullName);
 
                 var nodeList = doc.SelectNodes("/search/modifications/fixed/mod");
+
                 if (nodeList == null || nodeList.Count == 0)
                 {
                     OnWarningEvent("Fixed mod nodes not found in the MODPlus parameter file (/search/modifications/fixed/mod)");
@@ -676,6 +683,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var massCorrectionTag = mPeptideMods.LookupMassCorrectionTagByMass(modMassDa);
 
                     var modType = ModificationDefinition.ResidueModificationType.StaticMod;
+
                     if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() ||
                         residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
@@ -755,6 +763,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -771,6 +780,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMODPlusSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -824,6 +834,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1143,6 +1154,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1314,6 +1326,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1335,6 +1348,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Load the MODPlus Parameter File to look for any static mods
                     var modInfoExtracted = ExtractModInfoFromMODPlusParamFile(modPlusParameterFilePath, out var modPlusModInfo);
+
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1361,6 +1375,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
+
                     if (!success)
                     {
                         return false;
@@ -1371,6 +1386,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
                     success = ParseMODPlusSynopsisFile(synOutputFilePath, outputDirectoryPath, false);
+
                     if (!success)
                     {
                         return false;
@@ -1450,6 +1466,7 @@ namespace PeptideHitResultsProcessor.Processor
             mProteinNamePositionSplit ??= new Regex(@"(.+)\[([^\]]+)\]", RegexOptions.Compiled);
 
             var resultID = 1;
+
             foreach (var result in filteredSearchResults)
             {
                 var proteinList = result.ProteinList.Split(';');
@@ -1467,6 +1484,7 @@ namespace PeptideHitResultsProcessor.Processor
                     string peptidePosition;
 
                     var match = mProteinNamePositionSplit.Match(proteinEntry);
+
                     if (match.Success)
                     {
                         proteinName = match.Groups[1].Value;
@@ -1498,6 +1516,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Check for entries with multiple proteins listed
                 var indexEnd = index;
+
                 while (indexEnd + 1 < searchResults.Count)
                 {
                     if (searchResults[index].ScanNum == searchResults[indexEnd + 1].ScanNum &&
@@ -1561,6 +1580,7 @@ namespace PeptideHitResultsProcessor.Processor
             // The next QValue is the minimum of (QValue, CurrentFDR)
 
             var qValue = searchResults.Last().FDR;
+
             if (qValue > 1)
                 qValue = 1;
 
@@ -1725,6 +1745,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Probability is the same; check peptide
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
+
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
@@ -1772,6 +1793,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Charge is the same; check peptide
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
+
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein

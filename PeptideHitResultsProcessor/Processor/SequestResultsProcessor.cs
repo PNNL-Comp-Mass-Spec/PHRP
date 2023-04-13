@@ -77,6 +77,7 @@ namespace PeptideHitResultsProcessor.Processor
             var success = true;
 
             var sequenceWithMods = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequenceWithMods.Length - 1; index++)
             {
                 var character = sequenceWithMods[index];
@@ -247,6 +248,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -254,6 +256,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -264,6 +267,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
+
                             if (validHeader)
                             {
                                 dataLine = false;
@@ -326,6 +330,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format(
@@ -526,6 +531,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = true;
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -662,6 +668,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))

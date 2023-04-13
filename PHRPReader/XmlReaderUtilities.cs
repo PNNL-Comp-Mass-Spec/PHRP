@@ -31,6 +31,7 @@ namespace PHRPReader
             for (var i = 0; i < elementNames.Length; i++)
             {
                 var childNode = parentNode.Element(elementNames[i]);
+
                 if (childNode == null)
                     return string.Empty;
 
@@ -85,6 +86,7 @@ namespace PHRPReader
         public static bool TryGetElementValue(XElement parentItem, string elementName, out string elementValue)
         {
             var node = parentItem.Element(elementName);
+
             if (node == null)
             {
                 elementValue = string.Empty;

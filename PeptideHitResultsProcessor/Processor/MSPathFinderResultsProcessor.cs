@@ -262,6 +262,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
+
                         if (residueLocInPeptide <= 1)
                         {
                             residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
@@ -434,6 +435,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         // Parse the header line
                         var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
+
                         if (!success)
                         {
                             if (string.IsNullOrEmpty(mErrorMessage))
@@ -475,6 +477,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -553,6 +556,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var paramFile = new FileInfo(searchToolParameterFilePath);
+
                 if (!paramFile.Exists)
                 {
                     ReportError("MSPathFinder parameter file not found: " + searchToolParameterFilePath);
@@ -563,6 +567,7 @@ namespace PeptideHitResultsProcessor.Processor
                 RegisterEvents(paramFileReader);
 
                 var success = paramFileReader.ParseKeyValueParameterFile(out var paramFileEntries);
+
                 if (!success)
                 {
                     ReportError("Error reading MSPathFinder parameter file in GetNumMatchesPerSpectrumToReport: " + paramFileReader.ErrorMessage);
@@ -643,6 +648,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -659,6 +665,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMSPathFinderSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -740,6 +747,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup, modList);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1023,6 +1031,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1211,6 +1220,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1232,6 +1242,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Load the MSPathFinder Parameter File so that we can determine the modification names and masses
                     var modInfoExtracted = ExtractModInfoFromParamFile(msPathFinderParameterFilePath, out var modList);
+
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1239,6 +1250,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Re-parse the MSPathFinder parameter file to look for NumMatchesPerSpec
                     var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(msPathFinderParameterFilePath);
+
                     if (numMatchesPerSpec > 1)
                     {
                         // Auto-change IgnorePeptideToProteinMapperErrors to True
@@ -1267,6 +1279,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modList);
+
                     if (!success)
                     {
                         return false;
@@ -1277,6 +1290,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modList);
+
                     if (!success)
                     {
                         return false;
@@ -1327,6 +1341,7 @@ namespace PeptideHitResultsProcessor.Processor
             var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.QValueNum, item.ScanNum, item.Sequence, item.Protein select item;
 
             var index = 1;
+
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, errorMessages);
@@ -1494,6 +1509,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // SpecEValue is the same; check sequence
                 var result = string.CompareOrdinal(x.Sequence, y.Sequence);
+
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein

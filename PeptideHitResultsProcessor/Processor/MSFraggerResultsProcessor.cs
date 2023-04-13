@@ -512,6 +512,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by descending Andromeda Score
 
             var resultsSubset = new Dictionary<int, MSFraggerSearchResult>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -695,6 +696,7 @@ namespace PeptideHitResultsProcessor.Processor
             var elutionTimeByScanNumberSmoothed = new Dictionary<int, double>();
 
             var i = 0;
+
             foreach (var item in elutionTimeByScanNumber)
             {
                 elutionTimeByScanNumberSmoothed.Add(item.Key, smoothedTimes[i]);
@@ -754,6 +756,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var errorMessages = new List<string>();
 
                 var inputFile = new FileInfo(inputFilePath);
+
                 if (inputFile.Directory == null)
                 {
                     SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
@@ -943,6 +946,7 @@ namespace PeptideHitResultsProcessor.Processor
             foreach (var item in filteredSearchResults)
             {
                 var datasetName = item.DatasetName;
+
                 if (string.IsNullOrWhiteSpace(datasetName))
                     continue;
 
@@ -1223,6 +1227,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var sourceFile = new FileInfo(msFraggerParamFilePath);
+
                 if (!sourceFile.Exists)
                 {
                     SetErrorMessage("MSFragger parameter file not found: " + msFraggerParamFilePath);
@@ -1417,6 +1422,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
 
                         var key = ConstructKeyForPSM(item);
+
                         if (!searchResultsLookup.TryGetValue(key, out var additionalResult))
                             continue;
 
@@ -1509,6 +1515,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
 
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -1525,6 +1532,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMSFraggerSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -1546,6 +1554,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, true);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -2280,6 +2289,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -2296,6 +2306,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+
                     if (inputFile.Directory == null)
                     {
                         SetErrorMessage("Unable to determine the parent directory of the input file: " + inputFilePath);
@@ -2314,6 +2325,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Examine the MSFragger parameter file to determine the precursor match tolerance
                         var toleranceExtracted = LoadSearchEngineParamFile(msFraggerParameterFilePath);
+
                         if (!toleranceExtracted)
                         {
                             return false;
@@ -2347,6 +2359,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseMSFraggerSynopsisFile(synOutputFilePath, outputDirectoryPath, false);
+
                     if (!success)
                     {
                         return false;
@@ -2505,6 +2518,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // MSFragger will typically report just one match
 
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -2655,6 +2669,7 @@ namespace PeptideHitResultsProcessor.Processor
             filteredSearchResults.Sort(new MSFraggerSearchResultsComparerQValueHyperscoreScanChargePeptide());
 
             var index = 1;
+
             foreach (var result in filteredSearchResults)
             {
                 GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.DatasetName, out var baseDatasetName, out var datasetID);
@@ -2742,6 +2757,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // First sort on dataset name
                 var nameComparisonResult = string.CompareOrdinal(x.DatasetName, y.DatasetName);
+
                 if (nameComparisonResult != 0)
                 {
                     return nameComparisonResult;

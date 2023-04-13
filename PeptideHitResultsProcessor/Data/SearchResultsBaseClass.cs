@@ -310,6 +310,7 @@ namespace PeptideHitResultsProcessor.Data
             for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
             {
                 var resultMod = mSearchResultModifications[index];
+
                 if (resultMod.ModDefinition.ModificationType is ModificationDefinition.ResidueModificationType.DynamicMod or ModificationDefinition.ResidueModificationType.UnknownType)
                 {
                     sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
@@ -520,6 +521,7 @@ namespace PeptideHitResultsProcessor.Data
         public AminoAcidModInfo.ResidueTerminusState DetermineResidueTerminusState(int residueLocInPeptide)
         {
             var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
+
             if (residueLocInPeptide == 1)
             {
                 // Residue is at the N-terminus of the peptide
@@ -904,6 +906,7 @@ namespace PeptideHitResultsProcessor.Data
                             }
 
                             var massDifference = Math.Abs(mSearchResultModifications[indexCompare].ModDefinition.ModificationMass - modificationDefinition.ModificationMass);
+
                             if (Math.Abs(Math.Round(massDifference, PeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
                             {
                                 addModification = false;
@@ -1150,6 +1153,7 @@ namespace PeptideHitResultsProcessor.Data
             for (var index = 0; index <= mSearchResultModifications.Count - 1; index++)
             {
                 var resultMods = mSearchResultModifications[pointerArray[index]];
+
                 if (index > 0)
                     PeptideModDescription += MOD_LIST_SEP_CHAR;
 

@@ -398,6 +398,7 @@ namespace PHRPReader.Reader
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
@@ -415,6 +416,7 @@ namespace PHRPReader.Reader
                     // Trim off any text that occurs after a semicolon in kvSetting.Value
                     var settingValue = kvSetting.Value;
                     var charIndex = settingValue.IndexOf(';');
+
                     if (charIndex > 0)
                     {
                         settingValue = settingValue.Substring(charIndex).Trim();
@@ -491,6 +493,7 @@ namespace PHRPReader.Reader
                                 // Parse out the cleavage specificity number
                                 // This is the first number after the closing parenthesis in the above examples
                                 var match = enzymeSpecificityMatcher.Match(settingValue);
+
                                 if (match.Success)
                                 {
                                     if (int.TryParse(match.Groups[1].Value, out value))

@@ -329,6 +329,7 @@ namespace PHRPReader
                 }
 
                 var elementCount = empiricalFormula.GetElementCount(modifiedResidue.AffectedAtom);
+
                 if (elementCount == 0)
                 {
                     Console.WriteLine("Warning: no amino acids in {0} contain element {1}", sequence, modifiedResidue.AffectedAtom);
@@ -383,6 +384,7 @@ namespace PHRPReader
                 }
 
                 var modMassText = match.ToString();
+
                 if (double.TryParse(modMassText, out var modMass))
                 {
                     modMassTotal += modMass;
@@ -541,6 +543,7 @@ namespace PHRPReader
             if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
+
                 if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                 {
                     // Invalid Index
@@ -567,6 +570,7 @@ namespace PHRPReader
             }
 
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
+
             if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
@@ -754,6 +758,7 @@ namespace PHRPReader
             }
 
             var computedMass = ComputeMonoisotopicMass(empiricalFormula);
+
             if (Math.Abs(computedMass - monoMass) > 0.00001)
             {
                 Console.WriteLine("Mass discrepancy for amino acid {0}. DMS uses {1:F4} but this class computed {2:F4}", aminoAcidSymbol, monoMass, computedMass);
@@ -823,6 +828,7 @@ namespace PHRPReader
                     var elementCountText = match.Groups["ElementCount"].ToString();
 
                     var elementCount = 1;
+
                     if (!string.IsNullOrEmpty(elementCountText) && elementCountText.Length > 0)
                     {
                         if (!int.TryParse(elementCountText, out elementCount))
@@ -911,6 +917,7 @@ namespace PHRPReader
         public void ResetAminoAcidToDefault(char aminoAcidSymbol)
         {
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(aminoAcidSymbol);
+
             if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
@@ -957,6 +964,7 @@ namespace PHRPReader
             }
 
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
+
             if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
@@ -978,6 +986,7 @@ namespace PHRPReader
             if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
+
                 if (aminoAcidIndex is < 0 or > AMINO_ACID_LIST_MAX_INDEX)
                 {
                     // Invalid Index

@@ -516,6 +516,7 @@ namespace PeptideHitResultsProcessor.Processor
                     };
 
                     var sourceDirectory = new DirectoryInfo(sourceDirectoryPath);
+
                     foreach (var resultsFile in sourceDirectory.GetFiles(matchSpec))
                     {
                         // If we get here, a match was found; return its path
@@ -561,6 +562,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
@@ -745,12 +747,14 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var appDirPath = AppUtils.GetAppDirectoryPath();
+
                 if (string.IsNullOrWhiteSpace(appDirPath))
                 {
                     return false;
                 }
 
                 var fileInAppDirectory = new FileInfo(Path.Combine(appDirPath, Path.GetFileName(filePath)));
+
                 if (!fileInAppDirectory.Exists)
                     return false;
 
@@ -894,6 +898,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             var candidateDirectory = new DirectoryInfo(filePath);
+
             if (candidateDirectory.Exists && candidateDirectory.GetFiles(MaxQuantResultsProcessor.MSMS_FILE_NAME).Length > 1)
             {
                 return ResultsFileFormat.MaxQuantTXTFile;
@@ -1097,6 +1102,7 @@ namespace PeptideHitResultsProcessor.Processor
             // The next Q-Value is the minimum of (QValue, CurrentFDR)
 
             var qValue = searchResults.Last().FDR;
+
             if (qValue > 1)
                 qValue = 1;
 
@@ -1139,6 +1145,7 @@ namespace PeptideHitResultsProcessor.Processor
                                               Path.Combine(inputFile.DirectoryName, pepToProteinMapFileName);
 
             var pepToProteinMapFile = new FileInfo(pepToProteinMapFilePath);
+
             if (string.IsNullOrWhiteSpace(outputDirectoryPath))
             {
                 return pepToProteinMapFile.FullName;
@@ -1191,6 +1198,7 @@ namespace PeptideHitResultsProcessor.Processor
             int charsToRemove)
         {
             var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
+
             if (string.IsNullOrEmpty(baseName))
                 return string.Empty;
 
@@ -1426,6 +1434,7 @@ namespace PeptideHitResultsProcessor.Processor
                             linesRead++;
 
                             var splitLine = lineIn.Split(new[] { '\t' }, 3);
+
                             if (splitLine.Length < 2)
                                 continue;
 
@@ -1544,6 +1553,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Confirm that the PHRP data file exists
                 var phrpDataFile = new FileInfo(phrpDataFilePath);
+
                 if (!phrpDataFile.Exists)
                 {
                     SetErrorMessage("PHRP data file not found in CreateProteinModDetailsFile: " + phrpDataFilePath);
@@ -1564,6 +1574,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Read the _PepToProtMapMTS file
                 var success = LoadPeptideToProteinMapInfo(mtsPepToProteinMapFilePath, pepToProteinMapping, out _);
+
                 if (!success)
                 {
                     return false;
@@ -1576,9 +1587,11 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var proteinModsFilePath = ReplaceFilenameSuffix(phrpDataFile, FILENAME_SUFFIX_PROTEIN_MODS);
+
                 if (!string.IsNullOrEmpty(outputDirectoryPath))
                 {
                     var proteinModsFile = Path.GetFileName(proteinModsFilePath);
+
                     if (string.IsNullOrEmpty(proteinModsFile))
                     {
                         proteinModsFile = Path.GetFileNameWithoutExtension(phrpDataFile.Name) + FILENAME_SUFFIX_PROTEIN_MODS;
@@ -1635,6 +1648,7 @@ namespace PeptideHitResultsProcessor.Processor
                 foreach (var warningMessage in reader.WarningMessages)
                 {
                     var msg = warningMessage;
+
                     if (warningMessage.StartsWith("MSGF file not found", StringComparison.OrdinalIgnoreCase))
                     {
                         msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
@@ -1646,6 +1660,7 @@ namespace PeptideHitResultsProcessor.Processor
                 reader.ClearWarnings();
 
                 var peptidesNotFoundInPepToProtMapping = 0;
+
                 while (reader.MoveNext())
                 {
                     // Use binary search to find this peptide in pepToProteinMapping
@@ -1658,6 +1673,7 @@ namespace PeptideHitResultsProcessor.Processor
                             psmCount++;
 
                             var skipProtein = false;
+
                             if (!Options.ProteinModsFileIncludesReversedProteins)
                             {
                                 skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
@@ -2168,6 +2184,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var result = cmdLineParser.ParseArgs(args.ToArray());
                 var options = result.ParsedResults;
+
                 if (!result.Success || !options.Validate())
                 {
                     SetErrorMessage(string.Format("Error in LoadParameterFileSettings reading settings from parameter file {0}", parameterFile.FullName));
@@ -2299,13 +2316,16 @@ namespace PeptideHitResultsProcessor.Processor
                 using var reader = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
                 var linesRead = 0;
+
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
                     var dataLine = lineIn.Trim();
+
                     if (dataLine.Length == 0)
                         continue;
 
@@ -2367,6 +2387,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var domain = Domain.GetComputerDomain();
+
                 if (!domain.Name.EndsWith("pnl.gov", StringComparison.OrdinalIgnoreCase))
                     return datasetIDs;
             }
@@ -2379,6 +2400,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var quotedDatasetNames = new StringBuilder();
+
                 foreach (var item in datasetNames)
                 {
                     var optionalComma = quotedDatasetNames.Length == 0 ? string.Empty : ", ";
@@ -2614,16 +2636,19 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             var fileName = Path.GetFileName(fileNameOrPath);
+
             if (string.IsNullOrWhiteSpace(fileName))
                 return fileNameOrPath;
 
             var sourceDirectoryCandidateFile = new FileInfo(Path.Combine(sourceDirectoryPath, fileName));
+
             if (sourceDirectoryCandidateFile.Exists)
             {
                 return sourceDirectoryCandidateFile.FullName;
             }
 
             var workingDirectoryCandidateFile = new FileInfo(fileName);
+
             if (workingDirectoryCandidateFile.Exists)
             {
                 return workingDirectoryCandidateFile.FullName;
@@ -2699,6 +2724,7 @@ namespace PeptideHitResultsProcessor.Processor
             for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
             {
                 var modDef = mPeptideMods.GetModificationByIndex(index);
+
                 if (modDef.OccurrenceCount <= 0 && modDef.UnknownModAutoDefined)
                     continue;
 
@@ -2890,6 +2916,7 @@ namespace PeptideHitResultsProcessor.Processor
         protected virtual string TruncateProteinName(string proteinNameAndDescription)
         {
             var index = proteinNameAndDescription.IndexOf(' ');
+
             if (index > 0)
             {
                 return proteinNameAndDescription.Substring(0, index);
@@ -3026,6 +3053,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream && !dataFound)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
@@ -3092,6 +3120,7 @@ namespace PeptideHitResultsProcessor.Processor
             ref int deltaMassWarningCount)
         {
             var massDiffThreshold = peptideMonoMassFromTool / 5000 / 10;
+
             if (massDiffThreshold < 0.1)
                 massDiffThreshold = 0.1;
 
@@ -3216,6 +3245,7 @@ namespace PeptideHitResultsProcessor.Processor
                     continue;
 
                 var splitLine = lineIn.Split(splitChars, 2);
+
                 if (splitLine.Length == 0)
                     continue;
 
@@ -3328,6 +3358,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var fastaFile = new ProteinFileReader.FastaFileReader();
+
                 if (!fastaFile.OpenFile(fastaFilePath))
                 {
                     Console.WriteLine();
@@ -3502,6 +3533,7 @@ namespace PeptideHitResultsProcessor.Processor
             public int Compare(PepToProteinMapping x, PepToProteinMapping y)
             {
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
+
                 if (result == 0)
                 {
                     result = string.CompareOrdinal(x.Protein, y.Protein);

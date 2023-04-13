@@ -166,9 +166,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 var nameParts = new List<string>();
                 var startIndex = 0;
+
                 while (startIndex < datasetName.Length)
                 {
                     var matchIndex = datasetName.IndexOfAny(splitChars, startIndex + 1);
+
                     if (matchIndex < 0)
                     {
                         nameParts.Add(datasetName.Substring(startIndex));
@@ -204,6 +206,7 @@ namespace PeptideHitResultsProcessor.Processor
                 for (var i = 1; i < datasetNameKeys.Count; i++)
                 {
                     var baseNameToAdd = CombineDatasetNameParts(datasetNameKeys[i], datasetNameParts[datasetNameKeys[i]], partCountToUse);
+
                     if (candidateBaseNames.Contains(baseNameToAdd))
                     {
                         // Name collision found

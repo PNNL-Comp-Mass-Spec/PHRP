@@ -479,12 +479,14 @@ namespace PeptideHitResultsProcessor.Processor
                 else if (StringUtilities.IsLetterAtoZ(mostRecentLetter))
                 {
                     var success = searchResult.SearchResultAddDynamicModification(character, mostRecentLetter, residueLocInPeptide, searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+
                     if (success)
                     {
                         continue;
                     }
 
                     var errorMessage = searchResult.ErrorMessage;
+
                     if (string.IsNullOrEmpty(errorMessage))
                     {
                         errorMessage = "SearchResultAddDynamicModification returned false for symbol " + character;
@@ -633,6 +635,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by ascending Spec E-Value
 
             var resultsSubset = new Dictionary<int, MSGFPlusSearchResult>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -680,6 +683,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Make sure .PeptideSequenceWithMods does not have any generic mod masses
                 // It should only have mod symbols
                 var match = mModMassRegEx.Match(searchResult.PeptideSequenceWithMods);
+
                 if (match.Success)
                 {
                     // Modification mass did not have a symbol associated with it in the _ModDefs.txt file
@@ -869,6 +873,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
 
                         var candidateMassDiff = Math.Abs(msgfPlusModInfo[index].ModMassVal - modMass);
+
                         if (!(candidateMassDiff < 0.25))
                             continue;
 
@@ -1041,6 +1046,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -1049,6 +1055,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -1424,6 +1431,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
                     var pepToProteinMapAlternate = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(pepToProteinMapFilePath, "Dataset_msgfdb.txt");
+
                     if (File.Exists(pepToProteinMapAlternate))
                     {
                         pepToProteinMapFilePath = pepToProteinMapAlternate;
@@ -1631,6 +1639,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -1642,6 +1651,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -1650,6 +1660,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMSGFPlusSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -1704,6 +1715,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             successOverall = false;
@@ -2040,6 +2052,7 @@ namespace PeptideHitResultsProcessor.Processor
                     udtSearchResult.EValueNum = 0;
 
                 var targetDecoyFDRValid = DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.FDR_QValue], out udtSearchResult.QValue);
+
                 if (!double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum))
                     udtSearchResult.QValueNum = 0;
 
@@ -2179,6 +2192,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -2223,6 +2237,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -2487,6 +2502,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -2507,6 +2523,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+
                     if (inputFile.DirectoryName == null)
                     {
                         OnWarningEvent("Unable to determine the parent directory of the input file: " + inputFile.FullName);
@@ -2645,6 +2662,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Now parse the _syn.txt file that we just created to create the other PHRP files
                         success = ParseMSGFPlusSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
+
                         if (!success)
                         {
                             return false;
@@ -2761,6 +2779,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Find the index of the last residue
             var index = peptide.Length - 1;
+
             while (index > 0 && !StringUtilities.IsLetterAtoZ(peptide[index]))
             {
                 index--;
@@ -2854,6 +2873,7 @@ namespace PeptideHitResultsProcessor.Processor
                     else
                     {
                         var addOn = match.Groups[1].Value.Length;
+
                         if (addOn == 0)
                             index++;
                         else
@@ -2876,6 +2896,7 @@ namespace PeptideHitResultsProcessor.Processor
             if (indexFirstResidue > 0 && indexFirstResidue < peptide.Length)
             {
                 var peptideNew = peptide[indexFirstResidue] + peptide.Substring(0, indexFirstResidue);
+
                 if (indexFirstResidue < peptide.Length - 1)
                 {
                     peptideNew += peptide.Substring(indexFirstResidue + 1);
@@ -3000,6 +3021,7 @@ namespace PeptideHitResultsProcessor.Processor
             var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
 
             var resultID = 1;
+
             foreach (var result in query)
             {
                 WriteSearchResultToFile(resultID, writer, result, errorMessages, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
@@ -3015,6 +3037,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Step through scanGroupDetails to check for this
                 var scanGroupIDPrevious = -1;
                 var createFile = false;
+
                 foreach (var udtScanGroupInfo in scanGroupDetails)
                 {
                     if (udtScanGroupInfo.ScanGroupID == scanGroupIDPrevious)
@@ -3085,9 +3108,11 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var newPeptide = GetCleanSequence(searchResults[index].Peptide);
+
                 if (currentPeptide.Equals(newPeptide))
                 {
                     var bestProtein = GetBestProteinName(udtCurrentResult.Protein, currentProteinNumber, searchResults[index].Protein);
+
                     if (bestProtein.Value < currentProteinNumber)
                     {
                         currentProteinNumber = bestProtein.Value;
@@ -3393,6 +3418,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // SpecEValue is the same; check peptide
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
+
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein

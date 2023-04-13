@@ -834,6 +834,7 @@ namespace PHRPReader.Reader
             }
 
             var customAminoAcidDefs = (from item in modDef where item.ModType == MSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA select item).ToList();
+
             if (customAminoAcidDefs.Count == 0)
             {
                 // There are no custom amino acids

@@ -329,18 +329,21 @@ namespace PHRPReader.Reader
                 doc.Load(paramFilePath);
 
                 var dbNodes = doc.SelectNodes("/search/database");
+
                 if (dbNodes?.Count > 0)
                 {
                     searchEngineParams.FastaFilePath = GetAttribute(dbNodes[0], "local_path");
                 }
 
                 var enzymeNodes = doc.SelectNodes("/search/enzyme_rule");
+
                 if (enzymeNodes?.Count > 0)
                 {
                     searchEngineParams.Enzyme = GetAttribute(enzymeNodes[0], "name");
                 }
 
                 var instrumentResolutionNodes = doc.SelectNodes("/search/instrument_resolution");
+
                 if (instrumentResolutionNodes?.Count > 0)
                 {
                     searchEngineParams.PrecursorMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "ms"));
@@ -350,6 +353,7 @@ namespace PHRPReader.Reader
                 }
 
                 var enzymeConstraintNodes = doc.SelectNodes("/search/parameters/enzyme_constraint");
+
                 if (enzymeConstraintNodes?.Count > 0)
                 {
                     if (int.TryParse(GetAttribute(enzymeConstraintNodes[0], "max_miss_cleavages"), out var maxNumberInternalCleavages))
@@ -392,6 +396,7 @@ namespace PHRPReader.Reader
                 }
 
                 var modNodes = doc.SelectNodes("/search/modifications/fixed/mod");
+
                 if (modNodes == null || modNodes.Count <= 0)
                     return true;
 
@@ -419,6 +424,7 @@ namespace PHRPReader.Reader
                         continue;
 
                     var modType = ModificationDefinition.ResidueModificationType.StaticMod;
+
                     if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;

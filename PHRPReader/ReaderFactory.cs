@@ -545,6 +545,7 @@ namespace PHRPReader
             }
 
             var inputDirectory = new DirectoryInfo(inputDirectoryPath);
+
             if (!inputDirectory.Exists)
             {
                 throw new DirectoryNotFoundException("Input directory not found: " + inputDirectoryPath);
@@ -603,6 +604,7 @@ namespace PHRPReader
                     var dataset = dataFile.Name;
 
                     var charIndex = dataset.ToLower().IndexOf(fileSpec, StringComparison.Ordinal);
+
                     if (charIndex > 0)
                     {
                         dataset = dataset.Substring(0, charIndex);
@@ -686,6 +688,7 @@ namespace PHRPReader
             }
 
             var inputDirectory = new DirectoryInfo(inputDirectoryPath);
+
             if (!inputDirectory.Exists)
             {
                 throw new DirectoryNotFoundException("Input directory not found: " + inputDirectoryPath);
@@ -1059,12 +1062,14 @@ namespace PHRPReader
             }
 
             var basePHRPFile = new FileInfo(basePHRPFileName);
+
             if (basePHRPFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 // basePHRPFileName is first-hits-file based
 
                 var firstHitsFile = new FileInfo(filePath);
                 var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.OrdinalIgnoreCase);
+
                 if (synIndex > 0)
                 {
                     // filePath is synopsis-file based
@@ -1092,10 +1097,12 @@ namespace PHRPReader
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
         {
             var basePHRPFile = new FileInfo(basePHRPFileName);
+
             if (basePHRPFile.Name.IndexOf("_msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 var dataFile = new FileInfo(filePath);
                 var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.OrdinalIgnoreCase);
+
                 if (charIndex > 0)
                 {
                     // filePath has _msgfplus but should have _msgfdb
@@ -1239,6 +1246,7 @@ namespace PHRPReader
 
                 var index = 0;
                 var mostRecentResidue = '.';
+
                 while (index < peptide.Length)
                 {
                     if (index < indexStart || index > indexEnd)
@@ -1416,6 +1424,7 @@ namespace PHRPReader
             out string modSummaryFileNamePreferred)
         {
             var modSummaryFileName = GetPHRPModSummaryFileName(peptideHitResultType, datasetName);
+
             if (string.IsNullOrEmpty(modSummaryFileName))
             {
                 modSummaryFileNamePreferred = string.Empty;
@@ -1513,6 +1522,7 @@ namespace PHRPReader
                     }
 
                     var fileToFind = new FileInfo(Path.Combine(inputDirectoryPath, nameToFind));
+
                     if (fileToFind.Exists)
                     {
                         return fileToFind.FullName;
@@ -1536,6 +1546,7 @@ namespace PHRPReader
         public static string FlattenArray(IList<string> dataValues, int indexStart)
         {
             var combinedText = string.Empty;
+
             if (dataValues == null || dataValues.Count == 0)
             {
                 return combinedText;
@@ -1590,6 +1601,7 @@ namespace PHRPReader
             // Zoom-MS            29
 
             var collisionMode = scanTypeName.ToUpper();
+
             if (collisionMode.StartsWith("SA_"))
             {
                 collisionMode = collisionMode.Substring(3);
@@ -2047,6 +2059,7 @@ namespace PHRPReader
                     // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
                     // Note that the SynFileReader also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
                     success = ReadModSummaryFile(modSummaryFilePath, mDynamicMods, mStaticMods);
+
                     if (!success)
                     {
                         ModSummaryFileLoaded = false;
@@ -2385,6 +2398,7 @@ namespace PHRPReader
             if (dataColumns != null)
             {
                 var colIndex = LookupColumnIndex(columnName, columnHeaders);
+
                 if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
                     return string.IsNullOrWhiteSpace(dataColumns[colIndex]) ? string.Empty : dataColumns[colIndex];
@@ -2404,6 +2418,7 @@ namespace PHRPReader
             if (dataColumns != null)
             {
                 var colIndex = LookupColumnIndex(columnEnum, columnHeaders);
+
                 if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
                     return string.IsNullOrWhiteSpace(dataColumns[colIndex]) ? string.Empty : dataColumns[colIndex];
@@ -2445,6 +2460,7 @@ namespace PHRPReader
             // Markup the peptide with the dynamic and static mods
 
             var success = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim(), out var peptideWithMods, out var peptideMods);
+
             if (success)
             {
                 double totalModMass = 0;
@@ -2505,6 +2521,7 @@ namespace PHRPReader
             if (!mHeaderLineParsed)
             {
                 var splitLine = lineIn.Split('\t');
+
                 if (!IsNumber(splitLine[0]))
                 {
                     // Parse the header line to confirm the column ordering
@@ -2600,6 +2617,7 @@ namespace PHRPReader
 
             // Read the next line and check whether it's the same hit, but a different protein
             var readNext = true;
+
             while (readNext && !mSourceFile.EndOfStream)
             {
                 lineIn = mSourceFile.ReadLine();
@@ -2640,6 +2658,7 @@ namespace PHRPReader
                 {
                     // Update the protein list
                     var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.OrdinalIgnoreCase).ToList();
+
                     if (additionalProteins.Count > 0)
                     {
                         foreach (var item in additionalProteins)
@@ -2824,6 +2843,7 @@ namespace PHRPReader
 
                 var modSummaryReader = new PHRPModSummaryReader(modSummaryFilePath);
                 var success = modSummaryReader.Success;
+
                 if (!success)
                     return false;
 
@@ -3168,6 +3188,7 @@ namespace PHRPReader
             if (mStartupOptions.LoadModsAndSeqInfo)
             {
                 var modSummaryFileName = GetPHRPModSummaryFileName(resultType, DatasetName);
+
                 if (string.IsNullOrEmpty(modSummaryFileName))
                 {
                     ReportError(string.Format("Could not determine the ModSummaryFile name for dataset {0} " +

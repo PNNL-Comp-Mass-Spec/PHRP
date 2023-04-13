@@ -174,6 +174,7 @@ namespace PHRPReader.Reader
             }
 
             var tolerance = Math.Max(toleranceMinus, tolerancePlus);
+
             if (isPPM)
             {
                 tolerancePPM = tolerance;
@@ -367,6 +368,7 @@ namespace PHRPReader.Reader
                     try
                     {
                         var defaultParamsFilename = GetXTandemDefaultParamsFilename(searchEngineParamFilePath);
+
                         if (!string.IsNullOrEmpty(defaultParamsFilename))
                         {
                             fileNames.Add(defaultParamsFilename);
@@ -420,6 +422,7 @@ namespace PHRPReader.Reader
             try
             {
                 var taxonomyFilePath = Path.Combine(inputDirectoryPath, taxonomyFilename);
+
                 if (!File.Exists(taxonomyFilePath))
                 {
                     errorMessage = AppendToString(errorMessage, "Warning, taxonomy file not found: " + taxonomyFilePath);

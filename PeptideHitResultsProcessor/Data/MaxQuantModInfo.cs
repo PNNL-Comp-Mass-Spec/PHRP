@@ -111,9 +111,11 @@ namespace PeptideHitResultsProcessor.Data
             if (negativeCountMatches.Count > 0)
             {
                 var formulaToSubtract = new StringBuilder();
+
                 foreach (Match item in negativeCountMatches)
                 {
                     var elementCount = int.Parse(item.Groups["ElementCount"].Value);
+
                     formulaToSubtract.AppendFormat("{0}{1}", item.Groups["Element"].Value, Math.Abs(elementCount));
                 }
 

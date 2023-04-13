@@ -287,6 +287,7 @@ namespace PHRPReader.Reader
             if (!File.Exists(filePath))
             {
                 var filePathAlternate = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
+
                 if (File.Exists(filePathAlternate))
                 {
                     filePath = filePathAlternate;

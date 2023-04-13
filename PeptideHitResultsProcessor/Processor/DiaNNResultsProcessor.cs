@@ -573,6 +573,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var errorMessages = new List<string>();
 
                 var inputFile = new FileInfo(inputFilePath);
+
                 if (inputFile.Directory == null)
                 {
                     SetErrorMessage("Unable to determine the parent directory of file " + inputFile.FullName);
@@ -903,6 +904,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 var sourceFile = new FileInfo(diannParamFilePath);
+
                 if (!sourceFile.Exists)
                 {
                     SetErrorMessage("DIA-NN parameter file not found: " + diannParamFilePath);
@@ -984,6 +986,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
 
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -1000,6 +1003,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseDiaNNSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -1021,6 +1025,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, true);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1723,6 +1728,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1739,6 +1745,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+
                     if (inputFile.Directory == null)
                     {
                         SetErrorMessage("Unable to determine the parent directory of the input file: " + inputFilePath);
@@ -1788,6 +1795,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
                     success = ParseDiaNNSynopsisFile(synOutputFilePath, outputDirectoryPath, false);
+
                     if (!success)
                     {
                         return false;
@@ -1950,6 +1958,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // DIA-NN will typically report just one match
 
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -2066,6 +2075,7 @@ namespace PeptideHitResultsProcessor.Processor
             filteredSearchResults.Sort(new DiaNNSearchResultsComparerQValueScanChargePeptide());
 
             var index = 1;
+
             foreach (var result in filteredSearchResults)
             {
                 GetBaseNameAndDatasetID(datasetNameToBaseNameMap, datasetIDs, result.FullDatasetName, out var baseDatasetName, out var datasetID);
@@ -2194,6 +2204,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // First sort on dataset name
                 var nameComparisonResult = string.CompareOrdinal(x.DatasetName, y.DatasetName);
+
                 if (nameComparisonResult != 0)
                 {
                     return nameComparisonResult;

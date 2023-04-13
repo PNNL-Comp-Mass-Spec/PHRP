@@ -47,6 +47,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
             try
             {
                 var proceed = false;
+
                 if (commandLineParser.ParseCommandLine())
                 {
                     if (SetOptionsUsingCommandLineParameters(commandLineParser))
@@ -87,6 +88,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
 
             // Look for an N-terminal iTraq mod
             var match = mItraqMatcher.Match(primarySequence);
+
             if (match.Success)
             {
                 peptide = prefix + "." + match.Groups[2].Value + match.Groups[1].Value + match.Groups[3].Value + "." + suffix;
@@ -181,6 +183,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     values.Add(GetPrecursorMZ(massCalculator, psm));                                            // Precursor m/z
 
                     var isotopeError = GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_Isotope_Error, "0");
+
                     if (isotopeError == "0" && isotopeErrorComputed != 0)
                     {
                         isotopeError = isotopeErrorComputed.ToString();
@@ -217,6 +220,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
         private static string FlattenList(IReadOnlyList<string> values, char sepChar = '\t')
         {
             var outline = new StringBuilder();
+
             for (int index = 0, loopTo = values.Count - 1; index <= loopTo; index++)
             {
                 if (index > 0)

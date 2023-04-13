@@ -261,6 +261,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Parse paramValue
                     // Each modification entry can have multiple modification definitions separated  by commas, so we first split paramValue
                     var modDefs = paramValue.Split(MOD_LIST_SEP_CHAR);
+
                     for (var index = 0; index <= modDefs.Length - 1; index++)
                     {
                         // Modification definitions typically look like "15.9949@M"
@@ -372,6 +373,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // See if paramValue is a non-zero number
 
                     var modificationMass = 0.0;
+
                     if (SynFileReaderBaseClass.IsNumber(paramValue))
                     {
                         modificationMass = double.Parse(paramValue);
@@ -435,6 +437,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // Read the input parameters from the end of the X!Tandem results file (inputFilePath)
                     var success = ParseXTandemResultsFileInputParameters(inputFilePath);
+
                     if (!success)
                     {
                         SetErrorCode(PHRPErrorCode.ErrorReadingInputFile, true);
@@ -454,6 +457,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the additional output files
                     var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -482,6 +486,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                                     // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
                                     var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+
                                     if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
                                     {
                                         currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.SearchResults;
@@ -609,6 +614,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Note: we truncate .ProteinName at the first space
                 firstResult.ProteinName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
                 var index = firstResult.ProteinName.IndexOf(' ');
+
                 if (index > 0)
                 {
                     firstResult.ProteinName = firstResult.ProteinName.Substring(0, index);
@@ -766,6 +772,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                             case XTANDEM_XML_ELEMENT_NAME_GROUP:
                                 var value = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+
                                 if (value.Length > 0)
                                 {
                                     currentGroupType = value;
@@ -824,6 +831,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         try
                                         {
                                             var match = mScanNumberRegExA.Match(value);
+
                                             if (match.Success && match.Groups.Count > 1)
                                             {
                                                 firstResult.Scan = match.Groups[1].Value;
@@ -842,6 +850,7 @@ namespace PeptideHitResultsProcessor.Processor
                                             try
                                             {
                                                 var match = mScanNumberRegExB.Match(value);
+
                                                 if (match.Success && match.Groups.Count > 1)
                                                 {
                                                     firstResult.Scan = match.Groups[1].Value;
@@ -861,6 +870,7 @@ namespace PeptideHitResultsProcessor.Processor
                                             try
                                             {
                                                 var match = mScanNumberRegExC.Match(value);
+
                                                 if (match.Success && match.Groups.Count > 1)
                                                 {
                                                     firstResult.Scan = match.Groups[1].Value;
@@ -879,6 +889,7 @@ namespace PeptideHitResultsProcessor.Processor
                                             try
                                             {
                                                 var match = mScanNumberRegExD.Match(value);
+
                                                 if (match.Success)
                                                 {
                                                     firstResult.Scan = match.Value;
@@ -952,6 +963,7 @@ namespace PeptideHitResultsProcessor.Processor
                                     }
 
                                     var modsAdded = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
+
                                     if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                                     {
                                         errorMessages.Add(string.Format(
@@ -1086,12 +1098,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                                         // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_PARAMETERS
                                         var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+
                                         if (currentGroupType == XTANDEM_XML_GROUP_TYPE_PARAMETERS)
                                         {
                                             currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.InputParameters;
 
                                             // Read the Label for this group
                                             var currentGroupLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
+
                                             if (currentGroupLabel == GROUP_LABEL_INPUT_PARAMETERS)
                                             {
                                                 // Read the input parameters
@@ -1207,6 +1221,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (value != null)
                                 {
                                     var noteLabelLower = noteLabel.ToLower();
+
                                     if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_StaticModMass]))
                                     {
                                         ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modList);
@@ -1262,6 +1277,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         // In X!Tandem the LeftSpec and RightSpec values are separated by a vertical bar (CLEAVAGE_SPEC_SEP)
                                         // Look for CLEAVAGE_SPEC_SEP in value
                                         var barLoc = value.IndexOf(CLEAVAGE_SPEC_SEP);
+
                                         if (barLoc > 0 && barLoc < value.Length - 1)
                                         {
                                             var leftSpec = value.Substring(0, barLoc);
@@ -1334,6 +1350,7 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     var skipMod = false;
+
                     foreach (var comparisonMod in sortedModInfo)
                     {
                         if (comparisonMod.Equals(modDef))
@@ -1466,6 +1483,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1493,6 +1511,7 @@ namespace PeptideHitResultsProcessor.Processor
                     xtandemXTFilePath = Path.Combine(outputDirectoryPath, xtandemXTFilePath);
 
                     success = ParseXTandemResultsFile(inputFile.FullName, xtandemXTFilePath, false);
+
                     if (!success)
                     {
                         return false;

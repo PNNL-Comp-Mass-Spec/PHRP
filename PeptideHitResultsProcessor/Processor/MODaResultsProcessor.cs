@@ -186,6 +186,7 @@ namespace PeptideHitResultsProcessor.Processor
             var residueLocInPeptide = 0;
 
             var sequence = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
                 var character = sequence[index];
@@ -319,6 +320,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!success)
                 {
                     var errorMessage = searchResult.ErrorMessage;
+
                     if (string.IsNullOrEmpty(errorMessage))
                     {
                         errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassDigits;
@@ -354,6 +356,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
             var resultsSubset = new Dictionary<int, MODaSearchResult>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -562,6 +565,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -624,10 +628,12 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                         continue;
 
                     var dataLine = lineIn.Trim();
+
                     if (dataLine.Length == 0)
                         continue;
 
@@ -758,10 +764,12 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
 
                     var splitLine = lineIn.Split('\t');
+
                     if (splitLine.Length >= 3)
                     {
                         if (int.TryParse(splitLine[0], out var spectrumIndex))
@@ -861,6 +869,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -868,6 +877,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -876,6 +886,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseMODaSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -930,6 +941,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1257,6 +1269,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1437,6 +1450,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1460,6 +1474,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Load the MODa Parameter File to look for any static mods
                     var modInfoExtracted = ExtractModInfoFromMODaParamFile(modaParameterFilePath, out var modaModInfo);
+
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -1489,6 +1504,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
+
                     if (!success)
                     {
                         return false;
@@ -1499,6 +1515,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
                     success = ParseMODaSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
+
                     if (!success)
                     {
                         return false;
@@ -1577,6 +1594,7 @@ namespace PeptideHitResultsProcessor.Processor
             var query = from item in filteredSearchResults orderby item.ProbabilityNum descending, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
 
             var index = 1;
+
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, errorMessages);
@@ -1728,6 +1746,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Probability is the same; check peptide
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
+
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein

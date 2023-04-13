@@ -54,6 +54,7 @@ namespace PeptideHitResultsProcessor.Data
         {
             // Look for a space followed by an open parenthesis
             var charIndex = maxQuantModName.IndexOf(" (", StringComparison.Ordinal);
+
             if (charIndex < 0)
                 return maxQuantModName;
 

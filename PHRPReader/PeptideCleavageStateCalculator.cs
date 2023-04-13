@@ -373,6 +373,7 @@ namespace PHRPReader
                 return numMissedCleavages;
 
             var previousLetter = string.Empty;
+
             for (var index = 0; index <= primarySequence.Length - 1; index++)
             {
                 var chCurrent = primarySequence[index];

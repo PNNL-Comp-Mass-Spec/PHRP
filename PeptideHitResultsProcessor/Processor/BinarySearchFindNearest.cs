@@ -129,6 +129,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             var closestMatch = ~matchIndex - 1;
+
             if (closestMatch < 0)
                 closestMatch = 0;
 

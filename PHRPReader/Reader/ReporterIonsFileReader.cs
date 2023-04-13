@@ -121,6 +121,7 @@ namespace PHRPReader.Reader
                 ReporterIonHeaderNames.Add(columnNames[columnIndex]);
 
                 var match = mzMatcher.Match(columnNames[columnIndex]);
+
                 if (!match.Success)
                     continue;
 

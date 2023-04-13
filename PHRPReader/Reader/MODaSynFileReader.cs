@@ -379,6 +379,7 @@ namespace PHRPReader.Reader
                         continue;
 
                     var modType = ModificationDefinition.ResidueModificationType.StaticMod;
+
                     if (residueSpec.Value == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residueSpec.Value == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;

@@ -375,6 +375,7 @@ namespace PHRPReader
                 }
 
                 var paramFile = new FileInfo(paramFilePath);
+
                 if (!paramFile.Exists)
                 {
                     ReportError(mToolName + " param file not found: " + paramFilePath);

@@ -41,6 +41,7 @@ namespace Test_PHRPReader
             }
 
             var msgfPlusDirectory = new DirectoryInfo(resultsPathMSGFPlus);
+
             if (!msgfPlusDirectory.Exists)
             {
                 Console.WriteLine("Warning, Folder not found: " + resultsPathMSGFPlus);
@@ -70,6 +71,7 @@ namespace Test_PHRPReader
             {
                 // Look for an MSGF+ parameter file to parse
                 var lstFiles = msgfPlusDirectory.GetFiles("MSGFDB*.txt");
+
                 if (lstFiles.Length > 0)
                 {
                     TestMSGFPlusParamFileParsing(lstFiles.First().FullName);
@@ -77,6 +79,7 @@ namespace Test_PHRPReader
             }
 
             var sequestDirectory = new DirectoryInfo(resultsPathSequest);
+
             if (!sequestDirectory.Exists)
             {
                 Console.WriteLine("Warning, Folder not found: " + resultsPathSequest);
@@ -302,6 +305,7 @@ namespace Test_PHRPReader
                     }
 
                     var dblPeptideMassRecomputed = massCalculator.ComputeSequenceMassNumericMods(psm.PeptideWithNumericMods);
+
                     if (Math.Abs(psm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1)
                     {
                         Console.WriteLine("  Peptide mass disagreement: " + (psm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"));

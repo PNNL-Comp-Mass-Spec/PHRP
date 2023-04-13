@@ -110,6 +110,7 @@ namespace PHRPReader.Data
             }
 
             var formulaDescription = string.Empty;
+
             foreach (var element in ElementCounts)
             {
                 if (element.Value == 1)

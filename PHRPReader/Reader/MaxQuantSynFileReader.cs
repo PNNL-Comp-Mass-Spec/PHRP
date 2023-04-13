@@ -359,6 +359,7 @@ namespace PHRPReader.Reader
                 psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Charge), mColumnHeaders, 0);
 
                 var proteinNames = ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(MaxQuantSynFileColumns.Proteins), mColumnHeaders);
+
                 if (!string.IsNullOrWhiteSpace(proteinNames))
                 {
                     foreach (var protein in proteinNames.Split(';'))

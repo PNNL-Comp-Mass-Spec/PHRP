@@ -148,6 +148,7 @@ namespace PeptideHitResultsProcessor.Processor
             var storeAmbiguousResidue = false;
 
             var sequence = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
                 var character = sequence[index];
@@ -243,6 +244,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!success)
                         {
                             var errorMessage = searchResult.ErrorMessage;
+
                             if (string.IsNullOrEmpty(errorMessage))
                             {
                                 errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassOrName;
@@ -262,6 +264,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (!success)
                             {
                                 var errorMessage = searchResult.ErrorMessage;
+
                                 if (string.IsNullOrEmpty(errorMessage))
                                 {
                                     errorMessage = string.Format("SearchResultAddDynamicModification returned false for mod named {0} with mass {1} ",
@@ -358,6 +361,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Duplicate a portion of searchResults so that we can sort by PValue
 
             var resultsSubset = new Dictionary<int, TopPICPrSMs>();
+
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -658,6 +662,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (!reader.EndOfStream && !AbortProcessing)
                 {
                     var lineIn = reader.ReadLine();
+
                     if (string.IsNullOrWhiteSpace(lineIn))
                     {
                         continue;
@@ -666,6 +671,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!headerParsed)
                     {
                         var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
+
                         if (!validHeader)
                         {
                             // Error parsing header
@@ -729,6 +735,7 @@ namespace PeptideHitResultsProcessor.Processor
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
                     var endIndex = startIndex;
+
                     while (endIndex + 1 < searchResultsUnfiltered.Count &&
                            searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                     {
@@ -887,6 +894,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Create the output files
                     var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                     var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+
                     if (!filesInitialized)
                         return false;
 
@@ -894,6 +902,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
                             continue;
@@ -902,6 +911,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!headerParsed)
                         {
                             var validHeader = ParseTopPICSynFileHeaderLine(lineIn, columnMapping);
+
                             if (!validHeader)
                             {
                                 // Error parsing header
@@ -954,6 +964,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
 
                         var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+
                         if (!modsAdded && errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                         {
                             errorMessages.Add(string.Format("Error adding modifications to sequence for ResultID '{0}'", searchResult.ResultID));
@@ -1081,6 +1092,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // .Scans may have a list of scan numbers; extract the first scan number from .scans
                     var scanNumberDigits = string.Empty;
+
                     foreach (var character in searchResult.Scans)
                     {
                         if (char.IsDigit(character))
@@ -1369,6 +1381,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1414,6 +1427,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 var splitLine = lineIn.Split('\t');
+
                 for (var index = 0; index < splitLine.Length; index++)
                 {
                     if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
@@ -1623,6 +1637,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 success = ResetMassCorrectionTagsAndModificationDefinitions();
+
                 if (!success)
                 {
                     return false;
@@ -1790,6 +1805,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             var index = 1;
+
             foreach (var result in query)
             {
                 if (firstHitsFileWriter != null && result.StoreInFirstHitsFile)
@@ -1983,6 +1999,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Charge is the same; check PValue
                 var result = string.CompareOrdinal(x.PValue, y.PValue);
+
                 if (result == 0)
                 {
                     // PValue is the same; check peptide
