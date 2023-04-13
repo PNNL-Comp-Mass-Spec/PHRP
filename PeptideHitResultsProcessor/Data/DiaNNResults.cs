@@ -67,11 +67,6 @@ namespace PeptideHitResultsProcessor.Data
         public string ProteinGroup { get; set; }
 
         /// <summary>
-        /// Name of the first protein for this peptide
-        /// </summary>
-        public string Protein { get; set; }
-
-        /// <summary>
         /// Proteins associated with this peptide
         /// </summary>
         /// <remarks>
@@ -330,7 +325,6 @@ namespace PeptideHitResultsProcessor.Data
             CalculatedMonoMass = string.Empty;
             Modifications = string.Empty;
             ProteinGroup = string.Empty;
-            Protein = string.Empty;
             ProteinIDs.Clear();
             ProteinNames.Clear();
             GeneNames.Clear();
