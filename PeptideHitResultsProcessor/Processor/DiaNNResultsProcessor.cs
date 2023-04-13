@@ -849,7 +849,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>List of modifications</returns>
         private List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(DiaNNResults searchResult)
         {
-            // ToDo: Update this to call a method in a base class that can process a list of modifications of the form "9C(57.0215), 11C(57.0215)"
             return GetPeptideModifications(searchResult.PeptideCleanSequence, searchResult.Modifications);
         }
 
@@ -882,7 +881,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             foreach (var modEntry in modificationList.Split(','))
             {
-                if (MSFraggerResultsProcessor.ParseModificationDescription(cleanSequence, finalResidueLoc, modEntry, out var modInfo, out var errorMessage))
+                if (MSFraggerResultsProcessor.ParseModificationDescription(cleanSequence, finalResidueLoc, modEntry.Trim(), out var modInfo, out var errorMessage))
                 {
                     mods.Add(modInfo);
                     continue;
