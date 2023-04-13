@@ -404,13 +404,13 @@ namespace PeptideHitResultsProcessor.Processor
             public AminoAcidModInfo.ResidueTerminusState TerminusState;
 
             /// <summary>
-            /// Show the residue symbol and mod mass
+            /// Show the residue location in the peptide, residue symbol, and mod mass
             /// </summary>
             public override string ToString()
             {
                 return ResidueSymbol is default(char)
-                    ? string.Format("{0:F4}", ModMass)
-                    : string.Format("{0}: {1:F4}", ResidueSymbol, ModMass);
+                    ? string.Format("{0}: {1:F4}", ResidueLocInPeptide, ModMass)
+                    : string.Format("{0}{1}: {2:F4}", ResidueLocInPeptide, ResidueSymbol, ModMass);
             }
         }
 
