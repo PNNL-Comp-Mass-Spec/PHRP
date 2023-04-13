@@ -374,7 +374,15 @@ namespace PHRPReader.Reader
                 }
                 else
                 {
-                    psm.SetPeptide(peptide, mCleavageStateCalculator);
+                    if (peptide.IndexOf('.') < 0)
+                    {
+                        // Assume the peptide is tryptic
+                        psm.SetPeptide(peptide, mCleavageStateCalculator, true);
+                    }
+                    else
+                    {
+                        psm.SetPeptide(peptide, mCleavageStateCalculator);
+                    }
                 }
 
                 psm.Charge = (short)ReaderFactory.LookupColumnValue(columns, GetColumnNameByID(DiaNNSynFileColumns.Charge), mColumnHeaders, 0);

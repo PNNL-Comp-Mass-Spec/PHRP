@@ -603,10 +603,21 @@ namespace PHRPReader.Data
         /// </summary>
         /// <param name="peptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="cleavageStateCalculator">Cleavage state calculator object</param>
-        public void SetPeptide(string peptide, PeptideCleavageStateCalculator cleavageStateCalculator)
+        /// <param name="assumeTryptic">When true, if the peptide sequence does not have prefix or suffix letters, assume the peptide is tryptic</param>
+        public void SetPeptide(string peptide, PeptideCleavageStateCalculator cleavageStateCalculator, bool assumeTryptic = false)
         {
             SetPeptide(peptide);
-            UpdateCleavageInfo(cleavageStateCalculator);
+
+            if (assumeTryptic && peptide.IndexOf('.') < 0)
+            {
+                // Assume the peptide is fully tryptic (preceded by a K or R), then compute cleavage state and missed cleavages
+                var sequenceWithPrefixAndSuffix = string.Format("K.{0}.A", peptide);
+                UpdateCleavageInfo(cleavageStateCalculator, sequenceWithPrefixAndSuffix);
+            }
+            else
+            {
+                UpdateCleavageInfo(cleavageStateCalculator);
+            }
         }
 
         /// <summary>
@@ -640,6 +651,30 @@ namespace PHRPReader.Data
             NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(Peptide);
 
             CleavageState = cleavageStateCalculator.ComputeCleavageState(Peptide);
+
+            if (CleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Full)
+            {
+                NumTrypticTermini = 2;
+            }
+            else if (CleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Partial)
+            {
+                NumTrypticTermini = 1;
+            }
+            else
+            {
+                NumTrypticTermini = 0;
+            }
+        }
+        /// <summary>
+        /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the given peptide sequence
+        /// </summary>
+        /// <param name="cleavageStateCalculator"></param>
+        /// <param name="sequenceWithPrefixAndSuffix">Peptide sequence, including prefix and suffix residues</param>
+        public void UpdateCleavageInfo(PeptideCleavageStateCalculator cleavageStateCalculator, string sequenceWithPrefixAndSuffix)
+        {
+            NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(sequenceWithPrefixAndSuffix);
+
+            CleavageState = cleavageStateCalculator.ComputeCleavageState(sequenceWithPrefixAndSuffix);
 
             if (CleavageState == PeptideCleavageStateCalculator.PeptideCleavageState.Full)
             {
