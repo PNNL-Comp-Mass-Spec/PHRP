@@ -621,7 +621,7 @@ namespace PeptideHitResultsProcessor.Processor
             else
             {
                 // Mapping file does not exist
-                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, false);
 
                 if (!success)
                 {

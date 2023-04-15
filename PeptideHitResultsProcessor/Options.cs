@@ -188,7 +188,7 @@ namespace PeptideHitResultsProcessor
         public bool ProteinModsFileIncludesReversedProteins { get; set; }
 
         /// <summary>
-        /// Use existing MTS PepToProtein map file
+        /// Use existing MTS peptide to protein map file
         /// </summary>
         [Option("UseExistingPepToProteinMapFile",
             HelpText = "When true, look for an existing _PepToProtMap.txt file; if not found, it will be created using the FASTA file.")]

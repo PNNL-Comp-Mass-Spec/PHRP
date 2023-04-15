@@ -1226,7 +1226,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in sourcePHRPDataFiles
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
-        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <param name="peptideToProteinMapFilePath">Full path to the output file to create</param>
+        /// <param name="mapFileIncludesPrefixAndSuffixColumns">When true, add columns Prefix and Suffix to the protein to peptide map file</param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
         /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
@@ -1236,24 +1237,74 @@ namespace PeptideHitResultsProcessor.Processor
         /// </param>
         protected bool CreatePepToProteinMapFile(
             List<string> sourcePHRPDataFiles,
-            string mtsPepToProteinMapFilePath,
+            string peptideToProteinMapFilePath,
+            bool mapFileIncludesPrefixAndSuffixColumns,
             double maximumAllowableMatchErrorPercentThreshold = 0.1,
             double matchErrorPercentWarningThreshold = 0)
+        {
+            var sourceDataFiles = new List<FileInfo>();
+
+            foreach (var item in sourcePHRPDataFiles)
+            {
+                sourceDataFiles.Add(new FileInfo(item));
+            }
+
+            return CreatePepToProteinMapFile(
+                sourceDataFiles,
+                peptideToProteinMapFilePath,
+                mapFileIncludesPrefixAndSuffixColumns,
+                Options.IgnorePeptideToProteinMapperErrors,
+                maximumAllowableMatchErrorPercentThreshold,
+                matchErrorPercentWarningThreshold,
+                clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.PHRPFile);
+        }
+
+        /// <summary>
+        /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in sourceDataFiles
+        /// </summary>
+        /// <param name="sourceDataFiles">Data files with peptides to map to proteins</param>
+        /// <param name="peptideToProteinMapFilePath">Full path to the output file to create</param>
+        /// <param name="mapFileIncludesPrefixAndSuffixColumns">When true, add columns Prefix and Suffix to the protein to peptide map file</param>
+        /// <param name="ignorePeptideToProteinMapErrors">
+        /// <para>
+        /// When true, show a warning if any peptides do not map to a protein in the FASTA file
+        /// </para>
+        /// <para>
+        /// When false, if too many peptides do not match (based on thresholds maximumAllowableMatchErrorPercentThreshold and matchErrorPercentWarningThreshold),
+        /// an error is reported and this method returns false
+        /// </para>
+        /// </param>
+        /// <param name="maximumAllowableMatchErrorPercentThreshold">
+        /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
+        /// This is typically 0.1, but for MS-GF+, MaxQuant, and other tools we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
+        /// </param>
+        /// <param name="matchErrorPercentWarningThreshold">
+        /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
+        /// </param>
+        /// <param name="inputFileFormat">Input file format</param>
+        protected bool CreatePepToProteinMapFile(
+            List<FileInfo> sourceDataFiles,
+            string peptideToProteinMapFilePath,
+            bool mapFileIncludesPrefixAndSuffixColumns,
+            bool ignorePeptideToProteinMapErrors,
+            double maximumAllowableMatchErrorPercentThreshold,
+            double matchErrorPercentWarningThreshold,
+            clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants inputFileFormat)
         {
             var success = false;
 
             try
             {
-                if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
+                if (string.IsNullOrEmpty(peptideToProteinMapFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because mtsPepToProteinMapFilePath is empty; likely a programming bug");
+                    SetErrorMessage("Cannot create the peptide to protein map file because peptideToProteinMapFilePath is empty; likely a programming bug");
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
                 if (string.IsNullOrEmpty(Options.FastaFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because the FASTA File Path is not defined");
+                    SetErrorMessage("Cannot create the peptide to protein map file because the FASTA File Path is not defined");
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
@@ -1264,7 +1315,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!File.Exists(fastaFilePath))
                 {
-                    SetErrorMessage("Cannot create the PepToProtein map file because the FASTA File was not found: " + Options.FastaFilePath);
+                    SetErrorMessage("Cannot create the peptide to protein map file because the FASTA File was not found: " + Options.FastaFilePath);
                     SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
@@ -1297,13 +1348,11 @@ namespace PeptideHitResultsProcessor.Processor
                 UpdateProgress("Creating Peptide to Protein Map file", PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE);
 
                 // Initialize items
-                var mtsPepToProteinMapFile = new FileInfo(mtsPepToProteinMapFilePath);
-                string outputDirectoryPath;
+                var peptideToProteinMapFile = new FileInfo(peptideToProteinMapFilePath);
 
-                if (string.IsNullOrWhiteSpace(mtsPepToProteinMapFile.DirectoryName))
-                    outputDirectoryPath = string.Empty;
-                else
-                    outputDirectoryPath = mtsPepToProteinMapFile.DirectoryName;
+                var outputDirectoryPath = string.IsNullOrWhiteSpace(peptideToProteinMapFile.DirectoryName)
+                    ? string.Empty
+                    : peptideToProteinMapFile.DirectoryName;
 
                 var peptideToProteinMapResults = new SortedSet<string>();
 
@@ -1316,6 +1365,7 @@ namespace PeptideHitResultsProcessor.Processor
                     RemoveSymbolCharacters = true,
                     ProteinInputFilePath = fastaFilePath,
                     SaveProteinToPeptideMappingFile = true,
+                    MapFileIncludesPrefixAndSuffixColumns = mapFileIncludesPrefixAndSuffixColumns,
                     SearchAllProteinsForPeptideSequence = true,
                     SearchAllProteinsSkipCoverageComputationSteps = true
                 };
@@ -1325,7 +1375,7 @@ namespace PeptideHitResultsProcessor.Processor
                     DeleteTempFiles = true,
                     InspectParameterFilePath = string.Empty,
                     LogMessagesToFile = false,
-                    PeptideInputFileFormat = clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.PHRPFile
+                    PeptideInputFileFormat = inputFileFormat
                 };
 
                 RegisterEvents(peptideToProteinMapper);
@@ -1335,15 +1385,26 @@ namespace PeptideHitResultsProcessor.Processor
                 peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                 peptideToProteinMapper.SkipConsoleWriteIfNoProgressListener = true;
 
-                using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+                using var writer = new StreamWriter(new FileStream(peptideToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
                 var headerWritten = false;
 
-                foreach (var inputFilePath in sourcePHRPDataFiles)
+                foreach (var inputFile in sourceDataFiles)
                 {
-                    var resultsFilePath = Path.GetFileNameWithoutExtension(inputFilePath) +
-                                          clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
+                    var resultsFilePath = Path.Combine(
+                        outputDirectoryPath,
+                        Path.GetFileNameWithoutExtension(inputFile.Name) + clsProteinCoverageSummarizer.FILENAME_SUFFIX_PROTEIN_TO_PEPTIDE_MAPPING);
 
-                    resultsFilePath = Path.Combine(outputDirectoryPath, resultsFilePath);
+                    if (resultsFilePath.Equals(peptideToProteinMapFilePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        SetErrorMessage(string.Format(
+                            "The file that the clsPeptideToProteinMapEngine would create matches the output file specified by argument peptideToProteinMapFilePath; " +
+                            "specify an output file path that does not end with {0}; see {1}",
+                            clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING,
+                            peptideToProteinMapFilePath));
+
+                        return false;
+                    }
 
                     // Make sure the results file doesn't already exist
                     DeleteFileIgnoreErrors(resultsFilePath);
@@ -1351,7 +1412,7 @@ namespace PeptideHitResultsProcessor.Processor
                     peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                     mNextPeptideToProteinMapperLevel = 25;
 
-                    success = peptideToProteinMapper.ProcessFile(inputFilePath, outputDirectoryPath, string.Empty, true);
+                    success = peptideToProteinMapper.ProcessFile(inputFile.FullName, outputDirectoryPath, string.Empty, true);
 
                     peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
 
@@ -1359,7 +1420,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         if (!File.Exists(resultsFilePath))
                         {
-                            SetErrorMessage("Peptide to protein mapping file was not created for " + inputFilePath);
+                            SetErrorMessage("Peptide to protein mapping file was not created for " + inputFile.FullName);
                             SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                             success = false;
                             break;
@@ -1367,7 +1428,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         success = ValidatePeptideToProteinMapResults(
                             resultsFilePath,
-                            Options.IgnorePeptideToProteinMapperErrors,
+                            ignorePeptideToProteinMapErrors,
                             maximumAllowableMatchErrorPercentThreshold,
                             matchErrorPercentWarningThreshold);
                     }
@@ -1417,10 +1478,14 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    // Read the newly created file and append new entries to mtsPepToProteinMapFilePath
+                    // Read the newly created file and append new entries to the peptide to protein map file
 
                     // This tracks the number of non-empty lines read
                     var linesRead = 0;
+
+                    var peptideColumnIndex = 0;
+                    var proteinColumnIndex = 1;
+                    var columnMapDefined = false;
 
                     using (var reader = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
@@ -1440,8 +1505,28 @@ namespace PeptideHitResultsProcessor.Processor
 
                             if (linesRead == 1)
                             {
-                                if (splitLine[0].Equals("Peptide") && splitLine[1].Equals("Protein"))
+                                if (splitLine[0].Equals(clsPeptideToProteinMapEngine.PEPTIDE_TO_PROTEIN_MAP_FILE_PEPTIDE_COLUMN) &&
+                                    splitLine[1].Equals(clsPeptideToProteinMapEngine.PEPTIDE_TO_PROTEIN_MAP_FILE_PROTEIN_COLUMN)
+                                    ||
+                                    splitLine[0].Equals(clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PROTEIN_COLUMN) &&
+                                    splitLine[1].Equals(clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PEPTIDE_COLUMN))
                                 {
+                                    if (!columnMapDefined)
+                                    {
+                                        if (splitLine[0].Equals(clsPeptideToProteinMapEngine.PEPTIDE_TO_PROTEIN_MAP_FILE_PEPTIDE_COLUMN))
+                                        {
+                                            peptideColumnIndex = 0;
+                                            proteinColumnIndex = 1;
+                                        }
+                                        else
+                                        {
+                                            peptideColumnIndex = 1;
+                                            proteinColumnIndex = 0;
+                                        }
+
+                                        columnMapDefined = true;
+                                    }
+
                                     // Header line; write to disk if no results have been written yet
                                     if (!headerWritten)
                                     {
@@ -1469,7 +1554,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 }
                             }
 
-                            var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
+                            var peptideAndProteinKey = splitLine[peptideColumnIndex] + "_" + splitLine[proteinColumnIndex];
 
                             if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
                             {
@@ -1513,7 +1598,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
-                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath, false);
 
                 if (success)
                 {
@@ -1807,6 +1892,7 @@ namespace PeptideHitResultsProcessor.Processor
                     success = CreatePepToProteinMapFile(
                         sourcePHRPDataFiles,
                         mtsPepToProteinMapFilePath,
+                        false,
                         maximumAllowableMatchErrorPercentThreshold,
                         matchErrorPercentWarningThreshold);
 

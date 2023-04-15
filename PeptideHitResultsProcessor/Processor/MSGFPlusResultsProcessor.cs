@@ -2652,7 +2652,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: false);
 
-                        ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
+                        ResetProgress("Loading the Peptide to Protein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
                         LoadPeptideToProteinMapInfoMSGFPlus(
                             pepToProteinMapFilePath,

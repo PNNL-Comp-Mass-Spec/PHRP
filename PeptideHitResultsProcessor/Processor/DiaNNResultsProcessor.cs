@@ -14,10 +14,12 @@ using System.Linq;
 using System.Text;
 using PeptideHitResultsProcessor.Data;
 using PeptideHitResultsProcessor.SearchToolResults;
+using PeptideToProteinMapEngine;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM;
+using ProteinCoverageSummarizer;
 
 namespace PeptideHitResultsProcessor.Processor
 {
@@ -484,6 +486,183 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
+        private bool AddPrefixAndSuffixResiduesUsingFASTA(
+            List<DiaNNSearchResult> filteredSearchResults,
+            string outputDirectoryPath)
+        {
+            const bool mapFileIncludesPrefixAndSuffixColumns = true;
+            const bool ignorePeptideToProteinMapErrors = true;
+
+            const double maximumAllowableMatchErrorPercentThreshold = 0.1;
+            const double matchErrorPercentWarningThreshold = 0;
+
+            var peptidesWithPrefixAndSuffix = 0;
+
+            var uniquePeptides = new Dictionary<string, string>();
+
+            foreach (var item in filteredSearchResults)
+            {
+                GetCleanSequence(item.Sequence, out var prefix, out var suffix);
+
+                var peptideHasPrefixAndSuffix = !string.IsNullOrWhiteSpace(prefix) && !string.IsNullOrWhiteSpace(suffix);
+
+                if (peptideHasPrefixAndSuffix)
+                {
+                    peptidesWithPrefixAndSuffix++;
+                }
+
+                if (!uniquePeptides.ContainsKey(item.Sequence))
+                {
+                    uniquePeptides.Add(item.Sequence, peptideHasPrefixAndSuffix ? item.Sequence : string.Empty);
+                }
+            }
+
+            if (peptidesWithPrefixAndSuffix == filteredSearchResults.Count)
+            {
+                // All of the peptides already have prefix and suffix residues
+                OnStatusEvent(
+                    "All of the peptides loaded from the DIA-NN results file already have prefix and suffix letters; " +
+                    "skipping peptide to protein mapping prior to creating the synopsis file");
+
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(Options.FastaFilePath))
+            {
+                OnWarningEvent("Cannot add prefix and suffix residues to peptides identified by DIA-NN since a FASTA file was not specified when starting PHRP");
+                return true;
+            }
+
+            var peptideFilePath = Path.Combine(outputDirectoryPath, "Temp_DiaNN_peptides.txt");
+            var peptideToProteinMapFilePath = Path.Combine(outputDirectoryPath, "Temp_DiaNN_peptide_to_protein_map.txt");
+
+            using (var writer = new StreamWriter(new FileStream(peptideFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+            {
+                // Header line
+                writer.WriteLine("Peptide");
+
+                foreach (var item in uniquePeptides)
+                {
+                    writer.WriteLine(item.Key);
+                }
+            }
+
+            var sourceDataFiles = new List<FileInfo>
+            {
+                new(peptideFilePath)
+            };
+
+            var success = CreatePepToProteinMapFile(
+                sourceDataFiles,
+                peptideToProteinMapFilePath,
+                mapFileIncludesPrefixAndSuffixColumns,
+                ignorePeptideToProteinMapErrors,
+                maximumAllowableMatchErrorPercentThreshold,
+                matchErrorPercentWarningThreshold,
+                clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.TabDelimitedText);
+
+            if (!success)
+                return false;
+
+            using (var reader = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                var headerMap = new Dictionary<string, int>();
+                var peptideColumnIndex = -1;
+                var prefixColumnIndex = -1;
+                var suffixColumnIndex = -1;
+
+                while (!reader.EndOfStream)
+                {
+                    var dataLine = reader.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(dataLine))
+                        continue;
+
+                    var lineParts = dataLine.Split('\t');
+
+                    if (headerMap.Count == 0)
+                    {
+                        for (var i = 0; i < lineParts.Length; i++)
+                        {
+                            headerMap.Add(lineParts[i], i);
+                        }
+
+                        if (!headerMap.TryGetValue(clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PEPTIDE_COLUMN, out peptideColumnIndex))
+                        {
+                            SetErrorMessage(string.Format(
+                                "The peptide to protein map file does not have column {0} in the header line: {1}",
+                                clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PEPTIDE_COLUMN, peptideToProteinMapFilePath));
+
+                            return false;
+                        }
+
+                        if (!headerMap.TryGetValue(clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PREFIX_RESIDUE_COLUMN, out prefixColumnIndex))
+                        {
+                            SetErrorMessage(string.Format(
+                                "The peptide to protein map file does not have column {0} in the header line: {1}",
+                                clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_PREFIX_RESIDUE_COLUMN, peptideToProteinMapFilePath));
+
+                            return false;
+                        }
+
+                        if (!headerMap.TryGetValue(clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_SUFFIX_RESIDUE_COLUMN, out suffixColumnIndex))
+                        {
+                            SetErrorMessage(string.Format(
+                                "The peptide to protein map file does not have column {0} in the header line: {1}",
+                                clsProteinCoverageSummarizer.PROTEIN_TO_PEPTIDE_MAP_FILE_SUFFIX_RESIDUE_COLUMN, peptideToProteinMapFilePath));
+
+                            return false;
+                        }
+
+                        continue;
+                    }
+
+                    var peptide = lineParts[peptideColumnIndex];
+                    var prefixResidue = lineParts[prefixColumnIndex];
+                    var suffixResidue = lineParts[suffixColumnIndex];
+
+                    if (!uniquePeptides.TryGetValue(peptide, out var existingContextInfo))
+                        continue;
+
+                    if (!string.IsNullOrWhiteSpace(existingContextInfo))
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(prefixResidue) && string.IsNullOrWhiteSpace(suffixResidue))
+                        continue;
+
+                    uniquePeptides[peptide] = string.Format("{0}.{1}.{2}", prefixResidue, peptide, suffixResidue);
+                }
+            }
+
+            foreach (var item in filteredSearchResults)
+            {
+                if (!uniquePeptides.TryGetValue(item.Sequence, out var peptideWithContext))
+                {
+                    throw new KeyNotFoundException(string.Format(
+                        "uniquePeptides dictionary is missing peptide {0}; programming bug", item.Sequence));
+                }
+
+                if (string.IsNullOrWhiteSpace(peptideWithContext))
+                {
+                    OnWarningEvent("Peptide loaded from the peptide to protein map file does not have a mapping for peptide {0}", item.Sequence);
+                    continue;
+                }
+
+                if (peptideWithContext.IndexOf(item.Sequence, StringComparison.Ordinal) < 0)
+                {
+                    OnWarningEvent(
+                        "Peptide loaded from the peptide to protein map file does not include the original peptide sequence: {0} not in {1}",
+                        item.Sequence, peptideWithContext);
+
+                    continue;
+                }
+
+                item.Sequence = peptideWithContext;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
@@ -585,9 +764,9 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                var success = ReadDiaNNResults(inputFile, errorMessages, out var filteredSearchResults, out var datasetNameToBaseNameMap);
+                var resultsLoaded = ReadDiaNNResults(inputFile, errorMessages, out var filteredSearchResults, out var datasetNameToBaseNameMap);
 
-                if (!success)
+                if (!resultsLoaded)
                 {
                     baseName = string.Empty;
                     synOutputFilePath = string.Empty;
@@ -604,6 +783,19 @@ namespace PeptideHitResultsProcessor.Processor
 
                     return false;
                 }
+
+                // Write the results to a tab-delimited text file then use the peptide to protein mapper to determine the prefix and suffix letters for each peptide
+                var residuesAdded = AddPrefixAndSuffixResiduesUsingFASTA(filteredSearchResults, outputDirectoryPath);
+
+                if (!residuesAdded)
+                {
+                    baseName = string.Empty;
+                    synOutputFilePath = string.Empty;
+
+                    return false;
+                }
+
+                // ToDo: Update the cleavage state and missed cleavage values now that prefix and suffix residues are defined
 
                 Console.WriteLine();
 

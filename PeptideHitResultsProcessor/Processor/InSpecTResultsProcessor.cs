@@ -1595,7 +1595,7 @@ namespace PeptideHitResultsProcessor.Processor
                         // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
                         var pepToProteinMapFilePath = Path.Combine(inputFile.Directory.FullName, Path.GetFileNameWithoutExtension(inputFile.Name) + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt");
 
-                        ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
+                        ResetProgress("Loading the peptide to protein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
 
                         LoadPeptideToProteinMapInfoInspect(pepToProteinMapFilePath, outputDirectoryPath, inspectModInfo, ref pepToProteinMapping, ref mtsPepToProteinMapFilePath);
 
