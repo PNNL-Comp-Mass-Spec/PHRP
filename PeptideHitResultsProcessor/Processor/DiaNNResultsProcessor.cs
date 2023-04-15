@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using PeptideHitResultsProcessor.Data;
 using PeptideHitResultsProcessor.SearchToolResults;
 using PeptideToProteinMapEngine;
@@ -564,6 +565,8 @@ namespace PeptideHitResultsProcessor.Processor
             if (!success)
                 return false;
 
+            var trypticPeptide = new Regex(@"^([KR]\.[^P].+[KR]\.[A-O,Q-Z]|-\..+[KR]\.[A-O,Q-Z]|[KR]\.[^P].+\.-|-\..+\.-)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
             using (var reader = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 var headerMap = new Dictionary<string, int>();
@@ -624,13 +627,23 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!uniquePeptides.TryGetValue(peptide, out var existingContextInfo))
                         continue;
 
-                    if (!string.IsNullOrWhiteSpace(existingContextInfo))
-                        continue;
-
                     if (string.IsNullOrWhiteSpace(prefixResidue) && string.IsNullOrWhiteSpace(suffixResidue))
                         continue;
 
-                    uniquePeptides[peptide] = string.Format("{0}.{1}.{2}", prefixResidue, peptide, suffixResidue);
+                    var newPeptideWithContext = string.Format("{0}.{1}.{2}", prefixResidue, peptide, suffixResidue);
+
+                    if (string.IsNullOrWhiteSpace(existingContextInfo))
+                    {
+                        uniquePeptides[peptide] = newPeptideWithContext;
+                        continue;
+                    }
+
+                    var existingIsTryptic = trypticPeptide.IsMatch(existingContextInfo);
+
+                    if (!existingIsTryptic && trypticPeptide.IsMatch(newPeptideWithContext))
+                    {
+                        uniquePeptides[peptide] = newPeptideWithContext;
+                    }
                 }
             }
 
