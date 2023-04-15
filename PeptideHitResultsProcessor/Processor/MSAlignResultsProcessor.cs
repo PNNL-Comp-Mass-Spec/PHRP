@@ -985,7 +985,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Peaks], out udtSearchResult.Peaks);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = (short)StringUtilities.CIntSafe(udtSearchResult.Charge, 0);
 
                 // Monoisotopic mass value of the observed precursor_mz
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);

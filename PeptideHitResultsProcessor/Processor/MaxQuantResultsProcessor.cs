@@ -2266,7 +2266,7 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.ScanIndex], out searchResult.ScanIndex);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.Charge], out searchResult.Charge);
-                searchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(searchResult.Charge, 0));
+                searchResult.ChargeNum = (short)StringUtilities.CIntSafe(searchResult.Charge, 0);
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MaxQuant
                 if (DataUtilities.GetColumnValue(splitLine, columnMapping[MaxQuantResultsFileColumns.CalculatedMonoMass], out searchResult.CalculatedMonoMass))

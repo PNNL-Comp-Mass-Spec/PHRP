@@ -845,7 +845,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = (short)StringUtilities.CIntSafe(udtSearchResult.Charge, 0);
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);

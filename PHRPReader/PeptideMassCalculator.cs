@@ -406,12 +406,14 @@ namespace PHRPReader
 
         private short ConvertAminoAcidCharToIndex(char aminoAcidSymbol)
         {
-            return (short)(Convert.ToInt16(Convert.ToByte(aminoAcidSymbol)) - ASCII_VAL_LETTER_A);
+            // (short)(Convert.ToInt16(Convert.ToByte(aminoAcidSymbol)) - ASCII_VAL_LETTER_A);
+            return (short)((byte)aminoAcidSymbol - ASCII_VAL_LETTER_A);
         }
 
         private char ConvertAminoAcidIndexToChar(byte aminoAcidIndex)
         {
-            return Convert.ToChar(aminoAcidIndex + ASCII_VAL_LETTER_A);
+            // Convert.ToChar(aminoAcidIndex + ASCII_VAL_LETTER_A);
+            return (char)(aminoAcidIndex + ASCII_VAL_LETTER_A);
         }
 
         /// <summary>
@@ -510,7 +512,7 @@ namespace PHRPReader
 
             foreach (var chAminoAcidSymbol in sequence)
             {
-                // Use Convert.ToInt32 to convert to the ASCII value, then subtract 65
+                // Convert the amino acid symbol to its ASCII value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
 
                 try

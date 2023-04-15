@@ -1205,7 +1205,7 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrecursorId], out searchResult.PrecursorId);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrecursorCharge], out searchResult.Charge);
-                searchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(searchResult.Charge, 0));
+                searchResult.ChargeNum = (short)StringUtilities.CIntSafe(searchResult.Charge, 0);
 
                 if (DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.QValue], out searchResult.QValueDiaNN))
                 {

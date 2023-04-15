@@ -187,7 +187,7 @@ namespace PeptideHitResultsProcessor.Data
             {
                 if (SynFileReaderBaseClass.IsNumber(PeptideHyperscore) && SynFileReaderBaseClass.IsNumber(mPeptideNextScore))
                 {
-                    PeptideDeltaCn2 = (Convert.ToSingle(PeptideHyperscore) - Convert.ToSingle(mPeptideNextScore)) / Convert.ToSingle(PeptideHyperscore);
+                    PeptideDeltaCn2 = (float.Parse(PeptideHyperscore) - float.Parse(mPeptideNextScore)) / float.Parse(PeptideHyperscore);
                 }
                 else
                 {

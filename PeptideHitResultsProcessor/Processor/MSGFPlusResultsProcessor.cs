@@ -739,7 +739,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(cleanSequence, prefix, suffix);
 
-            return Convert.ToInt16(cleavageState);
+            return (short)cleavageState;
         }
 
         /// <summary>
@@ -1934,7 +1934,7 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSGFPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = (short)StringUtilities.CIntSafe(udtSearchResult.Charge, 0);
 
                 // Precursor mass error could be in PPM or Da
                 //   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)

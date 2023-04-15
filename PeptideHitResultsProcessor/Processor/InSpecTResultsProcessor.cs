@@ -1243,7 +1243,7 @@ namespace PeptideHitResultsProcessor.Processor
                 udtSearchResult.Protein = TruncateProteinName(splitLine[(int)InspectResultsFileColumns.Protein]);
 
                 udtSearchResult.Charge = splitLine[(int)InspectResultsFileColumns.Charge];
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = (short)StringUtilities.CIntSafe(udtSearchResult.Charge, 0);
 
                 udtSearchResult.MQScore = splitLine[(int)InspectResultsFileColumns.MQScore];
                 udtSearchResult.MQScoreNum = StringUtilities.CSngSafe(udtSearchResult.MQScore, 0);
@@ -1755,11 +1755,11 @@ namespace PeptideHitResultsProcessor.Processor
                     // Match found
                     try
                     {
-                        var modMass = Convert.ToInt32(match.Groups[1].Value);
+                        var modMass = int.Parse(match.Groups[1].Value);
 
                         // Compare the mod mass in the specification to this Mod's mod mass
                         // If they are less than 0.5 Da apart, assume we have a match; yes, this assumption is a bit flaky
-                        if (Math.Abs(modMass - Convert.ToDouble(inspectModInfo[index].ModMass)) <= 0.5)
+                        if (Math.Abs(modMass - double.Parse(inspectModInfo[index].ModMass)) <= 0.5)
                         {
                             // Match found
                             // Replace the matched region with .ModSymbol

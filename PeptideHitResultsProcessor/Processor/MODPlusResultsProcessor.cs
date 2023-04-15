@@ -932,7 +932,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Monoisotopic mass value of the observed precursor_mz
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
-                udtSearchResult.ChargeNum = Convert.ToInt16(StringUtilities.CIntSafe(udtSearchResult.Charge, 0));
+                udtSearchResult.ChargeNum = (short)StringUtilities.CIntSafe(udtSearchResult.Charge, 0);
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
@@ -1559,7 +1559,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (forwardPeptideCount > 0)
                 {
-                    fdr = reversePeptideCount / Convert.ToDouble(forwardPeptideCount);
+                    fdr = reversePeptideCount / (double)forwardPeptideCount;
                 }
 
                 // Store the FDR values

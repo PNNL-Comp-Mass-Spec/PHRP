@@ -24,7 +24,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Note: Integer.Parse() fails if value contains a decimal point, even if it is "8.000"
                 // Thus, we're converting to a double first, and then rounding
-                return (int)Math.Round(Convert.ToDouble(value));
+                return (int)Math.Round(double.Parse(value));
             }
             catch (Exception)
             {
