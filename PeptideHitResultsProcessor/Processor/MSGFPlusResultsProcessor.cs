@@ -1491,6 +1491,8 @@ namespace PeptideHitResultsProcessor.Processor
                     writer.WriteLine(headerLine);
                 }
 
+                var outputValues = new List<string>();
+
                 for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
                 {
                     // Replace any mod text names in the peptide sequence with the appropriate mod symbols
@@ -1503,10 +1505,13 @@ namespace PeptideHitResultsProcessor.Processor
                         UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
                     }
 
-                    writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
-                                     pepToProteinMapping[index].Protein + "\t" +
-                                     pepToProteinMapping[index].ResidueStart + "\t" +
-                                     pepToProteinMapping[index].ResidueEnd);
+                    outputValues.Clear();
+                    outputValues.Add(pepToProteinMapping[index].Peptide);
+                    outputValues.Add(pepToProteinMapping[index].Protein);
+                    outputValues.Add(pepToProteinMapping[index].ResidueStart.ToString());
+                    outputValues.Add(pepToProteinMapping[index].ResidueEnd.ToString());
+
+                    writer.WriteLine(string.Join("\t", outputValues));
                 }
             }
             catch (Exception ex)
