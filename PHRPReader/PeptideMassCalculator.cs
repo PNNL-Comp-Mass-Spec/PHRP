@@ -1011,9 +1011,8 @@ namespace PHRPReader
             // Use Convert.ToChar to convert from ASCII code to the letter
             var aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
 
-            var monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, out var empiricalFormula);
-
-            mAminoAcidMasses[aminoAcidIndex] = monoMass;
+            // Compute the monoisotopic mass of the residue
+            mAminoAcidMasses[aminoAcidIndex] = GetDefaultAminoAcidMass(aminoAcidSymbol, out var empiricalFormula);
             mAminoAcidEmpiricalFormulas[aminoAcidIndex] = empiricalFormula;
         }
     }
