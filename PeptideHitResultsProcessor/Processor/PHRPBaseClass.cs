@@ -1391,9 +1391,20 @@ namespace PeptideHitResultsProcessor.Processor
 
                 foreach (var inputFile in sourceDataFiles)
                 {
+                    var mapFileSuffix = inputFileFormat switch
+                    {
+                        clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.TabDelimitedText =>
+                            clsProteinCoverageSummarizer.FILENAME_SUFFIX_PROTEIN_TO_PEPTIDE_MAPPING,
+                        clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.PHRPFile =>
+                            clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING,
+                        _ =>
+                            throw new Exception(string.Format(
+                            "Unsupported value for inputFileFormat in call to CreatePepToProteinMapFile: {0}", inputFileFormat))
+                    };
+
                     var resultsFilePath = Path.Combine(
                         outputDirectoryPath,
-                        Path.GetFileNameWithoutExtension(inputFile.Name) + clsProteinCoverageSummarizer.FILENAME_SUFFIX_PROTEIN_TO_PEPTIDE_MAPPING);
+                        Path.GetFileNameWithoutExtension(inputFile.Name) + mapFileSuffix);
 
                     if (resultsFilePath.Equals(peptideToProteinMapFilePath, StringComparison.OrdinalIgnoreCase))
                     {
