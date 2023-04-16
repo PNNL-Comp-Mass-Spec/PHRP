@@ -1717,7 +1717,15 @@ namespace PeptideHitResultsProcessor.Processor
 
                 writer.WriteLine(string.Join("\t", headerNames));
 
-                var loadMSGFResults = phrpResultType != PeptideHitResultTypes.MSGFPlus;
+                var loadMSGFResults = phrpResultType switch
+                {
+                    PeptideHitResultTypes.DiaNN => false,
+                    PeptideHitResultTypes.MaxQuant => false,
+                    PeptideHitResultTypes.MSAlign => false,
+                    PeptideHitResultTypes.MSGFPlus => false,
+                    PeptideHitResultTypes.MSFragger => false,
+                    _ => true
+                };
 
                 // Update the Mass Calculator to use the one tracked by this class
                 // (since this class's calculator knows about custom amino acids and custom charge carriers)
@@ -1747,6 +1755,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (warningMessage.StartsWith("MSGF file not found", StringComparison.OrdinalIgnoreCase))
                     {
+                        // MSGF file not found; column MSGF_SpecProb will not have any data
                         msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
                     }
                     OnWarningEvent(msg);
