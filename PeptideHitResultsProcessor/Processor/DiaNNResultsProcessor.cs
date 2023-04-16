@@ -673,6 +673,10 @@ namespace PeptideHitResultsProcessor.Processor
                 item.Sequence = peptideWithContext;
             }
 
+            // Delete the temp files
+            DeleteFileIgnoreErrors(peptideFilePath);
+            DeleteFileIgnoreErrors(peptideToProteinMapFilePath);
+
             return true;
         }
 
