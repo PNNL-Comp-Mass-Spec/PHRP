@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 13, 2023";
+            FileDate = "April 15, 2023";
 
             mModificationMassByName = new Dictionary<string, double>();
 
@@ -808,7 +808,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                // ToDo: Update the cleavage state and missed cleavage values now that prefix and suffix residues are defined
+                // Now that prefix and suffix residues are defined, update the cleavage state and missed cleavage values
+                foreach (var searchResult in filteredSearchResults)
+                {
+                    ComputeTrypticStateAndMissedCleavages(searchResult, searchResult.Sequence);
+                }
 
                 Console.WriteLine();
 
@@ -1287,7 +1291,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse a DIA-NN results line while creating the DIA-NN synopsis file
+        /// Parse a DIA-NN results line while reading the report.tsv file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
@@ -1500,22 +1504,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var peptideWithPrefixAndSuffix = string.Format("K.{0}.A", searchResult.Sequence);
 
-                // Use the peptide cleavage state calculator to compute the missed cleavage count
-
-                var missedCleavageCount = mPeptideCleavageStateCalculator.ComputeNumberOfMissedCleavages(peptideWithPrefixAndSuffix);
-
-                searchResult.MissedCleavageCount = missedCleavageCount.ToString();
-
-                var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(peptideWithPrefixAndSuffix);
-
-                searchResult.NumberOfTrypticTermini = cleavageState switch
-                {
-                    PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
-                    PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
-                    PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific => 0,
-                    PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
-                    _ => 0
-                };
+                ComputeTrypticStateAndMissedCleavages(searchResult, peptideWithPrefixAndSuffix);
 
                 return true;
             }
@@ -1530,6 +1519,25 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return false;
             }
+        }
+
+        private void ComputeTrypticStateAndMissedCleavages(ToolResultsBaseClass searchResult, string peptideWithPrefixAndSuffix)
+        {
+            // Use the peptide cleavage state calculator to compute the missed cleavage count
+            var missedCleavageCount = mPeptideCleavageStateCalculator.ComputeNumberOfMissedCleavages(peptideWithPrefixAndSuffix);
+
+            searchResult.MissedCleavageCount = missedCleavageCount.ToString();
+
+            var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(peptideWithPrefixAndSuffix);
+
+            searchResult.NumberOfTrypticTermini = cleavageState switch
+            {
+                PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
+                PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
+                PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific => 0,
+                PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
+                _ => 0
+            };
         }
 
         /// <summary>
