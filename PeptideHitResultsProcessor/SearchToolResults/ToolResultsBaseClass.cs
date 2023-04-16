@@ -52,7 +52,8 @@
         /// For MSFragger, from column "Peptide"
         /// </para>
         /// <para>
-        /// For DIA-NN, from column "Stripped.Sequence"
+        /// For DIA-NN, originally from column "Stripped.Sequence", and thus no prefix or suffix residues
+        /// However, method AddPrefixAndSuffixResiduesUsingFASTA uses clsPeptideToProteinMapEngine to determine the prefix and suffix residues for each peptide
         /// </para>
         /// </remarks>
         public string Sequence;
