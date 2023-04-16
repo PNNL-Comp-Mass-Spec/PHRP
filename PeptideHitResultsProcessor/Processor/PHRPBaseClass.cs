@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "April 13, 2023";
+        public const string PROGRAM_DATE = "April 15, 2023";
 
         /// <summary>
         /// Constructor
@@ -1130,6 +1130,7 @@ namespace PeptideHitResultsProcessor.Processor
             var pepToProteinMapBaseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
             string pepToProteinMapFileName;
+
             if (mts)
             {
                 pepToProteinMapFileName = pepToProteinMapBaseName + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + "MTS.txt";
@@ -1291,7 +1292,13 @@ namespace PeptideHitResultsProcessor.Processor
             double matchErrorPercentWarningThreshold,
             clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants inputFileFormat)
         {
-            var success = false;
+            if (sourceDataFiles.Count == 0)
+            {
+                const string errorMessage = "parameter sourceDataFiles is an empty list in call to CreatePepToProteinMapFile";
+                SetErrorMessage(errorMessage);
+
+                throw new Exception(errorMessage);
+            }
 
             try
             {
@@ -1321,9 +1328,9 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Verify that the FASTA file is not a DNA-sequence based FASTA file
-                success = ValidateProteinFastaFile(fastaFilePath, out var warningMessage, out var proteinCount);
+                var validFASTA = ValidateProteinFastaFile(fastaFilePath, out var warningMessage, out var proteinCount);
 
-                if (!success)
+                if (!validFASTA)
                 {
                     OnWarningEvent(warningMessage);
                     return false;
@@ -1389,6 +1396,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerWritten = false;
 
+                var successCount = 0;
+
                 foreach (var inputFile in sourceDataFiles)
                 {
                     var mapFileSuffix = inputFileFormat switch
@@ -1423,7 +1432,7 @@ namespace PeptideHitResultsProcessor.Processor
                     peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                     mNextPeptideToProteinMapperLevel = 25;
 
-                    success = peptideToProteinMapper.ProcessFile(inputFile.FullName, outputDirectoryPath, string.Empty, true);
+                    var success = peptideToProteinMapper.ProcessFile(inputFile.FullName, outputDirectoryPath, string.Empty, true);
 
                     peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
 
@@ -1486,6 +1495,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (!File.Exists(resultsFilePath))
                     {
+                        if (success)
+                            successCount++;
+
                         continue;
                     }
 
@@ -1577,17 +1589,39 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Delete the interim results file
                     DeleteFileIgnoreErrors(resultsFilePath);
+
+                    if (success)
+                        successCount++;
                 }
 
                 peptideToProteinMapper.CloseLogFileNow();
+
+                if (successCount == sourceDataFiles.Count)
+                    return true;
+
+                if (sourceDataFiles.Count == 1)
+                {
+                    OnWarningEvent("Error creating the peptide to protein map file for {0}", sourceDataFiles[0].Name);
+                }
+                else if (successCount > 0)
+                {
+                    OnWarningEvent(
+                        "Error creating the peptide to protein map file for {0} out of {1} source files",
+                        sourceDataFiles.Count - successCount, sourceDataFiles.Count);
+                }
+                else
+                {
+                    OnWarningEvent("Error creating the peptide to protein map file for all {0} source files", sourceDataFiles.Count);
+                }
+
+                return false;
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in CreatePepToProteinMapFile", ex);
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
+                return false;
             }
-
-            return success;
         }
 
         /// <summary>
