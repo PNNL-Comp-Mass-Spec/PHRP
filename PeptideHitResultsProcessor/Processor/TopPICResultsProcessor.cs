@@ -757,6 +757,9 @@ namespace PeptideHitResultsProcessor.Processor
                     SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                 }
 
+                firstHitsFileWriter?.Flush();
+                synopsisFileWriter?.Flush();
+
                 return true;
             }
             catch (Exception ex)

@@ -1243,6 +1243,7 @@ namespace PeptideHitResultsProcessor.Processor
                         SetErrorMessage("Invalid Lines: \n" + string.Join("\n", errorMessages));
                     }
 
+                    writer.Flush();
                     return true;
                 }
                 catch (Exception ex)
