@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideHitResultsProcRunner_with_PeptideToProteinMapper", "PeptideHitResultsProcRunner_with_PeptideToProteinMapper.csproj", "{49DA4157-ADA0-4120-85CE-EB3AFBB9827C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideHitResultsProcessor_with_PeptideToProteinMapper", "PeptideHitResultsProcessor\PeptideHitResultsProcessor_with_PeptideToProteinMapper.csproj", "{AB63B137-46A4-4F7F-97C5-6609C913F082}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PHRPReader", "PHRPReader\PHRPReader.csproj", "{81A15D6E-10C3-4F2C-BF71-6642B76753ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PHRP_UnitTests", "UnitTests\PHRP_UnitTests.csproj", "{8DA4E355-2740-4D36-91C1-078B484CA262}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideToProteinMapper", "..\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapper.csproj", "{327E7C53-2350-483E-A551-83A60B9B5131}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideToProteinMapEngine", "..\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\PeptideToProteinMapEngine.csproj", "{AFA3FE41-2306-4799-8A39-846B7DDFDF3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProteinCoverageSummarizer", "..\Protein_Coverage_Summarizer\ProteinCoverageSummarizer\ProteinCoverageSummarizer.csproj", "{27958CB4-6AE4-4F9B-8FA9-381DEF2646BF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49DA4157-ADA0-4120-85CE-EB3AFBB9827C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49DA4157-ADA0-4120-85CE-EB3AFBB9827C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49DA4157-ADA0-4120-85CE-EB3AFBB9827C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49DA4157-ADA0-4120-85CE-EB3AFBB9827C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB63B137-46A4-4F7F-97C5-6609C913F082}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB63B137-46A4-4F7F-97C5-6609C913F082}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB63B137-46A4-4F7F-97C5-6609C913F082}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB63B137-46A4-4F7F-97C5-6609C913F082}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DA4E355-2740-4D36-91C1-078B484CA262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DA4E355-2740-4D36-91C1-078B484CA262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DA4E355-2740-4D36-91C1-078B484CA262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DA4E355-2740-4D36-91C1-078B484CA262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{327E7C53-2350-483E-A551-83A60B9B5131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{327E7C53-2350-483E-A551-83A60B9B5131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{327E7C53-2350-483E-A551-83A60B9B5131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{327E7C53-2350-483E-A551-83A60B9B5131}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFA3FE41-2306-4799-8A39-846B7DDFDF3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFA3FE41-2306-4799-8A39-846B7DDFDF3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFA3FE41-2306-4799-8A39-846B7DDFDF3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFA3FE41-2306-4799-8A39-846B7DDFDF3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27958CB4-6AE4-4F9B-8FA9-381DEF2646BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27958CB4-6AE4-4F9B-8FA9-381DEF2646BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27958CB4-6AE4-4F9B-8FA9-381DEF2646BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27958CB4-6AE4-4F9B-8FA9-381DEF2646BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EDAB44DE-4457-45B7-AF84-86948F63D84F}
+	EndGlobalSection
+EndGlobal
