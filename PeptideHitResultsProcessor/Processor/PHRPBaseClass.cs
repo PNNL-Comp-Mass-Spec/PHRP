@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "April 15, 2023";
+        public const string PROGRAM_DATE = "April 16, 2023";
 
         /// <summary>
         /// Constructor
@@ -1753,12 +1753,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var loadMSGFResults = phrpResultType switch
                 {
-                    PeptideHitResultTypes.DiaNN => false,
-                    PeptideHitResultTypes.MaxQuant => false,
-                    PeptideHitResultTypes.MSAlign => false,
-                    PeptideHitResultTypes.MSGFPlus => false,
-                    PeptideHitResultTypes.MSFragger => false,
-                    _ => true
+                    PeptideHitResultTypes.MODa => true,
+                    PeptideHitResultTypes.MODPlus => true,
+                    PeptideHitResultTypes.MSPathFinder => true,
+                    PeptideHitResultTypes.XTandem => true,
+                    _ => false
                 };
 
                 // Update the Mass Calculator to use the one tracked by this class
