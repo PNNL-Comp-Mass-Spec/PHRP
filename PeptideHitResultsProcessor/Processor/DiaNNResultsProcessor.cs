@@ -1,5 +1,5 @@
-﻿// This class reads in an DIA-NN report.tsv file and creates
-// a tab-delimited text file with the data.
+﻿// This class reads search results from a DIA-NN report.tsv file and creates
+// a tab-delimited text file with the data
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -25,12 +25,12 @@ using ProteinCoverageSummarizer;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads in DIA-NN report.tsv file and creates
+    /// This class reads search results from a DIA-NN report.tsv file and creates
     /// a tab-delimited text file with the data
     /// </summary>
     /// <remarks>
     /// <para>
-    /// 1) ProcessFile reads DIA-NN results file report.tsv
+    /// 1) ProcessFile reads a DIA-NN results file (Dataset_report.tsv)
     /// </para>
     /// <para>
     /// 2) It calls CreateSynResultsFile to create the _syn.txt file
@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 15, 2023";
+            FileDate = "April 17, 2023";
 
             mModificationMassByName = new Dictionary<string, double>();
 
@@ -746,7 +746,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This routine creates a synopsis file from the output from DIA-NN (file report.tsv)
+        /// This routine creates a synopsis file using search results read from the DIA-NN report.tsv file
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="inputFilePath">DIA-NN results file</param>
@@ -1411,7 +1411,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.Length = searchResult.Sequence.Length;
 
-                // Peptide sequences in report.tsv do not include prefix or suffix residues
+                // Peptide sequences in DIA-NN report.tsv files do not include prefix or suffix residues (but this class will add them later)
                 // DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrevAA], out searchResult.PrefixResidue);
                 // DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.NextAA], out searchResult.SuffixResidue);
 
@@ -1920,7 +1920,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing routine
         /// </summary>
-        /// <param name="inputFilePath">DIA-NN results file (report.tsv)</param>
+        /// <param name="inputFilePath">DIA-NN results file (Dataset_report.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>

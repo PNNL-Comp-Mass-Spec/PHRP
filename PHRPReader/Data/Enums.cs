@@ -868,7 +868,7 @@ namespace PHRPReader.Data
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This is read from column Modified.Sequence in report.tsv, then converted into MSFragger style modification names by PHRP
+        /// This is read from column Modified.Sequence in Dataset_report.tsv, then converted into MSFragger style modification names by PHRP
         /// </para>
         /// <para>
         /// DIA-NN modification examples:

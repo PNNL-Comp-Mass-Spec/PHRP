@@ -22,7 +22,7 @@
         /// but MSFraggerResultsProcessor stores the correct name for each PSM
         /// </para>
         /// <para>
-        /// For DIA-NN, comes from column Run in the report.tsv file
+        /// For DIA-NN, comes from column Run in the Dataset_report.tsv file
         /// This is an abbreviated dataset name, as assigned by the analysis manager
         /// </para>
         /// </remarks>
@@ -103,7 +103,7 @@
         /// and comes from column "Assigned Modifications"
         /// </para>
         /// <para>
-        /// For DIA-NN, this is read from column Modified.Sequence in report.tsv
+        /// For DIA-NN, this is read from column Modified.Sequence in Dataset_report.tsv
         /// </para>
         /// <para>
         /// MaxQuant Examples:
@@ -153,7 +153,7 @@
         /// For MaxQuant, in the msms.txt file, column "Retention time" is in minutes
         /// For MSFragger, in the Dataset_psm.tsv file, column "Retention" is in seconds
         /// For MSFragger, in the MSFragger results file, column "retention_time" is in minutes
-        /// For DIA-NN, in the report.tsv file, column "RT" is in minutes
+        /// For DIA-NN, in the Dataset_report.tsv file, column "RT" is in minutes
         /// </remarks>
         public string ElutionTime;
 
