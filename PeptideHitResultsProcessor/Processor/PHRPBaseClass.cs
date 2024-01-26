@@ -268,7 +268,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show the modification type and mass
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return ModificationType + ": " + ModificationMass + " @ " + TargetResidues;
             }
@@ -289,7 +289,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show residue number and modification name
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return ResidueLocInPeptide + ": " + ModName;
             }
@@ -323,7 +323,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show the peptide sequence and protein name
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return Peptide + ", " + Protein;
             }

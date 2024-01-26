@@ -232,7 +232,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show scan, peptide, and p-value
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("Scan {0}: {1}, PValue {2}", ScanNum, PeptideAnnotation, PValue);
             }

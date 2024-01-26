@@ -50,7 +50,7 @@ namespace PHRPReader.Reader
             /// <summary>
             /// Show the modification mass
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return ModMassString;
             }

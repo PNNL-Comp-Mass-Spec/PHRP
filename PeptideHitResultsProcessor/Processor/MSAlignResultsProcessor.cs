@@ -181,7 +181,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show scan, peptide, and E-value
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("Scan {0}: {1}, EValue {2}", ScanNum, Peptide, EValue);
             }

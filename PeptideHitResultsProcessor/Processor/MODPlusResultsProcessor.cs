@@ -173,7 +173,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show scan, peptide, and probability
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("Scan {0}: {1}, Probability {2}", ScanNum, Peptide, Probability);
             }

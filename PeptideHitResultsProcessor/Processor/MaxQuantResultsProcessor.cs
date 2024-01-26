@@ -211,7 +211,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show the residue symbol and mod mass
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("{0}: {1:F4}", Residue, ModInfo.ModMassVal);
             }

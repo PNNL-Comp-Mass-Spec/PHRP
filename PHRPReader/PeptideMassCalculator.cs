@@ -98,7 +98,7 @@ namespace PHRPReader
             /// <summary>
             /// Modification mass and residue number
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("{0:F4} Da on residue {1}", ModificationMass, ResidueLocInPeptide);
             }
