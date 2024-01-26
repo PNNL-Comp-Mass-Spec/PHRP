@@ -405,6 +405,7 @@ namespace PHRPReader.Reader
 
             return mMSGFDBColumns[column];
         }
+
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>

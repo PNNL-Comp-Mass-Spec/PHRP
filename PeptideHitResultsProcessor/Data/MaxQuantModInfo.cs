@@ -171,6 +171,7 @@ namespace PeptideHitResultsProcessor.Data
 
             string updatedFormula1;
             double massToSubtract;
+
             if (negativeCountMatches.Count > 0)
             {
                 var formulaToSubtract = new StringBuilder();

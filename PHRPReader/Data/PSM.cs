@@ -665,6 +665,7 @@ namespace PHRPReader.Data
                 NumTrypticTermini = 0;
             }
         }
+
         /// <summary>
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the given peptide sequence
         /// </summary>

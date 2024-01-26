@@ -112,6 +112,7 @@ namespace PHRPReader.Reader
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
+
         /// <summary>
         /// Constructor
         /// </summary>

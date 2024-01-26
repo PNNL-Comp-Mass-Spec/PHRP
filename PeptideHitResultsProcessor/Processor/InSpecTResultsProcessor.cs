@@ -2146,6 +2146,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     return -1;
                 }
+
                 // Charge is the same; check FScore (sort on descending FScore)
                 if (x.FScoreNum > y.FScoreNum)
                 {

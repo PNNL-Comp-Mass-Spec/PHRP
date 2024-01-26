@@ -137,11 +137,13 @@ namespace PHRPReader
         /// <summary>
         /// Peptide C-terminus mass
         /// </summary>
+        /// <remarks>Defaults to the mass of oxygen and hydrogen</remarks>
         public double PeptideCTerminusMass { get; set; }
 
         /// <summary>
         /// Peptide N-terminus mass
         /// </summary>
+        /// <remarks>Defaults to the mass of hydrogen</remarks>
         public double PeptideNTerminusMass { get; set; }
 
         /// <summary>

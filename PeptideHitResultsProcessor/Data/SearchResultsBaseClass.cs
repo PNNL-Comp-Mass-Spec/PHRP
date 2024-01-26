@@ -73,6 +73,7 @@ namespace PeptideHitResultsProcessor.Data
         private readonly PeptideModificationContainer mPeptideMods;
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+
         private readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
         private string mErrorMessage = string.Empty;
