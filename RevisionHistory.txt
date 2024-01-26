@@ -1,5 +1,14 @@
 Peptide Hit Results Processor Runner Revision History
 
+Version 3.1.8791; January 26, 2024
+	- Add support for MaxQuant modifications that specify modification composition using amino acids
+
+Version 3.1.8503; April 13, 2023
+	- Add support for DIA-NN
+
+Version 3.1.8290; September 12, 2022
+	- Add support for new columns in the TopPIC v1.5 results file
+
 Version 3.1.8056; January 22, 2022
 	- Updated ProteinFileReader that uses a new version of CsvHelper
 

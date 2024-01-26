@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="options">Options</param>
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "January 13, 2022";
+            FileDate = "January 26, 2022";
         }
 
         /// <summary>
