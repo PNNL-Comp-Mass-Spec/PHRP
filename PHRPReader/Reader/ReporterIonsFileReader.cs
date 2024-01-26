@@ -73,8 +73,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Examine the column headers to populate mReporterIonHeaders
         /// </summary>
-        /// <param name="columnNames"></param>
-        /// <param name="reporterIonMapping"></param>
+        /// <param name="columnNames">List of column names</param>
+        /// <param name="reporterIonMapping">Reporter ion mapping</param>
         private void CacheReporterIonColumnInfo(IReadOnlyList<string> columnNames, IDictionary<string, int> reporterIonMapping)
         {
             // The reporter ion columns should start in the column just after the ReporterIonIntensityMax column
@@ -211,7 +211,7 @@ namespace PHRPReader.Reader
         /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
         /// Populates a dictionary mapping enum ReporterIonsFileColumns to the 0-based index in columnNames
         /// </summary>
-        /// <param name="headerNames"></param>
+        /// <param name="headerNames">List of header names</param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         public static Dictionary<ReporterIonsFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
@@ -222,7 +222,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the column name associated with the given enum
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="column">Column enum</param>
         /// <returns>Column name</returns>
         public static string GetColumnNameByID(ReporterIonsFileColumns column)
         {

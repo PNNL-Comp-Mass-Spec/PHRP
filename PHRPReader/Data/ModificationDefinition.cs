@@ -26,7 +26,7 @@ namespace PHRPReader.Data
         // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy
 
         /// <summary>
-        /// Modification symbol used after all of the DEFAULT_MODIFICATION_SYMBOLS have been used
+        /// Modification symbol used after all the DEFAULT_MODIFICATION_SYMBOLS have been used
         /// </summary>
         public const char LAST_RESORT_MODIFICATION_SYMBOL = '_';
 
@@ -230,8 +230,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor that takes a mod symbol and mod mass
         /// </summary>
-        /// <param name="modificationSymbol"></param>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationSymbol">Modification symbol</param>
+        /// <param name="modificationMass">Modification mass</param>
         public ModificationDefinition(char modificationSymbol, double modificationMass)
         {
             Clear();
@@ -243,9 +243,9 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor that takes a mod mass, target residues, and modification type
         /// </summary>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidues"></param>
-        /// <param name="modificationType"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidues">Target residues</param>
+        /// <param name="modificationType">Modification type</param>
         public ModificationDefinition(double modificationMass, string targetResidues, ResidueModificationType modificationType)
         {
             Clear();
@@ -258,11 +258,11 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor that takes a mod symbol, mod mass, target residues, modification type, and mass correction tag
         /// </summary>
-        /// <param name="modificationSymbol"></param>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidues"></param>
-        /// <param name="modificationType"></param>
-        /// <param name="massCorrectionTag"></param>
+        /// <param name="modificationSymbol">Modification symbol</param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidues">Target residues</param>
+        /// <param name="modificationType">Modification type</param>
+        /// <param name="massCorrectionTag">Mass correction tag</param>
         public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ResidueModificationType modificationType, string massCorrectionTag)
         {
             Clear();
@@ -277,13 +277,13 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor that takes a mod symbol, mod mass, target residues, modification type, mass correction tag, and affected atom
         /// </summary>
-        /// <param name="modificationSymbol"></param>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidues"></param>
-        /// <param name="modificationType"></param>
-        /// <param name="massCorrectionTag"></param>
-        /// <param name="chAffectedAtom"></param>
-        /// <param name="unknownModAutoDefined"></param>
+        /// <param name="modificationSymbol">Modification symbol</param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidues">Target residues</param>
+        /// <param name="modificationType">Modification type</param>
+        /// <param name="massCorrectionTag">Mass correction tag</param>
+        /// <param name="chAffectedAtom">Affected atom</param>
+        /// <param name="unknownModAutoDefined">True if this is an auto-defined unknown modification</param>
         public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ResidueModificationType modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
@@ -318,7 +318,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Compares b to this object, ignoring .ModificationSymbol and ignoring .AffectedResidues
         /// </summary>
-        /// <param name="b"></param>
+        /// <param name="b">Modification definition to compare</param>
         /// <returns>True if the items are equivalent</returns>
         public bool EquivalentMassTypeTagAndAtom(ModificationDefinition b)
         {
@@ -328,8 +328,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Compare a to b but ignore .ModificationSymbol and .AffectedResidues
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
+        /// <param name="a">First modification definition</param>
+        /// <param name="b">Second modification definition</param>
         /// <returns>True if the items are equivalent</returns>
         public bool EquivalentMassTypeTagAndAtom(ModificationDefinition a, ModificationDefinition b)
         {
@@ -343,7 +343,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Compares b to this object, ignoring .ModificationSymbol
         /// </summary>
-        /// <param name="b"></param>
+        /// <param name="b">Modification definition to compare</param>
         /// <returns>True if the items are equivalent</returns>
         // ReSharper disable once UnusedMember.Global
         public bool EquivalentMassTypeTagAtomAndResidues(ModificationDefinition b)
@@ -354,8 +354,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Compares b to this object
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
+        /// <param name="a">First modification definition</param>
+        /// <param name="b">Second modification definition</param>
         /// <returns>True if the items are equivalent</returns>
         public bool EquivalentMassTypeTagAtomAndResidues(ModificationDefinition a, ModificationDefinition b)
         {
@@ -400,9 +400,9 @@ namespace PHRPReader.Data
         /// <summary>
         /// Compare the residue lists (ignoring order)
         /// </summary>
-        /// <param name="residues1"></param>
-        /// <param name="residues2"></param>
-        /// <param name="allowResidues2ToBeSubsetOfResidues1"></param>
+        /// <param name="residues1">First list of residues</param>
+        /// <param name="residues2">Second list of residues</param>
+        /// <param name="allowResidues2ToBeSubsetOfResidues1">True if residues2 is allowed to be a subset of residues1</param>
         /// <returns>True if they contain the same residues</returns>
         public static bool EquivalentTargetResidues(string residues1, string residues2, bool allowResidues2ToBeSubsetOfResidues1)
         {
@@ -547,7 +547,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Retrieve the modification type symbol for the given modification Type
         /// </summary>
-        /// <param name="modificationType"></param>
+        /// <param name="modificationType">Modification type</param>
         /// <returns>D, S, T, I, or P</returns>
         public static char ModificationTypeToModificationSymbol(ResidueModificationType modificationType)
         {
@@ -565,7 +565,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Check whether the target residues contain the given residue
         /// </summary>
-        /// <param name="chComparisonResidue"></param>
+        /// <param name="chComparisonResidue">Comparison residue</param>
         /// <returns>True if successful, false if an error</returns>
         public bool TargetResiduesContain(char chComparisonResidue)
         {

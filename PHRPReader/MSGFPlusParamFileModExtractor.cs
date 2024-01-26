@@ -249,13 +249,14 @@ namespace PHRPReader
             /// <summary>
             /// Mod type, name, mass, residues
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return string.Format("{0} {1}, {2}; {3}", ModType, ModName, ModMass, Residues);
             }
         }
 
         private string mErrorMessage;
+
         private readonly string mToolName;
 
         /// <summary>
@@ -341,11 +342,11 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from a MS-GF+, MSPathFinder, TopPIC, or DIA-NN param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from an MS-GF+, MSPathFinder, TopPIC, or DIA-NN param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
-        /// <param name="paramFilePath"></param>
-        /// <param name="modSpecFormat"></param>
-        /// <param name="modList"></param>
+        /// <param name="paramFilePath">Parameter file path</param>
+        /// <param name="modSpecFormat">Modification spec format</param>
+        /// <param name="modList">Output: list of extracted modifications</param>
         /// <returns>True if success; false if a problem</returns>
         public bool ExtractModInfoFromParamFile(
             string paramFilePath,
@@ -424,7 +425,6 @@ namespace PHRPReader
                         //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
                         //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
                         //   True
-
 
                         if (tagName.Equals(PARAM_TAG_MOD_STATIC, StringComparison.OrdinalIgnoreCase))
                         {
@@ -581,11 +581,11 @@ namespace PHRPReader
         /// <summary>
         /// Parse the mod spec definition from a DIA-NN parameter file
         /// </summary>
-        /// <param name="paramFilePath"></param>
-        /// <param name="splitLine"></param>
+        /// <param name="paramFilePath">Parameter file path</param>
+        /// <param name="splitLine">Line parts after splitting a delimited data line</param>
         /// <param name="modType">MSGFPlusModType.DynamicMod or MSGFPlusModType.StaticMod</param>
-        /// <param name="unnamedModID"></param>
-        /// <param name="udtModInfo"></param>
+        /// <param name="unnamedModID">Number of unnamed Mod IDs</param>
+        /// <param name="udtModInfo">Output: modification info</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseModSpecDiaNN(
             string paramFilePath,
@@ -649,12 +649,12 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Parse the mod spec definition from a MS-GF+ or MSPathFinder parameter file
+        /// Parse the mod spec definition from an MS-GF+ or MSPathFinder parameter file
         /// </summary>
-        /// <param name="paramFilePath"></param>
-        /// <param name="splitLine"></param>
-        /// <param name="unnamedModID"></param>
-        /// <param name="udtModInfo"></param>
+        /// <param name="paramFilePath">Parameter file path</param>
+        /// <param name="splitLine">Line parts after splitting a delimited data line</param>
+        /// <param name="unnamedModID">Number of unnamed Mod IDs</param>
+        /// <param name="udtModInfo">Output: modification info</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseModSpecMSGFPlus(
             string paramFilePath,
@@ -829,11 +829,11 @@ namespace PHRPReader
         /// <summary>
         /// Parse the mod spec definition from a TopPIC parameter file
         /// </summary>
-        /// <param name="paramFilePath"></param>
-        /// <param name="splitLine"></param>
+        /// <param name="paramFilePath">Parameter file path</param>
+        /// <param name="splitLine">Line parts after splitting a delimited data line</param>
         /// <param name="modType">MSGFPlusModType.DynamicMod or MSGFPlusModType.StaticMod</param>
-        /// <param name="unnamedModID"></param>
-        /// <param name="udtModInfo"></param>
+        /// <param name="unnamedModID">Number of unnamed Mod IDs</param>
+        /// <param name="udtModInfo">Output: modification info</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseModSpecTopPIC(
             string paramFilePath,
@@ -948,8 +948,8 @@ namespace PHRPReader
         /// <summary>
         /// Resolve MS-GF+, MSPathFinder, TopPIC, or DIA-NN mods with modification definitions
         /// </summary>
-        /// <param name="modList"></param>
-        /// <param name="peptideMods"></param>
+        /// <param name="modList">List of modification info</param>
+        /// <param name="peptideMods">Peptide modifications</param>
         public void ResolveMSGFPlusModsWithModDefinitions(List<ModInfo> modList, PeptideModificationContainer peptideMods)
         {
             if (modList == null)
@@ -1077,8 +1077,8 @@ namespace PHRPReader
         /// If the data line starts with text in parameter modTag followed by an equals sign, return the text after the equals sign
         /// </summary>
         /// <remarks>If the line has a comment (which starts with #), the comment will not be included in the returned text</remarks>
-        /// <param name="lineIn"></param>
-        /// <param name="modTag"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="modTag">Modification tag</param>
         /// <returns>Modification definition if found, otherwise an empty string</returns>
         private string ValidateIsValidModSpec(string lineIn, string modTag)
         {

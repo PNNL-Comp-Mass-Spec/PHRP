@@ -12,8 +12,8 @@ namespace PHRPReader
         /// If the final element is found, return its value, otherwise return an empty string
         /// </summary>
         /// <remarks>See also <see cref="TryGetElementValue"/></remarks>
-        /// <param name="parentNode"></param>
-        /// <param name="elementNames"></param>
+        /// <param name="parentNode">Parent node</param>
+        /// <param name="elementNames">Element names</param>
         /// <returns>Value if found, or an empty string</returns>
         public static string GetElementValueOrDefault(XElement parentNode, params string[] elementNames)
         {
@@ -49,9 +49,9 @@ namespace PHRPReader
         /// <summary>
         /// Get the named attribute from the given element
         /// </summary>
-        /// <param name="item"></param>
-        /// <param name="attributeName"></param>
-        /// <param name="attributeValue"></param>
+        /// <param name="item">XML element</param>
+        /// <param name="attributeName">Attribute name</param>
+        /// <param name="attributeValue">Attribute value</param>
         /// <returns>True if found, otherwise false</returns>
         public static bool TryGetAttribute(XElement item, string attributeName, out string attributeValue)
         {
@@ -79,9 +79,9 @@ namespace PHRPReader
         /// Otherwise, return false
         /// </summary>
         /// <remarks>See also <see cref="GetElementValueOrDefault"/></remarks>
-        /// <param name="parentItem"></param>
-        /// <param name="elementName"></param>
-        /// <param name="elementValue"></param>
+        /// <param name="parentItem">Parent XML element</param>
+        /// <param name="elementName">Element name</param>
+        /// <param name="elementValue">Element value</param>
         /// <returns>True if found, otherwise false</returns>
         public static bool TryGetElementValue(XElement parentItem, string elementName, out string elementValue)
         {

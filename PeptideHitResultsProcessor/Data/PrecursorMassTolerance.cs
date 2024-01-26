@@ -56,8 +56,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor for a symmetric tolerance
         /// </summary>
-        /// <param name="tolerance"></param>
-        /// <param name="isPPM"></param>
+        /// <param name="tolerance">Tolerance</param>
+        /// <param name="isPPM">True if the tolerance is in PPM</param>
         public PrecursorMassTolerance(double tolerance, bool isPPM) : this(tolerance, tolerance, isPPM)
         {
         }
@@ -65,9 +65,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor for an asymmetric tolerance
         /// </summary>
-        /// <param name="toleranceLeft"></param>
-        /// <param name="toleranceRight"></param>
-        /// <param name="isPPM"></param>
+        /// <param name="toleranceLeft">Tolerance to the left</param>
+        /// <param name="toleranceRight">Tolerance to the right</param>
+        /// <param name="isPPM">True if the tolerance is in PPM</param>
         public PrecursorMassTolerance(double toleranceLeft, double toleranceRight, bool isPPM)
         {
             ToleranceLeft = toleranceLeft;

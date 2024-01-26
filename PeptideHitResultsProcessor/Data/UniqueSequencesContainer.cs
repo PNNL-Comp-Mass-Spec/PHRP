@@ -56,7 +56,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Clear stored sequences, resetting the initial sequence ID to the given value
         /// </summary>
-        /// <param name="initialSeqID"></param>
+        /// <param name="initialSeqID">Initial sequence ID</param>
         public void Clear(int initialSeqID)
         {
             // Clears mMasterSequences and resets mNextUniqueSeqID to initialSeqID
@@ -67,9 +67,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Look for the given sequence in the master sequence list, returning the sequence ID if found, or adding it if missing
         /// </summary>
-        /// <param name="sequence"></param>
-        /// <param name="modDescription"></param>
-        /// <param name="existingSequenceFound"></param>
+        /// <param name="sequence">Sequence</param>
+        /// <param name="modDescription">Modification description</param>
+        /// <param name="existingSequenceFound">Output: true if an existing sequence was found</param>
         public int GetNextUniqueSequenceID(string sequence, string modDescription, out bool existingSequenceFound)
         {
             int uniqueSeqID;

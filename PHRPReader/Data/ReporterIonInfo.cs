@@ -68,7 +68,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanNumber">Scan number</param>
         public ReporterIonInfo(int scanNumber)
         {
             ScanNumber = scanNumber;

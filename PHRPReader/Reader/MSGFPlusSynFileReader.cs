@@ -181,9 +181,9 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Determines the precursor mass tolerance for either MS-GF+, MSPathFinder, or TopPIC
         /// </summary>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
-        /// <param name="resultType"></param>
+        /// <param name="resultType">PHRP result type</param>
         /// <returns>Precursor tolerance, in Da</returns>
         public static double DeterminePrecursorMassTolerance(
             SearchEngineParameters searchEngineParams,
@@ -272,8 +272,8 @@ namespace PHRPReader.Reader
         /// Otherwise return false
         /// </summary>
         /// <remarks>This method is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
-        /// <param name="searchEngineParams"></param>
-        /// <param name="chargeCarrierMass"></param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
+        /// <param name="chargeCarrierMass">Charge carrier mass</param>
         /// <returns>True if successful, false if an error</returns>
         public static bool GetCustomChargeCarrierMass(SearchEngineParameters searchEngineParams, out double chargeCarrierMass)
         {
@@ -304,8 +304,8 @@ namespace PHRPReader.Reader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
-        /// <param name="includeLegacyNames"></param>
-        /// <param name="includeExtraColumns"></param>
+        /// <param name="includeLegacyNames">When true, include legacy column names</param>
+        /// <param name="includeExtraColumns">When true, include IMS_Scan and IMS_Drift_Time columns</param>
         /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeLegacyNames, bool includeExtraColumns)
         {
@@ -356,7 +356,7 @@ namespace PHRPReader.Reader
         /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
         /// Populates a dictionary mapping enum MSGFPlusSynFileColumns to the 0-based index in columnNames
         /// </summary>
-        /// <param name="headerNames"></param>
+        /// <param name="headerNames">List of header names</param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
@@ -368,7 +368,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the synopsis file column name associated with the given enum
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="column">Column enum</param>
         /// <returns>Column name</returns>
         public static string GetColumnNameByID(MSGFPlusSynFileColumns column)
         {
@@ -388,7 +388,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the MSGFDB column name associated with the given column (for legacy tool MSGFDB, not MS-GF+)
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="column">Column enum</param>
         /// <returns>Column name</returns>
         public static string GetMSGFDBColumnNameByID(MSGFDBSynFileColumns column)
         {
@@ -408,7 +408,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
@@ -418,7 +418,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ModSummary file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(string datasetName)
         {
@@ -428,7 +428,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default PepToProtMap file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
@@ -438,7 +438,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ProteinMods file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(string datasetName)
         {
@@ -448,7 +448,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default Synopsis file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(string datasetName)
         {
@@ -458,7 +458,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ResultToSeq map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
@@ -468,7 +468,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqInfo map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(string datasetName)
         {
@@ -478,7 +478,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqToProtein map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
@@ -496,8 +496,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parses the specified MS-GF+ (previously MSGFDB) parameter file
         /// </summary>
-        /// <param name="searchEngineParamFilePath"></param>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParamFilePath">MS-GF+ parameter file name</param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFilePath, out SearchEngineParameters searchEngineParams)
         {
@@ -804,10 +804,10 @@ namespace PHRPReader.Reader
         /// Look for custom amino acid definitions in the MS-GF+ parameter file
         /// If any are found, update the amino acid mass values in the PeptideMassCalculator instance
         /// </summary>
-        /// <param name="searchEngineParamFilePath"></param>
-        /// <param name="modFileProcessor"></param>
-        /// <param name="peptideMassCalculator"></param>
-        /// <param name="errorMessage"></param>
+        /// <param name="searchEngineParamFilePath">MS-GF+ parameter file path</param>
+        /// <param name="modFileProcessor">Modification parser</param>
+        /// <param name="peptideMassCalculator">Peptide mass calculator</param>
+        /// <param name="errorMessage">Output: error message</param>
         /// <returns>True if successful, false if an error</returns>
         public static bool UpdateMassCalculatorMasses(
             string searchEngineParamFilePath,

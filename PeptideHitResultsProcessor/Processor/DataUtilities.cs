@@ -125,8 +125,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// https://numerics.mathdotnet.com/api/MathNet.Numerics.Statistics/RunningStatistics.htm
         /// </para>
         /// </remarks>
-        /// <param name="values"></param>
-        /// <param name="windowSize"></param>
+        /// <param name="values">Data to smooth</param>
+        /// <param name="windowSize">Window size</param>
         /// <returns>List of smoothed values</returns>
         public static List<double> MovingAverageSmooth(IEnumerable<double> values, int windowSize = 10)
         {

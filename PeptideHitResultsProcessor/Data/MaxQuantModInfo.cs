@@ -57,8 +57,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor that takes a mod name and empirical formula
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="composition"></param>
+        /// <param name="title">Modification name</param>
+        /// <param name="composition">Empirical formula</param>
         public MaxQuantModInfo(string title, string composition)
         {
             Title = title;
@@ -73,8 +73,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor that takes a mod name and mass
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="monoisotopicMass"></param>
+        /// <param name="title">Modification name</param>
+        /// <param name="monoisotopicMass">Monoisotopic mass, in Da</param>
         public MaxQuantModInfo(string title, double monoisotopicMass)
         {
             Title = title;
@@ -89,8 +89,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Parse the empirical formula to compute the modification mass
         /// </summary>
-        /// <param name="title"></param>
-        /// <param name="composition"></param>
+        /// <param name="title">Modification name</param>
+        /// <param name="composition">Empirical formula</param>
         /// <returns>Monoisotopic mass, in Da</returns>
         public static double ComputeMass(string title, string composition)
         {
@@ -161,9 +161,9 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// The Molecular Weight Calculator can properly parse UniMod style formulas, e.g. H(25) C(8) 13C(7) N 15N(2) O(3)
         /// However, MaxQuant uses Cx, Nx, Ox, and Hx for heavy isotopes of elements
-        /// This method replaces those symbols with the format support by the Molecular Weight Calculator
+        /// This method replaces those symbols with the format supported by the Molecular Weight Calculator
         /// </summary>
-        /// <param name="formula"></param>
+        /// <param name="formula">Empirical formula</param>
         private static string ConvertFormulaNotation(string formula)
         {
             return formula.Replace("Cx", "^13.003355C").Replace("Nx", "^15.000109N").Replace("Ox", "^17.999161O").Replace("Hx", "D");

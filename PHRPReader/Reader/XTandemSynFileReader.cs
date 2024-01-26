@@ -147,7 +147,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
         private double DeterminePrecursorMassTolerance(SearchEngineParameters searchEngineParams, out double tolerancePPM)
@@ -234,7 +234,7 @@ namespace PHRPReader.Reader
         /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
         /// Populates a dictionary mapping enum XTandemSynFileColumns to the 0-based index in columnNames
         /// </summary>
-        /// <param name="headerNames"></param>
+        /// <param name="headerNames">List of header names</param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<XTandemSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
@@ -246,7 +246,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the synopsis file column name associated with the given enum
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="column">Column enum</param>
         /// <returns>Column name</returns>
         public static string GetColumnNameByID(XTandemSynFileColumns column)
         {
@@ -266,7 +266,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Empty string, since X!Tandem does not have a first-hits file; just the _xt.txt file</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
@@ -276,7 +276,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ModSummary file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(string datasetName)
         {
@@ -286,7 +286,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default PepToProtMap file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
@@ -296,7 +296,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ProteinMods file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(string datasetName)
         {
@@ -306,7 +306,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default Synopsis file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(string datasetName)
         {
@@ -316,7 +316,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ResultToSeq map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
@@ -326,7 +326,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqInfo map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(string datasetName)
         {
@@ -336,7 +336,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqToProtein map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
@@ -346,7 +346,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Additional search engine parameter file names
         /// </summary>
-        /// <param name="searchEngineParamFilePath"></param>
+        /// <param name="searchEngineParamFilePath">Search engine parameter file path</param>
         public static List<string> GetAdditionalSearchEngineParamFileNames(string searchEngineParamFilePath)
         {
             var fileNames = new List<string>();
@@ -492,8 +492,8 @@ namespace PHRPReader.Reader
         /// Parses the specified X!Tandem parameter file
         /// Note that the file specified by parameter "list path, default parameters" will also be auto-parsed (if found in directory mInputDirectoryPath)
         /// </summary>
-        /// <param name="searchEngineParamFileName"></param>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParamFileName">X!Tandem parameter file name</param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams)
         {
@@ -505,10 +505,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parse an X!Tandem parameter file
         /// </summary>
-        /// <param name="paramFileName"></param>
-        /// <param name="searchEngineParams"></param>
-        /// <param name="lookForDefaultParamsFileName"></param>
-        /// <param name="determineFastaFileNameUsingTaxonomyFile"></param>
+        /// <param name="paramFileName">X!Tandem parameter file name</param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
+        /// <param name="lookForDefaultParamsFileName">When true, look for the default X!Tandem parameter file</param>
+        /// <param name="determineFastaFileNameUsingTaxonomyFile">When true, determine the FASTA file name using the taxonomy file</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ParseXTandemParamFile(
             string paramFileName,

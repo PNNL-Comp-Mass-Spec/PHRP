@@ -260,9 +260,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add dynamic modifications to a peptide read from the MaxQuant synopsis file
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
+        /// <param name="modList">List of modifications</param>
         private void AddDynamicModificationsToResidues(
             MaxQuantResults searchResult,
             bool updateModOccurrenceCounts,
@@ -348,9 +348,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add modifications to a peptide read from the MaxQuant synopsis file
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         private void AddModificationsToResidues(
             MaxQuantResults searchResult,
@@ -381,9 +381,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Add modifications to a peptide read from the MaxQuant synopsis file
         /// Next, compute the monoisotopic mass
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         /// <returns>True if success, false if an error</returns>
         private bool AddModificationsAndComputeMass(
@@ -417,11 +417,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
-        /// <param name="searchResults"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="endIndex"></param>
+        /// <param name="searchResults">Search results</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
         private void AssignRankByScore(
             IList<MaxQuantSearchResult> searchResults,
             int startIndex,
@@ -477,7 +477,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
         /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <returns>(M+H)+, as a string</returns>
         private string ComputeMH(ToolResultsBaseClass searchResult)
         {
@@ -489,7 +489,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="filteredSearchResults">Search results</param>
         /// <param name="precursorsByDataset">Keys are dataset names, values are dictionaries of precursor m/z by scan number</param>
-        /// <param name="modList"></param>
+        /// <param name="modList">List of modifications</param>
         private void ComputeObservedMassErrors(
             IEnumerable<MaxQuantSearchResult> filteredSearchResults,
             IReadOnlyDictionary<string, Dictionary<int, double>> precursorsByDataset,
@@ -627,8 +627,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="staticModPresent">The calling method should set this to true if modList has static mods</param>
         private double ComputeTotalModMass(
             MaxQuantSearchResult searchResult,
@@ -656,8 +656,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse out dynamic modifications from ModifiedSequence (read from msms.txt)
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>Comma separated list of dynamic modification names and affected residues</returns>
         private string ConstructDynamicModificationList(
             MaxQuantSearchResult searchResult,
@@ -887,10 +887,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// This routine creates a synopsis file from the output from MaxQuant (file msms.txt)
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
-        /// <param name="maxQuantPeptides"></param>
+        /// <param name="maxQuantPeptides">Dictionary where keys are peptide sequence, values are the metadata for the peptide</param>
         /// <param name="inputFilePath">MaxQuant results file (msms.txt)</param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="modList"></param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
         /// <param name="filterPassingResultCount">Output: number of filter passing results</param>
@@ -932,10 +932,10 @@ namespace PeptideHitResultsProcessor.Processor
                 var headerParsed = false;
                 var lineNumber = 0;
 
-                // Initialize the list that will hold all of the records in the MaxQuant result file
+                // Initialize the list that will hold all the records in the MaxQuant result file
                 var searchResultsUnfiltered = new List<MaxQuantSearchResult>();
 
-                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                // Initialize the list that will hold all the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<MaxQuantSearchResult>();
 
                 // Parse the input file
@@ -992,7 +992,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
-                    // Find all of the matches for the current result's scan
+                    // Find all the matches for the current result's scan
                     // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
                     // MaxQuant will typically report just one match
 
@@ -1073,9 +1073,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Examine the dataset names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
-        /// <param name="inputFileName"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="longestCommonBaseName"></param>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="longestCommonBaseName">Longest common base name</param>
         /// <returns>Dictionary where keys are dataset names and values are abbreviated names</returns>
         private Dictionary<string, string> GetDatasetNameMap(
             string inputFileName,
@@ -1101,8 +1101,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Sum up the mass values for dynamic mods defined for this peptide
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>Total dynamic mod mass, in Da</returns>
         private double GetDynamicModMass(MaxQuantSearchResult searchResult, IList<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
@@ -1470,7 +1470,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Look for the MaxQuant modifications.xml file, both in the input directory and in other predefined paths
         /// </summary>
-        /// <param name="inputDirectory"></param>
+        /// <param name="inputDirectory">Input directory</param>
         /// <returns>True if no error (including file not found; which is a warning); false if an exception</returns>
         private bool LoadMaxQuantModificationDefinitions(DirectoryInfo inputDirectory)
         {
@@ -1682,8 +1682,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// The parameters.txt file does not list dynamic mods
         /// It also does not list isobaric mods (like TMT or iTRAQ)
         /// </remarks>
-        /// <param name="sourceFile"></param>
-        /// <param name="modList"></param>
+        /// <param name="sourceFile">parameters.txt file</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if success, false if an error</returns>
         private bool LoadMaxQuantTxtParameterFile(FileInfo sourceFile, out List<MSGFPlusParamFileModExtractor.ModInfo> modList)
         {
@@ -1895,8 +1895,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:peptidetable
         /// </remarks>
-        /// <param name="inputDirectory"></param>
-        /// <param name="maxQuantPeptides">Keys are peptide sequence, values are the metadata for the peptide</param>
+        /// <param name="inputDirectory">Input directory</param>
+        /// <param name="maxQuantPeptides">Output: dictionary where keys are peptide sequence, values are the metadata for the peptide</param>
         private void LoadPeptideInfo(FileSystemInfo inputDirectory, out Dictionary<string, MaxQuantPeptideInfo> maxQuantPeptides)
         {
             maxQuantPeptides = new Dictionary<string, MaxQuantPeptideInfo>();
@@ -2003,7 +2003,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="maxQuantParamFilePath">
         /// This is typically the XML-based MaxQuant parameter file, but it can alternatively be
         /// the parameters.txt file created in the txt output directory</param>
-        /// <param name="modList"></param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True on success, false if an error</returns>
         private bool LoadSearchEngineParamFile(
             string maxQuantParamFilePath,
@@ -2060,10 +2060,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <param name="modList"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantSynopsisFile(
             string inputFilePath,
@@ -2211,12 +2211,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// This method is called while reading the msms.txt file
         /// For column details, see http://www.coxdocs.org/doku.php?id=maxquant:table:msmstable
         /// </remarks>
-        /// <param name="maxQuantPeptides"></param>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="modList"></param>
+        /// <param name="maxQuantPeptides">Dictionary where keys are peptide sequence, values are the metadata for the peptide</param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantResultsFileEntry(
@@ -2442,8 +2442,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line in the MaxQuant peptides.txt file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <param name="intensityByExperimentColumns">Keys are column index, values are experiment name</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantPeptidesFileHeaderLine(
@@ -2530,8 +2530,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the MaxQuant results file header line (file msms.txt), populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMaxQuantResultsFileHeaderLine(string lineIn, IDictionary<MaxQuantResultsFileColumns, int> columnMapping)
         {
@@ -2616,8 +2616,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MaxQuant _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantSynFileHeaderLine(string lineIn, IDictionary<MaxQuantSynFileColumns, int> columnMapping)
         {
@@ -2656,11 +2656,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from a MaxQuant Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMaxQuantSynFileEntry(
             string lineIn,
@@ -3049,9 +3049,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Sort filteredSearchResults and write to disk
         /// </summary>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
-        /// <param name="writer"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="errorMessages">Error messages</param>
         private void SortAndWriteFilteredSearchResults(
             Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
@@ -3171,8 +3171,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -3199,12 +3199,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="baseDatasetName"></param>
-        /// <param name="datasetID"></param>
-        /// <param name="writer"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="baseDatasetName">Base dataset name</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             string baseDatasetName,

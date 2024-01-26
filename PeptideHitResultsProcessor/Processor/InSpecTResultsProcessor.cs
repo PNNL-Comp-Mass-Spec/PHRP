@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public InSpecTResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 13, 2022";
@@ -320,10 +320,10 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc sortScanChargeTotalPRMDesc = new();
 
         /// <summary>
-        /// Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
+        /// Sorts the data by descending TotalPRMScore, then ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
         /// </summary>
-        /// <param name="searchResultsCurrentScan"></param>
-        /// <param name="currentScanResultsCount"></param>
+        /// <param name="searchResultsCurrentScan">Search results for the current scan</param>
+        /// <param name="currentScanResultsCount">Number of items in searchResultsCurrentScan</param>
         private void AssignRankAndDeltaNormValues(ref InspectSearchResult[] searchResultsCurrentScan, int currentScanResultsCount)
         {
             const float DeltaNormMQScore_If_Undefined = 0;
@@ -335,7 +335,7 @@ namespace PeptideHitResultsProcessor.Processor
             var currentRank = 0;
 
             // Sort searchResultsCurrentScan by ascending scan, ascending charge, and descending RankFScore
-            // All of the data in searchResultsCurrentScan should have the same scan number
+            // All the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeFScore);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
@@ -359,7 +359,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Sort searchResultsCurrentScan by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
-            // All of the data in searchResultsCurrentScan should have the same scan number
+            // All the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeMQScore);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
@@ -375,7 +375,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Sort searchResultsCurrentScan by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
-            // All of the data in searchResultsCurrentScan should have the same scan number
+            // All the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeTotalPRMDesc);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
@@ -448,8 +448,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This routine creates a first hits file or synopsis file from the output from InSpecT
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputFilePath">Output file path</param>
         /// <param name="inspectModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
         /// <param name="filteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns>True if successful, false if an error</returns>
@@ -497,11 +497,11 @@ namespace PeptideHitResultsProcessor.Processor
                     errorMessages.Clear();
                     var resultsProcessed = 0;
 
-                    // Initialize array that will hold all of the records for a given scan
+                    // Initialize array that will hold all the records for a given scan
                     var currentScanResultsCount = 0;
                     var searchResultsCurrentScan = new InspectSearchResult[10];
 
-                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                    // Initialize the list that will hold all the records that will ultimately be written out to disk
                     var filteredSearchResults = new List<InspectSearchResult>();
 
                     // Parse the input file
@@ -623,9 +623,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
         /// </summary>
-        /// <param name="precursorMZText"></param>
-        /// <param name="precursorErrorText"></param>
-        /// <param name="chargeText"></param>
+        /// <param name="precursorMZText">Precursor m/z</param>
+        /// <param name="precursorErrorText">Precursor error</param>
+        /// <param name="chargeText">Charge</param>
         private double ComputePeptideMHFromPrecursorInfo(string precursorMZText, string precursorErrorText, string chargeText)
         {
             double peptideMH = 0;
@@ -681,8 +681,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read mod info from the InSpecT parameter file
         /// </summary>
-        /// <param name="inspectParameterFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="inspectParameterFilePath">InSpecT parameter file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, out List<ModInfo> modList)
         {
@@ -845,11 +845,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// Load the PeptideToProteinMap information
         /// In addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
-        /// <param name="pepToProteinMapFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="inspectModInfo"></param>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <param name="pepToProteinMapFilePath">Peptide to protein map file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="inspectModInfo">Modification info</param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="mtsPepToProteinMapFilePath">MTS peptide to protein map file path</param>
         /// <returns>True if successful, false if an error</returns>
         private void LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
@@ -927,8 +927,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of an Inspect _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectSynFileHeaderLine(string lineIn, IDictionary<InspectSynFileColumns, int> columnMapping)
         {
@@ -967,12 +967,16 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse and InSpecT synopsis file
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseInspectSynopsisFile(
+            string inputFilePath,
+            string outputDirectoryPath,
+            ref List<PepToProteinMapping> pepToProteinMapping,
+            bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that InSpecT synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -1187,11 +1191,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of an InSpecT results file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="inspectModInfo"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="inspectModInfo">Modification info</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectResultsFileEntry(
             string lineIn,
@@ -1333,11 +1337,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of an InSpecT _syn.txt file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="peptideSequenceWithMods"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="peptideSequenceWithMods">Peptide sequence, with modification symbols</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectSynFileEntry(
             string lineIn,
@@ -1659,7 +1663,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// If value ends in .0000, remove the .0000 portion
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">Value to parse</param>
         private string RemoveExtraneousDigits(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -1698,8 +1702,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// This method assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined
         /// </remarks>
-        /// <param name="peptide"></param>
-        /// <param name="inspectModInfo"></param>
+        /// <param name="peptide">Peptide sequence</param>
+        /// <param name="inspectModInfo">Modification info</param>
         private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<ModInfo> inspectModInfo)
         {
             var prefix = string.Empty;
@@ -1934,7 +1938,7 @@ namespace PeptideHitResultsProcessor.Processor
             AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
             // Sort searchResultsCurrentScan by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on sortComparer)
-            // All of the data in searchResultsCurrentScan should have the same scan number
+            // All the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 
             // Now store or write out the first match for each charge for this scan
@@ -1960,7 +1964,7 @@ namespace PeptideHitResultsProcessor.Processor
             AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
             // Sort searchResultsCurrentScan by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
-            // All of the data in searchResultsCurrentScan should have the same scan number
+            // All the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 
             // Now store or write out the matches that pass the filters
@@ -1978,8 +1982,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -2006,10 +2010,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

@@ -495,7 +495,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Copy options from sourceOptions to the current instance of PHRPOptions
         /// </summary>
-        /// <param name="sourceOptions"></param>
+        /// <param name="sourceOptions">Source options</param>
         public void UpdateAll(PHRPOptions sourceOptions)
         {
             InputFilePath = sourceOptions.InputFilePath;

@@ -15,7 +15,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         protected MultiDatasetResultsProcessor(PHRPOptions options) : base(options)
         {
         }
@@ -75,8 +75,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>If datasetNameToBaseNameMap is empty, or if longestCommonBaseName and Options.OutputFileBaseName are empty, uses a generic base name</remarks>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
-        /// <param name="toolNameAbbreviation"></param>
-        /// <param name="longestCommonBaseName"></param>
+        /// <param name="toolNameAbbreviation">Tool name abbreviation</param>
+        /// <param name="longestCommonBaseName">Longest common base name</param>
         /// <returns>Base name</returns>
         protected string GetBaseNameForOutputFiles(
             Dictionary<string, string> datasetNameToBaseNameMap,
@@ -106,9 +106,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Create a mapping from full name to abbreviated name
         /// </summary>
         /// <param name="inputFileName">Input file name, which is used if datasetNames is empty</param>
-        /// <param name="datasetNames"></param>
-        /// <param name="longestCommonBaseName"></param>
-        /// <param name="filenameSuffixToRemove"></param>
+        /// <param name="datasetNames">Dataset names</param>
+        /// <param name="longestCommonBaseName">Longest common base name</param>
+        /// <param name="filenameSuffixToRemove">Filename suffix to remove</param>
         /// <returns>Dictionary where keys are dataset names and values are abbreviated names</returns>
         protected Dictionary<string, string> GetDatasetNameMap(
             string inputFileName,
@@ -147,7 +147,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Examine the names in datasetNames
         /// Create a mapping from full name to abbreviated name
         /// </summary>
-        /// <param name="datasetNames"></param>
+        /// <param name="datasetNames">Dataset names</param>
         /// <param name="longestCommonBaseName">Output: longest common base name</param>
         /// <param name="warnings">Output: warning messages</param>
         /// <returns>Dictionary where keys are dataset names and values are abbreviated names</returns>
@@ -276,8 +276,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Lookup the base name and dataset ID for the given dataset name
         /// </summary>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
-        /// <param name="datasetIDs"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetIDs">Dataset IDs</param>
+        /// <param name="datasetName">Dataset name to find</param>
         /// <param name="baseDatasetName">Output: base dataset name, or empty string if not found</param>
         /// <param name="datasetID">Output: dataset ID, or 0 if not found</param>
         protected void GetBaseNameAndDatasetID(

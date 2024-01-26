@@ -64,7 +64,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="maxQuantModName"></param>
+        /// <param name="maxQuantModName">MaxQuant mod name</param>
         public MaxQuantModifiedSequenceModInfo(string maxQuantModName)
         {
             MaxQuantModName = maxQuantModName;

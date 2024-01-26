@@ -48,9 +48,9 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="scanNumber"></param>
-        /// <param name="scanTimeMinutes"></param>
-        /// <param name="scanType"></param>
+        /// <param name="scanNumber">Scan number</param>
+        /// <param name="scanTimeMinutes">Scan time, in minutes</param>
+        /// <param name="scanType">Scan type (aka scan level)</param>
         public PrecursorInfo(int scanNumber, float scanTimeMinutes, int scanType)
         {
             ScanNumber = scanNumber;

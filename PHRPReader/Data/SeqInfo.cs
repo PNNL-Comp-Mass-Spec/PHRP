@@ -62,7 +62,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Update the monoisotopic mass for this sequence
         /// </summary>
-        /// <param name="monoMass"></param>
+        /// <param name="monoMass">Monoisotopic mass</param>
         // ReSharper disable once UnusedMember.Global
         public void UpdateMonoisotopicMass(double monoMass)
         {

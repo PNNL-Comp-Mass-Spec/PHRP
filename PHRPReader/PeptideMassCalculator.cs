@@ -174,7 +174,7 @@ namespace PHRPReader
         /// Compute the monoisotopic mass of the given empirical formula
         /// </summary>
         /// <remarks>Throws an exception if an unknown symbol is encountered</remarks>
-        /// <param name="empiricalFormula"></param>
+        /// <param name="empiricalFormula">Empirical formula</param>
         public static double ComputeMonoisotopicMass(EmpiricalFormula empiricalFormula)
         {
             double monoisotopicMass = 0;
@@ -197,8 +197,8 @@ namespace PHRPReader
         /// <summary>
         /// Compute the monoisotopic mass of the compound represented by elementalComposition
         /// </summary>
-        /// <param name="elementalComposition"></param>
-        /// <param name="unknownSymbols"></param>
+        /// <param name="elementalComposition">Elemental composition</param>
+        /// <param name="unknownSymbols">Output: list of unknown symbols</param>
         public static double ComputeMonoisotopicMass(Dictionary<string, int> elementalComposition, out List<string> unknownSymbols)
         {
             double monoisotopicMass = 0;
@@ -352,7 +352,7 @@ namespace PHRPReader
         ///  K.Q-17.0265QIEESTSDYDKEK.L
         /// </summary>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-        /// <param name="sequence"></param>
+        /// <param name="sequence">Peptide sequence</param>
         public double ComputeSequenceMassNumericMods(string sequence)
         {
             string primarySequence;
@@ -420,9 +420,9 @@ namespace PHRPReader
         /// Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
         /// </summary>
         /// <remarks>Uses the charge carrier mass defined by ChargeCarrierMass</remarks>
-        /// <param name="massMZ"></param>
-        /// <param name="currentCharge"></param>
-        /// <param name="desiredCharge"></param>
+        /// <param name="massMZ">m/z</param>
+        /// <param name="currentCharge">Current charge; if 0, assumes massMZ is the neutral, monoisotopic mass</param>
+        /// <param name="desiredCharge">Desired charge</param>
         public double ConvoluteMass(double massMZ, int currentCharge, int desiredCharge = 1)
         {
             return ConvoluteMass(massMZ, currentCharge, desiredCharge, ChargeCarrierMass);
@@ -537,7 +537,7 @@ namespace PHRPReader
         /// <summary>
         /// Returns the mass of the specified amino acid
         /// </summary>
-        /// <param name="chAminoAcidSymbol"></param>
+        /// <param name="chAminoAcidSymbol">Amino acid symbol</param>
         public double GetAminoAcidMass(char chAminoAcidSymbol)
         {
             // Returns the mass if success, 0 if an error
@@ -561,7 +561,7 @@ namespace PHRPReader
         /// <summary>
         /// Returns a List with the number of atoms of C, H, N, O, and S in the specified amino acid
         /// </summary>
-        /// <param name="chAminoAcidSymbol"></param>
+        /// <param name="chAminoAcidSymbol">Amino acid symbol</param>
         public EmpiricalFormula GetAminoAcidEmpiricalFormula(char chAminoAcidSymbol)
         {
             // Returns the atom counts if success, 0 if an error
@@ -585,11 +585,11 @@ namespace PHRPReader
         /// <summary>
         /// Create a new EmpiricalFormula instance with the specified number of atoms
         /// </summary>
-        /// <param name="countC"></param>
-        /// <param name="countH"></param>
-        /// <param name="countN"></param>
-        /// <param name="countO"></param>
-        /// <param name="countS"></param>
+        /// <param name="countC">Number of carbon atoms</param>
+        /// <param name="countH">Number of hydrogen atoms</param>
+        /// <param name="countN">Number of nitrogen atoms</param>
+        /// <param name="countO">Number of oxygen atoms</param>
+        /// <param name="countS">Number of sulfur atoms</param>
         private EmpiricalFormula GetAminoAcidEmpiricalFormula(int countC, int countH, int countN, int countO, int countS)
         {
             var empiricalFormula = new EmpiricalFormula();
@@ -610,7 +610,7 @@ namespace PHRPReader
         ///  C3H3NOS4
         ///  CH23NO-5S+4
         /// </summary>
-        /// <param name="elementMonoMasses"></param>
+        /// <param name="elementMonoMasses">Dictionary with element symbols and monoisotopic masses</param>
         /// <returns>RegEx with named capture groups ElementSymbol and ElementCount</returns>
         private static Regex GetAtomicFormulaRegEx(Dictionary<string, double> elementMonoMasses)
         {
@@ -811,7 +811,7 @@ namespace PHRPReader
         ///  C3H3NOS4
         ///  CH23NO-5S+4
         /// </summary>
-        /// <param name="empiricalFormula"></param>
+        /// <param name="empiricalFormula">Empirical formula</param>
         /// <returns>EmpiricalFormula instance tracking the element symbols and counts</returns>
         public static EmpiricalFormula GetEmpiricalFormulaComponents(string empiricalFormula)
         {
@@ -862,8 +862,8 @@ namespace PHRPReader
         /// <summary>
         /// Converts massToConvert to ppm, based on the value of currentMZ
         /// </summary>
-        /// <param name="massToConvert"></param>
-        /// <param name="currentMZ"></param>
+        /// <param name="massToConvert">Mass to convert</param>
+        /// <param name="currentMZ">Current m/z</param>
         public static double MassToPPM(double massToConvert, double currentMZ)
         {
             return massToConvert * 1000000.0 / currentMZ;
@@ -873,7 +873,7 @@ namespace PHRPReader
         /// Converts and MH mass to the uncharged (neutral) mass
         /// </summary>
         /// <remarks>Equivalent to ConvoluteMass(mH, 1, 0)</remarks>
-        /// <param name="mH"></param>
+        /// <param name="mH">Mass value of MH</param>
         public double MHToMonoisotopicMass(double mH)
         {
             return ConvoluteMass(mH, 1, 0);
@@ -883,8 +883,8 @@ namespace PHRPReader
         /// Converts an uncharged (neutral) mass to the m/z value for the specified charge
         /// </summary>
         /// <remarks>Equivalent to ConvoluteMass(monoisotopicMass, 0, desiredCharge)</remarks>
-        /// <param name="monoisotopicMass"></param>
-        /// <param name="desiredCharge"></param>
+        /// <param name="monoisotopicMass">Monoisotopic mass</param>
+        /// <param name="desiredCharge">Desired charge</param>
         public double MonoisotopicMassToMZ(double monoisotopicMass, int desiredCharge)
         {
             return ConvoluteMass(monoisotopicMass, 0, desiredCharge);
@@ -893,15 +893,15 @@ namespace PHRPReader
         /// <summary>
         /// Converts from a ppm value to a mass value, using the specified mass value as a reference point
         /// </summary>
-        /// <param name="ppmToConvert"></param>
-        /// <param name="currentMass"></param>
+        /// <param name="ppmToConvert">PPM value to convert</param>
+        /// <param name="currentMass">Current mass</param>
         public static double PPMToMass(double ppmToConvert, double currentMass)
         {
             return ppmToConvert / 1000000.0 * currentMass;
         }
 
         /// <summary>
-        /// Reset all of the amino acid masses and atom counts to default values
+        /// Reset all the amino acid masses and atom counts to default values
         /// </summary>
         public void ResetAminoAcidMasses()
         {
@@ -980,8 +980,8 @@ namespace PHRPReader
         /// <summary>
         /// Defines a custom mass for an amino acid
         /// </summary>
-        /// <param name="chAminoAcidSymbol"></param>
-        /// <param name="mass"></param>
+        /// <param name="chAminoAcidSymbol">Amino acid symbol</param>
+        /// <param name="mass">Amino acid mass</param>
         /// <returns>True if successful, False if an invalid amino acid symbol</returns>
         public bool SetAminoAcidMass(char chAminoAcidSymbol, double mass)
         {
@@ -1005,7 +1005,7 @@ namespace PHRPReader
         /// <summary>
         /// Updates an entry in parallel arrays AminoAcidMasses and AminoAcidSymbols
         /// </summary>
-        /// <param name="aminoAcidIndex"></param>
+        /// <param name="aminoAcidIndex">Index to update</param>
         private void UpdateAminoAcidStatEntry(byte aminoAcidIndex)
         {
             // Use Convert.ToChar to convert from ASCII code to the letter

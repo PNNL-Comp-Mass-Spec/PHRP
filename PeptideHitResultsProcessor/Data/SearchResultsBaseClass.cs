@@ -268,8 +268,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="peptideMods"></param>
-        /// <param name="peptideSeqMassCalculator"></param>
+        /// <param name="peptideMods">Peptide modifications</param>
+        /// <param name="peptideSeqMassCalculator">Peptide sequence mass calculator</param>
         protected SearchResultsBaseClass(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
         {
             mSearchResultModifications = new List<AminoAcidModInfo>();
@@ -567,10 +567,10 @@ namespace PeptideHitResultsProcessor.Data
         /// Get the modification info, by index
         /// </summary>
         /// <param name="index">Modification entry index (0-based)</param>
-        /// <param name="residue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="modificationMass"></param>
-        /// <param name="affectedAtom"></param>
+        /// <param name="residue">Residue</param>
+        /// <param name="residueLocInPeptide">residue location in the peptide</param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="affectedAtom">Affected atom</param>
         /// <returns>True if index is valid; otherwise, returns false</returns>
         // ReSharper disable once UnusedMember.Global
         public bool GetSearchResultModDetailsByIndex(
@@ -621,11 +621,11 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Associates the given modification symbol with the given residue
         /// </summary>
-        /// <param name="modificationSymbol"></param>
-        /// <param name="targetResidue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modificationSymbol">Modification symbol</param>
+        /// <param name="targetResidue">Target residue</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if successful, false if the modification symbol is unknown</returns>
         public bool SearchResultAddDynamicModification(
             char modificationSymbol,
@@ -669,11 +669,11 @@ namespace PeptideHitResultsProcessor.Data
         /// Associates the given modification mass with the given residue
         /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidue">Target residue</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if mod successfully added</returns>
         public bool SearchResultAddModification(
             double modificationMass,
@@ -693,11 +693,11 @@ namespace PeptideHitResultsProcessor.Data
         /// Associates the given modification mass with the given residue
         /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidue">Target residue</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <param name="modMassDigitsOfPrecision">Number of digits after the decimal point to round to when comparing modificationMass to the masses of known mods</param>
         /// <param name="modMassDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using modMassDigitsOfPrecision)</param>
         /// <returns>True if mod successfully added</returns>
@@ -739,11 +739,11 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Associates the given modification with the given residue
         /// </summary>
-        /// <param name="modificationDefinition"></param>
-        /// <param name="targetResidue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="modificationDefinition">Modification definition</param>
+        /// <param name="targetResidue">Target residue</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if successful, false if an error</returns>
         public bool SearchResultAddModification(
             ModificationDefinition modificationDefinition,
@@ -777,7 +777,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Adds any defined isotopic modifications to the peptide
         /// </summary>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if successful, false if an error</returns>
         public bool SearchResultAddIsotopicModifications(bool updateModOccurrenceCounts)
         {
@@ -806,7 +806,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Protein terminus static mods are only considered if the peptide is at the appropriate terminus for the modification
         /// </remarks>
         /// <param name="allowDuplicateModOnTerminus">When false, only add the modification if the terminal residue does not already have the given modification associated with it</param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         public void SearchResultAddStaticTerminusMods(bool allowDuplicateModOnTerminus, bool updateModOccurrenceCounts)
         {
             var residueLocInPeptide = 0;
@@ -932,7 +932,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Updates the N-Terminal mass applied to peptides when computing their mass
         /// if significantly different than the currently defined N-terminal peptide mass
         /// </summary>
-        /// <param name="nTerminalMassChange"></param>
+        /// <param name="nTerminalMassChange">N-terminal mass change</param>
         public void UpdatePeptideNTerminusMass(double nTerminalMassChange)
         {
             if (Math.Round(Math.Abs(nTerminalMassChange - mPeptideSeqMassCalculator.PeptideNTerminusMass), PeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0)
@@ -945,7 +945,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Updates the C-Terminal mass applied to peptides when computing their mass
         /// if significantly different than the currently defined C-terminal peptide mass
         /// </summary>
-        /// <param name="cTerminalMassChange"></param>
+        /// <param name="cTerminalMassChange">C-terminal mass change</param>
         public void UpdatePeptideCTerminusMass(double cTerminalMassChange)
         {
             if (Math.Round(Math.Abs(cTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), PeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0)
@@ -957,7 +957,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Update the enzyme and terminus info for the search result tracked by this class
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public void UpdateSearchResultEnzymeAndTerminusInfo(PHRPOptions options)
         {
             SetEnzymeMatchSpec(options.EnzymeMatchSpec);
@@ -1051,7 +1051,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Define custom RegEx specs used to find enzyme cleavage sites
         /// </summary>
         /// <remarks>Define standard RegEx values using SetStandardEnzymeMatchSpec</remarks>
-        /// <param name="udtEnzymeMatchSpec"></param>
+        /// <param name="udtEnzymeMatchSpec">Enzyme match spec</param>
         public void SetEnzymeMatchSpec(PeptideCleavageStateCalculator.EnzymeMatchSpecInfo udtEnzymeMatchSpec)
         {
             mPeptideCleavageStateCalculator.SetEnzymeMatchSpec(udtEnzymeMatchSpec.LeftResidueRegEx, udtEnzymeMatchSpec.RightResidueRegEx);
@@ -1060,8 +1060,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Stores sequenceWithMods in PeptideSequenceWithMods
         /// </summary>
-        /// <param name="sequenceWithMods"></param>
-        /// <param name="checkForPrefixAndSuffixResidues"></param>
+        /// <param name="sequenceWithMods">Peptide sequence, with modification symbols</param>
+        /// <param name="checkForPrefixAndSuffixResidues">When true, check for prefix and suffix residues</param>
         /// <param name="autoPopulateCleanSequence">When true, populates PeptideCleanSequence, which automatically calls ComputePeptideCleavageStateInProtein</param>
         public void SetPeptideSequenceWithMods(string sequenceWithMods, bool checkForPrefixAndSuffixResidues, bool autoPopulateCleanSequence)
         {
@@ -1101,7 +1101,7 @@ namespace PeptideHitResultsProcessor.Data
         /// Define standard RegEx values for finding enzyme cleavage sites
         /// </summary>
         /// <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>
-        /// <param name="standardCleavageAgent"></param>
+        /// <param name="standardCleavageAgent">Standard cleavage agent</param>
         // ReSharper disable once UnusedMember.Global
         public void SetStandardEnzymeMatchSpec(PeptideCleavageStateCalculator.StandardCleavageAgent standardCleavageAgent)
         {
@@ -1167,8 +1167,8 @@ namespace PeptideHitResultsProcessor.Data
             /// <summary>
             /// Comparer
             /// </summary>
-            /// <param name="x"></param>
-            /// <param name="y"></param>
+            /// <param name="x">X</param>
+            /// <param name="y">Y</param>
             public int Compare(AminoAcidModInfo x, AminoAcidModInfo y)
             {
                 if (x == null)

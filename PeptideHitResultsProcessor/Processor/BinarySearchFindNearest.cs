@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add data using a dictionary where keys are integers and values are doubles
         /// </summary>
-        /// <param name="values"></param>
+        /// <param name="values">Data to add</param>
         public void AddData(IDictionary<int, double> values)
         {
             var xyValues = values.Select(item => new KeyValuePair<double, double>(item.Key, item.Value));
@@ -36,8 +36,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add data using parallel lists of doubles
         /// </summary>
-        /// <param name="xValues"></param>
-        /// <param name="yValues"></param>
+        /// <param name="xValues">X values</param>
+        /// <param name="yValues">Y values</param>
         // ReSharper disable once UnusedMember.Global
         public void AddData(List<double> xValues, List<double> yValues)
         {
@@ -155,11 +155,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Given two X,Y coordinates interpolate or extrapolate to determine the Y value that would be seen for a given X value
         /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="x2"></param>
-        /// <param name="y1"></param>
-        /// <param name="y2"></param>
-        /// <param name="xValueToInterpolate"></param>
+        /// <param name="x1">X1</param>
+        /// <param name="x2">X2</param>
+        /// <param name="y1">Y1</param>
+        /// <param name="y2">Y2</param>
+        /// <param name="xValueToInterpolate">X value to interpolate</param>
         private static double InterpolateY(double x1, double x2, double y1, double y2, double xValueToInterpolate)
         {
             var xDifference = x2 - x1;

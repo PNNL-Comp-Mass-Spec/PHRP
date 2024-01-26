@@ -61,7 +61,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="modSummaryFilePath"></param>
+        /// <param name="modSummaryFilePath">Modification summary file path</param>
         public PHRPModSummaryReader(string modSummaryFilePath)
         {
             ModificationDefs = new List<ModificationDefinition>();
@@ -85,7 +85,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Returns the mass value associated with the given mass correction tag
         /// </summary>
-        /// <param name="massCorrectionTag"></param>
+        /// <param name="massCorrectionTag">Mass correction tag</param>
         public string GetModificationMassAsText(string massCorrectionTag)
         {
             if (mModDefMassesAsText.TryGetValue(massCorrectionTag, out var modMass))

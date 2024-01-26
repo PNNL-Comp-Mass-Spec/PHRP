@@ -71,7 +71,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Initialize mSeqToProteinMap
             mSeqToProteinMap = new SortedSet<string>();
 
-            // Define a RegEx to replace all of the non-letter characters
+            // Define a RegEx to replace all the non-letter characters
             mReplaceSymbols = new Regex("[^A-Za-z]", RegexOptions.Compiled);
 
             mProteinNameOrder = new Dictionary<string, int>();
@@ -463,9 +463,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Construct the peptide hit results file path for the given results file format
         /// </summary>
-        /// <param name="peptideHitResultFileFormat"></param>
-        /// <param name="sourceDirectoryPath"></param>
-        /// <param name="baseName"></param>
+        /// <param name="peptideHitResultFileFormat">PHRP result file format</param>
+        /// <param name="sourceDirectoryPath">Source directory</param>
+        /// <param name="baseName">Base name</param>
         // ReSharper disable once UnusedMember.Global
         public static string AutoDefinePeptideHitResultsFilePath(
             ResultsFileFormat peptideHitResultFileFormat,
@@ -498,7 +498,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in directory sourceDirectoryPath
         /// </remarks>
-        /// <param name="sourceDirectoryPath"></param>
+        /// <param name="sourceDirectoryPath">Source directory path</param>
         /// <returns>The first matching file found, or an empty string</returns>
         public static string AutoDefinePeptideHitResultsFilePath(string sourceDirectoryPath)
         {
@@ -632,9 +632,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Validate the input file and output directory paths
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="alternateBasePath"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="alternateBasePath">Alternate base path</param>
         /// <returns>True if successful, False if failure</returns>
         protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath, string alternateBasePath)
         {
@@ -711,7 +711,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="alternateBasePath">Optional alternate base path</param>
         /// <param name="inputFile">Output: input file (if found)</param>
         /// <param name="lookInAppDirectoryIfNotFound">When true, if the file is not found, look for the file in the directory with the entry or executing assembly</param>
-        /// <param name="showDebugMessage"></param>
+        /// <param name="showDebugMessage">When true, show debug messages</param>
         /// <returns>True if the file is found, otherwise false</returns>
         public static bool FindInputFile(
             string filePath,
@@ -778,7 +778,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// For TSV files, read the first line and examine column names to determine the file format
         /// </remarks>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path</param>
         public static ResultsFileFormat DetermineResultsFileFormat(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -986,7 +986,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// searchResult.PeptideLocInProteinStart = 2 and PeptideLocInProteinEnd updated accordingly
         /// </para>
         /// </remarks>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         protected void ComputePseudoPeptideLocInProtein(SearchResultsBaseClass searchResult)
         {
             // Set these to 1 and 10000 since MSGFDB, SEQUEST, InSpecT, and other tool result files do not contain protein sequence information
@@ -1044,8 +1044,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the mass of the residues in the sequence, then add the modification mass (if non-zero) and return the result
         /// </summary>
-        /// <param name="cleanSequence"></param>
-        /// <param name="totalModMass"></param>
+        /// <param name="cleanSequence">Clean peptide sequence (one letter based amino acid symbols)</param>
+        /// <param name="totalModMass">Total mod mass</param>
         /// <returns>Mass, in Daltons</returns>
         protected double ComputePeptideMassForCleanSequence(string cleanSequence, double totalModMass)
         {
@@ -1063,7 +1063,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Compute FDR values, then assign QValues
         /// </summary>
         /// <remarks>Assumes the data is sorted by highest confidence to lowest confidence</remarks>
-        /// <param name="searchResults"></param>
+        /// <param name="searchResults">Search results</param>
         protected void ComputeQValues(List<ToolResultsBaseClass> searchResults)
         {
             if (searchResults.Count == 0)
@@ -1226,7 +1226,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in sourcePHRPDataFiles
         /// </summary>
-        /// <param name="sourcePHRPDataFiles"></param>
+        /// <param name="sourcePHRPDataFiles">Data files with peptides to map to proteins</param>
         /// <param name="peptideToProteinMapFilePath">Full path to the output file to create</param>
         /// <param name="mapFileIncludesPrefixAndSuffixColumns">When true, add columns Prefix and Suffix to the protein to peptide map file</param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
@@ -1627,8 +1627,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Create the protein mod details file for the specified PHRP data file
         /// </summary>
-        /// <param name="phrpDataFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="phrpDataFilePath">PHRP data file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         public bool CreateProteinModDetailsFile(string phrpDataFilePath, string outputDirectoryPath)
         {
             var success = false;
@@ -1661,10 +1661,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Create the protein modification details file
         /// </summary>
-        /// <param name="phrpDataFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="mtsPepToProteinMapFilePath"></param>
-        /// <param name="phrpResultType"></param>
+        /// <param name="phrpDataFilePath">PHRP data file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="mtsPepToProteinMapFilePath">MTS peptide to protein map file path</param>
+        /// <param name="phrpResultType">PHRP result type</param>
         /// <returns>True if successful, false if an error</returns>
         public bool CreateProteinModDetailsFile(
             string phrpDataFilePath,
@@ -1881,11 +1881,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Create the MTSPepToProteinMap file if missing, then create the protein modification details file
         /// </summary>
-        /// <param name="baseName"></param>
-        /// <param name="inputFile"></param>
-        /// <param name="synOutputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="phrpResultType"></param>
+        /// <param name="baseName">Base name</param>
+        /// <param name="inputFile">Input file</param>
+        /// <param name="synOutputFilePath">Synopsis file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="phrpResultType">PHRP result type</param>
         /// <param name="maximumAllowableMatchErrorPercentThreshold">
         /// Maximum percentage of peptides in the peptide to protein map file that are allowed to have not matched a protein in the FASTA file (value between 0 and 100)
         /// This is typically 0.1, but for MaxQuant we set this to 50 (or even higher if a small FASTA file, since MaxQuant includes additional contaminant proteins, e.g. CON__P08727)
@@ -1893,8 +1893,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="matchErrorPercentWarningThreshold">
         /// When at least one peptide did not have a matched protein in the FASTA file, this threshold defines at what percent level a warning should be shown (value between 0 and 100)
         /// </param>
-        /// <param name="fhtOutputFilePath"></param>
-        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <param name="fhtOutputFilePath">First-hits file path</param>
+        /// <param name="mtsPepToProteinMapFilePath">MTS peptide to protein map file path</param>
         /// <returns>True if successful, false if an error</returns>
         protected bool CreateProteinModsFileWork(
             string baseName,
@@ -1993,7 +1993,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Delete the file, ignoring any errors
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">File path to delete</param>
         protected void DeleteFileIgnoreErrors(string filePath)
         {
             try
@@ -2016,10 +2016,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// If the list has fewer than largeListThreshold items, the capacity is left unchanged
         /// </remarks>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="items"></param>
-        /// <param name="countToAdd"></param>
-        /// <param name="largeListThreshold"></param>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="items">List </param>
+        /// <param name="countToAdd">Number of items to add</param>
+        /// <param name="largeListThreshold">If the list has fewer items than this value, leave it unchanged</param>
         protected void ExpandListIfRequired<T>(List<T> items, int countToAdd, int largeListThreshold = 1000000)
         {
             if (items.Count > largeListThreshold && items.Count + countToAdd > items.Capacity)
@@ -2040,8 +2040,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Look for the peptide in the peptide to protein map list
         /// </summary>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="peptideToFind"></param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="peptideToFind">Peptide to find</param>
         /// <returns>Index of the match if found, otherwise a negative number (based on a bitwise complement calculation)</returns>
         protected int FindFirstMatchInPepToProteinMapping(List<PepToProteinMapping> pepToProteinMapping, string peptideToFind)
         {
@@ -2078,7 +2078,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Remove the prefix and suffix residues from the given peptide sequence and return the result
         /// </summary>
-        /// <param name="sequenceWithMods"></param>
+        /// <param name="sequenceWithMods">Peptide sequence, with modification symbols</param>
         protected string GetCleanSequence(string sequenceWithMods)
         {
             return GetCleanSequence(sequenceWithMods, out _, out _);
@@ -2088,7 +2088,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Remove the prefix and suffix residues from the given peptide sequence and return the result
         /// </summary>
         /// <remarks>Also removes any non-letter characters</remarks>
-        /// <param name="sequenceWithMods"></param>
+        /// <param name="sequenceWithMods">Peptide sequence, with modification symbols</param>
         /// <param name="prefix">Output: prefix residue</param>
         /// <param name="suffix">Output: suffix residue</param>
         protected string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix)
@@ -2158,7 +2158,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Initializes the StreamWriter objects using baseOutputFilePath as a base name and replacing the suffix with the default suffix names
         /// </summary>
-        /// <param name="baseOutputFilePath"></param>
+        /// <param name="baseOutputFilePath">Base output file path</param>
         /// <returns>True if success; does not catch errors; they will be thrown to the calling method if they occur</returns>
         protected bool InitializeSequenceOutputFiles(string baseOutputFilePath)
         {
@@ -2229,7 +2229,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Return true if the protein name starts with or ends with a known reversed protein name tag
         /// </summary>
-        /// <param name="proteinName"></param>
+        /// <param name="proteinName">Protein name</param>
         /// <returns>
         /// True if the protein starts with reversed_, REV_, scrambled_, xxx_, or REV__, or if it ends with :reversed
         /// Otherwise, false
@@ -2284,7 +2284,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load settings from either a Key=Value parameter file or an XML-based parameter file
         /// </summary>
-        /// <param name="parameterFilePath"></param>
+        /// <param name="parameterFilePath">Parameter file path</param>
         /// <returns>True if parameters were loaded (or if parameterFilePath is an empty string), false if an error</returns>
         protected bool LoadParameterFileSettings(string parameterFilePath)
         {
@@ -2346,7 +2346,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load settings from an XML-based parameter file
         /// </summary>
-        /// <param name="parameterFilePath"></param>
+        /// <param name="parameterFilePath">Parameter file path</param>
         /// <returns>True if parameters were loaded (or if parameterFilePath is an empty string), false if an error</returns>
         private bool LoadParameterFileSettingsXML(string parameterFilePath)
         {
@@ -2510,7 +2510,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Contact the database to lookup dataset IDs by dataset name
         /// </summary>
-        /// <param name="datasetNames"></param>
+        /// <param name="datasetNames">List of dataset names</param>
         /// <returns>Dictionary where keys are dataset names and values are dataset IDs</returns>
         protected Dictionary<string, int> LookupDatasetIDs(List<string> datasetNames)
         {
@@ -2590,8 +2590,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Convert a list of delimited items to an enumerable list, trimming whitespace from each item
         /// </summary>
-        /// <param name="delimitedList"></param>
-        /// <param name="delimiter"></param>
+        /// <param name="delimitedList">Delimited list of items</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <param name="includeEmptyItems">If true, include empty items in the list</param>
         /// <remarks>
         /// If delimitedList is "Value1;;Value2" and includeEmptyItems is false, a 2 item list will be returned
@@ -2607,7 +2607,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
-        /// <param name="outputDirectoryPath">Output directory</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <returns>True if successful, False if failure</returns>
         // ReSharper disable once UnusedMember.Global
         public bool ProcessFile(string inputFilePath, string outputDirectoryPath)
@@ -2619,7 +2619,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
-        /// <param name="outputDirectoryPath">Output directory</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="parameterFilePath">Parameter file (either legacy XML-based or Key=Value)</param>
         /// <returns>True if successful, False if failure</returns>
         public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
@@ -2629,8 +2629,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Note that newSuffix may contain a file extension though it does not have to
         /// If newSuffix does not contain an extension, the path returned will end in the same extension as originalFilePath
         /// </summary>
-        /// <param name="originalFile"></param>
-        /// <param name="newSuffix"></param>
+        /// <param name="originalFile">Original file</param>
+        /// <param name="newSuffix">New file suffix</param>
         /// <returns>Full path to the file using the directory associated with originalFilePath</returns>
         protected string ReplaceFilenameSuffix(FileInfo originalFile, string newSuffix)
         {
@@ -2662,9 +2662,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Report an error by raising event ErrorEvent; store the error in mErrorMessage
         /// </summary>
-        /// <param name="errMsg"></param>
+        /// <param name="errMsg">Error message</param>
         /// <param name="throwException">If True, throw an exception</param>
-        /// <param name="ex"></param>
+        /// <param name="ex">Exception</param>
         protected void ReportError(string errMsg, bool throwException = false, Exception ex = null)
         {
             SetErrorMessage(errMsg, ex);
@@ -2735,8 +2735,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Reset percent complete to 0 and update mProgressStepDescription to the given description
         /// </summary>
-        /// <param name="progressStepDescription"></param>
-        /// <param name="echoToConsole"></param>
+        /// <param name="progressStepDescription">Progress step description</param>
+        /// <param name="echoToConsole">When true, display the progress description at the console</param>
         protected void ResetProgress(string progressStepDescription, bool echoToConsole = false)
         {
             mProgressStepDescription = progressStepDescription;
@@ -2827,8 +2827,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Round a value (stored as text) to the given number of digits after the decimal point
         /// </summary>
-        /// <param name="valueToRound"></param>
-        /// <param name="digitsAfterDecimal"></param>
+        /// <param name="valueToRound">Value to round</param>
+        /// <param name="digitsAfterDecimal">Number of digits after the decimal</param>
         protected string RoundValue(string valueToRound, byte digitsAfterDecimal = 4)
         {
             if (!double.TryParse(valueToRound, out var value))
@@ -2842,7 +2842,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Create the modification summary file
         /// </summary>
-        /// <param name="modificationSummaryFilePath"></param>
+        /// <param name="modificationSummaryFilePath">Modification summary file</param>
         protected void SaveModificationSummaryFile(string modificationSummaryFilePath)
         {
             using var writer = new StreamWriter(modificationSummaryFilePath, false);
@@ -2885,7 +2885,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Append an entry to the _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <remarks>Call InitializeOutputFiles once prior to calling this method</remarks>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <param name="updateResultToSeqMapFile">Set to True only for the first protein of each peptide in each group</param>
         protected void SaveResultsFileEntrySeqInfo(SearchResultsBaseClass searchResult, bool updateResultToSeqMapFile)
         {
@@ -2981,7 +2981,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Update the error code stored in mErrorCode
         /// </summary>
-        /// <param name="newErrorCode"></param>
+        /// <param name="newErrorCode">New error code</param>
         protected void SetErrorCode(PHRPErrorCode newErrorCode)
         {
             SetErrorCode(newErrorCode, false);
@@ -2990,7 +2990,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Update the error code stored in mErrorCode
         /// </summary>
-        /// <param name="newErrorCode"></param>
+        /// <param name="newErrorCode">New error code</param>
         /// <param name="leaveExistingErrorCodeUnchanged">If true and mErrorCode is already non-zero, leave unchanged</param>
         protected void SetErrorCode(PHRPErrorCode newErrorCode, bool leaveExistingErrorCodeUnchanged)
         {
@@ -3010,8 +3010,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// If ex is not null, appends the exception message to the error message (if not already present)
         /// </remarks>
-        /// <param name="message"></param>
-        /// <param name="ex"></param>
+        /// <param name="message">Error message</param>
+        /// <param name="ex">Exception</param>
         protected void SetErrorMessage(string message, Exception ex = null)
         {
             message ??= string.Empty;
@@ -3051,7 +3051,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Return the text up to (but not including) the first space in proteinNameAndDescription
         /// </summary>
-        /// <param name="proteinNameAndDescription"></param>
+        /// <param name="proteinNameAndDescription">Protein name and description</param>
         protected virtual string TruncateProteinName(string proteinNameAndDescription)
         {
             var index = proteinNameAndDescription.IndexOf(' ');
@@ -3067,9 +3067,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Update the peptide to protein mapping at the given index
         /// </summary>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="index"></param>
-        /// <param name="peptide"></param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="index">Index</param>
+        /// <param name="peptide">Peptide sequence</param>
         protected void UpdatePepToProteinMapPeptide(List<PepToProteinMapping> pepToProteinMapping, int index, string peptide)
         {
             var udtItem = pepToProteinMapping[index];
@@ -3114,7 +3114,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Update progress while creating the synopsis file
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">Reader</param>
         protected void UpdateSynopsisFileCreationProgress(StreamReader reader)
         {
             var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
@@ -3136,8 +3136,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="filePath">Path to the file</param>
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
-        /// <param name="errorMessage"></param>
-        /// <param name="requireHeaderLine"></param>
+        /// <param name="errorMessage">Error message</param>
+        /// <param name="requireHeaderLine">When true, skip the first line</param>
         /// <returns>True if the file has data; otherwise false</returns>
         public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, bool requireHeaderLine = false)
         {
@@ -3153,7 +3153,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </remarks>
         /// <param name="filePath">Path to the file</param>
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
-        /// <param name="errorMessage"></param>
+        /// <param name="errorMessage">Error message</param>
         /// <param name="numericDataColIndex">Index of the numeric data column; use -1 to simply look for any text in the file</param>
         /// <param name="requireHeaderLine">When true, skip the first line</param>
         /// <returns>True if the file has data; otherwise false</returns>
@@ -3407,8 +3407,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Assures that the _MSGF.txt file exists in the output directory, provided it exists in the input directory
         /// </summary>
         /// <remarks>Copies the file to the output directory if missing</remarks>
-        /// <param name="phrpDataFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="phrpDataFilePath">PHRP data file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputDirectoryPath)
         {
             try
@@ -3450,7 +3450,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Proteins where at least 10% of the residues are not A, T, C, or G are considered valid proteins
+        /// Proteins are considered valid if at least 10% of the residues are not A, T, C, or G
         /// </para>
         /// <para>
         /// Proteins where over 95% of the residues are A, T, C, or G are considered invalid proteins
@@ -3459,8 +3459,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// After examining the first 500 proteins, if there are more invalid proteins than valid proteins, returns false
         /// </para>
         /// </remarks>
-        /// <param name="fastaFilePath"></param>
-        /// <param name="warningMessage"></param>
+        /// <param name="fastaFilePath">FaSTA file path</param>
+        /// <param name="warningMessage">Warning message</param>
         /// <param name="proteinCount">Output: number of proteins in the FASTA file</param>
         /// <returns>True if found and valid, otherwise false</returns>
         public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage, out int proteinCount)

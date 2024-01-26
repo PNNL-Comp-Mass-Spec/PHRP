@@ -213,9 +213,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// For each residue, check if a static mod is defined that affects that residue
         /// For each mod mass, determine the modification and add to searchResult
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
+        /// <param name="modList">List of modifications</param>
         private void AddModificationsToResidues(
             MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
@@ -343,7 +343,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
         /// <param name="modificationList">Comma separated list of modifications, e.g. Dehydro 52,Dehydro 63</param>
-        /// <param name="modList"></param>
+        /// <param name="modList">List of modifications</param>
         private double ComputeTotalModMass(
             string modificationList,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modList)
@@ -392,9 +392,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// This routine creates a synopsis file from the output from MSPathFinder
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputFilePath">Output file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
@@ -414,10 +414,10 @@ namespace PeptideHitResultsProcessor.Processor
                 var headerParsed = false;
                 var lineNumber = 0;
 
-                // Initialize the list that will hold all of the records in the MSPathFinder result file
+                // Initialize the list that will hold all the records in the MSPathFinder result file
                 var searchResultsUnfiltered = new List<MSPathFinderSearchResult>();
 
-                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                // Initialize the list that will hold all the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<MSPathFinderSearchResult>();
 
                 // Parse the input file
@@ -513,8 +513,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the MSPathFinder parameter file
         /// </summary>
         /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
-        /// <param name="msPathFinderParamFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="msPathFinderParamFilePath">MSPathFinder parameter file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string msPathFinderParamFilePath,
@@ -588,10 +588,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <param name="modList"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathfinderSynopsisFile(
             string inputFilePath,
@@ -807,11 +807,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MSPathFinder results line while creating the MSPathFinder synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="modList"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="modList">List of modifications</param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
@@ -910,8 +910,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the MSPathFinder results file header line, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<MSPathFinderResultsFileColumns, int> columnMapping)
         {
@@ -1013,8 +1013,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MSPathFinder _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<MSPathFinderSynFileColumns, int> columnMapping)
         {
@@ -1053,11 +1053,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from a MSPathFinder Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
@@ -1384,8 +1384,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -1412,10 +1412,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

@@ -111,8 +111,8 @@ namespace PeptideHitResultsProcessor.Data
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        /// <param name="peptideMods"></param>
-        /// <param name="peptideSeqMassCalculator"></param>
+        /// <param name="peptideMods">Peptide modifications</param>
+        /// <param name="peptideSeqMassCalculator">Peptide sequence mass calculator</param>
         public MSAlignResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

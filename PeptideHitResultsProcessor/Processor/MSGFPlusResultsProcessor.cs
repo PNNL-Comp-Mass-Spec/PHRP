@@ -436,8 +436,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// For each residue, check if a static mod is defined that affects that residue
         /// For each mod symbol, determine the modification and add to searchResult
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             var mostRecentLetter = '-';
@@ -505,8 +505,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Adds or updates the prefix and suffix residues to the peptide, as defined in kvProteinInfo
         /// </summary>
-        /// <param name="peptide"></param>
-        /// <param name="kvProteinInfo"></param>
+        /// <param name="peptide">Peptide sequence</param>
+        /// <param name="kvProteinInfo">Protein info, where the key is protein name and the value is the N and C terminus characters</param>
         /// <returns>Peptide sequence with N-terminal and C-Terminal residues</returns>
         private string AddUpdatePrefixAndSuffixResidues(string peptide, KeyValuePair<string, TerminusChars> kvProteinInfo)
         {
@@ -610,7 +610,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
         /// <param name="searchResults">Search results</param>
         /// <param name="startIndex">Start index for data in this scan</param>
@@ -750,7 +750,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="precursorMZ">Precursor m/z</param>
         /// <param name="charge">Precursor charge</param>
         /// <param name="peptideMonoisotopicMass">Monoisotopic mass of the peptide</param>
-        /// <param name="adjustPrecursorMassForC13"></param>
+        /// <param name="adjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
         /// <returns>DelM, in ppm</returns>
         private double ComputeDelMCorrectedPPM(
             double precursorErrorDa,
@@ -768,8 +768,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Compute the monoisotopic mass of the peptide
         /// </summary>
-        /// <param name="peptide"></param>
-        /// <param name="totalModMass"></param>
+        /// <param name="peptide">Peptide sequence</param>
+        /// <param name="totalModMass">Total modification mass</param>
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
@@ -801,15 +801,15 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses the digits in modDigits to convert them to one or more modification symbols
         /// </summary>
-        /// <param name="currentResidue"></param>
+        /// <param name="currentResidue">Current residue</param>
         /// <param name="modDigits">Example: +57.021 or +79.9663+14.0157 or -18.0106</param>
-        /// <param name="modSymbols"></param>
-        /// <param name="dynModSymbols"></param>
-        /// <param name="msgfPlusModInfo"></param>
-        /// <param name="nTerminalMod"></param>
-        /// <param name="possibleCTerminalMod"></param>
-        /// <param name="modMassFound"></param>
-        /// <param name="containsStaticMod"></param>
+        /// <param name="modSymbols">Output: modification symbols</param>
+        /// <param name="dynModSymbols">Output: dynamic modification symbols</param>
+        /// <param name="msgfPlusModInfo">Modification info</param>
+        /// <param name="nTerminalMod">True if this is an N-terminal mod</param>
+        /// <param name="possibleCTerminalMod">True if this could be a C-terminal mod</param>
+        /// <param name="modMassFound">Output: modification mass found</param>
+        /// <param name="containsStaticMod">Output: true if a static mod was found</param>
         /// <returns>True if success; false if a problem</returns>
         private bool ConvertMSGFModMassesToSymbols(
             string currentResidue,
@@ -960,12 +960,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
         /// The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
-        /// <param name="scanGroupFilePath"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputFilePath">Output file path</param>
+        /// <param name="scanGroupFilePath">Scan group file path</param>
         /// <param name="msgfPlusModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
         /// <param name="isMsgfPlus">Output parameter: this method will set this to True if we're processing MS-GF+ results</param>
-        /// <param name="specIdToIndex"></param>
+        /// <param name="specIdToIndex">Dictionary mapping spectrum ID to index</param>
         /// <param name="filteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateFHTorSYNResultsFile(
@@ -1032,7 +1032,7 @@ namespace PeptideHitResultsProcessor.Processor
                     scanGroupDetails.Clear();
                     scanGroupCombo.Clear();
 
-                    // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                    // Initialize the array that will hold all the records that will ultimately be written out to disk
                     var filteredSearchResults = new List<MSGFPlusSearchResult>();
 
                     // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
@@ -1207,7 +1207,7 @@ namespace PeptideHitResultsProcessor.Processor
                     while (startIndex < searchResultsPrefiltered.Count)
                     {
                         var endIndex = startIndex;
-                        // Find all of the peptides with the same scan number
+                        // Find all the peptides with the same scan number
                         while (endIndex + 1 < searchResultsPrefiltered.Count &&
                                searchResultsPrefiltered[endIndex + 1].ScanNum == searchResultsPrefiltered[startIndex].ScanNum)
                         {
@@ -1262,10 +1262,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Extracts mod info from either a MS-GF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from either an MS-GF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
-        /// <param name="msgfPlusParamFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="msgfPlusParamFilePath">MS-GF+ parameter file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if success; false if a problem</returns>
         private bool ExtractModInfoFromParamFile(
             string msgfPlusParamFilePath,
@@ -1299,7 +1299,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Extracts parent mass tolerance from the parameters loaded from an MS-GF+ parameter file
         /// </summary>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
         private PrecursorMassTolerance ExtractParentMassToleranceFromParamFile(SearchEngineParameters searchEngineParams)
         {
@@ -1367,9 +1367,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// return a KeyValuePair with candidateProteinName and the proteinNumber for that protein
         /// Otherwise, return a KeyValuePair with currentProteinName and currentProteinNumber
         /// </summary>
-        /// <param name="currentProteinName"></param>
-        /// <param name="currentProteinNumber"></param>
-        /// <param name="candidateProteinName"></param>
+        /// <param name="currentProteinName">Current protein name</param>
+        /// <param name="currentProteinNumber">Current protein number</param>
+        /// <param name="candidateProteinName">Candidate protein name</param>
         /// <returns>KeyValuePair of the best protein name</returns>
         private KeyValuePair<string, int> GetBestProteinName(string currentProteinName, int currentProteinNumber, string candidateProteinName)
         {
@@ -1403,12 +1403,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
-        /// <param name="pepToProteinMapFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="msgfPlusModInfo"></param>
+        /// <param name="pepToProteinMapFilePath">Peptide to protein map file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="msgfPlusModInfo">Modification info</param>
         /// <param name="isMsgfPlus">Should be set to True if processing MS-GF+ results</param>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="mtsPepToProteinMapFilePath"></param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="mtsPepToProteinMapFilePath">MTS peptide to protein map file path</param>
         /// <returns>True if successful, false if an error</returns>
         private void LoadPeptideToProteinMapInfoMSGFPlus(
             string pepToProteinMapFilePath,
@@ -1525,7 +1525,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the MS-GF+ parameter file and updates settings
         /// </summary>
-        /// <param name="msgfPlusParamFilePath"></param>
+        /// <param name="msgfPlusParamFilePath">MS-GF+ parameter file path</param>
         /// <returns>
         /// True if success, false if an error.
         /// Returns True if msgfPlusParamFilePath is empty
@@ -2139,8 +2139,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the MS-GF+ results file header line, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusResultsFileHeaderLine(string lineIn, IDictionary<MSGFPlusResultsFileColumns, int> columnMapping)
         {
@@ -2225,8 +2225,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MS-GF+ _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<MSGFPlusSynFileColumns, int> columnMapping)
         {
@@ -2265,12 +2265,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse an entry from a MS-GF+ synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="peptideSequenceWithMods"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="peptideSequenceWithMods">Peptide sequence, with modification symbols</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
@@ -2721,7 +2721,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
         /// </summary>
-        /// <param name="peptide"></param>
+        /// <param name="peptide">Peptide sequence</param>
         /// <param name="msgfPlusModInfo">This method assumes that each entry in msgfPlusModInfo has both .ModName and .ModSymbol defined</param>
         /// <param name="isMsgfPlus">Should be set to True if processing MS-GF+ results</param>
         /// <param name="totalModMass">Output parameter: total mass of all modifications</param>
@@ -3191,12 +3191,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="includeFDRandPepFDR"></param>
-        /// <param name="includeEFDR"></param>
-        /// <param name="includeIMSFields"></param>
-        /// <param name="isMsgfPlus"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="includeFDRandPepFDR">When true, include the QValue and PepQValue columns</param>
+        /// <param name="includeEFDR">When true, include the EFDR and PepFDR columns</param>
+        /// <param name="includeIMSFields">When true, include IMS_Scan and IMS_Drift_Time columns</param>
+        /// <param name="isMsgfPlus">True if processing MS-GF+ results, false if legacy MSGFDB results</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages,
@@ -3296,14 +3296,14 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="includeFDRandPepFDR"></param>
-        /// <param name="includeEFDR"></param>
-        /// <param name="includeIMSFields"></param>
-        /// <param name="isMsgfPlus"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="includeFDRandPepFDR">When true, include the QValue and PepQValue columns</param>
+        /// <param name="includeEFDR">When true, include the EFDR and PepFDR columns</param>
+        /// <param name="includeIMSFields">When true, include IMS_Scan and IMS_Drift_Time columns</param>
+        /// <param name="isMsgfPlus">True if processing MS-GF+ results, false if legacy MSGFDB results</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

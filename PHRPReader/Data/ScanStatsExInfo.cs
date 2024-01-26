@@ -104,7 +104,7 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanNumber">Scan number</param>
         public ScanStatsExInfo(int scanNumber)
         {
             ScanNumber = scanNumber;

@@ -99,10 +99,10 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="residue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="modDefinition"></param>
+        /// <param name="residue">Residue symbol</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="modDefinition">Modification definition</param>
         public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusState residueTerminusState, ModificationDefinition modDefinition)
         {
             ModDefinition = modDefinition;
@@ -115,11 +115,11 @@
         /// <summary>
         /// Constructor with endResidueLocInPeptide
         /// </summary>
-        /// <param name="residue"></param>
-        /// <param name="residueLocInPeptide"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="modDefinition"></param>
-        /// <param name="endResidueLocInPeptide"></param>
+        /// <param name="residue">Residue symbol</param>
+        /// <param name="residueLocInPeptide">Residue location in the peptide</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="modDefinition">Modification definition</param>
+        /// <param name="endResidueLocInPeptide">For ambiguous mods, indicates the last residue on which the mod could appear</param>
         public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusState residueTerminusState, ModificationDefinition modDefinition, int endResidueLocInPeptide)
         {
             ModDefinition = modDefinition;

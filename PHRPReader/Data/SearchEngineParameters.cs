@@ -135,7 +135,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="searchEngineName"></param>
+        /// <param name="searchEngineName">Search engine name</param>
         public SearchEngineParameters(string searchEngineName) : this(searchEngineName, new List<ModificationDefinition>(), null)
         {
         }
@@ -143,8 +143,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="searchEngineName"></param>
-        /// <param name="modList"></param>
+        /// <param name="searchEngineName">Search engine name</param>
+        /// <param name="modList">List of modification definitions</param>
         public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modList) : this(searchEngineName, modList, null)
         {
         }
@@ -152,9 +152,9 @@ namespace PHRPReader.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="searchEngineName"></param>
-        /// <param name="modList"></param>
-        /// <param name="parameters"></param>
+        /// <param name="searchEngineName">Search engine name</param>
+        /// <param name="modList">List of modification definitions</param>
+        /// <param name="parameters">Dictionary of parameters loaded from the search engine parameter file</param>
         public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modList, Dictionary<string, string> parameters)
         {
             InitializeDefaults();
@@ -179,7 +179,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add a new dynamic or static modification
         /// </summary>
-        /// <param name="modDef"></param>
+        /// <param name="modDef">Modification definition</param>
         public void AddModification(ModificationDefinition modDef)
         {
             ModList.Add(modDef);
@@ -188,7 +188,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add/update a parameter
         /// </summary>
-        /// <param name="kvSetting"></param>
+        /// <param name="kvSetting">Key-value pair of parameter name and parameter value</param>
         public void AddUpdateParameter(KeyValuePair<string, string> kvSetting)
         {
             AddUpdateParameter(kvSetting.Key, kvSetting.Value);
@@ -197,8 +197,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add/update a parameter
         /// </summary>
-        /// <param name="paramName"></param>
-        /// <param name="paramValue"></param>
+        /// <param name="paramName">Parameter name</param>
+        /// <param name="paramValue">Parameter value</param>
         public void AddUpdateParameter(string paramName, string paramValue)
         {
             // Add/update the dictionary
@@ -243,7 +243,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Update the search engine parameter file path
         /// </summary>
-        /// <param name="paramFilePath"></param>
+        /// <param name="paramFilePath">Parameter file path</param>
         public void UpdateSearchEngineParamFilePath(string paramFilePath)
         {
             mSearchEngineParamFilePath = paramFilePath;
@@ -252,7 +252,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Update the search engine version
         /// </summary>
-        /// <param name="searchEngineVersion"></param>
+        /// <param name="searchEngineVersion">Search engine version</param>
         public void UpdateSearchEngineVersion(string searchEngineVersion)
         {
             mSearchEngineVersion = searchEngineVersion;
@@ -261,7 +261,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Update the search date
         /// </summary>
-        /// <param name="searchDate"></param>
+        /// <param name="searchDate">Search date</param>
         public void UpdateSearchDate(DateTime searchDate)
         {
             mSearchDate = searchDate;

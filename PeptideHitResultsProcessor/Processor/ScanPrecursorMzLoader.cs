@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="inputDirectoryPath"></param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         public ScanPrecursorMzLoader(string inputDirectoryPath)
         {
             InputDirectoryPath = inputDirectoryPath;
@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Look for data files that have information regarding the precursor m/z value for each scan, for each dataset
         /// If found, populate a dictionary with the data
         /// </summary>
-        /// <param name="datasetNames"></param>
+        /// <param name="datasetNames">Dataset names</param>
         /// <returns>Dictionary where keys are dataset names and values are dictionaries of precursor m/z by scan number</returns>
         public Dictionary<string, Dictionary<int, double>> LoadPrecursorIons(IEnumerable<string> datasetNames)
         {

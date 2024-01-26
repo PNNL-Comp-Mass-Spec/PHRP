@@ -36,7 +36,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public TopPICResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "September 13, 2022";
@@ -129,8 +129,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// For each residue, check if a static mod is defined that affects that residue
         /// For each mod mass, determine the modification and add to searchResult
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -339,12 +339,12 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
-        /// <param name="searchResults"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="endIndex"></param>
-        /// <param name="sortOnPValue"></param>
+        /// <param name="searchResults">Search results</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
+        /// <param name="sortOnPValue">True if we should sort by PValue</param>
         private void AssignRankByScore(
             IList<TopPICPrSMs> searchResults,
             int startIndex,
@@ -427,8 +427,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Copy values from sourceResult to targetResult, but only if both have the same Prsm_ID value
         /// </summary>
         /// <remarks>Does not copy protein name or description</remarks>
-        /// <param name="sourceResult"></param>
-        /// <param name="targetResult"></param>
+        /// <param name="sourceResult">Source result</param>
+        /// <param name="targetResult">Target result</param>
         /// <returns>True if the results both have the same Prsm_ID and scores were thus cloned, otherwise false</returns>
         private bool CloneScores(TopPICPrSMs sourceResult, TopPICPrSMs targetResult)
         {
@@ -558,7 +558,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Compute the peptide mass
         /// </summary>
         /// <param name="peptide">Sequence with mods, which can be either numeric or named ([15.98154] or [Acetyl])</param>
-        /// <param name="totalModMass"></param>
+        /// <param name="totalModMass">Total modification mass</param>
         /// <returns>Mass of the peptide plus totalModMass</returns>
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
@@ -650,10 +650,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 mDeltaMassWarningCount = 0;
 
-                // Initialize array that will hold all of the records in the TopPIC result file
+                // Initialize array that will hold all the records in the TopPIC result file
                 var searchResultsUnfiltered = new List<TopPICPrSMs>();
 
-                // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                // Initialize the array that will hold all the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<TopPICPrSMs>();
 
                 var previousSearchResult = new TopPICPrSMs();
@@ -774,7 +774,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the TopPIC parameter file
         /// </summary>
         /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
-        /// <param name="topPICParamFilePath"></param>
+        /// <param name="topPICParamFilePath">TopPIC parameter file path</param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(string topPICParamFilePath)
         {
@@ -1049,11 +1049,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from the TopPIC results file (Dataset_TopPIC_PrSMs.txt)
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
         /// <param name="isAdditionalProtein">Output: true if this is an additional protein for the current PSM</param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
@@ -1166,8 +1166,8 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!DataUtilities.GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out searchResult.Proteoform))
                 {
                     // Starting with TopPIC 1.5, proteoforms that map to multiple proteins will be listed multiple times in the _TopPIC_PrSMs.txt file
-                    // The first protein will be in a result line with all of the scores
-                    // Subsequent proteins will be in a line with Data File Name, Prism ID, Protein accession, and Protein description, while all of the other columns are blank
+                    // The first protein will be in a result line with all the scores
+                    // Subsequent proteins will be in a line with Data File Name, Prism ID, Protein accession, and Protein description, while all the other columns are blank
 
                     var emptyColumns = 0;
 
@@ -1310,8 +1310,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a TopPIC results file (Dataset_TopPIC_PrSMs.txt), populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
@@ -1412,8 +1412,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a TopPIC _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<TopPICSynFileColumns, int> columnMapping)
         {
@@ -1452,12 +1452,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from the TopPIC Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="peptideSequenceWithMods"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="peptideSequenceWithMods">Peptide sequence, with modification symbols</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileEntry(
             string lineIn,
@@ -1850,9 +1850,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="dataHasPValues"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="dataHasPValues">True if the data has PValue columns</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             bool dataHasPValues,
@@ -1889,11 +1889,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to the synopsis file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="dataHasPValues"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="dataHasPValues">True if the data has PValue columns</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

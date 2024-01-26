@@ -43,10 +43,10 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="proteinName"></param>
-        /// <param name="seqID"></param>
-        /// <param name="cleavageState"></param>
-        /// <param name="terminusState"></param>
+        /// <param name="proteinName">Protein name</param>
+        /// <param name="seqID">Protein sequence ID</param>
+        /// <param name="cleavageState">Cleavage state</param>
+        /// <param name="terminusState">Terminus state</param>
         public ProteinInfo(
             string proteinName,
             int seqID,
@@ -58,11 +58,11 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="proteinName"></param>
-        /// <param name="proteinDescription"></param>
-        /// <param name="seqID"></param>
-        /// <param name="cleavageState"></param>
-        /// <param name="terminusState"></param>
+        /// <param name="proteinName">Protein name</param>
+        /// <param name="proteinDescription">Protein description</param>
+        /// <param name="seqID">Protein sequence ID</param>
+        /// <param name="cleavageState">Cleavage state</param>
+        /// <param name="terminusState">Terminus state</param>
         public ProteinInfo(
             string proteinName,
             string proteinDescription,
@@ -75,13 +75,13 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="proteinName"></param>
-        /// <param name="proteinDescription"></param>
-        /// <param name="seqID"></param>
-        /// <param name="cleavageState"></param>
-        /// <param name="terminusState"></param>
-        /// <param name="proteinResidueStart"></param>
-        /// <param name="proteinResidueEnd"></param>
+        /// <param name="proteinName">Protein name</param>
+        /// <param name="proteinDescription">Protein description</param>
+        /// <param name="seqID">Protein sequence ID</param>
+        /// <param name="cleavageState">Cleavage state</param>
+        /// <param name="terminusState">Terminus state</param>
+        /// <param name="proteinResidueStart">Residue number in the protein at which this sequence starts</param>
+        /// <param name="proteinResidueEnd">Residue number in the protein at which this sequence ends</param>
         public ProteinInfo(
             string proteinName,
             string proteinDescription,
@@ -92,6 +92,7 @@
             int proteinResidueEnd)
         {
             ProteinName = proteinName;
+
             if (string.IsNullOrEmpty(proteinDescription))
             {
                 Description = string.Empty;
@@ -100,6 +101,7 @@
             {
                 Description = proteinDescription;
             }
+
             SeqID = seqID;
             CleavageState = cleavageState;
             TerminusState = terminusState;
@@ -110,8 +112,8 @@
         /// <summary>
         /// Update the start/end residues for this protein (or peptide)
         /// </summary>
-        /// <param name="proteinResidueStart"></param>
-        /// <param name="proteinResidueEnd"></param>
+        /// <param name="proteinResidueStart">Residue number in the protein at which this sequence starts</param>
+        /// <param name="proteinResidueEnd">Residue number in the protein at which this sequence ends</param>
         public void UpdateLocationInProtein(int proteinResidueStart, int proteinResidueEnd)
         {
             ResidueStart = proteinResidueStart;

@@ -433,8 +433,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Add modifications to a peptide read from the DIA-NN synopsis file
         /// Next, compute the monoisotopic mass
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if success, false if an error</returns>
         private bool AddModificationsAndComputeMass(
             DiaNNResults searchResult,
@@ -467,8 +467,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add modifications to a peptide read from the DIA-NN synopsis file
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddModificationsToResidues(
             DiaNNResults searchResult,
             bool updateModOccurrenceCounts)
@@ -520,9 +520,9 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (peptidesWithPrefixAndSuffix == filteredSearchResults.Count)
             {
-                // All of the peptides already have prefix and suffix residues
+                // All the peptides already have prefix and suffix residues
                 OnStatusEvent(
-                    "All of the peptides loaded from the DIA-NN results file already have prefix and suffix letters; " +
+                    "All the peptides loaded from the DIA-NN results file already have prefix and suffix letters; " +
                     "skipping peptide to protein mapping prior to creating the synopsis file");
 
                 return true;
@@ -684,7 +684,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
         /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <returns>(M+H)+, as a string</returns>
         private string ComputeMH(ToolResultsBaseClass searchResult)
         {
@@ -694,7 +694,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <param name="modList">Output: list of modifications</param>
         private double ComputeTotalModMass(DiaNNSearchResult searchResult, out List<MSFraggerResultsProcessor.MSFraggerModInfo> modList)
         {
@@ -750,7 +750,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="inputFilePath">DIA-NN results file</param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
         /// <param name="filterPassingResultCount">Output: number of filter passing results</param>
@@ -875,7 +875,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Read mod info from the DIA-NN parameter file
         /// </summary>
         /// <remarks>The DMS-based parameter file for DIA-NN uses the same formatting as MS-GF+</remarks>
-        /// <param name="diannParamFilePath"></param>
+        /// <param name="diannParamFilePath">DIA-NN parameter file path</param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromParamFile(
             string diannParamFilePath)
@@ -1058,7 +1058,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Get the list of static and dynamic modifications for a peptide read from a DIA-NN synopsis file
         /// </summary>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <returns>List of modifications</returns>
         private List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(DiaNNResults searchResult)
         {
@@ -1068,7 +1068,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Get the list of static and dynamic modifications for a peptide read from the DIA-NN report.tsv file
         /// </summary>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <returns>List of modifications</returns>
         private List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(DiaNNSearchResult searchResult)
         {
@@ -1109,7 +1109,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read the static and dynamic modifications from the DIA-NN parameter file
         /// </summary>
-        /// <param name="diannParamFilePath"></param>
+        /// <param name="diannParamFilePath">DIA-NN parameter file path</param>
         /// <returns>True on success, false if an error</returns>
         private bool LoadSearchEngineParamFile(string diannParamFilePath)
         {
@@ -1156,9 +1156,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNSynopsisFile(
             string inputFilePath,
@@ -1297,10 +1297,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a DIA-NN results line while reading the report.tsv file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="baseNameToFullDatasetNameMap">Keys are abbreviated dataset names, values are the full dataset names</param>
@@ -1547,8 +1547,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the DIA-NN report.tsv file header line, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseDiaNNResultsFileHeaderLine(
             string lineIn,
@@ -1654,8 +1654,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a DIA-NN _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNSynFileHeaderLine(string lineIn, IDictionary<DiaNNSynFileColumns, int> columnMapping)
         {
@@ -1694,11 +1694,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from a DIA-NN Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNSynFileEntry(
             string lineIn,
@@ -2065,7 +2065,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
         /// <param name="inputFile">report.tsv file</param>
-        /// <param name="errorMessages"></param>
+        /// <param name="errorMessages">Error messages</param>
         /// <param name="filteredSearchResults">Output: DIA-NN results</param>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <returns>True if successful, false if an error</returns>
@@ -2098,7 +2098,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var headerParsed = false;
                 var lineNumber = 0;
 
-                // Initialize the list that will hold all of the records in the DIA-NN result file
+                // Initialize the list that will hold all the records in the DIA-NN result file
                 var searchResultsUnfiltered = new List<DiaNNSearchResult>();
 
                 var currentDatasetFile = string.Empty;
@@ -2168,7 +2168,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
-                    // Find all of the matches for the current result's scan
+                    // Find all the matches for the current result's scan
                     // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
                     // DIA-NN will typically report just one match
 
@@ -2245,8 +2245,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -2274,9 +2274,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write search results to disk
         /// </summary>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
-        /// <param name="writer"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteFilteredSearchResults(
             Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
@@ -2312,12 +2312,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="baseDatasetName"></param>
-        /// <param name="datasetID"></param>
-        /// <param name="writer"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="baseDatasetName">Base dataset name</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             string baseDatasetName,

@@ -468,10 +468,10 @@ namespace PHRPReader
         /// <summary>
         /// Add a PHRP file to find when auto-determining the input file type
         /// </summary>
-        /// <param name="filesToFind"></param>
-        /// <param name="resultType"></param>
-        /// <param name="getPhrpFilenameMethod"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="filesToFind">Files to find</param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="getPhrpFilenameMethod">PHRP filename method</param>
+        /// <param name="datasetName">Dataset name</param>
         private static void AddFileToFind(
             ICollection<KeyValuePair<string, PeptideHitResultTypes>> filesToFind,
             PeptideHitResultTypes resultType,
@@ -489,9 +489,9 @@ namespace PHRPReader
         /// <summary>
         /// Add a PHRP file to find when auto-determining the input file type
         /// </summary>
-        /// <param name="filesToFind"></param>
-        /// <param name="resultType"></param>
-        /// <param name="phrpFilename"></param>
+        /// <param name="filesToFind">Files to find</param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="phrpFilename">PHRP filename</param>
         private static void AddFileToFind(
             ICollection<KeyValuePair<string, PeptideHitResultTypes>> filesToFind,
             PeptideHitResultTypes resultType,
@@ -503,9 +503,9 @@ namespace PHRPReader
         /// <summary>
         /// Add a filename suffix to check when auto-determining the input file type
         /// </summary>
-        /// <param name="suffixesToCheck"></param>
-        /// <param name="resultType"></param>
-        /// <param name="suffix"></param>
+        /// <param name="suffixesToCheck">Suffixes to check</param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="suffix">Filename suffix</param>
         private static void AddSuffixToCheck(
             ICollection<KeyValuePair<string, PeptideHitResultTypes>> suffixesToCheck,
             PeptideHitResultTypes resultType,
@@ -799,7 +799,7 @@ namespace PHRPReader
         /// Auto-determine the dataset name using the input file path
         /// </summary>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">Input file path</param>
         /// <returns>Dataset name</returns>
         public static string AutoDetermineDatasetName(string filePath)
         {
@@ -811,8 +811,8 @@ namespace PHRPReader
         /// Auto-determine the dataset name using the input file path and specified PeptideHit result type
         /// </summary>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-        /// <param name="filePath"></param>
-        /// <param name="resultType"></param>
+        /// <param name="filePath">Input file path</param>
+        /// <param name="resultType">PHRP result type</param>
         /// <returns>Dataset name</returns>
         public static string AutoDetermineDatasetName(string filePath, PeptideHitResultTypes resultType)
         {
@@ -939,7 +939,7 @@ namespace PHRPReader
         /// <summary>
         /// Determine the PeptideHit result type given the input file path
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">Input file path</param>
         public static PeptideHitResultTypes AutoDetermineResultType(string filePath)
         {
             const string LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt";
@@ -1052,8 +1052,8 @@ namespace PHRPReader
         /// <summary>
         /// Updates filePath to have _fht instead of _syn if filePath contains_syn yet basePHRPFileName contains _fht
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="basePHRPFileName"></param>
+        /// <param name="filePath">Input file path</param>
+        /// <param name="basePHRPFileName">Based PHRP filename</param>
         private static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
         {
             if (string.IsNullOrEmpty(basePHRPFileName))
@@ -1092,8 +1092,8 @@ namespace PHRPReader
         /// <summary>
         /// Updates filePath to have _msgfdb instead of _msgfplus if basePHRPFileName contains _msgfdb
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="basePHRPFileName"></param>
+        /// <param name="filePath">File path</param>
+        /// <param name="basePHRPFileName">Base PHRP filename</param>
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
         {
             var basePHRPFile = new FileInfo(basePHRPFileName);
@@ -1125,8 +1125,8 @@ namespace PHRPReader
         /// Check whether filePath ends in other known PHRP extensions
         /// If it does, remove the suffix and return the trimmed path
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="filePathTrimmed"></param>
+        /// <param name="filePath">File path</param>
+        /// <param name="filePathTrimmed">Output: trimmed file path, or an empty string if the file does not end in a known extension</param>
         /// <returns>True if the path was trimmed, otherwise false</returns>
         private static bool AutoTrimExtraSuffix(string filePath, out string filePathTrimmed)
         {
@@ -1199,7 +1199,7 @@ namespace PHRPReader
         /// Note that if the _SeqInfo.txt file is available, this method will not be used
         /// </summary>
         /// <remarks>peptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
-        /// <param name="peptide"></param>
+        /// <param name="peptide">Peptide sequence</param>
         /// <param name="peptideWithNumericMods">Output: Peptide with numeric mods</param>
         /// <param name="peptideMods">Output: List of modified amino acids</param>
         /// <returns>True if successful, false if an error</returns>
@@ -1360,8 +1360,8 @@ namespace PHRPReader
         /// This method extracts the Parent Ion m/z from the filter string
         /// </summary>
         /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
-        /// <param name="filterText"></param>
-        /// <param name="parentIonMz"></param>
+        /// <param name="filterText">Thermo scan filter</param>
+        /// <param name="parentIonMz">Output: parenter ion m/z</param>
         /// <returns>True if parsing successful</returns>
         public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
@@ -1540,7 +1540,7 @@ namespace PHRPReader
         /// <summary>
         /// Join a series of string values together, separating by a tab
         /// </summary>
-        /// <param name="dataValues"></param>
+        /// <param name="dataValues">List of items</param>
         /// <param name="indexStart">Index of the first item to include</param>
         /// <returns>Tab-separated list of values</returns>
         public static string FlattenArray(IList<string> dataValues, int indexStart)
@@ -1572,7 +1572,7 @@ namespace PHRPReader
         /// <summary>
         /// Determines the collision mode using the Scan Type name
         /// </summary>
-        /// <param name="scanTypeName"></param>
+        /// <param name="scanTypeName">Scan type name</param>
         private string GetCollisionMode(string scanTypeName)
         {
             // Typical scan types, along with DMS usage count as of 4/26/2012
@@ -1647,7 +1647,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the peptide hit result type for the given result type name
         /// </summary>
-        /// <param name="resultTypeName"></param>
+        /// <param name="resultTypeName">Result type name</param>
         public static PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
         {
             return resultTypeName.ToLower() switch
@@ -1719,8 +1719,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default first-hits file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1731,8 +1731,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default ModSummary file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1743,8 +1743,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default PepToProtMap file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1755,8 +1755,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default ProteinMods file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1767,8 +1767,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default Synopsis file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1779,8 +1779,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default ResultToSeq Map file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1791,8 +1791,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default SeqInfo file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1803,8 +1803,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default SeqToProtein Map file name for the given PeptideHit result type
         /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="datasetName"></param>
+        /// <param name="resultType">PHRP result type</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
@@ -1815,7 +1815,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the ScanStats filename for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetScanStatsFilename(string datasetName)
         {
@@ -1825,7 +1825,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the extended ScanStats filename for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetExtendedScanStatsFilename(string datasetName)
         {
@@ -1835,7 +1835,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the tool version info filename for the given analysis tool
         /// </summary>
-        /// <param name="resultType"></param>
+        /// <param name="resultType">PHRP result type</param>
         /// <returns>Filename</returns>
         [Obsolete("Use GetToolVersionInfoFileNames")]
         public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
@@ -1847,7 +1847,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the tool version info filename for the given analysis tool
         /// </summary>
-        /// <param name="resultType"></param>
+        /// <param name="resultType">PHRP result type</param>
         /// <returns>Filename</returns>
         public static List<string> GetToolVersionInfoFilenames(PeptideHitResultTypes resultType)
         {
@@ -2265,7 +2265,7 @@ namespace PHRPReader
         /// <summary>
         /// Examines the string to determine if it is numeric
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">Value to parse</param>
         /// <returns>True if a number, otherwise false</returns>
         public static bool IsNumber(string data)
         {
@@ -2292,7 +2292,7 @@ namespace PHRPReader
         /// <summary>
         /// Examine the filename to see if it ends with one of the known suffixes for synopsis and first hits files created by PeptideHitResultsProcRunner
         /// </summary>
-        /// <param name="fileNameOrPath"></param>
+        /// <param name="fileNameOrPath">File name or file path</param>
         /// <returns>True if the name ends with a known suffix, otherwise false</returns>
         public static bool IsSynopsisOrFirstHitsFile(string fileNameOrPath)
         {
@@ -2334,9 +2334,9 @@ namespace PHRPReader
         /// Look for the given column names, returning true if all are found
         /// </summary>
         /// <remarks>Uses case-sensitive comparison</remarks>
-        /// <param name="columnNames"></param>
-        /// <param name="columnNamesToFind"></param>
-        /// <returns>True if all of the columns are found, otherwise false</returns>
+        /// <param name="columnNames">Column names to search</param>
+        /// <param name="columnNamesToFind">Column names to find</param>
+        /// <returns>True if all the columns are found, otherwise false</returns>
         public static bool LineContainsColumns(IReadOnlyCollection<string> columnNames, params string[] columnNamesToFind)
         {
             return LineContainsColumns(columnNames, false, columnNamesToFind);
@@ -2345,10 +2345,10 @@ namespace PHRPReader
         /// <summary>
         /// Look for the given column names, returning true if all are found
         /// </summary>
-        /// <param name="columnNames"></param>
+        /// <param name="columnNames">Column names to search</param>
         /// <param name="ignoreCase">When true, ignore case when comparing names</param>
-        /// <param name="columnNamesToFind"></param>
-        /// <returns>True if all of the columns are found, otherwise false</returns>
+        /// <param name="columnNamesToFind">Column names to find</param>
+        /// <returns>True if all the columns are found, otherwise false</returns>
         public static bool LineContainsColumns(IReadOnlyCollection<string> columnNames, bool ignoreCase, params string[] columnNamesToFind)
         {
             var comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -2361,8 +2361,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the index of the indicated column, as tracked by columnHeaders
         /// </summary>
-        /// <param name="columnName"></param>
-        /// <param name="columnHeaders"></param>
+        /// <param name="columnName">Column name</param>
+        /// <param name="columnHeaders">Dictionary of column names and index values</param>
         /// <returns>Column index, or -1 if not found</returns>
         public static int LookupColumnIndex(string columnName, SortedDictionary<string, int> columnHeaders)
         {
@@ -2377,8 +2377,8 @@ namespace PHRPReader
         /// <summary>
         /// Returns the index of the indicated column, as tracked by columnHeaders
         /// </summary>
-        /// <param name="columnEnum"></param>
-        /// <param name="columnHeaders"></param>
+        /// <param name="columnEnum">Column enum</param>
+        /// <param name="columnHeaders">Dictionary of column names and index values</param>
         /// <returns>Column index, or -1 if not found</returns>
         public static int LookupColumnIndex(Enum columnEnum, SortedDictionary<Enum, int> columnHeaders)
         {
@@ -2765,9 +2765,9 @@ namespace PHRPReader
         /// <summary>
         /// Read the column names in the first line of the file
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="columnNames"></param>
-        /// <param name="columnDelimiter"></param>
+        /// <param name="filePath">File to examine</param>
+        /// <param name="columnNames">Output: column names from the first line</param>
+        /// <param name="columnDelimiter">Column delimiter</param>
         /// <returns>True if successful, false if an error</returns>
         public static bool ReadHeaderLine(string filePath, out List<string> columnNames, char columnDelimiter = '\t')
         {
@@ -3100,10 +3100,10 @@ namespace PHRPReader
         /// <summary>
         /// If the column exists, get the value for the column and return true
         /// </summary>
-        /// <param name="columns"></param>
-        /// <param name="columnName"></param>
-        /// <param name="columnHeaders"></param>
-        /// <param name="columnValue"></param>
+        /// <param name="columns">Column data</param>
+        /// <param name="columnName">Column name to find</param>
+        /// <param name="columnHeaders">Column headers</param>
+        /// <param name="columnValue">Output: value from columns if the colum name was recognized</param>
         /// <returns>True if the column exists, otherwise false</returns>
         public static bool TryGetColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, out string columnValue)
         {
@@ -3261,7 +3261,7 @@ namespace PHRPReader
         /// <summary>
         /// Dispose of this class
         /// </summary>
-        /// <param name="disposing"></param>
+        /// <param name="disposing">True if disposing this instance</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

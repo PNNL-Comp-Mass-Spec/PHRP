@@ -288,9 +288,9 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Add an additional scan number to associate with this PSM
+        /// Add a scan number to associate with this PSM
         /// </summary>
-        /// <param name="scanNumber"></param>
+        /// <param name="scanNumber">Additional scan number</param>
         public void AddCombinedScan(int scanNumber)
         {
             if (!ScanList.Contains(scanNumber))
@@ -346,7 +346,7 @@ namespace PHRPReader.Data
         /// Add a new protein to associate with this peptide
         /// </summary>
         /// <remarks>Does not update the ProteinDetails dictionary</remarks>
-        /// <param name="proteinName"></param>
+        /// <param name="proteinName">Protein name</param>
         public void AddProtein(string proteinName)
         {
             if (!string.IsNullOrWhiteSpace(proteinName) && !mProteins.Contains(proteinName))
@@ -359,7 +359,7 @@ namespace PHRPReader.Data
         /// Add detailed info of a protein associated with this peptide
         /// </summary>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
-        /// <param name="proteinInfo"></param>
+        /// <param name="proteinInfo">Protein info</param>
         public void AddProtein(ProteinInfo proteinInfo)
         {
             AddProteinDetail(proteinInfo);
@@ -369,7 +369,7 @@ namespace PHRPReader.Data
         /// Add detailed info of a protein associated with this peptide
         /// </summary>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
-        /// <param name="proteinInfo"></param>
+        /// <param name="proteinInfo">Protein info</param>
         public void AddProteinDetail(ProteinInfo proteinInfo)
         {
             var proteinName = proteinInfo.ProteinName;
@@ -580,7 +580,7 @@ namespace PHRPReader.Data
         /// </summary>
         /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
         /// <param name="peptideSequence">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-        /// <param name="updateCleanSequence"></param>
+        /// <param name="updateCleanSequence">When true, auto-determine the clean sequence</param>
         public void SetPeptide(string peptideSequence, bool updateCleanSequence = true)
         {
             if (string.IsNullOrEmpty(peptideSequence))
@@ -623,8 +623,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add/update an additional score to associate with this peptide
         /// </summary>
-        /// <param name="scoreName"></param>
-        /// <param name="scoreValue"></param>
+        /// <param name="scoreName">Score name</param>
+        /// <param name="scoreValue">Score value</param>
         public void SetScore(string scoreName, string scoreValue)
         {
             // Add/update the dictionary
@@ -634,8 +634,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Returns the value stored for the specified score
         /// </summary>
-        /// <param name="scoreName"></param>
-        /// <param name="scoreValue"></param>
+        /// <param name="scoreName">Score name</param>
+        /// <param name="scoreValue">Score value</param>
         /// <returns>True if the score is defined, otherwise false</returns>
         public bool TryGetScore(string scoreName, out string scoreValue)
         {
@@ -645,7 +645,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the peptide sequence
         /// </summary>
-        /// <param name="cleavageStateCalculator"></param>
+        /// <param name="cleavageStateCalculator">Peptide cleavage state calculator</param>
         public void UpdateCleavageInfo(PeptideCleavageStateCalculator cleavageStateCalculator)
         {
             NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(Peptide);
@@ -668,7 +668,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the given peptide sequence
         /// </summary>
-        /// <param name="cleavageStateCalculator"></param>
+        /// <param name="cleavageStateCalculator">Peptide cleavage state calculator</param>
         /// <param name="sequenceWithPrefixAndSuffix">Peptide sequence, including prefix and suffix residues</param>
         public void UpdateCleavageInfo(PeptideCleavageStateCalculator cleavageStateCalculator, string sequenceWithPrefixAndSuffix)
         {

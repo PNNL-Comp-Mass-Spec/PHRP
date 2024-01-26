@@ -41,9 +41,9 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="intensityColumnIndex"></param>
-        /// <param name="intensityColumnName"></param>
-        /// <param name="reporterIonMz"></param>
+        /// <param name="intensityColumnIndex">Intensity column index</param>
+        /// <param name="intensityColumnName">Intensity column name</param>
+        /// <param name="reporterIonMz">Reporter ion m/z</param>
         public ReporterIonColumnInfo(int intensityColumnIndex, string intensityColumnName, double reporterIonMz)
         {
             IntensityColumnIndex = intensityColumnIndex;

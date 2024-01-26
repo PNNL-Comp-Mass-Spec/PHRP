@@ -82,9 +82,9 @@ namespace PeptideHitResultsProcRunner
         /// If filePath is an empty string, return textIfEmptyPath
         /// Otherwise, return the file path, truncated if over the specified maximum length
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="textIfEmptyPath"></param>
-        /// <param name="maxPathLength"></param>
+        /// <param name="filePath">File path</param>
+        /// <param name="textIfEmptyPath">Text to return if filePath is an empty string</param>
+        /// <param name="maxPathLength">Maximum path length</param>
         private string FilePathOrText(string filePath, string textIfEmptyPath, int maxPathLength = 110)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -136,7 +136,7 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Log an additional message to the log file
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Message</param>
         public void LogAdditionalMessage(string message)
         {
             LogMessage(message);
@@ -146,9 +146,9 @@ namespace PeptideHitResultsProcRunner
         /// Main processing routine
         /// </summary>
         /// <param name="inputFilePath">PSM tool results file</param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="parameterFilePath"></param>
-        /// <param name="resetErrorCode"></param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="parameterFilePath">Parameter file path</param>
+        /// <param name="resetErrorCode">When true, reset the error code</param>
         /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {

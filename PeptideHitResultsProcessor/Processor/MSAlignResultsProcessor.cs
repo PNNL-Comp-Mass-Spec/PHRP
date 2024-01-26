@@ -27,7 +27,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public MSAlignResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 13, 2022";
@@ -194,8 +194,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// For each residue, check if a static mod is defined that affects that residue
         /// For each mod mass, determine the modification and add to searchResult
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -390,11 +390,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
-        /// <param name="searchResults"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="endIndex"></param>
+        /// <param name="searchResults">Search results</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
         private void AssignRankByScore(
             IList<MSAlignSearchResult> searchResults,
             int startIndex,
@@ -517,8 +517,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
         /// The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputFilePath">Output file path</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
@@ -540,10 +540,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                 mDeltaMassWarningCount = 0;
 
-                // Initialize array that will hold all of the records in the MSAlign result file
+                // Initialize array that will hold all the records in the MSAlign result file
                 var searchResultsUnfiltered = new List<MSAlignSearchResult>();
 
-                // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                // Initialize the array that will hold all the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<MSAlignSearchResult>();
 
                 // Parse the input file
@@ -632,8 +632,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read mod info from the MSAlign parameter file
         /// </summary>
-        /// <param name="msAlignParamFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="msAlignParamFilePath">MSAlign parameter file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True on success, false if an error</returns>
         private bool ExtractModInfoFromMSAlignParamFile(string msAlignParamFilePath, out List<ModificationDefinition> modList)
         {
@@ -925,10 +925,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse an entry from the MSAlign results file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
         private bool ParseMSAlignResultsFileEntry(
             string lineIn,
             out MSAlignSearchResult udtSearchResult,
@@ -1122,8 +1122,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MSAlign results file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
@@ -1202,8 +1202,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MSAlign _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<MSAlignSynFileColumns, int> columnMapping)
         {
@@ -1536,7 +1536,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Call .LookupModificationDefinitionByMass for each entry in msAlignModInfo
         /// </summary>
-        /// <param name="msAlignModInfo"></param>
+        /// <param name="msAlignModInfo">Modification info</param>
         private void ResolveMSAlignModsWithModDefinitions(IReadOnlyCollection<ModificationDefinition> msAlignModInfo)
         {
             if (msAlignModInfo == null)
@@ -1603,10 +1603,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="includeSpeciesAndFragMethod"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="includeSpeciesAndFragMethod">Output: if true, include species and fragmentation method</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             IDictionary<MSAlignResultsFileColumns, int> columnMapping,
@@ -1655,11 +1655,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to the synopsis file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="includeSpeciesAndFragMethod"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="includeSpeciesAndFragMethod">When true, append headers Species_ID and FragMethod</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

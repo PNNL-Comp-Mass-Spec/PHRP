@@ -16,8 +16,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Convert an integer to a string, returning a default value if the conversion fails
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="defaultValue"></param>
+        /// <param name="value">Value to parse</param>
+        /// <param name="defaultValue">Default value</param>
         public static int CIntSafe(string value, int defaultValue)
         {
             try
@@ -36,8 +36,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Convert a double to a string, returning a default value if the conversion fails
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="defaultValue"></param>
+        /// <param name="value">Value to parse</param>
+        /// <param name="defaultValue">Default value</param>
         public static double CDblSafe(string value, double defaultValue)
         {
             try
@@ -54,8 +54,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Convert a float to a string, returning a default value if the conversion fails
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="defaultValue"></param>
+        /// <param name="value">Value to parse</param>
+        /// <param name="defaultValue">Default value</param>
         public static float CSngSafe(string value, float defaultValue)
         {
             try
@@ -72,7 +72,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Collapses a list of strings to a tab-delimited line of text
         /// </summary>
-        /// <param name="fields"></param>
+        /// <param name="fields">List of strings</param>
         public static string CollapseList(List<string> fields)
         {
             return string.Join("\t", fields);
@@ -83,7 +83,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>
         /// Note that the Char.IsLetter() method returns True for "º" and various other Unicode ModifierLetter characters
-        /// In contrast, this method only returns True for normal letters between A and Z (case insensitive)
+        /// In contrast, this method only returns True for normal letters between A and Z (case-insensitive)
         /// </remarks>
         /// <param name="character">Character to examine</param>
         public static bool IsLetterAtoZ(char character)
@@ -94,8 +94,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Find the longest string of letters in common at the start of the items
         /// </summary>
-        /// <param name="items"></param>
-        /// <param name="caseSensitive"></param>
+        /// <param name="items">Items to examine</param>
+        /// <param name="caseSensitive">True if case-sensitive</param>
         public static string LongestCommonStringFromStart(List<string> items, bool caseSensitive = false)
         {
             if (items.Count == 0)
@@ -125,9 +125,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Find the longest string of letters in common between string1 and string 2
         /// </summary>
-        /// <param name="string1"></param>
-        /// <param name="string2"></param>
-        /// <param name="comparisonType"></param>
+        /// <param name="string1">First string</param>
+        /// <param name="string2">Second string</param>
+        /// <param name="comparisonType">String comparison mode</param>
         public static string LongestCommonStringFromStart(string string1, string string2, StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
         {
             if (string2.Length < string1.Length)
@@ -152,8 +152,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Find the longest string of letters in common at the start of the items (verbose algorithm)
         /// </summary>
-        /// <param name="items"></param>
-        /// <param name="caseSensitive"></param>
+        /// <param name="items">Items to examine</param>
+        /// <param name="caseSensitive">True if case-sensitive</param>
         public static string LongestCommonStringFromStartVerbose(List<string> items, bool caseSensitive = false)
         {
             if (items.Count == 0)
@@ -213,7 +213,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Convert a mass error to a string, rounding to either 5 or 6 decimal places
         /// </summary>
         /// <remarks>Returns "0" if zero</remarks>
-        /// <param name="massErrorDa"></param>
+        /// <param name="massErrorDa">Mass error, in Da</param>
         public static string MassErrorToString(double massErrorDa)
         {
             if (Math.Abs(massErrorDa) < 0.000001)
@@ -229,8 +229,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Otherwise, if valueText is 0.0, returns 0
         /// Otherwise, returns valueText
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="valueText"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="valueText">Value, as text</param>
         public static string TrimZeroIfNotFirstID(int resultID, string valueText)
         {
             return resultID > 1 ? TrimZero(valueText) : valueText;
@@ -240,7 +240,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// If valueText is 0.0, returns 0
         /// Otherwise, returns valueText
         /// </summary>
-        /// <param name="valueText"></param>
+        /// <param name="valueText">Value, as text</param>
         public static string TrimZero(string valueText)
         {
             return valueText.Equals("0.0") ? "0" : valueText;

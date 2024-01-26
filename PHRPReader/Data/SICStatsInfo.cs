@@ -188,8 +188,8 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="parentIonIndex"></param>
-        /// <param name="fragScanNumber"></param>
+        /// <param name="parentIonIndex">Parent ion index</param>
+        /// <param name="fragScanNumber">Fragmentation scan number</param>
         public SICStatsInfo(int parentIonIndex, int fragScanNumber)
         {
             ParentIonIndex = parentIonIndex;

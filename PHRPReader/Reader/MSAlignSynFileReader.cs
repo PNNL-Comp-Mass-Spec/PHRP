@@ -121,7 +121,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
         private double DeterminePrecursorMassTolerance(SearchEngineParameters searchEngineParams, out double tolerancePPM)
@@ -190,7 +190,7 @@ namespace PHRPReader.Reader
         /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
         /// Populates a dictionary mapping enum MSAlignSynFileColumns to the 0-based index in columnNames
         /// </summary>
-        /// <param name="headerNames"></param>
+        /// <param name="headerNames">List of header names</param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<MSAlignSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
@@ -202,7 +202,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Get the synopsis file column name associated with the given enum
         /// </summary>
-        /// <param name="column"></param>
+        /// <param name="column">Column enum</param>
         /// <returns>Column name</returns>
         public static string GetColumnNameByID(MSAlignSynFileColumns column)
         {
@@ -222,7 +222,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
@@ -232,7 +232,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ModSummary file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(string datasetName)
         {
@@ -242,7 +242,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default PepToProtMap file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
@@ -252,7 +252,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ProteinMods file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(string datasetName)
         {
@@ -262,7 +262,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default Synopsis file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(string datasetName)
         {
@@ -272,7 +272,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default ResultToSeq map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
@@ -282,7 +282,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqInfo map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(string datasetName)
         {
@@ -292,7 +292,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Default SeqToProtein map file name for the given dataset
         /// </summary>
-        /// <param name="datasetName"></param>
+        /// <param name="datasetName">Dataset name</param>
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
@@ -310,8 +310,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parses the specified MSAlign parameter file
         /// </summary>
-        /// <param name="searchEngineParamFileName"></param>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="searchEngineParamFileName">MSAlign parameter file name</param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams)
         {

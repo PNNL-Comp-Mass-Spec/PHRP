@@ -406,7 +406,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Show the residue location in the peptide, residue symbol, and mod mass
             /// </summary>
-            public override string ToString()
+            public readonly override string ToString()
             {
                 return ResidueSymbol is default(char)
                     ? string.Format("{0}: {1:F4}", ResidueLocInPeptide, ModMass)
@@ -435,8 +435,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// Add modifications to a peptide read from the MSFragger synopsis file
         /// Next, compute the monoisotopic mass
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         /// <returns>True if success, false if an error</returns>
         private bool AddModificationsAndComputeMass(
             MSFraggerResults searchResult,
@@ -469,8 +469,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Add modifications to a peptide read from the MSFragger synopsis file
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddModificationsToResidues(
             MSFraggerResults searchResult,
             bool updateModOccurrenceCounts)
@@ -490,11 +490,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
-        /// <param name="searchResults"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="endIndex"></param>
+        /// <param name="searchResults">Search results</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
         private void AssignRankByScore(
             IList<MSFraggerSearchResult> searchResults,
             int startIndex,
@@ -550,7 +550,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Compute the monoisotopic MH value using the calculated monoisotopic mass
         /// </summary>
         /// <remarks>This is (M+H)+ when the charge carrier is a proton</remarks>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         /// <returns>(M+H)+, as a string</returns>
         private string ComputeMH(ToolResultsBaseClass searchResult)
         {
@@ -709,7 +709,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
-        /// <param name="searchResult"></param>
+        /// <param name="searchResult">Search result</param>
         private double ComputeTotalModMass(ToolResultsBaseClass searchResult)
         {
             if (string.IsNullOrWhiteSpace(searchResult.ModificationList))
@@ -723,7 +723,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Use scan number, charge state, and clean sequence (no prefix or suffix residues) to create a key for a PSM
         /// </summary>
-        /// <param name="additionalResult"></param>
+        /// <param name="additionalResult">Search result</param>
         /// <returns>String in the form Scan-Charge-CleanSequence</returns>
         /// <exception cref="NotImplementedException"></exception>
         private string ConstructKeyForPSM(ToolResultsBaseClass additionalResult)
@@ -737,7 +737,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="inputFilePath">MSFragger results file</param>
-        /// <param name="outputDirectoryPath"></param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
         /// <param name="filterPassingResultCount">Output: number of filter passing results</param>
@@ -861,8 +861,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Find the Dataset.tsv files that correspond to an Aggregation_psm.tsv file
         /// </summary>
-        /// <param name="inputFile"></param>
-        /// <param name="datasetNames"></param>
+        /// <param name="inputFile">Input file</param>
+        /// <param name="datasetNames">List of dataset names</param>
         /// <returns>Dictionary with the matching files, along with the dataset name for each file</returns>
         private Dictionary<FileInfo, string> FindAggregationPsmSourceFiles(FileInfo inputFile, IEnumerable<string> datasetNames)
         {
@@ -932,9 +932,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Examine the dataset names in filteredSearchResults
         /// Create a mapping from full name to abbreviated name
         /// </summary>
-        /// <param name="inputFileName"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="longestCommonBaseName"></param>
+        /// <param name="inputFileName">Input file name</param>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="longestCommonBaseName">Longest common base name</param>
         /// <returns>Dictionary where keys are dataset names and values are abbreviated names</returns>
         private Dictionary<string, string> GetDatasetNameMap(
             string inputFileName,
@@ -1220,7 +1220,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Read the precursor match tolerance from the MSFragger parameter file
         /// </summary>
-        /// <param name="msFraggerParamFilePath"></param>
+        /// <param name="msFraggerParamFilePath">MSFragger parameter file path</param>
         /// <returns>True on success, false if an error</returns>
         private bool LoadSearchEngineParamFile(string msFraggerParamFilePath)
         {
@@ -1473,9 +1473,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSFraggerSynopsisFile(
             string inputFilePath,
@@ -1614,11 +1614,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MSFragger results line while creating the MSFragger synopsis file
         /// </summary>
-        /// <param name="readingPsmFile"></param>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="readingPsmFile">True when reading the _psm.tsv file</param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
         /// <param name="currentDatasetName">Current dataset name; updated by this method if the Spectrum File name is not an empty string</param>
         /// <returns>True if successful, false if an error</returns>
@@ -1918,9 +1918,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// This method supports both Dataset_psm.tsv files and Dataset.tsv (which have similar, but different column names)
         /// </remarks>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="readingPsmFile"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="readingPsmFile">True when reading the _psm.tsv file</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMSFraggerResultsFileHeaderLine(
             string lineIn,
@@ -2040,8 +2040,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a MSFragger _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSFraggerSynFileHeaderLine(string lineIn, IDictionary<MSFraggerSynFileColumns, int> columnMapping)
         {
@@ -2080,11 +2080,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from a MSFragger Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSFraggerSynFileEntry(
             string lineIn,
@@ -2412,7 +2412,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
         /// <param name="inputFile">Dataset.tsv, Dataset_psm.tsv, or Aggregation_psm.tsv file</param>
-        /// <param name="errorMessages"></param>
+        /// <param name="errorMessages">Error messages</param>
         /// <param name="filteredSearchResults">Output: MSFragger results</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ReadMSFraggerResults(
@@ -2441,7 +2441,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var headerParsed = false;
                 var lineNumber = 0;
 
-                // Initialize the list that will hold all of the records in the MSFragger result file
+                // Initialize the list that will hold all the records in the MSFragger result file
                 var searchResultsUnfiltered = new List<MSFraggerSearchResult>();
 
                 // Check whether the input file ends with _psm.tsv
@@ -2513,7 +2513,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 while (startIndex < searchResultsUnfiltered.Count)
                 {
-                    // Find all of the matches for the current result's scan
+                    // Find all the matches for the current result's scan
                     // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
                     // MSFragger will typically report just one match
 
@@ -2552,9 +2552,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// If proteinNameToCheck contains a space, extract the protein name and description, then return true
         /// Otherwise, store the string in proteinName, set proteinDescription to an empty string, and return false
         /// </summary>
-        /// <param name="proteinNameToCheck"></param>
-        /// <param name="proteinName"></param>
-        /// <param name="proteinDescription"></param>
+        /// <param name="proteinNameToCheck">Protein name to check</param>
+        /// <param name="proteinName">Protein name</param>
+        /// <param name="proteinDescription">Protein description</param>
         /// <returns>True if a space was found, otherwise false</returns>
         private bool SplitProteinNameAndDescription(string proteinNameToCheck, out string proteinName, out string proteinDescription)
         {
@@ -2611,8 +2611,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Update targetValue if it is empty, but sourceValue is not empty
         /// </summary>
-        /// <param name="targetValue"></param>
-        /// <param name="sourceValue"></param>
+        /// <param name="targetValue">Target value</param>
+        /// <param name="sourceValue">Source value</param>
         private void UpdateUndefinedValue(ref string targetValue, string sourceValue)
         {
             if (!string.IsNullOrWhiteSpace(targetValue) || string.IsNullOrWhiteSpace(sourceValue))
@@ -2624,8 +2624,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -2653,9 +2653,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write search results to disk
         /// </summary>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
-        /// <param name="writer"></param>
-        /// <param name="filteredSearchResults"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteFilteredSearchResults(
             Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
@@ -2682,12 +2682,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="baseDatasetName"></param>
-        /// <param name="datasetID"></param>
-        /// <param name="writer"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="baseDatasetName">Base dataset name</param>
+        /// <param name="datasetID">Dataset ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             string baseDatasetName,

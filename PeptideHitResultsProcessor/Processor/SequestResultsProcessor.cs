@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public SequestResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 13, 2022";
@@ -196,9 +196,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a synopsis or first hits file
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
@@ -650,8 +650,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line of a SEQUEST _syn.txt file, populating columnMapping
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseSequestSynFileHeaderLine(string lineIn, IDictionary<SequestSynopsisFileColumns, int> columnMapping)
         {

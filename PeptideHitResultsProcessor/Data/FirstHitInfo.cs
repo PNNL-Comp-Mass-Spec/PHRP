@@ -52,8 +52,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="peptideSeqWithModsAndContext"></param>
-        /// <param name="peptideCleanSeq"></param>
+        /// <param name="peptideSeqWithModsAndContext">Peptide sequence with modifications, prefix, and suffix letters</param>
+        /// <param name="peptideCleanSeq">Peptide sequence without modifications</param>
         public FirstHitInfo(string peptideSeqWithModsAndContext, string peptideCleanSeq)
         {
             if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, out mPrimarySequence, out mPrefix, out mSuffix))
@@ -75,8 +75,8 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Update the prefix and suffix residues for this peptide
         /// </summary>
-        /// <param name="newPrefix"></param>
-        /// <param name="newSuffix"></param>
+        /// <param name="newPrefix">New prefix</param>
+        /// <param name="newSuffix">New suffix</param>
         public void UpdatePrefixAndSuffix(string newPrefix, string newSuffix)
         {
             mPrefix = newPrefix;

@@ -120,8 +120,8 @@ namespace PHRPReader.Data
         /// However, do not add if a duplicate modification
         /// Furthermore, if everything matches except for .TargetResidues, add the new target residues to the existing, matching mod
         /// </summary>
-        /// <param name="modificationDefinition"></param>
-        /// <param name="useNextAvailableModificationSymbol"></param>
+        /// <param name="modificationDefinition">Modification definition</param>
+        /// <param name="useNextAvailableModificationSymbol">When true, use the next available modification symbol</param>
         /// <returns>The index of the newly added modification, or the index of the modification that modificationDefinition matches </returns>
         private int AddModification(ModificationDefinition modificationDefinition, bool useNextAvailableModificationSymbol)
         {
@@ -289,10 +289,10 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Find the modification in matchedMods with smallest delta mass value
+        /// Find the modification in matchedMods with the smallest delta mass value
         /// </summary>
         /// <param name="matchedMods">List of modifications where keys are absolute value of delta mass and values are the modification definition</param>
-        /// <param name="chTargetResidue"></param>
+        /// <param name="chTargetResidue">Target residue</param>
         /// <param name="addTargetResidue">If true, add the target residue to the modification definition's target residues list (if missing)</param>
         private ModificationDefinition FindClosestMatchedMod(
             IReadOnlyCollection<KeyValuePair<double, ModificationDefinition>> matchedMods,
@@ -325,7 +325,7 @@ namespace PHRPReader.Data
         /// Converts a modification mass to a generic 8 character name
         /// The name will always start with + or - then will have the modification mass, rounded as necessary to give an 8 character name
         /// </summary>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationMass">Modification mass</param>
         private string GenerateGenericModMassName(double modificationMass)
         {
             int formatDigits;
@@ -411,7 +411,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Looks for the best match in mIntegerMassCorrectionTagLookup for modificationMass (which should be close to a integer value)
         /// </summary>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationMass">Modification mass</param>
         /// <returns>The mass correction tag name if a match, otherwise an empty string</returns>
         private string GetBestIntegerBasedMassCorrectionTag(double modificationMass)
         {
@@ -432,7 +432,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Get a modification, by index
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">Index</param>
         public ModificationDefinition GetModificationByIndex(int index)
         {
             if (index >= 0 && index < Modifications.Count)
@@ -446,7 +446,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Get the modification type, by modification index
         /// </summary>
-        /// <param name="index"></param>
+        /// <param name="index">Index</param>
         public ModificationDefinition.ResidueModificationType GetModificationTypeByIndex(int index)
         {
             if (index >= 0 && index < Modifications.Count)
@@ -464,7 +464,7 @@ namespace PHRPReader.Data
         /// Searches known mods using 3 digits of precision, then 2 digits, then 1 digit
         /// If no match, adds as a new, unknown modification
         /// </remarks>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationMass">Modification mass</param>
         /// <returns>Mod name, or empty string if no match</returns>
         public string LookupMassCorrectionTagByMass(double modificationMass)
         {
@@ -481,8 +481,8 @@ namespace PHRPReader.Data
         /// Searches known mods using massDigitsOfPrecision digits of precision, then massDigitsOfPrecision-1 digits, ... 1 digit
         /// If no match, adds as a new, unknown modification
         /// </remarks>
-        /// <param name="modificationMass"></param>
-        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="massDigitsOfPrecision">Mass digits of precision</param>
         /// <returns>Mod name, or empty string if no match</returns>
         // ReSharper disable once UnusedMember.Global
         public string LookupMassCorrectionTagByMass(double modificationMass, byte massDigitsOfPrecision)
@@ -499,9 +499,9 @@ namespace PHRPReader.Data
         /// Searches known mods using massDigitsOfPrecision digits of precision, then massDigitsOfPrecision-1 digits, ... 1 digit
         /// If no match, adds as a new, unknown modification
         /// </remarks>
-        /// <param name="modificationMass"></param>
-        /// <param name="massDigitsOfPrecision"></param>
-        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="massDigitsOfPrecision">Mass digits of precision</param>
+        /// <param name="addToModificationListIfUnknown">When true, add to the modification list if unknown</param>
         /// <returns>Mod name, or empty string if no match</returns>
         public string LookupMassCorrectionTagByMass(double modificationMass, byte massDigitsOfPrecision, bool addToModificationListIfUnknown)
         {
@@ -513,9 +513,9 @@ namespace PHRPReader.Data
         /// <summary>
         /// Find the mass correction tag with the given mass, adding to the unknown modification list if not found and addToModificationListIfUnknown is true
         /// </summary>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationMass">Modification mass</param>
         /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
-        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="addToModificationListIfUnknown">When true, add to the modification list if unknown</param>
         /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>Mod name, or empty string if no match</returns>
         public string LookupMassCorrectionTagByMass(
@@ -611,10 +611,10 @@ namespace PHRPReader.Data
         /// Looks for a modification of type .DynamicMod or type .UnknownType in mModifications having .ModificationSymbol = modificationSymbol and chTargetResidue in .TargetResidues
         /// </summary>
         /// <remarks>If modificationSymbol does not match any of the mods, a modification with a mass of 0 is returned</remarks>
-        /// <param name="modificationSymbol"></param>
-        /// <param name="chTargetResidue"></param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="existingModFound"></param>
+        /// <param name="modificationSymbol">Modification symbol</param>
+        /// <param name="chTargetResidue">Target residue</param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="existingModFound">Output: true if an existing modification was found</param>
         /// <returns>Modification details</returns>
         public ModificationDefinition LookupDynamicModificationDefinitionByTargetInfo(
             char modificationSymbol,
@@ -762,14 +762,14 @@ namespace PHRPReader.Data
         /// Looks for an existing modification with the given modification mass and target residues
         /// </summary>
         /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
-        /// <param name="modificationMass"></param>
+        /// <param name="modificationMass">Modification mass</param>
         /// <param name="chTargetResidue">
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
         /// if no match, looks for the first modification with the given mass and no defined .TargetResidues
         /// </param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="existingModFound"></param>
-        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="existingModFound">Output: true if an existing modification was found</param>
+        /// <param name="addToModificationListIfUnknown">When true, add to the modification list if unknown</param>
         /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
         /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown is True</returns>
@@ -1041,14 +1041,14 @@ namespace PHRPReader.Data
         /// Looks for an existing modification with the given modification mass, modification type, and target residues
         /// </summary>
         /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
-        /// <param name="modificationMass"></param>
-        /// <param name="modType"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="modType">Modification type</param>
         /// <param name="chTargetResidue">
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
         /// if no match, looks for the first modification with the given mass and no defined .TargetResidues</param>
-        /// <param name="residueTerminusState"></param>
-        /// <param name="existingModFound"></param>
-        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="residueTerminusState">Residue terminus state</param>
+        /// <param name="existingModFound">Output: true if an existing modification was found</param>
+        /// <param name="addToModificationListIfUnknown">When true, add to the modification list if unknown</param>
         /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
         /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True</returns>
@@ -1235,8 +1235,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Load the mass correction tags file
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="fileNotFound"></param>
+        /// <param name="filePath">Mass correction tags file path</param>
+        /// <param name="fileNotFound">Output: true if the file was not found</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ReadMassCorrectionTagsFile(string filePath, out bool fileNotFound)
         {
@@ -1309,8 +1309,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Read a modification definitions file (_ModDefs.txt)
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="fileNotFound"></param>
+        /// <param name="filePath">Modification definitions file path</param>
+        /// <param name="fileNotFound">Output: true if the file was not found</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ReadModificationDefinitionsFile(string filePath, out bool fileNotFound)
         {
@@ -1873,10 +1873,10 @@ namespace PHRPReader.Data
         /// <summary>
         /// Verify that a modification is present, adding it if missing
         /// </summary>
-        /// <param name="modificationMass"></param>
-        /// <param name="targetResidues"></param>
-        /// <param name="modificationType"></param>
-        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="modificationMass">Modification mass</param>
+        /// <param name="targetResidues">Target residues</param>
+        /// <param name="modificationType">Modification type</param>
+        /// <param name="massDigitsOfPrecision">Mass digits of precision</param>
         /// <returns>True if the modification was matched or was added; false if an error</returns>
         public bool VerifyModificationPresent(
             double modificationMass,

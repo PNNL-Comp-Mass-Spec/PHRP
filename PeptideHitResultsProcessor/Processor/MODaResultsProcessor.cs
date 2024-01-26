@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">Options</param>
         public MODaResultsProcessor(PHRPOptions options) : base(options)
         {
             FileDate = "January 14, 2022";
@@ -173,8 +173,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// For each residue, check if a static mod is defined that affects that residue
         /// For each mod mass, determine the modification and add to searchResult
         /// </summary>
-        /// <param name="searchResult"></param>
-        /// <param name="updateModOccurrenceCounts"></param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="updateModOccurrenceCounts">When true, update mod occurrence counts</param>
         private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -331,11 +331,11 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Ranks each entry (assumes all of the data is from the same scan)
+        /// Ranks each entry (assumes all the data is from the same scan)
         /// </summary>
-        /// <param name="searchResults"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="endIndex"></param>
+        /// <param name="searchResults">Search results</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="endIndex">End index</param>
         private void AssignRankByScore(
             IList<MODaSearchResult> searchResults,
             int startIndex,
@@ -490,8 +490,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// The synopsis file includes every result with a probability above a set threshold
         /// The first-hits file includes the result with the highest probability (for each scan and charge)
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputFilePath"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputFilePath">Output file path</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
@@ -510,10 +510,10 @@ namespace PeptideHitResultsProcessor.Processor
                 var resultsProcessed = 0;
                 mDeltaMassWarningCount = 0;
 
-                // Initialize the list that will hold all of the records in the MODa result file
+                // Initialize the list that will hold all the records in the MODa result file
                 var searchResultsUnfiltered = new List<MODaSearchResult>();
 
-                // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                // Initialize the list that will hold all the records that will ultimately be written out to disk
                 var filteredSearchResults = new List<MODaSearchResult>();
 
                 // Parse the input file
@@ -600,8 +600,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Load the static mods defined in the MODa parameter file
         /// </summary>
-        /// <param name="modaParamFilePath"></param>
-        /// <param name="modList"></param>
+        /// <param name="modaParamFilePath">MODa parameter file path</param>
+        /// <param name="modList">List of modifications</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ExtractModInfoFromMODaParamFile(string modaParamFilePath, out List<ModificationDefinition> modList)
         {
@@ -807,10 +807,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse a MODa synopsis file
         /// </summary>
-        /// <param name="inputFilePath"></param>
-        /// <param name="outputDirectoryPath"></param>
-        /// <param name="pepToProteinMapping"></param>
-        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="outputDirectoryPath">Output directory path</param>
+        /// <param name="pepToProteinMapping">List of peptide to protein map values</param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions">If true, reset the mass correction tags and modification definitions</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
@@ -1022,10 +1022,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from the MODa results file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
@@ -1169,8 +1169,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line from a MODa results file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseMODaResultsFileHeaderLine(string lineIn, IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
@@ -1251,8 +1251,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the header line from a MODa _syn.txt file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="columnMapping"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="columnMapping">Column mapping</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynFileHeaderLine(string lineIn, IDictionary<MODaSynFileColumns, int> columnMapping)
         {
@@ -1291,12 +1291,12 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parses an entry from a MODa Synopsis file
         /// </summary>
-        /// <param name="lineIn"></param>
-        /// <param name="searchResult"></param>
-        /// <param name="errorMessages"></param>
-        /// <param name="resultsProcessed"></param>
-        /// <param name="columnMapping"></param>
-        /// <param name="peptideSequenceWithMods"></param>
+        /// <param name="lineIn">Data line</param>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="resultsProcessed">Number of results loaded when this method is called</param>
+        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="peptideSequenceWithMods">Peptide sequence, with modification symbols</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynFileEntry(
             string lineIn,
@@ -1625,8 +1625,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits files
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)
@@ -1653,10 +1653,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Writes an entry to the synopsis file
         /// </summary>
-        /// <param name="resultID"></param>
-        /// <param name="writer"></param>
-        /// <param name="udtSearchResult"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="resultID">Result ID</param>
+        /// <param name="writer">Writer</param>
+        /// <param name="udtSearchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

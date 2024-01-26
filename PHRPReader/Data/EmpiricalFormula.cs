@@ -58,8 +58,8 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add a new element to the empirical formula
         /// </summary>
-        /// <param name="elementSymbol"></param>
-        /// <param name="elementCount"></param>
+        /// <param name="elementSymbol">Element symbol</param>
+        /// <param name="elementCount">Element count</param>
         public void AddElement(string elementSymbol, int elementCount)
         {
             if (ElementCounts.TryGetValue(elementSymbol, out var existingCount))
@@ -73,9 +73,9 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Adds all of the elements from the given empirical formula
+        /// Adds all the elements from the given empirical formula
         /// </summary>
-        /// <param name="empiricalFormula"></param>
+        /// <param name="empiricalFormula">Empirical formula</param>
         public void AddElements(EmpiricalFormula empiricalFormula)
         {
             foreach (var element in empiricalFormula.ElementCounts)
@@ -87,7 +87,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Return the number of atoms of the given element in the empirical formula
         /// </summary>
-        /// <param name="elementSymbol"></param>
+        /// <param name="elementSymbol">Element symbol</param>
         /// <returns>Element Count, or 0 if the element is not in ElementCounts</returns>
         public int GetElementCount(char elementSymbol)
         {

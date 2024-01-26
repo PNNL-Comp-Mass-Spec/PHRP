@@ -620,7 +620,7 @@ namespace PeptideHitResultsProcessor.Processor
                     firstResult.ProteinName = firstResult.ProteinName.Substring(0, index);
                 }
 
-                // sumI: log10 value of the sum of all of the fragment ion intensities
+                // sumI: log10 value of the sum of all the fragment ion intensities
                 firstResult.PeptideIntensity = XMLTextReaderGetAttributeValue(xmlReader, "sumI", string.Empty);
 
                 // maxI: maximum fragment ion intensity
@@ -757,7 +757,7 @@ namespace PeptideHitResultsProcessor.Processor
                                     newestResult.PeptideBScore = XMLTextReaderGetAttributeValue(xmlReader, "b_score", string.Empty);
                                     newestResult.PeptideBIons = XMLTextReaderGetAttributeValue(xmlReader, "b_ions", string.Empty);
 
-                                    // Now read all of the mods for this domain
+                                    // Now read all the mods for this domain
                                     // If this is the first search result, update the mod occurrence counts; otherwise, do not
                                     if (searchResults.Count == 1)
                                     {
@@ -1172,7 +1172,7 @@ namespace PeptideHitResultsProcessor.Processor
             var modList = new List<SearchOptionModificationInfo>();
 
             // Initialize paramLabels; this specifies the parameters to examine
-            // Note: When populating this we use .ToLower() to make sure all of the text is lowercase
+            // Note: When populating this we use .ToLower() to make sure all the text is lowercase
             var paramLabels = new string[INPUT_PARAM_LABEL_NAMES_MAX_INDEX + 1];
             paramLabels[(int)InputParamLabelNames.Residue_StaticModMass] = "residue, modification mass".ToLower();
             paramLabels[(int)InputParamLabelNames.Residue_PotentialModMass] = "residue, potential modification mass".ToLower();
@@ -1189,7 +1189,7 @@ namespace PeptideHitResultsProcessor.Processor
             paramLabels[(int)InputParamLabelNames.Refine_ModificationMass] = "refine, modification mass".ToLower();
             paramLabels[(int)InputParamLabelNames.Scoring_Include_Reverse] = "scoring, include reverse".ToLower();
 
-            // Make sure all of the text in paramLabels() is lowercase
+            // Make sure all the text in paramLabels() is lowercase
             for (var index = 0; index <= paramLabels.Length - 1; index++)
             {
                 paramLabels[index] = paramLabels[index].ToLower();
@@ -1580,7 +1580,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Return the text up to (but not including) the first space in proteinNameAndDescription
         /// </summary>
         /// <remarks>Optionally looks for the reversed protein sequence indicator</remarks>
-        /// <param name="proteinNameAndDescription"></param>
+        /// <param name="proteinNameAndDescription">Protein name and description</param>
         protected override string TruncateProteinName(string proteinNameAndDescription)
         {
             var isReversed = false;
@@ -1602,8 +1602,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Write out the header line for synopsis / first hits file
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="errorMessages"></param>
+        /// <param name="writer">Writer</param>
+        /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ICollection<string> errorMessages)

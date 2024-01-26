@@ -254,7 +254,7 @@ namespace PHRPReader.Reader
         /// </remarks>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <param name="peptideHitResultType"></param>
+        /// <param name="peptideHitResultType">PHRP results type</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
@@ -535,9 +535,9 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Add a score to a PSM
         /// </summary>
-        /// <param name="psm"></param>
-        /// <param name="columns"></param>
-        /// <param name="scoreColumnName"></param>
+        /// <param name="psm">PSM</param>
+        /// <param name="columns">column data</param>
+        /// <param name="scoreColumnName">Score column name</param>
         protected void AddScore(PSM psm, string[] columns, string scoreColumnName)
         {
             const string NOT_FOUND = "==SCORE_NOT_FOUND==";
@@ -610,7 +610,7 @@ namespace PHRPReader.Reader
         /// Look for ambiguous mods in sequenceWithMods
         /// For example, -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
         /// </summary>
-        /// <param name="sequenceWithMods"></param>
+        /// <param name="sequenceWithMods">Peptide sequence, with modification masses</param>
         /// <returns>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</returns>
         private SortedList<int, AmbiguousModInfo> ExtractAmbiguousMods(string sequenceWithMods)
         {
@@ -684,7 +684,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Finalize the PSM by updating the clean sequence, updating mod info, and updating the sequence info
         /// </summary>
-        /// <param name="psm"></param>
+        /// <param name="psm">PSM</param>
         public void FinalizePSM(PSM psm)
         {
             psm.UpdateCleanSequence();
@@ -762,8 +762,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Report an exception as an error
         /// </summary>
-        /// <param name="baseMessage"></param>
-        /// <param name="ex"></param>
+        /// <param name="baseMessage">Base message</param>
+        /// <param name="ex">Exception</param>
         protected void HandleException(string baseMessage, Exception ex)
         {
             if (string.IsNullOrEmpty(baseMessage))
@@ -777,7 +777,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Examines the string to determine if it is numeric
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="data">Value to parse</param>
         /// <returns>True if a number, otherwise false</returns>
         public static bool IsNumber(string data)
         {
@@ -935,8 +935,8 @@ namespace PHRPReader.Reader
         /// Rounds the number to the specified number of digits, trimming off trailing zeros
         /// Example output: +79.9663 or -17.016
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="digitsOfPrecision"></param>
+        /// <param name="value">Number to format</param>
+        /// <param name="digitsOfPrecision">Digits of precision</param>
         /// <returns>Formatted number</returns>
         public static string NumToStringPlusMinus(double value, int digitsOfPrecision)
         {
@@ -961,7 +961,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Parse the column names in splitLine and update the local column header mapping
         /// </summary>
-        /// <param name="splitLine"></param>
+        /// <param name="splitLine">Array of column names</param>
         public void ParseColumnHeaders(string[] splitLine)
         {
             ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
@@ -970,8 +970,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Convert a list of delimited items to an enumerable list, trimming whitespace from each item
         /// </summary>
-        /// <param name="delimitedList"></param>
-        /// <param name="delimiter"></param>
+        /// <param name="delimitedList">Delimited list of items</param>
+        /// <param name="delimiter">Delimiter</param>
         /// <param name="includeEmptyItems">If true, include empty items in the list</param>
         /// <remarks>
         /// If delimitedList is "Value1;;Value2" and includeEmptyItems is false, a 2 item list will be returned
@@ -989,8 +989,8 @@ namespace PHRPReader.Reader
         /// Splits text on text, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
         /// </summary>
         /// <remarks>Automatically trims whitespace</remarks>
-        /// <param name="text"></param>
-        /// <param name="chDelimiter"></param>
+        /// <param name="text">Text to parse</param>
+        /// <param name="chDelimiter">Delimiter</param>
         /// <returns>KeyValuePair with key and value from text; key and value will be empty if chDelimiter was not found</returns>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string text, char chDelimiter)
         {
@@ -1001,8 +1001,8 @@ namespace PHRPReader.Reader
         /// Splits text on text, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
         /// </summary>
         /// <remarks>Automatically trims whitespace</remarks>
-        /// <param name="text"></param>
-        /// <param name="chDelimiter"></param>
+        /// <param name="text">Text to parse</param>
+        /// <param name="chDelimiter">Delimiter</param>
         /// <param name="commentChar">If defined, looks for this character in the value portion of the setting and removes that character plus any text after it</param>
         /// <returns>KeyValuePair with key and value from text; key and value will be empty if chDelimiter was not found</returns>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string text, char chDelimiter, string commentChar)
@@ -1170,8 +1170,8 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Determine the search engine version using a Tool_Version_Info file
         /// </summary>
-        /// <param name="peptideHitResultType"></param>
-        /// <param name="searchEngineParams"></param>
+        /// <param name="peptideHitResultType">PHRP result type</param>
+        /// <param name="searchEngineParams">Search engine parameters</param>
         /// <returns>True if successful, false if an error</returns>
         protected bool ReadSearchEngineVersion(
             PeptideHitResultTypes peptideHitResultType,
@@ -1293,7 +1293,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Report an error
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Error message</param>
         protected void ReportError(string message)
         {
             mErrorMessage = message;
@@ -1304,7 +1304,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Report a warning
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Warning message</param>
         protected void ReportWarning(string message)
         {
             WarningMessages.Add(message);
@@ -1314,7 +1314,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Report a status message
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Status message</param>
         protected void ShowMessage(string message)
         {
             OnStatusEvent(message);
@@ -1460,7 +1460,7 @@ namespace PHRPReader.Reader
         /// Also updates the modification info
         /// Also updates SeqID
         /// </summary>
-        /// <param name="currentPSM"></param>
+        /// <param name="currentPSM">Current PSM</param>
         /// <returns>True if successful, False if currentPSM.ResultID is not found in mResultToSeqMap</returns>
         protected bool UpdatePSMUsingSeqInfo(PSM currentPSM)
         {
@@ -1491,7 +1491,7 @@ namespace PHRPReader.Reader
                 }
             }
 
-            // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
+            // Make sure all the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
             foreach (var proteinName in currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList())
             {
                 if (MaxProteinsPerPSM > 0 && currentPSM.ProteinDetails.Count > MaxProteinsPerPSM)
