@@ -270,7 +270,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public readonly override string ToString()
             {
-                return ModificationType + ": " + ModificationMass + " @ " + TargetResidues;
+                return string.Format("{0}: {1:F3} @ {2}", ModificationType, ModificationMass, TargetResidues);
             }
         }
 
@@ -291,7 +291,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public readonly override string ToString()
             {
-                return ResidueLocInPeptide + ": " + ModName;
+                return string.Format("{0}: {1}", ResidueLocInPeptide, ModName);
             }
         }
 
@@ -325,7 +325,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public readonly override string ToString()
             {
-                return Peptide + ", " + Protein;
+                return string.Format("{0}, {1}", Peptide, Protein);
             }
         }
 

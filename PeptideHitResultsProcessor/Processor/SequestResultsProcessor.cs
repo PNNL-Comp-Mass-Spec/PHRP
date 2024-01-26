@@ -692,7 +692,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public override string ToString()
         {
-            return TOOL_NAME + " results processor";
+            return string.Format("{0} results processor", TOOL_NAME);
         }
     }
 }

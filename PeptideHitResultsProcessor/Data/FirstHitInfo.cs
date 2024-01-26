@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         public override string ToString()
         {
-            return CleanSequence + ", " + ProteinName + ", " + ProteinNumber;
+            return string.Format("{0}, {1}, {2}", CleanSequence, ProteinName, ProteinNumber);
         }
 
         /// <summary>
