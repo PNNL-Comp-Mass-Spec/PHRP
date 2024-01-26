@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using MolecularWeightCalculator.Formula;
+using PHRPReader;
 
 namespace PeptideHitResultsProcessor.Data
 {
@@ -11,7 +12,15 @@ namespace PeptideHitResultsProcessor.Data
 
         private static readonly MolecularWeightCalculator.MolecularWeightTool mMolecularWeightCalculator = new(ElementMassMode.Isotopic);
 
+        private static readonly PeptideMassCalculator mPeptideSeqMassCalculator = new()
+        {
+            ChargeCarrierMass = PeptideMassCalculator.MASS_PROTON,
+            RemovePrefixAndSuffixIfPresent = false
+        };
+
         private static readonly Regex mNegativeCountMatcher = new(@"(?<Element>[a-z]+)\((?<ElementCount>-\d+)\)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex mNonAminoAcidCharacterMatcher = new("[^ACDEFGHIKLMNOPQRSTUVWY]+", RegexOptions.Compiled);
 
         /// <summary>
         /// Empirical formula
@@ -60,6 +69,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <param name="title">Modification name</param>
         /// <param name="composition">Empirical formula</param>
+        [Obsolete("Use the constructor that accepts Mod Type")]
         public MaxQuantModInfo(string title, string composition)
         {
             Title = title;
@@ -68,7 +78,23 @@ namespace PeptideHitResultsProcessor.Data
             ModType = MaxQuantModType.Standard;
             TerminusType = MaxQuantTerminusType.None;
             Residues = string.Empty;
-            MonoisotopicMass = ComputeMass(title, composition);
+            MonoisotopicMass = ComputeMass(title, composition, ModType);
+        }
+
+        /// <summary>
+        /// Constructor that takes a mod name and empirical formula
+        /// </summary>
+        /// <param name="title">Modification name</param>
+        /// <param name="composition">Empirical formula</param>
+        /// <param name="modType">MaxQuant mod type</param>
+        public MaxQuantModInfo(string title, string composition, MaxQuantModType modType)
+        {
+            Title = title;
+            Composition = composition.Trim();
+            Position = MaxQuantModPosition.Anywhere;
+            ModType = MaxQuantModType.Standard;
+            Residues = string.Empty;
+            MonoisotopicMass = ComputeMass(title, composition, modType);
         }
 
         /// <summary>
@@ -82,7 +108,6 @@ namespace PeptideHitResultsProcessor.Data
             Composition = string.Empty;
             Position = MaxQuantModPosition.Anywhere;
             ModType = MaxQuantModType.Standard;
-            TerminusType = MaxQuantTerminusType.None;
             Residues = string.Empty;
             MonoisotopicMass = monoisotopicMass;
         }
@@ -92,8 +117,9 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <param name="title">Modification name</param>
         /// <param name="composition">Empirical formula</param>
+        /// <param name="modType">MaxQuant mod type</param>
         /// <returns>Monoisotopic mass, in Da</returns>
-        public static double ComputeMass(string title, string composition)
+        public static double ComputeMass(string title, string composition, MaxQuantModType modType)
         {
             // Examples formulas for composition:
 
@@ -102,6 +128,42 @@ namespace PeptideHitResultsProcessor.Data
             // Cx(5) Nx C(-5) N(-1)
             // H(-1) N(-1) Ox
             // C(-6) Cx(6) N(-1) Nx
+
+            // MaxQuant v2.4.13 introduced modType SequenceBasedModifier, which indicates that the composition is amino acid based, e.g.
+            // GG (two glycines)
+            // RGG (arginine and two glycines)
+            // QQTGG
+            // DVFQQQTGG
+
+            if (modType == MaxQuantModType.SequenceBasedModifier)
+            {
+                // Amino acid based formula
+                // Check for any unrecognized characters
+
+                var unexpectedCharacter = mNonAminoAcidCharacterMatcher.Match(composition);
+
+                if (unexpectedCharacter.Success)
+                {
+                    throw new Exception(string.Format(
+                        "Error computing modification mass for '{0}', composition {1}, unexpected character found: {2}",
+                        title, composition, unexpectedCharacter.Value));
+                }
+
+                // By default, the peptide sequence mass calculator adds the mass of H and OH when computing the mass of a peptide
+                // We don't want that for MaxQuant mods, so assure that the N and C terminus mass values are zero
+
+                if (mPeptideSeqMassCalculator.PeptideNTerminusMass != 0)
+                {
+                    mPeptideSeqMassCalculator.PeptideNTerminusMass = 0;
+                }
+
+                if (mPeptideSeqMassCalculator.PeptideCTerminusMass != 0)
+                {
+                    mPeptideSeqMassCalculator.PeptideCTerminusMass = 0;
+                }
+
+                return mPeptideSeqMassCalculator.ComputeSequenceMass(composition);
+            }
 
             // Look for elements (or groups) with a negative element count
             // The Molecular Weight Calculator does not support negative counts, so we'll need to process these elements separately

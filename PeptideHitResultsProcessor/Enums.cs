@@ -1,4 +1,6 @@
-﻿namespace PeptideHitResultsProcessor
+﻿using System;
+
+namespace PeptideHitResultsProcessor
 {
     // Ignore Spelling: MaxQuant, MODa
 
@@ -21,6 +23,7 @@
         Glycan = 4,
         AaSubstitution = 5,
         CleavedCrosslink = 6,
+        SequenceBasedModifier = 7
     }
 
     [Obsolete("Deprecated with MaxQuant v2.4.0")]

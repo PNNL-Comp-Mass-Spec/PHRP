@@ -1570,7 +1570,30 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    var maxQuantMod = new MaxQuantModInfo(modTitle, composition)
+                    MaxQuantModType modType;
+
+                    if (XmlReaderUtilities.TryGetElementValue(modificationNode, "type", out var modTypeText))
+                    {
+                        modType = modTypeText switch
+                        {
+                            "Standard" => MaxQuantModType.Standard,
+                            "IsobaricLabel" => MaxQuantModType.IsobaricLabel,
+                            "Label" => MaxQuantModType.Label,
+                            "NeuCodeLabel" => MaxQuantModType.NeuCodeLabel,
+                            "Glycan" => MaxQuantModType.Glycan,
+                            "AaSubstitution" => MaxQuantModType.AaSubstitution,
+                            "CleavedCrosslink" => MaxQuantModType.CleavedCrosslink,
+                            "SequenceBasedModifier" => MaxQuantModType.SequenceBasedModifier,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element", modTitle);
+                        modType = MaxQuantModType.Standard;
+                    }
+
+                    var maxQuantMod = new MaxQuantModInfo(modTitle, composition, modType)
                     {
                         Description = modDescription
                     };
@@ -1595,24 +1618,6 @@ namespace PeptideHitResultsProcessor.Processor
                         OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'position' element", maxQuantMod.Title);
                     }
 
-                    if (XmlReaderUtilities.TryGetElementValue(modificationNode, "type", out var modTypeText))
-                    {
-                        maxQuantMod.ModType = modTypeText switch
-                        {
-                            "Standard" => MaxQuantModType.Standard,
-                            "IsobaricLabel" => MaxQuantModType.IsobaricLabel,
-                            "Label" => MaxQuantModType.Label,
-                            "NeuCodeLabel" => MaxQuantModType.NeuCodeLabel,
-                            "Glycan" => MaxQuantModType.Glycan,
-                            "AaSubstitution" => MaxQuantModType.AaSubstitution,
-                            "CleavedCrosslink" => MaxQuantModType.CleavedCrosslink,
-                            _ => throw new ArgumentOutOfRangeException()
-                        };
-                    }
-                    else
-                    {
-                        OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element", maxQuantMod.Title);
-                    }
                     // MaxQuant versions before v2.4.0 had a "terminus_type" node for most of the modifications
                     // Newer modification files no longer have that node
 
