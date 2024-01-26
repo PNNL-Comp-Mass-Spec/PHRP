@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\PHRPReader.xml</DocumentationFile>
+    <NoWarn>IDE0028, IDE0290, IDE0305</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,7 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\PHRPReader.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591, IDE0028, IDE0290, IDE0305</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

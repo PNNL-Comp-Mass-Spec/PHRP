@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\PeptideHitResultsProcessor.xml</DocumentationFile>
+    <NoWarn>IDE0028, IDE0290, IDE0305</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
+    <NoWarn>1591, IDE0028, IDE0290, IDE0305</NoWarn>
     <DocumentationFile>bin\Release\PeptideHitResultsProcessor.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
