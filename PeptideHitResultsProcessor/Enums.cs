@@ -23,6 +23,7 @@
         CleavedCrosslink = 6,
     }
 
+    [Obsolete("Deprecated with MaxQuant v2.4.0")]
     internal enum MaxQuantTerminusType
     {
         None = 0,

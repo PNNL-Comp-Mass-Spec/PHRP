@@ -52,6 +52,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Terminus type
         /// </summary>
+        [Obsolete("Deprecated with MaxQuant v2.4.0")]
         public MaxQuantTerminusType TerminusType { get; set; }
 
         /// <summary>

@@ -1613,7 +1613,12 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'type' element", maxQuantMod.Title);
                     }
+                    // MaxQuant versions before v2.4.0 had a "terminus_type" node for most of the modifications
+                    // Newer modification files no longer have that node
 
+                    // Deprecated code
+
+                    /*
                     if (XmlReaderUtilities.TryGetElementValue(modificationNode, "terminus_type", out var terminusTypeText))
                     {
                         maxQuantMod.TerminusType = terminusTypeText switch
@@ -1627,6 +1632,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         OnWarningEvent("Modification node '{0}' in the MaxQuant modifications file is missing the 'terminus_type' element", maxQuantMod.Title);
                     }
+                    */
 
                     var modificationSiteNodes = modificationNode.Elements("modification_site").ToList();
 
