@@ -738,7 +738,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
 
             // Assure that there are no parentheses remaining in the masked sequence
-            if (maskedModifiedSequence.IndexOfAny(new[] { '(', ')' }) >= 0)
+            if (maskedModifiedSequence.IndexOfAny(['(', ')']) >= 0)
             {
                 OnWarningEvent("Masked modified sequence still has parentheses: {0} for {1}", maskedModifiedSequence, searchResult.ModifiedSequence);
             }

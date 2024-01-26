@@ -1521,7 +1521,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                             linesRead++;
 
-                            var splitLine = lineIn.Split(new[] { '\t' }, 3);
+                            var splitLine = lineIn.Split(['\t'], 3);
 
                             if (splitLine.Length < 2)
                                 continue;
