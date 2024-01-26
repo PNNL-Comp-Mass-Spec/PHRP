@@ -46,16 +46,16 @@ call Distribute_Files_Work.bat "..\..\..\SMAQC\SMAQC\SMAQC\bin\Debug"
 
 @echo off
 echo.
-if not exist ..\..\..\..\JoshAldrich echo Directory not found: skip copying to AScore
-if not exist ..\..\..\..\JoshAldrich echo.
-if not exist ..\..\..\..\JoshAldrich goto SkipAscore
+if not exist ..\..\..\..\Josh_Aldrich echo Directory not found: skip copying to AScore
+if not exist ..\..\..\..\Josh_Aldrich echo.
+if not exist ..\..\..\..\Josh_Aldrich goto SkipAscore
 
 @echo on
-call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_DLL\lib"
-call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Release"
-call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Debug"
-call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_Console\bin\Debug"
-call Distribute_Files_Work.bat "..\..\..\..\JoshAldrich\AScore\AScore_Console\bin\Release"
+call Distribute_Files_Work.bat "..\..\..\..\Josh_Aldrich\AScore\AScore_DLL\lib"
+call Distribute_Files_Work.bat "..\..\..\..\Josh_Aldrich\AScore\AScore_DLL\bin\AnyCPU\Release"
+call Distribute_Files_Work.bat "..\..\..\..\Josh_Aldrich\AScore\AScore_DLL\bin\AnyCPU\Debug"
+call Distribute_Files_Work.bat "..\..\..\..\Josh_Aldrich\AScore\AScore_Console\bin\Debug"
+call Distribute_Files_Work.bat "..\..\..\..\Josh_Aldrich\AScore\AScore_Console\bin\Release"
 
 @echo off
 :SkipAscore
