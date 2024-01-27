@@ -21,7 +21,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class SequestSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Chymotrypsin, Cn, Da, Daltons, GluC, LysC, milli, mmu, PassFilt, Prot, tryptic, Xc
+        // Ignore Spelling: Chymotrypsin, Cn, Da, Daltons, FHT, GluC, LysC, milli, mmu, PassFilt, Prot, psm, Sequest, tryptic, Xc
 
         /// <summary>
         /// SEQUEST synopsis file suffix

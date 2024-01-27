@@ -9,7 +9,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class PHRPOptions
     {
-        // Ignore Spelling: conf, Hyperscore, MaxQuant, MODa, prepended, txt
+        // Ignore Spelling: conf, Dia, DMS, Fasta, Fragger, Hyperscore, MaxQuant, MODa, prepended, Quant, txt
 
         /// <summary>
         /// Default database connection string

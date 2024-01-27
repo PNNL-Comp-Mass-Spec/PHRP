@@ -11,7 +11,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MaxQuantSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Chymotrypsin, maxq, MaxQuant, PepToProtMap, tryptic
+        // Ignore Spelling: Chymotrypsin, FHT, maxq, MaxQuant, PepToProtMap, psm, Quant, tryptic
 
         /// <summary>
         /// MaxQuant synopsis file suffix

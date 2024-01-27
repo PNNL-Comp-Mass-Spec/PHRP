@@ -25,7 +25,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public abstract class SynFileReaderBaseClass : PRISM.EventNotifier
     {
-        // Ignore Spelling: Defs, iTraq, MODa, Sequest
+        // Ignore Spelling: Defs, iTraq, MODa, psm, Sequest
 
         /// <summary>
         /// Tracks ambiguous modifications

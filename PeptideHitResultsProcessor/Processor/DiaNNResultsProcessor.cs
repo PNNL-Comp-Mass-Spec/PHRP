@@ -60,7 +60,7 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: Averagine, diann, proteotypic, tryptic, txt
+        // Ignore Spelling: Averagine, Dia, diann, proteotypic, Quant, Qvalue, tryptic, txt
 
         // ReSharper restore CommentTypo
 

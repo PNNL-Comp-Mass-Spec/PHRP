@@ -41,15 +41,16 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: A-Za-z, Da, Daltons, expectscore, Fscore, hyperscore, MaxQuant, MSFragger, mts
-        // Ignore Spelling: nextscore, pre, prepending, prot, xxx
+        // Ignore Spelling: A-Za-z, app, Da, Daltons, expectscore, Fasta, fht, Fscore, hyperscore, Loc
+        // Ignore Spelling: MaxQuant, MSAlign, MSFragger, MSGF, MSGFDB, MSGFPlus, mts, nextscore
+        // Ignore Spelling: phrp, pre, prepending, prot, ResultID, TotalPRM, XTandem, xxx
 
         // ReSharper restore CommentTypo
 
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "April 17, 2023";
+        public const string PROGRAM_DATE = "January 26, 2024";
 
         /// <summary>
         /// Constructor

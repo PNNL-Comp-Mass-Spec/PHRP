@@ -10,7 +10,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </summary>
     public static class StringUtilities
     {
-        // Ignore Spelling: A-Za-z
+        // Ignore Spelling: A-Za-z, Ato, NTT, Sng
 
         private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
 

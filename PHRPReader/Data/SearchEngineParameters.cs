@@ -8,7 +8,7 @@ namespace PHRPReader.Data
     /// </summary>
     public class SearchEngineParameters
     {
-        // Ignore Spelling: Daltons, tryptic
+        // Ignore Spelling: Daltons, Fasta, kv, tryptic
 
         /// <summary>
         /// Monoisotopic mass

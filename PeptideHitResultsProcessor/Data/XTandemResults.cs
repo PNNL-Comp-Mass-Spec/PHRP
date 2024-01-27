@@ -27,7 +27,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class XTandemResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: delM, hyperscore
+        // Ignore Spelling: Cn, delM, hyperscore
 
         // Note: ProteinExpectationValue and ProteinIntensity are defined in SearchResultsBaseClass
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program

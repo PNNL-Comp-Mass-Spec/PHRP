@@ -60,8 +60,8 @@ namespace PeptideHitResultsProcessor.Processor
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Hyperscore, massdiff, msfragger
-        // Ignore Spelling: Nextscore, Prev, proline, scannum, sp, tryptic, txt
+        // Ignore Spelling: acetylated, Da, Carbamidomethyl, expectscore, Fragger, Hyperscore, Loc, massdiff, msfragger
+        // Ignore Spelling: Nextscore, Prev, proline, psm, scannum, sp, tryptic, txt
 
         // ReSharper restore CommentTypo
 

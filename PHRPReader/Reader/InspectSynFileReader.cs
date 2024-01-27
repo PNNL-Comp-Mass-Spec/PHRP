@@ -19,7 +19,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class InspectSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: chymotrypsin, Da, FilePos, PepToProt
+        // Ignore Spelling: chymotrypsin, Da, FHT, FilePos, PepToProt, psm
 
         /// <summary>
         /// InSpecT synopsis file suffix

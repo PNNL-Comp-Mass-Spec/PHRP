@@ -12,8 +12,8 @@ namespace PHRPReader.Reader
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: aspn, Averagine, chymotrypsin, diann, Glu, gluc, Lys, lysc
-        // Ignore Spelling: proline, proteotypic, tryptic
+        // Ignore Spelling: aspn, Averagine, chymotrypsin, Dia, diann, FHT, Glu, gluc, Lys, lysc
+        // Ignore Spelling: proline, proteotypic, psm, tryptic
 
         // ReSharper restore CommentTypo
 

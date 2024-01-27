@@ -21,7 +21,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSGFPlusSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: enzymeid, Da, Daltons, Frag, novo, msgfdb, peptidomics, prot, nnet, ntt, tda, tryptic, Za, Validator
+        // Ignore Spelling: enzymeid, Da, Daltons, FHT, Frag, novo, msgfdb, peptidomics, nnet, ntt, prot, psm, tda, tryptic, Za, Validator
         // Ignore Spelling: Arg, Chymotrypsin, Glu, Lys
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace PHRPReader.Data
     /// </summary>
     public class ModificationDefinition
     {
-        // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy
+        // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy, Quant, Uni
 
         /// <summary>
         /// Modification symbol used after all the DEFAULT_MODIFICATION_SYMBOLS have been used

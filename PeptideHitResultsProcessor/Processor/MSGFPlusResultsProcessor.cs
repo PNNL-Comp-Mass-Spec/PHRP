@@ -25,7 +25,7 @@ using PHRPReader.Reader;
 namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
-    /// This class reads a MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
+    /// This class reads an MS-GF+ results file (e.g. Dataset.tsv) and creates the first hits and synopsis files
     /// </summary>
     /// <remarks>
     /// <para>
@@ -62,7 +62,8 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSGFPlusResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: da, fht, frag, kv, methylation, msgfdb, novo, pre, Prefiltered, struct, structs, tda, tsv, udt
+        // Ignore Spelling: da, Evalue, fht, frag, kv, methylation, MSGF, msgfdb, MSGFPlus
+        // Ignore Spelling: NTT, novo, pre, Prefiltered, struct, structs, tda, tsv, udt
 
         /// <summary>
         /// Constructor

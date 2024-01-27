@@ -12,7 +12,7 @@ namespace PHRPReader.Reader
     {
         // ReSharper disable CommentTypo
 
-        // Ignore Spelling: Chymotrypsin, Daltons, Hyperscore, MSFragger, NextScore, PepToProtMap, tryptic
+        // Ignore Spelling: Chymotrypsin, Daltons, FHT, Fragger, Hyperscore, MSFragger, NextScore, PepToProtMap, psm, tryptic
         // Ignore Spelling: argc, aspn, cnbr, elastase, formicacid, gluc, lysc, lysn, stricttrypsin, thermolysin
 
         // ReSharper restore CommentTypo

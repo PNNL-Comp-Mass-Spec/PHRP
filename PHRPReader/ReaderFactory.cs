@@ -33,8 +33,8 @@ namespace PHRPReader
     /// </summary>
     public class ReaderFactory : EventNotifier, IDisposable
     {
-        // Ignore Spelling: A-Za-z, DA, fht, kv, Hyperscore, moda, MODa, modp, modplus
-        // Ignore Spelling: msa, msgfdb, msp, mspath, msx, prot, Ss, toppic, tpc, xt
+        // Ignore Spelling: A-Za-z, Ato, DA, fht, kv, Hyperscore, moda, MODa, modp, modplus
+        // Ignore Spelling: msa, MSGF, msgfdb, msp, mspath, msx, mzXml, PHRP, prot, Ss, toppic, tpc, xt
 
         /// <summary>
         /// Symbol used by PHRP to indicate a protein terminus

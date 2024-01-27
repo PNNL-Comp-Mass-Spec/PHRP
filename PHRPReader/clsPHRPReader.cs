@@ -15,6 +15,8 @@ namespace PHRPReader
     [Obsolete("Legacy PHRP Reader; superseded by the ReaderFactory class")]
     public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {
+        // Ignore spelling: Ato, cls, MSGF, mzXml, PHRP, XT
+
         #region "Constants"
 
         /// <summary>

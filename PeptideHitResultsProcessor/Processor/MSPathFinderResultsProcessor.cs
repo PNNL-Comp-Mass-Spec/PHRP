@@ -58,7 +58,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// </remarks>
     public class MSPathFinderResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: Dehydro, Desc, IcTda, mspath, Pre, struct
+        // Ignore Spelling: Dehydro, Desc, IcTda, mspath, MSPathFinder, Pre, struct
 
         /// <summary>
         /// Constructor

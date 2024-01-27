@@ -12,7 +12,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class PHRPSeqMapReader
     {
-        // Ignore Spelling: PepToProtMap
+        // Ignore Spelling: PepToProtMap, phrp, Prot
 
 #pragma warning disable CS1591
 

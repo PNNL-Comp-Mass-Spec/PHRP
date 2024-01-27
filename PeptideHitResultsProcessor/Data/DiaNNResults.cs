@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class DiaNNResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Averagine, Proteotypic, tryptic
+        // Ignore Spelling: Averagine, Dia, NTT, Proteotypic, tryptic
 
         /// <summary>
         /// Dataset name

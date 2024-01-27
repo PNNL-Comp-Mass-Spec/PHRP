@@ -31,7 +31,7 @@ namespace PHRPReader
     /// </summary>
     public class PeptideMassCalculator
     {
-        // Ignore Spelling: Asn, Da, Gln, Glu, Ile, Leu, Selenocysteine
+        // Ignore Spelling: Asn, Da, Gln, Glu, Ile, Leu, Loc, Selenocysteine
 
         /// <summary>
         /// Symbol used when the modification is not an isotopic modification

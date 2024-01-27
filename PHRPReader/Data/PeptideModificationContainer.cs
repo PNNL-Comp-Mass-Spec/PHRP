@@ -31,7 +31,8 @@ namespace PHRPReader.Data
     /// </remarks>
     public class PeptideModificationContainer
     {
-        // Ignore Spelling: acetyl, carbamyl, deamidated, didehydro, dimethylation, methylation, phospho, phosphorylation, Sequest, UniMod
+        // Ignore Spelling: acetyl, carbamyl, deamidated, didehydro, dimethylation, methylation
+        // Ignore Spelling: phospho, phosphorylation, Sequest, UniMod, XTandem
 
         /// <summary>
         /// Default modification symbols

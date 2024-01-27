@@ -30,14 +30,14 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public abstract class SearchResultsBaseClass
     {
-        // Ignore Spelling: acetyl, Da, delM, MaxQuant, MODa, Oxy, tryptic
+        // Ignore Spelling: acetyl, Da, delM, Loc, MaxQuant, MODa, Oxy, tryptic, udt
 
         /// <summary>
         /// Mass difference, in Da, between ^12C and ^13C
         /// </summary>
         public const double MASS_C13 = 1.00335483;
 
-        // Note: Many of these variables typically hold numbers but we're storing the numbers as strings
+        // Note: Many of these variables typically hold numbers, but we're storing the numbers as strings
         //       to prevent the numeric representation from changing when converting to a number then back to a string
 
         /// <summary>

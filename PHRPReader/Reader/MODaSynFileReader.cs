@@ -20,7 +20,7 @@ namespace PHRPReader.Reader
     public class MODaSynFileReader : SynFileReaderBaseClass
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: Da, moda, MODa, PeptTolerance, PepToProtMap
+        // Ignore Spelling: Da, FHT, moda, MODa, PeptTolerance, PepToProtMap, psm
 
         /// <summary>
         /// MODa synopsis file suffix

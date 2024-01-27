@@ -19,7 +19,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSAlignSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: cysteine, Da, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm
+        // Ignore Spelling: cysteine, Da, FHT, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm, psm
 
         /// <summary>
         /// MSAlign synopsis file suffix

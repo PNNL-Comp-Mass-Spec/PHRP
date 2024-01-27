@@ -8,7 +8,7 @@
     /// </remarks>
     internal class MSFraggerSearchResult : ToolResultsBaseClass
     {
-        // Ignore Spelling: Hyperscore, sp
+        // Ignore Spelling: Fragger, Hyperscore, Nextscore, sp
 
         /// <summary>
         /// Average elution time of MS/MS spectra when reading results from a multi-dataset search, in minutes
@@ -18,7 +18,7 @@
         // ReSharper disable CommentTypo
 
         /// <summary>
-        /// Peptide sequence with integer values representing the total mass of the any modified residue
+        /// Peptide sequence with integer values representing the total mass of the modified residue
         /// </summary>
         /// <remarks>
         /// <para>

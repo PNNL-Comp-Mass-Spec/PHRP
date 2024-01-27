@@ -10,7 +10,7 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class MSGFProcessingTests
     {
-        // Ignore Spelling: Carbamidomethyl
+        // Ignore Spelling: Carbamidomethyl, PHRP
 
         [Test]
         public void TestReplaceMSGFModTextWithSymbol()

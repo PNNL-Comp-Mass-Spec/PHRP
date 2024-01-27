@@ -8,7 +8,7 @@
     /// </remarks>
     internal class DiaNNSearchResult : ToolResultsBaseClass
     {
-        // Ignore Spelling: Averagine, Proteotypic
+        // Ignore Spelling: Averagine, Dia, Proteotypic, Quant
 
         /// <summary>
         /// Dataset .mzML file path

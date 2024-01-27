@@ -33,7 +33,8 @@ namespace PeptideHitResultsProcessor.Processor
     /// <remarks>The modification definition information is determined from the InSpecT parameter file</remarks>
     public class InSpecTResultsProcessor : PHRPBaseClass
     {
-        // Ignore Spelling: cterminal, Da, Daltons, fht, methylation, ModDefs, nterminal, phos, phosphorylation, Pos, txt
+        // Ignore Spelling: cterminal, Da, Daltons, fht, Fscore, methylation, ModDefs
+        // Ignore Spelling: nterminal, NTT, phos, phosphorylation, Pos, PValue, TotalPRMScore, txt
 
         /// <summary>
         /// Constructor
@@ -240,7 +241,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private struct ModInfo
         {
-            public string ModName;              // Mod names must be lower case, and 4 characters in length (or shorter)
+            public string ModName;              // Mod names must be lowercase, and 4 characters in length (or shorter)
             public string ModMass;              // Storing as a string since reading from a text file and writing to a text file
             public string Residues;
             public InspectModType ModType;

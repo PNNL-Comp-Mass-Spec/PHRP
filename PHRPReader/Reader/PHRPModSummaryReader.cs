@@ -10,6 +10,8 @@ namespace PHRPReader.Reader
     /// </summary>
     public class PHRPModSummaryReader
     {
+        // Ignore spelling: Defs
+
         /// <summary>
         /// Modification symbol column in ModSummary.txt files
         /// </summary>

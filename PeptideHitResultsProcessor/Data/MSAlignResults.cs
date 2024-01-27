@@ -24,6 +24,8 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MSAlignResults : SearchResultsBaseClass
     {
+        // Ignore Spelling: Frag, Phrp, Prot, Prsm
+
         /// <summary>
         /// Result ID
         /// </summary>

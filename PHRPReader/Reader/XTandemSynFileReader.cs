@@ -26,7 +26,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class XTandemSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Da, Hyperscore, ProtMap, xt
+        // Ignore Spelling: Da, Fasta, FHT, Hyperscore, ProtMap, psm, xt
 
         /// <summary>
         /// X!Tandem synopsis file suffix

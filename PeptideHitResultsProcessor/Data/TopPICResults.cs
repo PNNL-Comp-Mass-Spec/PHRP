@@ -24,7 +24,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     internal class TopPICResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Proteoform
+        // Ignore Spelling: Frag, Proteoform, Prsm
 
         /// <summary>
         ///  Result ID

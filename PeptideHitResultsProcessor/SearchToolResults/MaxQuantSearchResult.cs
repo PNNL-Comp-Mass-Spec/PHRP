@@ -10,7 +10,7 @@ namespace PeptideHitResultsProcessor.SearchToolResults
     /// </remarks>
     internal class MaxQuantSearchResult : ToolResultsBaseClass
     {
-        // Ignore Spelling: Acetyl, Da, Orbitrap
+        // Ignore Spelling: Acetyl, Da, Diff, Orbitrap, PIF, Quant
 
         /// <summary>
         /// Index of the spectrum in the dataset (1-based, consecutive integer)

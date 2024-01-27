@@ -27,7 +27,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class SequestResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: tryptic
+        // Ignore Spelling: Cn, Filt, Sequest, tryptic, Xc
 
         /// <summary>
         /// NumScans

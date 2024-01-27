@@ -5,7 +5,7 @@
     /// </summary>
     public class AminoAcidModInfo
     {
-        // Ignore Spelling: Da
+        // Ignore Spelling: Da, DMS, Loc
 
         /// <summary>
         /// Symbol used by DMS for tracking the N-terminus of a peptide

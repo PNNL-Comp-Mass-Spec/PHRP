@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class InSpecTResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: tryptic
+        // Ignore Spelling: NTT, tryptic
 
         // Scan: tracked by the base class
         // Annotation: aka Peptide, which is tracked by the base class

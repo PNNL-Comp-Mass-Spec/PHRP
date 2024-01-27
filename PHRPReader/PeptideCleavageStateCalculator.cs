@@ -49,7 +49,7 @@ namespace PHRPReader
     // ReSharper restore CommentTypo
     public class PeptideCleavageStateCalculator
     {
-        // Ignore Spelling: A-Za-z, Arg, chymotrypsin, Glu, Lys, tryptic, udt
+        // Ignore Spelling: A-Za-z, Arg, chymotrypsin, Glu, Lys, Sequest, tryptic, udt, XTandem
 
         /// <summary>
         /// Generic residue symbol

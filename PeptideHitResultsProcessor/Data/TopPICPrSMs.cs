@@ -8,7 +8,7 @@
     /// </remarks>
     internal class TopPICPrSMs
     {
-        // Ignore Spelling: proteoform
+        // Ignore Spelling: Evalue, Frag, Nterminal, Prot, proteoform, Prsm, Qvalue
 
         // ReSharper disable NotAccessedField.Local
 

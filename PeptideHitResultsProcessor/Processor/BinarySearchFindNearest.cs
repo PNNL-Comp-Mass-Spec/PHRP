@@ -6,6 +6,8 @@ namespace PeptideHitResultsProcessor.Processor
 {
     internal class BinarySearchFindNearest
     {
+        // Ignore Spelling: xy
+
         /// <summary>
         /// Tracks X and Y values
         /// </summary>

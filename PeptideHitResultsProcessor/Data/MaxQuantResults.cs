@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MaxQuantResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, MaxQuant, Orbitrap, plex, tryptic
+        // Ignore Spelling: Acetyl, Carbamidomethyl, Da, Frag, MaxQuant, NTT, Orbitrap, Quant, plex, tryptic
 
         /// <summary>
         /// Dataset name

@@ -17,7 +17,7 @@ namespace PHRPReader.Data
     /// </summary>
     public class PSM
     {
-        // Ignore Spelling: Daltons, tryptic
+        // Ignore Spelling: Daltons, Loc, PSM, tryptic
 
         /// <summary>
         /// Unknown collision mode

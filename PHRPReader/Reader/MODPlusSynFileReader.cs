@@ -22,7 +22,7 @@ namespace PHRPReader.Reader
     public class MODPlusSynFileReader : SynFileReaderBaseClass
     {
         // ReSharper disable once CommentTypo
-        // Ignore Spelling: da, Daltons, massdiff, msms, MODp, modp, prot, tol
+        // Ignore Spelling: da, Daltons, FHT, massdiff, msms, MODp, modp, prot, psm, tol
 
         /// <summary>
         /// MODPlus synopsis file suffix

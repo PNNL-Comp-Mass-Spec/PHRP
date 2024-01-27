@@ -12,7 +12,7 @@ namespace PeptideHitResultsProcessor.Data
     /// </remarks>
     public class MSFraggerResults : SearchResultsBaseClass
     {
-        // Ignore Spelling: Da, Hyperscore, tryptic
+        // Ignore Spelling: Da, Fragger, Hyperscore, Nextscore, NTT, tryptic
 
         /// <summary>
         /// Dataset name

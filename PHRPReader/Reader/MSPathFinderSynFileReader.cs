@@ -19,7 +19,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MSPathFinderSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: mspath, ProteinDesc, PepToProt
+        // Ignore Spelling: FHT, mspath, ProteinDesc, PepToProt, psm
 
         /// <summary>
         /// MSPathFinder synopsis file suffix

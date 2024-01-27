@@ -2,7 +2,7 @@
 
 namespace PHRPReader.Data
 {
-    // Ignore Spelling: Averagine, Da, Daltons, Hyperscore, MaxQuant, novo,
+    // Ignore Spelling: Averagine, Da, Daltons, Dia, Hyperscore, MaxQuant, novo,
     // Ignore Spelling: proteoform, Proteotypic, novo, tda, tryptic
 
     /// <summary>
@@ -10,6 +10,8 @@ namespace PHRPReader.Data
     /// </summary>
     public enum ExtendedScanStatsFileColumns
     {
+        // Ignore Spelling: Fragger, Quant, Sequest
+
         /// <summary>
         /// Dataset Id
         /// </summary>

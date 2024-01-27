@@ -19,7 +19,7 @@ namespace PHRPReader.Reader
     /// </summary>
     public class TopPICSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: toppic, prsm, Frag, Da, Prot
+        // Ignore Spelling: Da, FHT, Frag, Prot, prsm, psm, toppic
 
         /// <summary>
         /// TopPIC synopsis file suffix

@@ -5,6 +5,8 @@
     /// </summary>
     public class SICStatsInfo
     {
+        // Ignore Spelling: frag
+
         /// <summary>
         /// Dataset ID
         /// </summary>

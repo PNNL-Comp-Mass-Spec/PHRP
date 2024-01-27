@@ -4,7 +4,7 @@ namespace PeptideHitResultsProcessor.Data
 {
     internal class MaxQuantModifiedSequenceModInfo
     {
-        // Ignore Spelling: Acetyl
+        // Ignore Spelling: Acetyl, Quant
 
         /// <summary>
         /// MaxQuant modification name, as read from the MaxQuant results file (msms.txt)
