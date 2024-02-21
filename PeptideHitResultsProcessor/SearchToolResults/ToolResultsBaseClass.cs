@@ -312,6 +312,11 @@
         /// <para>
         /// From column Q.Value for DIA-NN
         /// </para>
+        /// <para>
+        /// The MSGF Results Summarizer filters on QValue when computing PSM stats, which are stored in the database using procedure store_job_psm_stats
+        /// Stats are displayed on the Analysis Job Detail Report page, for example:
+        /// Spectra Searched: 23949, Total PSMs: 12317, Unique Peptides: 10439, Unique Proteins: 2247 (FDR &lt; 1.00%)
+        /// </para>
         /// </remarks>
         public double QValue;
     }
