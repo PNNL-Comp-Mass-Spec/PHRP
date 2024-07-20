@@ -8,7 +8,7 @@
 // Program started January 2, 2006
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
+// Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://www.pnnl.gov/integrative-omics
 // -------------------------------------------------------------------------------
 
 using System;
@@ -46,7 +46,7 @@ namespace PeptideHitResultsProcRunner
                               "MSPathFinder, TopPIC, and X!Tandem, along with SEQUEST Synopsis/First Hits files.",
                 ContactInfo = "Program written by Matthew Monroe for PNNL (Richland, WA)" + Environment.NewLine +
                               "E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov" + Environment.NewLine +
-                              "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics"
+                              "Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://www.pnnl.gov/integrative-omics"
             };
 
             parser.UsageExamples.Add(string.Format(

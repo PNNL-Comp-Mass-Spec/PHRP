@@ -21,7 +21,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
     // Program started March 14, 2013
     //
     // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-    // Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
+    // Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://www.pnnl.gov/integrative-omics
     // -------------------------------------------------------------------------------
 
     internal static class Program
@@ -376,7 +376,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                 Console.WriteLine("Version: " + GetAppVersion());
                 Console.WriteLine();
                 Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov");
-                Console.WriteLine("Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics");
+                Console.WriteLine("Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://www.pnnl.gov/integrative-omics");
 
                 // Delay for 750 msec in case the user double-clicked this file from within Windows Explorer (or started the program via a shortcut)
                 Thread.Sleep(750);
