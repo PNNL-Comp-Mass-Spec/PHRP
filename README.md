@@ -153,7 +153,7 @@ When processing a MODPlus or MODa results file, use `/SynPValue` to customize th
 
 When processing MaxQuant results using a computer on the pnl.gov domain, the DMS database is contacted to lookup dataset IDs by dataset name, where dataset name comes from the 'Raw file' column in the msms.txt file
 * Optionally use `/DB` to override the default connection info
-* The default is `/DB:"Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun"`
+* The default is `/DB:"host=prismdb2.emsl.pnl.gov;Port=5432;Database=dms;UserId=dmsreader;Password=dms4fun"`
 * To disable contacting DMS, use `/DB:""` or `/DB:false`
 
 ## Contacts

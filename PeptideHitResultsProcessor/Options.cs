@@ -14,7 +14,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Default database connection string
         /// </summary>
-        public const string DMS_CONNECTION_STRING = "Data Source=gigasax;Initial Catalog=DMS5;User=DMSReader;Password=dms4fun";
+        public const string DMS_CONNECTION_STRING = "host=prismdb2.emsl.pnl.gov;Port=5432;Database=dms;UserId=dmsreader;Password=dms4fun";
 
         /// <summary>
         /// Input file path
