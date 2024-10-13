@@ -1935,26 +1935,23 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
+            else if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
+            {
+                success = true;
+            }
             else
             {
-                if (File.Exists(mtsPepToProteinMapFilePath) && Options.UseExistingMTSPepToProteinMapFile)
-                {
-                    success = true;
-                }
-                else
-                {
-                    success = CreatePepToProteinMapFile(
-                        sourcePHRPDataFiles,
-                        mtsPepToProteinMapFilePath,
-                        false,
-                        maximumAllowableMatchErrorPercentThreshold,
-                        matchErrorPercentWarningThreshold);
+                success = CreatePepToProteinMapFile(
+                    sourcePHRPDataFiles,
+                    mtsPepToProteinMapFilePath,
+                    false,
+                    maximumAllowableMatchErrorPercentThreshold,
+                    matchErrorPercentWarningThreshold);
 
-                    if (!success)
-                    {
-                        // Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False
-                        OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
-                    }
+                if (!success)
+                {
+                    // Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False
+                    OnWarningEvent(WARNING_MESSAGE_SKIPPING_PROTEIN_MODS_FILE_CREATION + " since CreatePepToProteinMapFile returned False");
                 }
             }
 
