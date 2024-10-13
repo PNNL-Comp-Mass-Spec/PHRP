@@ -1885,6 +1885,7 @@ namespace PHRPReader
 
                 case PeptideHitResultTypes.MSFragger:
                     toolVersionFileNames.Add("Tool_Version_Info_MSFragger.txt");
+                    toolVersionFileNames.Add("Tool_Version_Info_FragPipe.txt");
                     break;
 
                 case PeptideHitResultTypes.MSGFPlus:

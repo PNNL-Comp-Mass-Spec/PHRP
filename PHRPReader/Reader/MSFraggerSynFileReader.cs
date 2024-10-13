@@ -205,6 +205,15 @@ namespace PHRPReader.Reader
             return mSynopsisFileColumn[column];
         }
 
+        private bool GetParameterValue(
+            SearchEngineParameters searchEngineParams,
+            string parameterPrefix,
+            string parameterName,
+            out string parameterValue)
+        {
+            return searchEngineParams.Parameters.TryGetValue(string.Format("{0}{1}", parameterPrefix, parameterName), out parameterValue);
+        }
+
         /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
@@ -287,9 +296,10 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Examine the MSFragger parameters to determine the precursor mass tolerance(s)
+        /// Examine the MSFragger or FragPipe parameters to determine the precursor mass tolerance(s)
         /// </summary>
         /// <param name="searchEngineParams">MSFragger search engine parameters loaded from a Key=Value parameter file</param>
+        /// <param name="parameterPrefix">Parameter name prefix: empty string for MSFragger, "msfragger." for FragPipe</param>
         /// <param name="toleranceLower">Output: Tolerance to the left, e.g. -20</param>
         /// <param name="toleranceUpper">Output: Tolerance to the right, e.g. 20</param>
         /// <param name="ppmBased">Output: True if ppm-based tolerances</param>
@@ -297,19 +307,20 @@ namespace PHRPReader.Reader
         /// <returns>True if the tolerance parameters were found, false if not found or an error</returns>
         public bool GetPrecursorSearchTolerances(
             SearchEngineParameters searchEngineParams,
+            string parameterPrefix,
             out double toleranceLower,
             out double toleranceUpper,
             out bool ppmBased,
             out bool singleTolerance)
         {
             // First look for the legacy symmetric tolerance parameter
-            searchEngineParams.Parameters.TryGetValue("precursor_true_tolerance", out var precursorTrueTolerance);
-            searchEngineParams.Parameters.TryGetValue("precursor_true_units", out var precursorTrueUnits);
+            GetParameterValue(searchEngineParams, parameterPrefix, "precursor_true_tolerance", out var precursorTrueTolerance);
+            GetParameterValue(searchEngineParams, parameterPrefix, "precursor_true_units", out var precursorTrueUnits);
 
             // Next look for the newer tolerance parameters
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_lower", out var precursorMassLower);
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_upper", out var precursorMassUpper);
-            searchEngineParams.Parameters.TryGetValue("precursor_mass_units", out var precursorMassUnits);
+            GetParameterValue(searchEngineParams, parameterPrefix, "precursor_mass_lower", out var precursorMassLower);
+            GetParameterValue(searchEngineParams, parameterPrefix, "precursor_mass_upper", out var precursorMassUpper);
+            GetParameterValue(searchEngineParams, parameterPrefix, "precursor_mass_units", out var precursorMassUnits);
 
             if (int.TryParse(precursorMassUnits, out var precursorMassUnitsVal) &&
                 double.TryParse(precursorMassLower, out var precursorMassLowerVal) &&
@@ -349,6 +360,24 @@ namespace PHRPReader.Reader
         public static string GetSearchEngineName()
         {
             return MSFRAGGER_SEARCH_ENGINE_NAME;
+        }
+
+        /// <summary>
+        /// Determine if the search engine parameters were loaded from a MSFragger parameter file, or from a FragPipe workflow file
+        /// </summary>
+        /// <param name="searchEngineParams">MSFragger or FragPipe parameters</param>
+        /// <returns>Empty string if MSFragger parameters, "msfragger." if FragPipe workflow parameters</returns>
+        public static string GetSearchEngineParameterPrefix(SearchEngineParameters searchEngineParams)
+        {
+            if (searchEngineParams.Parameters.TryGetValue("msfragger.precursor_mass_lower", out _) ||
+                searchEngineParams.Parameters.TryGetValue("msfragger.precursor_mass_units", out _))
+            {
+                // The search engine parameter file is a FragPipe workflow file
+                return "msfragger.";
+            }
+
+            // The search engine parameter file is a MSFragger parameter file
+            return string.Empty;
         }
 
         /// <summary>
@@ -512,25 +541,24 @@ namespace PHRPReader.Reader
                     return false;
                 }
 
+                var parameterPrefix = GetSearchEngineParameterPrefix(searchEngineParams);
+
                 string enzymeName;
 
                 // Starting with MSFragger v3.4, enzyme name is specified by parameter search_enzyme_name_1
                 // Previous versions used search_enzyme_name
-                if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name_1", out var enzymeNameA))
+                if (GetParameterValue(searchEngineParams, parameterPrefix, "search_enzyme_name_1", out var enzymeNameA))
                 {
                     enzymeName = enzymeNameA;
                 }
+                else if (GetParameterValue(searchEngineParams, parameterPrefix, "search_enzyme_name", out var enzymeNameB))
+                {
+                    enzymeName = enzymeNameB;
+                }
                 else
                 {
-                    if (searchEngineParams.Parameters.TryGetValue("search_enzyme_name", out var enzymeNameB))
-                    {
-                        enzymeName = enzymeNameB;
-                    }
-                    else
-                    {
-                        enzymeName = string.Empty;
-                        ReportWarning("The MSFragger parameter file does not have parameter 'search_enzyme_name' or 'search_enzyme_name_1'");
-                    }
+                    enzymeName = string.Empty;
+                    ReportWarning("The MSFragger parameter file does not have parameter 'search_enzyme_name' or 'search_enzyme_name_1'");
                 }
 
                 // Determine the enzyme name
@@ -576,7 +604,7 @@ namespace PHRPReader.Reader
 
                 // Determine the cleavage specificity
 
-                if (!searchEngineParams.Parameters.TryGetValue("num_enzyme_termini", out var numTermini))
+                if (!GetParameterValue(searchEngineParams, parameterPrefix, "num_enzyme_termini", out var numTermini))
                 {
                     ReportWarning("'num_enzyme_termini' parameter not found in the MSFragger parameter file");
                 }
@@ -609,6 +637,7 @@ namespace PHRPReader.Reader
 
                 var validTolerance = GetPrecursorSearchTolerances(
                     searchEngineParams,
+                    parameterPrefix,
                     out var toleranceLower, out var toleranceUpper,
                     out var ppmBased, out _);
 

@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 7, 2023";
+            FileDate = "October 12, 2024";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -1122,7 +1122,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Read the precursor match tolerance from the MSFragger parameter file
+        /// Read the precursor match tolerance from the MSFragger or FragPipe parameter file
         /// </summary>
         /// <param name="msFraggerParamFilePath">MSFragger parameter file path</param>
         /// <returns>True on success, false if an error</returns>
@@ -1152,6 +1152,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var success = reader.LoadSearchEngineParameters(sourceFile.FullName, out var searchEngineParams);
 
+                var parameterPrefix = MSFraggerSynFileReader.GetSearchEngineParameterPrefix(searchEngineParams);
+
                 if (!success)
                 {
                     return false;
@@ -1159,6 +1161,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var validTolerances = reader.GetPrecursorSearchTolerances(
                     searchEngineParams,
+                    parameterPrefix,
                     out var toleranceLower, out var toleranceUpper,
                     out var ppmBased, out var singleTolerance);
 
@@ -1620,6 +1623,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorMessages">Error messages</param>
         /// <param name="columnMapping">Column mapping</param>
         /// <param name="lineNumber">Line number in the input file (used for error reporting)</param>
+        /// <param name="scanChargeMatcher">RegEx for extracting scan number from the Spectrum column</param>
         /// <param name="currentDatasetName">Current dataset name; updated by this method if the Spectrum File name is not an empty string</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSFraggerResultsFileEntry(
@@ -1629,6 +1633,7 @@ namespace PeptideHitResultsProcessor.Processor
             ICollection<string> errorMessages,
             IDictionary<MSFraggerPsmFileColumns, int> columnMapping,
             int lineNumber,
+            Regex scanChargeMatcher,
             ref string currentDatasetName)
         {
             searchResult = new MSFraggerSearchResult();
@@ -1697,7 +1702,17 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!int.TryParse(searchResult.Scan, out searchResult.ScanNum))
                 {
-                    ReportError("Scan column is not numeric on line " + lineNumber, true);
+                    // The _psm.tsv file created by FragPipe has Spectrum entries of the form "DatasetName.00983.00983.3"
+                    var scanMatch = scanChargeMatcher.Match(searchResult.Scan);
+
+                    if (scanMatch.Success)
+                    {
+                        searchResult.ScanNum = int.Parse(scanMatch.Groups["StartScan"].Value);
+                    }
+                    else
+                    {
+                        ReportError("Scan column is not numeric on line " + lineNumber, true);
+                    }
                 }
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Charge], out searchResult.Charge);
@@ -1790,6 +1805,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.IsUnique], out searchResult.IsUnique);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Protein], out searchResult.Protein);
+
+                // ReSharper disable once GrammarMistakeInComment
 
                 // The Protein column in Dataset.tsv files has both protein name and description; extract out the protein description
                 // For _psm.tsv files, .Protein should just have a single protein name, but we'll check for a space anyway
@@ -2196,6 +2213,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.MSFraggerComputedDelM = MSFraggerComputedDelM;
 
+                // ReSharper disable once GrammarMistakeInComment
+
                 // Note that MSFragger peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
                 // Thus, .PeptideSequenceWithMods will not have any mod symbols
 
@@ -2323,7 +2342,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         var msFraggerParameterFilePath = ResolveFilePath(inputFile.DirectoryName, Options.SearchToolParameterFilePath);
 
-                        // Examine the MSFragger parameter file to determine the precursor match tolerance
+                        // Examine the MSFragger or FragPipe parameter file to determine the precursor match tolerance
                         var toleranceExtracted = LoadSearchEngineParamFile(msFraggerParameterFilePath);
 
                         if (!toleranceExtracted)
@@ -2449,6 +2468,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var currentDatasetName = readingPsmFile ? string.Empty : Path.GetFileNameWithoutExtension(inputFile.Name);
 
+                var scanChargeMatcher = new Regex(@"^(?<Dataset>.+)\.(?<StartScan>\d+)\.(?<EndScan>\d+)\.(?<Charge>\d+)", RegexOptions.Compiled);
+
                 // Parse the input file
                 while (!reader.EndOfStream && !AbortProcessing)
                 {
@@ -2486,6 +2507,7 @@ namespace PeptideHitResultsProcessor.Processor
                         errorMessages,
                         columnMapping,
                         lineNumber,
+                        scanChargeMatcher,
                         ref currentDatasetName);
 
                     if (validSearchResult)
