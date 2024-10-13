@@ -998,102 +998,6 @@ namespace PeptideHitResultsProcessor.Processor
             return mods;
         }
 
-        internal static bool ParseModificationDescription(
-            string cleanSequence,
-            int finalResidueLoc,
-            string modEntry,
-            out MSFraggerModInfo modInfo,
-            out string errorMessage)
-        {
-            // Parse out the residue and mod mass
-            var residueMatch = mModListResidueModMatcher.Match(modEntry);
-            var termMatch = mModListTerminalModMatcher.Match(modEntry);
-
-            if (!(residueMatch.Success || termMatch.Success))
-            {
-                errorMessage = string.Format("Invalid MSFragger mod entry format; must be residue number, symbol, and mod mass: {0}", modEntry);
-                modInfo = new MSFraggerModInfo();
-                return false;
-            }
-
-            var modMassText = residueMatch.Success
-                ? residueMatch.Groups["ModMass"].Value
-                : termMatch.Groups["ModMass"].Value;
-
-            if (!double.TryParse(modMassText, out var modMass))
-            {
-                errorMessage = string.Format("Unable to parse the mod mass value from {0}; invalid number: {1}", modEntry, modMassText);
-                modInfo = new MSFraggerModInfo();
-                return false;
-            }
-
-            modInfo = new MSFraggerModInfo
-            {
-                ModMass = modMass
-            };
-
-            if (residueMatch.Success)
-            {
-                // Matched a modified residue
-                var residueNumber = residueMatch.Groups["ResidueNumber"].Value;
-                modInfo.ResidueSymbol = residueMatch.Groups["ResidueSymbol"].Value[0];
-
-                if (!int.TryParse(residueNumber, out modInfo.ResidueLocInPeptide))
-                {
-                    errorMessage = string.Format("Unable to parse the residue number from the mod entry: {0}", modEntry);
-                    return false;
-                }
-
-                if (modInfo.ResidueLocInPeptide <= 1)
-                {
-                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
-                }
-                else if (modInfo.ResidueLocInPeptide >= finalResidueLoc)
-                {
-                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
-                }
-                else
-                {
-                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.None;
-                }
-            }
-            else
-            {
-                // Matched a terminal mod
-                switch (termMatch.Groups["TerminusName"].Value)
-                {
-                    case MOD_POSITION_NAME_N_TERMINUS:
-                        modInfo.ResidueLocInPeptide = 1;
-                        modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
-                        modInfo.ResidueSymbol = cleanSequence[0];
-                        break;
-
-                    case MOD_POSITION_NAME_C_TERMINUS:
-                        modInfo.ResidueLocInPeptide = finalResidueLoc;
-                        modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
-                        modInfo.ResidueSymbol = cleanSequence[finalResidueLoc - 1];
-                        break;
-
-                    default:
-                        errorMessage = string.Format("Unrecognized terminus name in the mod entry: {0}", modEntry);
-                        return false;
-                }
-            }
-
-            // Assure that ResidueLocInPeptide is between 1 and finalResidueLoc
-            if (modInfo.ResidueLocInPeptide < 1)
-            {
-                modInfo.ResidueLocInPeptide = 1;
-            }
-            else if (modInfo.ResidueLocInPeptide > finalResidueLoc)
-            {
-                modInfo.ResidueLocInPeptide = finalResidueLoc;
-            }
-
-            errorMessage = string.Empty;
-            return true;
-        }
-
         private string GetPeptideSequence(ToolResultsBaseClass peptideInfo, bool includePrefixAndSuffix = true)
         {
             if (!includePrefixAndSuffix)
@@ -1468,6 +1372,102 @@ namespace PeptideHitResultsProcessor.Processor
                 SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 return false;
             }
+        }
+
+        internal static bool ParseModificationDescription(
+            string cleanSequence,
+            int finalResidueLoc,
+            string modEntry,
+            out MSFraggerModInfo modInfo,
+            out string errorMessage)
+        {
+            // Parse out the residue and mod mass
+            var residueMatch = mModListResidueModMatcher.Match(modEntry);
+            var termMatch = mModListTerminalModMatcher.Match(modEntry);
+
+            if (!(residueMatch.Success || termMatch.Success))
+            {
+                errorMessage = string.Format("Invalid MSFragger mod entry format; must be residue number, symbol, and mod mass: {0}", modEntry);
+                modInfo = new MSFraggerModInfo();
+                return false;
+            }
+
+            var modMassText = residueMatch.Success
+                ? residueMatch.Groups["ModMass"].Value
+                : termMatch.Groups["ModMass"].Value;
+
+            if (!double.TryParse(modMassText, out var modMass))
+            {
+                errorMessage = string.Format("Unable to parse the mod mass value from {0}; invalid number: {1}", modEntry, modMassText);
+                modInfo = new MSFraggerModInfo();
+                return false;
+            }
+
+            modInfo = new MSFraggerModInfo
+            {
+                ModMass = modMass
+            };
+
+            if (residueMatch.Success)
+            {
+                // Matched a modified residue
+                var residueNumber = residueMatch.Groups["ResidueNumber"].Value;
+                modInfo.ResidueSymbol = residueMatch.Groups["ResidueSymbol"].Value[0];
+
+                if (!int.TryParse(residueNumber, out modInfo.ResidueLocInPeptide))
+                {
+                    errorMessage = string.Format("Unable to parse the residue number from the mod entry: {0}", modEntry);
+                    return false;
+                }
+
+                if (modInfo.ResidueLocInPeptide <= 1)
+                {
+                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
+                }
+                else if (modInfo.ResidueLocInPeptide >= finalResidueLoc)
+                {
+                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
+                }
+                else
+                {
+                    modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.None;
+                }
+            }
+            else
+            {
+                // Matched a terminal mod
+                switch (termMatch.Groups["TerminusName"].Value)
+                {
+                    case MOD_POSITION_NAME_N_TERMINUS:
+                        modInfo.ResidueLocInPeptide = 1;
+                        modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
+                        modInfo.ResidueSymbol = cleanSequence[0];
+                        break;
+
+                    case MOD_POSITION_NAME_C_TERMINUS:
+                        modInfo.ResidueLocInPeptide = finalResidueLoc;
+                        modInfo.TerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
+                        modInfo.ResidueSymbol = cleanSequence[finalResidueLoc - 1];
+                        break;
+
+                    default:
+                        errorMessage = string.Format("Unrecognized terminus name in the mod entry: {0}", modEntry);
+                        return false;
+                }
+            }
+
+            // Assure that ResidueLocInPeptide is between 1 and finalResidueLoc
+            if (modInfo.ResidueLocInPeptide < 1)
+            {
+                modInfo.ResidueLocInPeptide = 1;
+            }
+            else if (modInfo.ResidueLocInPeptide > finalResidueLoc)
+            {
+                modInfo.ResidueLocInPeptide = finalResidueLoc;
+            }
+
+            errorMessage = string.Empty;
+            return true;
         }
 
         /// <summary>
