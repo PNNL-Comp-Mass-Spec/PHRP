@@ -369,11 +369,25 @@ namespace PHRPReader.Reader
         /// <returns>Empty string if MSFragger parameters, "msfragger." if FragPipe workflow parameters</returns>
         public static string GetSearchEngineParameterPrefix(SearchEngineParameters searchEngineParams)
         {
-            if (searchEngineParams.Parameters.TryGetValue("msfragger.precursor_mass_lower", out _) ||
-                searchEngineParams.Parameters.TryGetValue("msfragger.precursor_mass_units", out _))
+            // Count the number of parameters that start with "msfragger."
+            // If ten or more, assume that this is a FragPipe workflow file
+
+            var matchCount = 0;
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+
+            foreach (var parameter in searchEngineParams.Parameters.Keys)
             {
-                // The search engine parameter file is a FragPipe workflow file
-                return "msfragger.";
+                if (!parameter.StartsWith("msfragger.", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                matchCount++;
+
+                if (matchCount >= 10)
+                {
+                    // The search engine parameter file is a FragPipe workflow file
+                    return "msfragger.";
+                }
             }
 
             // The search engine parameter file is a MSFragger parameter file
