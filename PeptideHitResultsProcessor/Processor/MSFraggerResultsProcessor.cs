@@ -1697,7 +1697,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!DataUtilities.GetColumnValue(splitLine, columnMapping[MSFraggerPsmFileColumns.Spectrum], out searchResult.Scan))
                 {
-                    ReportError("Scan column is missing or invalid on line " + lineNumber, true);
+                    ReportError("Spectrum column is missing or invalid on line " + lineNumber, true);
                 }
 
                 if (!int.TryParse(searchResult.Scan, out searchResult.ScanNum))
@@ -1711,7 +1711,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                     else
                     {
-                        ReportError("Scan column is not numeric on line " + lineNumber, true);
+                        ReportError(string.Format(
+                            "Spectrum column is not numeric on line {0}, and unable to extract scan number using a RegEx match to {1}",
+                            lineNumber, searchResult.Scan), true);
                     }
                 }
 
