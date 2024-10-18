@@ -931,7 +931,7 @@ namespace PeptideHitResultsProcessor.Data
 
         /// <summary>
         /// Updates the N-Terminal mass applied to peptides when computing their mass
-        /// if significantly different than the currently defined N-terminal peptide mass
+        /// if significantly different from the currently defined N-terminal peptide mass
         /// </summary>
         /// <param name="nTerminalMassChange">N-terminal mass change</param>
         public void UpdatePeptideNTerminusMass(double nTerminalMassChange)
@@ -944,7 +944,7 @@ namespace PeptideHitResultsProcessor.Data
 
         /// <summary>
         /// Updates the C-Terminal mass applied to peptides when computing their mass
-        /// if significantly different than the currently defined C-terminal peptide mass
+        /// if significantly different from the currently defined C-terminal peptide mass
         /// </summary>
         /// <param name="cTerminalMassChange">C-terminal mass change</param>
         public void UpdatePeptideCTerminusMass(double cTerminalMassChange)
@@ -963,7 +963,7 @@ namespace PeptideHitResultsProcessor.Data
         {
             SetEnzymeMatchSpec(options.EnzymeMatchSpec);
 
-            // Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
+            // Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different from the defaults
             if (Math.Abs(options.PeptideNTerminusMassChange) > float.Epsilon)
             {
                 UpdatePeptideNTerminusMass(options.PeptideNTerminusMassChange);

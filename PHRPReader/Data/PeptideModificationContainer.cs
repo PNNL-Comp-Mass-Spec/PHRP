@@ -164,7 +164,7 @@ namespace PHRPReader.Data
 
                             if (!useNextAvailableModificationSymbol)
                             {
-                                // See if the new modification symbol is different than the already-defined symbol
+                                // See if the new modification symbol is different from the already-defined symbol
 
                                 if (modificationDefinition.ModificationSymbol != mod.ModificationSymbol)
                                 {
@@ -410,7 +410,7 @@ namespace PHRPReader.Data
         }
 
         /// <summary>
-        /// Looks for the best match in mIntegerMassCorrectionTagLookup for modificationMass (which should be close to a integer value)
+        /// Looks for the best match in mIntegerMassCorrectionTagLookup for modificationMass (which should be close to an integer value)
         /// </summary>
         /// <param name="modificationMass">Modification mass</param>
         /// <returns>The mass correction tag name if a match, otherwise an empty string</returns>

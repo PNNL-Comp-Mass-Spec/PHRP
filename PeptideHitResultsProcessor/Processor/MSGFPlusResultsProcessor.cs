@@ -1386,7 +1386,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (proteinNumber < currentProteinNumber)
                 {
-                    // A better protein name has been found (or this is the first protein and we just determined the protein number to associate with it)
+                    // A better protein name has been found (or this is the first protein, and we just determined the protein number to associate with it)
                     return new KeyValuePair<string, int>(candidateProteinName, proteinNumber);
                 }
             }
@@ -2224,7 +2224,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse the header line of a MS-GF+ _syn.txt file, populating columnMapping
+        /// Parse the header line of an MS-GF+ _syn.txt file, populating columnMapping
         /// </summary>
         /// <param name="lineIn">Data line</param>
         /// <param name="columnMapping">Column mapping</param>
@@ -2264,7 +2264,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Parse an entry from a MS-GF+ synopsis file
+        /// Parse an entry from an MS-GF+ synopsis file
         /// </summary>
         /// <param name="lineIn">Data line</param>
         /// <param name="searchResult">Search result</param>

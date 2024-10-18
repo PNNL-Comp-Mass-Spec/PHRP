@@ -14,7 +14,7 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PHRPReaderTests
     {
-        // Ignore Spelling: Da, gb, gi, Hyperscore
+        // Ignore Spelling: Da, Fragger, gb, gi, Hyperscore, PHRP, Proteoform, Quant
 
         private struct MSGFPlusInfo
         {
