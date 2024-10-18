@@ -1698,6 +1698,8 @@ namespace PeptideHitResultsProcessor.Processor
                             // New result has the same SpecEValue as the previous result
                             // See if peptidesFoundForSpecEValueLevel contains the peptide, scan and charge
 
+                            // ReSharper disable once CanSimplifySetAddingWithSingleCall
+
                             if (peptidesFoundForSpecEValueLevel.Contains(key))
                             {
                                 firstMatchForGroup = false;
@@ -3177,6 +3179,8 @@ namespace PeptideHitResultsProcessor.Processor
                                     searchResults[index].Protein + "_" +
                                     searchResults[index].MH + "_" +
                                     searchResults[index].SpecEValue;
+
+                    // ReSharper disable once CanSimplifySetAddingWithSingleCall
 
                     if (results.Contains(resultKey))
                     {

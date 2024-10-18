@@ -348,6 +348,8 @@ namespace PHRPReader
 
         private static readonly Regex RegexModMasses = new("[+-][0-9.]+", RegexOptions.Compiled);
 
+        // ReSharper disable CommentTypo
+
         /// <summary>
         /// Compute the mass of the peptide sequence.  Supports peptide sequences with numeric mod masses
         /// Examples of numeric mods:
@@ -356,6 +358,7 @@ namespace PHRPReader
         /// </summary>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         /// <param name="sequence">Peptide sequence</param>
+        // ReSharper restore CommentTypo
         public double ComputeSequenceMassNumericMods(string sequence)
         {
             string primarySequence;

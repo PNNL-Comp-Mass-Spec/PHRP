@@ -289,6 +289,8 @@ namespace PHRPReader.Data
             Modifications.Clear();
         }
 
+        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
+
         /// <summary>
         /// Find the modification in matchedMods with the smallest delta mass value
         /// </summary>
@@ -1885,6 +1887,8 @@ namespace PHRPReader.Data
             ModificationDefinition.ResidueModificationType modificationType,
             int massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
+            // ReSharper disable once GrammarMistakeInComment
+
             // Look for mods in mModifications with matching .ModificationType, .ModificationMass (within tolerance), and .TargetResidues
             // If not found, add a new entry to mModifications
 

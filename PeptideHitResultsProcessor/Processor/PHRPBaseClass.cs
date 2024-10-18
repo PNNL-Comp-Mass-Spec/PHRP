@@ -612,6 +612,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var key = uniqueSeqID + UNIQUE_SEQ_TO_PROTEIN_MAP_SEP + proteinName;
 
+                // ReSharper disable once CanSimplifySetAddingWithSingleCall
+
                 if (mSeqToProteinMap.Contains(key))
                 {
                     existingMapFound = true;
@@ -1059,6 +1061,8 @@ namespace PeptideHitResultsProcessor.Processor
 
             return mass;
         }
+
+        // ReSharper disable once GrammarMistakeInComment
 
         /// <summary>
         /// Compute FDR values, then assign QValues
