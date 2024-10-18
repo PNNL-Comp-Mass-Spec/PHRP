@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using PHRPReader.Data;
@@ -631,8 +630,15 @@ namespace PHRPReader
 
             for (var minLength = 2; minLength > 0; minLength--)
             {
-                foreach (var element in elementMonoMasses.Where(element => element.Key.Length >= minLength))
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+                foreach (var element in elementMonoMasses)
                 {
+                    if (minLength > 1 && element.Key.Length <= 1 ||
+                        minLength == 1 && element.Key.Length > 1)
+                    {
+                        continue;
+                    }
+
                     regExSpec.Append(element.Key).Append('|');
                 }
             }
