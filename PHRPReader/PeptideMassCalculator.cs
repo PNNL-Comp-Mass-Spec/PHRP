@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using PHRPReader.Data;
@@ -622,9 +623,15 @@ namespace PHRPReader
 
             regExSpec.Append("(?<ElementSymbol>");
 
-            foreach (var element in elementMonoMasses)
+            // First append the two-letter abbreviation elements
+            // Then append the one-letter abbreviation elements
+
+            for (var minLength = 2; minLength > 0; minLength--)
             {
-                regExSpec.Append(element.Key).Append('|');
+                foreach (var element in elementMonoMasses.Where(element => element.Key.Length >= minLength))
+                {
+                    regExSpec.Append(element.Key).Append('|');
+                }
             }
 
             // Remove the trailing vertical bar
