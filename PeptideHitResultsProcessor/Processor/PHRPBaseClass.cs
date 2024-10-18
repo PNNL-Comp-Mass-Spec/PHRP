@@ -1584,9 +1584,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                             var peptideAndProteinKey = splitLine[peptideColumnIndex] + "_" + splitLine[proteinColumnIndex];
 
-                            if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
+                            if (peptideToProteinMapResults.Add(peptideAndProteinKey))
                             {
-                                peptideToProteinMapResults.Add(peptideAndProteinKey);
                                 writer.WriteLine(lineIn);
                             }
                         }
