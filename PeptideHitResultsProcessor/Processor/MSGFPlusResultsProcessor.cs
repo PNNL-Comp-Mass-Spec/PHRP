@@ -1977,9 +1977,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 // Replace any mod text values in the peptide sequence with the appropriate mod symbols
                 // In addition, replace the terminus symbols with dashes
-                udtSearchResult.Peptide =
-                    ReplaceMSGFModTextWithSymbol(ReplaceTerminus(udtSearchResult.Peptide), msgfPlusModInfo, isMsgfPlus,
-                                                 out var totalModMass);
+                udtSearchResult.Peptide = ReplaceMSGFModTextWithSymbol(
+                    ReplaceTerminus(udtSearchResult.Peptide),
+                    msgfPlusModInfo, isMsgfPlus, out var totalModMass);
 
                 // Compute monoisotopic mass of the peptide
                 var peptideMonoisotopicMass = ComputePeptideMass(udtSearchResult.Peptide, totalModMass);

@@ -50,7 +50,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "August 30, 2024";
+        public const string PROGRAM_DATE = "October 17, 2024";
 
         /// <summary>
         /// Constructor
