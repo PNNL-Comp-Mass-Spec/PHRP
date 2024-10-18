@@ -1448,14 +1448,15 @@ namespace PeptideHitResultsProcessor.Processor
                             SetErrorMessage("Peptide to protein mapping file was not created for " + inputFile.FullName);
                             SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                             success = false;
-                            break;
                         }
-
-                        success = ValidatePeptideToProteinMapResults(
-                            resultsFilePath,
-                            ignorePeptideToProteinMapErrors,
-                            maximumAllowableMatchErrorPercentThreshold,
-                            matchErrorPercentWarningThreshold);
+                        else
+                        {
+                            success = ValidatePeptideToProteinMapResults(
+                                resultsFilePath,
+                                ignorePeptideToProteinMapErrors,
+                                maximumAllowableMatchErrorPercentThreshold,
+                                matchErrorPercentWarningThreshold);
+                        }
                     }
                     else
                     {
