@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "October 12, 2024";
+            FileDate = "October 18, 2024";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -1656,6 +1656,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Extract the dataset name from the spectrum file name
                     // Example names:
                     //   interact-Dataset.pep.xml
+                    //   interact-Dataset.mod.pep.xml
                     //   interact-Dataset.pin.pep.xml
 
                     var baseName = Path.GetFileNameWithoutExtension(spectrumFile);
@@ -1671,6 +1672,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var suffixesToRemove = new List<string>
                     {
+                        ".mod",
                         ".pep",
                         ".pin"
                     };
