@@ -733,7 +733,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// This routine creates a synopsis file from the output from MSFragger (file Dataset_psm.tsv or Dataset.tsv)
+        /// This routine creates a synopsis file from the output from MSFragger (or FragPipe) results file (e.g., Dataset.tsv, Dataset_psm.tsv, ExperimentGroup_psm.tsv)
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
         /// <param name="inputFilePath">MSFragger results file</param>
@@ -2288,7 +2288,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Main processing routine
         /// </summary>
-        /// <param name="inputFilePath">MSFragger results file (Dataset_psm.tsv or Dataset.tsv)</param>
+        /// <param name="inputFilePath">MSFragger (or FragPipe) results file (e.g., Dataset.tsv, Dataset_psm.tsv, ExperimentGroup_psm.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if successful, False if failure</returns>
@@ -2431,7 +2431,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Load MSFragger search results
+        /// Load MSFragger (or FragPipe) search results
         /// </summary>
         /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
         /// <param name="inputFile">Dataset.tsv, Dataset_psm.tsv, or Aggregation_psm.tsv file</param>
