@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "October 22, 2024";
+            FileDate = "November 6, 2024";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -396,11 +396,29 @@ namespace PeptideHitResultsProcessor.Processor
             AlternativeProteins = 24
         }
 
-        internal struct MSFraggerModInfo
+        /// <summary>
+        /// Information about a modified residue in a peptide
+        /// </summary>
+        public struct MSFraggerModInfo
         {
+            /// <summary>
+            /// Modification mass
+            /// </summary>
             public double ModMass;
+
+            /// <summary>
+            /// Residue symbol
+            /// </summary>
             public char ResidueSymbol;
+
+            /// <summary>
+            /// Residue location in the peptide (1-based)
+            /// </summary>
             public int ResidueLocInPeptide;
+
+            /// <summary>
+            /// Terminus state
+            /// </summary>
             public AminoAcidModInfo.ResidueTerminusState TerminusState;
 
             /// <summary>
@@ -986,7 +1004,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             foreach (var modEntry in modificationList.Split(','))
             {
-                if (ParseModificationDescription(cleanSequence, finalResidueLoc, modEntry, out var modInfo, out var errorMessage))
+                if (ParseModificationDescription(cleanSequence, finalResidueLoc, modEntry.Trim(), out var modInfo, out var errorMessage))
                 {
                     mods.Add(modInfo);
                     continue;
@@ -1377,7 +1395,16 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        internal static bool ParseModificationDescription(
+        /// <summary>
+        /// Parse a modification description, e.g. 1M(15.9949)
+        /// </summary>
+        /// <param name="cleanSequence">Clean peptide sequence</param>
+        /// <param name="finalResidueLoc">Final residue number, i.e. the peptide length</param>
+        /// <param name="modEntry">Modification description to parse, e.g. "1M(15.9949)", "5C(57.0215)", or "N-term(42.0106)"</param>
+        /// <param name="modInfo">Output: modification info</param>
+        /// <param name="errorMessage">Output: error message</param>
+        /// <returns>True if successful, false if an error</returns>
+        public static bool ParseModificationDescription(
             string cleanSequence,
             int finalResidueLoc,
             string modEntry,
