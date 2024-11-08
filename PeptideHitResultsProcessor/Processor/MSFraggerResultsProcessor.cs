@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "November 6, 2024";
+            FileDate = "November 7, 2024";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -399,7 +399,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Information about a modified residue in a peptide
         /// </summary>
-        public struct MSFraggerModInfo
+        internal struct MSFraggerModInfo
         {
             /// <summary>
             /// Modification mass
@@ -1404,7 +1404,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modInfo">Output: modification info</param>
         /// <param name="errorMessage">Output: error message</param>
         /// <returns>True if successful, false if an error</returns>
-        public static bool ParseModificationDescription(
+        internal static bool ParseModificationDescription(
             string cleanSequence,
             int finalResidueLoc,
             string modEntry,
