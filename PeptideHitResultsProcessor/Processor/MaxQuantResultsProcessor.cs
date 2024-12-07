@@ -69,7 +69,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MaxQuantResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "January 26, 2024";
+            FileDate = "December 6, 2024";
 
             mMaxQuantMods = new Dictionary<string, MaxQuantModInfo>(StringComparer.OrdinalIgnoreCase);
 
@@ -777,6 +777,8 @@ namespace PeptideHitResultsProcessor.Processor
             // This dictionary maps from the abbreviated modification name stored in the synopsis file to the full modification name (as used by MaxQuant)
             var modificationNameMap = new Dictionary<string, string>();
 
+            var modifiedSequenceLength = searchResult.ModifiedSequence.Length;
+
             // Look for each dynamic modification and store it in dynamicModifications
             foreach (var modItem in modifiedSeqMods)
             {
@@ -784,7 +786,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var startIndex = 0;
 
-                while (startIndex < matchedModNameWithParentheses.Length)
+                while (startIndex < modifiedSequenceLength)
                 {
                     var charIndex = searchResult.ModifiedSequence.IndexOf(matchedModNameWithParentheses, startIndex, StringComparison.Ordinal);
 
