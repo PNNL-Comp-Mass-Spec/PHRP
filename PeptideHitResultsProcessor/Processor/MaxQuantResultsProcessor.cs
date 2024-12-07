@@ -517,7 +517,7 @@ namespace PeptideHitResultsProcessor.Processor
                 var deltaMassDa = observedPrecursorMass - searchResult.CalculatedMonoMassPHRP;
                 var warningShown = false;
 
-                if (deltaMassDa < -15 && isobaricModPresent)
+                if (Math.Abs(deltaMassDa) > 15 && isobaricModPresent)
                 {
                     // When Isobaric mods are present, MaxQuant will sometimes treat one of them as optional
                     foreach (var modItem in modList)
@@ -543,7 +543,7 @@ namespace PeptideHitResultsProcessor.Processor
                         }
                     }
 
-                    if (deltaMassDa < -15)
+                    if (Math.Abs(deltaMassDa) > 15)
                     {
                         mPrecursorMassErrorWarningCount++;
                         ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
