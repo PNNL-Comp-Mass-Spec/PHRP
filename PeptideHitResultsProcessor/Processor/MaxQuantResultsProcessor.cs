@@ -1743,6 +1743,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // ToDo: determine how multiple static mods are listed
 
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach (var maxQuantModName in staticMods.Split(','))
                     {
                         var modDef = GetModDetails(MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod, maxQuantModName);
@@ -1784,6 +1785,8 @@ namespace PeptideHitResultsProcessor.Processor
                 //    <string>Oxidation (M)</string>
                 //    <string>Acetyl (Protein N-term)</string>
                 // </variableModifications>
+
+                // ReSharper disable once CommentTypo
 
                 // <isobaricLabels>
                 //   <IsobaricLabelInfo>
@@ -2779,6 +2782,8 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.MaxQuantComputedDelM = maxquantComputedDelM;
                 searchResult.MaxQuantComputedDelMPPM = maxquantComputedDelMppm;
+
+                // ReSharper disable once GrammarMistakeInComment
 
                 // Note that MaxQuant peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
                 // Thus, .PeptideSequenceWithMods will not have any mod symbols
