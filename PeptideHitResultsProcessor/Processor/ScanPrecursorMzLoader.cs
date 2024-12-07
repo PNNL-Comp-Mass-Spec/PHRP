@@ -23,6 +23,8 @@ namespace PeptideHitResultsProcessor.Processor
     // ReSharper restore CommentTypo
     internal class ScanPrecursorMzLoader : EventNotifier
     {
+        private bool mPrecursorMzCandidatesShown;
+
         private string InputDirectoryPath { get; }
 
         /// <summary>
@@ -31,6 +33,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputDirectoryPath">Input directory path</param>
         public ScanPrecursorMzLoader(string inputDirectoryPath)
         {
+            mPrecursorMzCandidatesShown = false;
             InputDirectoryPath = inputDirectoryPath;
         }
 
@@ -105,7 +108,19 @@ namespace PeptideHitResultsProcessor.Processor
                 }
             }
 
-            OnStatusEvent("Data file with precursor m/z values not found for dataset " + dataset);
+            OnStatusEvent("Data file with precursor m/z values not found for dataset {0}", dataset);
+
+            if (mPrecursorMzCandidatesShown)
+                return new Dictionary<int, double>();
+
+            OnStatusEvent("Supported files: Dataset{0}, Dataset{1}, and Dataset{2}",
+                ReaderFactory.PRECURSOR_INFO_FILENAME_SUFFIX,
+                ReaderFactory.SIC_STATS_FILENAME_SUFFIX,
+                ReaderFactory.EXTENDED_SCAN_STATS_FILENAME_SUFFIX);
+
+            Console.WriteLine();
+            mPrecursorMzCandidatesShown = true;
+
             return new Dictionary<int, double>();
         }
 
