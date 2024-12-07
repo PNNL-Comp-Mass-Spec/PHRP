@@ -669,6 +669,12 @@ namespace PeptideHitResultsProcessor.Processor
                 return string.Empty;
             }
 
+            if (searchResult.ScanNum == 11504)
+            {
+                // Uncomment to debug
+                // Console.WriteLine("Check this PSM");
+            }
+
             var modsWithCounts = searchResult.ModificationSummary.Split(',');
 
             // This dictionary tracks information about mod names in ModificationSummary and ModifiedSequence
