@@ -2478,6 +2478,7 @@ namespace PHRPReader
 
                 mPSMCurrent.PeptideWithNumericMods = peptideWithMods;
                 mPSMCurrent.ClearModifiedResidues();
+
                 foreach (var modEntry in peptideMods)
                 {
                     mPSMCurrent.AddModifiedResidue(modEntry);

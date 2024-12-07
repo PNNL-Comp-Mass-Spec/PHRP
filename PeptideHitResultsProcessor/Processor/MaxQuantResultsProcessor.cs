@@ -527,9 +527,12 @@ namespace PeptideHitResultsProcessor.Processor
 
                         var adjustedDeltaMassAbs = Math.Abs(deltaMassDa + modItem.ModMassVal);
 
-                        if (adjustedDeltaMassAbs < 0.1 || Math.Abs(adjustedDeltaMassAbs - 1) < 0.1)
+                        if (adjustedDeltaMassAbs < 0.1 ||
+                            Math.Abs(adjustedDeltaMassAbs - 1) < 0.1 ||
+                            Math.Abs(adjustedDeltaMassAbs - 2) < 0.1 ||
+                            Math.Abs(adjustedDeltaMassAbs - 3) < 0.1)
                         {
-                            // The adjusted delta mass value is either close to 0 or close to 1
+                            // The adjusted delta mass value is either close to 0 or close to 1, 2, or 3
                             // Remove one instance of this static isobaric mod
 
                             searchResult.CalculatedMonoMassPHRP -= modItem.ModMassVal;
