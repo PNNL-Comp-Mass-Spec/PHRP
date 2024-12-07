@@ -167,8 +167,8 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
@@ -178,9 +178,9 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and autoloads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
@@ -201,8 +201,8 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
         public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, resultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
@@ -213,9 +213,9 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and autoloads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults,
                              bool loadScanStats)
         {

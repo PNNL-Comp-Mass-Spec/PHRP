@@ -33,7 +33,7 @@ namespace PHRPReader
     /// </summary>
     public class ReaderFactory : EventNotifier, IDisposable
     {
-        // Ignore Spelling: A-Za-z, Ato, DA, fht, kv, Hyperscore, moda, MODa, modp, modplus
+        // Ignore Spelling: A-Za-z, Ato, autoloaded, autoloads, DA, fht, kv, Hyperscore, moda, MODa, modp, modplus
         // Ignore Spelling: msa, MSGF, msgfdb, msp, mspath, msx, mzXml, PHRP, prot, Ss, toppic, tpc, xt
 
         /// <summary>
@@ -334,8 +334,8 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
         public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
@@ -345,9 +345,9 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and autoloads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
@@ -368,8 +368,8 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
         public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, resultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
@@ -380,9 +380,9 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and autoloads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and autoloads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and autoloads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
         {
             mStartupOptions = new StartupOptions
@@ -1361,7 +1361,7 @@ namespace PHRPReader
         /// </summary>
         /// <remarks>The original version of this code is in ThermoRawFileReader.FilterTextUtilities.ExtractParentIonMZFromFilterText(string, out double)</remarks>
         /// <param name="filterText">Thermo scan filter</param>
-        /// <param name="parentIonMz">Output: parenter ion m/z</param>
+        /// <param name="parentIonMz">Output: parent ion m/z</param>
         /// <returns>True if parsing successful</returns>
         public static bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
@@ -2193,7 +2193,7 @@ namespace PHRPReader
                         break;
 
                     case PeptideHitResultTypes.XTandem:
-                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
+                        // Note that Result to Protein mapping will be autoloaded during instantiation of the SynFileReader
                         SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
