@@ -231,10 +231,11 @@ namespace PeptideHitResultsProcessor.Processor
         private readonly Regex mModListModNameMatcher = new(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
 
         /// <summary>
-        /// This RegEx matches dynamic modifications in ModificationSummary, e.g.
+        /// This RegEx matches dynamic modifications in ModificationSummary that are preceded by a number, e.g.
         /// Oxidation (M)
         /// 2 Oxidation (M)
-        /// Acetyl (Protein N-term)
+        /// 2 Phospho (STY)
+        /// 4 Phospho (STY)
         /// </summary>
         private readonly Regex mModCountMatcher = new(@"^(?<ModCount>\d+) (?<ModName>.+)", RegexOptions.Compiled);
 
@@ -695,6 +696,7 @@ namespace PeptideHitResultsProcessor.Processor
             // _M(Oxidation (M))TSVGSQDTTGPMTR_
             // _M(Oxidation (M))TSVGSQDTTGPM(Oxidation (M))TR_
             // _(Acetyl (Protein N-term))M(Oxidation (M))GSHVAPTALTCAR_
+            // _EWLS(Phospho (STY))SLY(Phospho (STY))GS(Phospho (STY))KY(Phospho (STY))NLLHK_
 
             // ReSharper restore CommentTypo
 

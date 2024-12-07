@@ -2245,7 +2245,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (proteinName.StartsWith("REV_", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by MSGFDB and in DMS-generated protein collections
+                // Used by MaxQuant and in DMS-generated protein collections (also used by deprecated tool MSGFDB)
                 return true;
             }
 
@@ -2263,7 +2263,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (proteinName.StartsWith("REV__", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by MSFragger
+                // Used by MSFragger, though this should have been matched above with proteinName.StartsWith("REV_")
                 return true;
             }
 
