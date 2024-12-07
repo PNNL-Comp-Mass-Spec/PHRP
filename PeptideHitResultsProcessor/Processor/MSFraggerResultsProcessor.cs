@@ -1867,7 +1867,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     // The list of additional proteins will have both protein names and descriptions, each separated by @@
 
-                    var additionalProteinAndDescriptions = searchResult.AdditionalProteins.Split(new[] { "@@" }, StringSplitOptions.RemoveEmptyEntries);
+                    var additionalProteinAndDescriptions = searchResult.AdditionalProteins.Split(["@@"], StringSplitOptions.RemoveEmptyEntries);
                     var additionalProteins = new List<string>();
 
                     foreach (var item in additionalProteinAndDescriptions)
