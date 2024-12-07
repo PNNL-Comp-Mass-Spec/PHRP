@@ -609,10 +609,8 @@ namespace PHRPReader
                     {
                         dataset = dataset.Substring(0, charIndex);
 
-                        if (!datasetNames.Contains(dataset))
-                        {
-                            datasetNames.Add(dataset);
-                        }
+                        // Add the dataset if not yet defined
+                        datasetNames.Add(dataset);
                     }
                 }
             }
@@ -2951,7 +2949,7 @@ namespace PHRPReader
 
                             try
                             {
-                                if (dynamicMods.ContainsKey(modDef.ModificationSymbol))
+                                if (dynamicMods.TryGetValue(modDef.ModificationSymbol, out var mod))
                                 {
                                     // Mod symbol already present in dynamicMods; this is unexpected, but can happen with MODa and TopPIC, which finds lots of mods
                                     if (duplicateModSymbolCounts.TryGetValue(modDef.ModificationSymbol, out var duplicateCount))
@@ -2965,7 +2963,7 @@ namespace PHRPReader
                                         // We'll log a warning, but continue
                                         ShowMessage(string.Format(
                                             "Warning: Dynamic mod symbol '{0}' is already defined, with mass {1}; it cannot have more than one associated mod mass (duplicate has mass {2})",
-                                            modDef.ModificationSymbol, dynamicMods[modDef.ModificationSymbol].ModificationMass, modMass));
+                                            modDef.ModificationSymbol, mod.ModificationMass, modMass));
                                     }
                                 }
                                 else
