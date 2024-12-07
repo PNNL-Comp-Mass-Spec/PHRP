@@ -2252,6 +2252,38 @@ namespace PHRPReader
         }
 
         /// <summary>
+        /// Return true if the modification name is a known isobaric mod
+        /// </summary>
+        /// <param name="modName">Modification name</param>
+        /// <returns>True if isobaric, otherwise false</returns>
+        public static bool IsIsobaricMod(string modName)
+        {
+            // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+            // ReSharper disable DuplicatedSwitchSectionBodies
+
+            switch (modName)
+            {
+                // ReSharper disable StringLiteralTypo
+
+                // UniMod names
+                case "iTRAQ4plex" or "iTRAQ8plex" or
+                    "TMT" or "TMT2plex" or "TMT6plex" or "TMTpro" or "TMTpro_zero" or
+                    "cysTMT" or "cysTMT6plex" or "iodoTMT" or "iodoTMT6plex":
+                    return true;
+
+                // DMS names
+                case "itrac" or "iTRAQ8" or "TMT0Tag" or "TMT2Tag" or "TMT6Tag" or "TMT16Tag" or "iodoTMT6" or "TMT6Gly2":
+                    // ReSharper restore DuplicatedSwitchSectionBodies
+                    return true;
+
+                default:
+                    return false;
+            }
+
+            // ReSharper restore StringLiteralTypo
+        }
+
+        /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
         /// <remarks>

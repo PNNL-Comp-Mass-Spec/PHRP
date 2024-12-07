@@ -790,30 +790,7 @@ namespace PHRPReader
 
                 udtModInfo.ModName = ParseModSpecGetName(splitLine[4], ref unnamedModID);
                 udtModInfo.ShortName = string.Empty;
-
-                // ReSharper disable once ConvertSwitchStatementToSwitchExpression
-                switch (udtModInfo.ModName)
-                {
-                    // ReSharper disable StringLiteralTypo
-
-                    // UniMod names
-                    case "iTRAQ4plex" or "iTRAQ8plex" or
-                         "TMT" or "TMT2plex" or "TMT6plex" or "TMTpro" or "TMTpro_zero" or
-                         "cysTMT" or "cysTMT6plex" or "iodoTMT" or "iodoTMT6plex":
-                        udtModInfo.IsobaricMod = true;
-                        break;
-
-                    // ReSharper restore StringLiteralTypo
-
-                    // DMS Names
-                    case "itrac" or "iTRAQ8" or "TMT0Tag" or "TMT2Tag" or "TMT6Tag" or "TMT16Tag" or "iodoTMT6" or "TMT6Gly2":
-                        udtModInfo.IsobaricMod = true;
-                        break;
-
-                    default:
-                        udtModInfo.IsobaricMod = false;
-                        break;
-                }
+                udtModInfo.IsobaricMod = ReaderFactory.IsIsobaricMod(udtModInfo.ModName);
 
                 return true;
             }
