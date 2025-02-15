@@ -930,9 +930,52 @@ namespace PeptideHitResultsProcessor.Processor
             return sourceFiles;
         }
 
+        /// <summary>
+        /// Construct a unique list of dataset names for the given search results
+        /// </summary>
+        /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <returns>List of dataset names</returns>
         private List<string> GetDatasetNames(IEnumerable<MSFraggerSearchResult> filteredSearchResults)
         {
-            return (from item in filteredSearchResults select item.DatasetName).Distinct().ToList();
+            var datasetNames = (from item in filteredSearchResults select item.DatasetName).Distinct().ToList();
+
+            if (datasetNames.Count == 0)
+            {
+                return datasetNames;
+            }
+
+            // If the dataset names end in _rank1, _rank2, _rank3, etc. remove the rank suffix
+
+            var rankMatcher = new Regex(@"_rank\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            var datasetsWithRankSuffix = new Dictionary<string, string>();
+
+            foreach (var dataset in datasetNames)
+            {
+                var match = rankMatcher.Match(dataset);
+
+                if (match.Success)
+                {
+                    datasetsWithRankSuffix.Add(dataset, dataset.Substring(0, dataset.Length - match.Value.Length));
+                }
+            }
+
+            if (datasetsWithRankSuffix.Count == 0)
+            {
+                return datasetNames;
+            }
+
+            if (datasetsWithRankSuffix.Count == datasetNames.Count)
+            {
+                return datasetsWithRankSuffix.Values.ToList().Distinct().ToList();
+            }
+
+            OnWarningEvent(
+                "One or more datasets in the _psm.tsv file ends with _rank1, _rank2, etc., " +
+                "but not every dataset ends with a rank suffix: {0}/{1} end with _rankN.xml; will use the dataset names defined in the file",
+                datasetsWithRankSuffix.Count, datasetNames.Count);
+
+            return datasetNames;
         }
 
         private string GetDatasetName(string fileName)
