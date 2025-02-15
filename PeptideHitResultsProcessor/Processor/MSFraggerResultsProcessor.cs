@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "November 7, 2024";
+            FileDate = "February 15, 2025";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
