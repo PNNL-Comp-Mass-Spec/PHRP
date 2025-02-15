@@ -739,15 +739,15 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
-        /// Use scan number, charge state, and clean sequence (no prefix or suffix residues) to create a key for a PSM
+        /// Use scan number, charge state, clean sequence (no prefix or suffix residues), and Rank to create a key for a PSM
         /// </summary>
         /// <param name="additionalResult">Search result</param>
-        /// <returns>String in the form Scan-Charge-CleanSequence</returns>
+        /// <returns>String in the form Scan-Charge-CleanSequence-Rank</returns>
         /// <exception cref="NotImplementedException"></exception>
         private string ConstructKeyForPSM(ToolResultsBaseClass additionalResult)
         {
             var cleanSequence = GetCleanSequence(additionalResult.Sequence);
-            return string.Format("{0}-{1}-{2}", additionalResult.Scan, additionalResult.Charge, cleanSequence);
+            return string.Format("{0}-{1}-{2}-{3}", additionalResult.Scan, additionalResult.Charge, cleanSequence, additionalResult.RankScore);
         }
 
         /// <summary>
