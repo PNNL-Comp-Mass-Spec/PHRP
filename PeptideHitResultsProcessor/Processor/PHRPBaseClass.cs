@@ -50,7 +50,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "February 15, 2025";
+        public const string PROGRAM_DATE = "March 9, 2025";
 
         /// <summary>
         /// Constructor
@@ -850,6 +850,16 @@ namespace PeptideHitResultsProcessor.Processor
                 fileName.EndsWith(MaxQuantResultsProcessor.MSMS_FILE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                 return ResultsFileFormat.MaxQuantTXTFile;
+            }
+
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            if (extensionLCase == ".parquet")
+            {
+                if (fileName.EndsWith(DiaNNResultsProcessor.PARQUET_REPORT_FILE_SUFFIX, StringComparison.OrdinalIgnoreCase))
+                    return ResultsFileFormat.DiannParquetFile;
+
+                ConsoleMsgUtils.ShowWarning("Assuming the input file is from DIA-NN since the extension is '.parquet'");
+                return ResultsFileFormat.DiannParquetFile;
             }
 
             if (extensionLCase == ".tsv")

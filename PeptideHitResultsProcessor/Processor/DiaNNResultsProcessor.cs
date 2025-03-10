@@ -9,10 +9,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using ParquetSharp;
 using PeptideHitResultsProcessor.Data;
 using PeptideHitResultsProcessor.SearchToolResults;
 using PeptideToProteinMapEngine;
@@ -69,7 +71,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "April 17, 2023";
+            FileDate = "March 9, 2025";
 
             mModificationMassByName = new Dictionary<string, double>();
 
@@ -102,6 +104,11 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_DiaNN = "-";
+
+        /// <summary>
+        /// .parquet report file suffix
+        /// </summary>
+        public const string PARQUET_REPORT_FILE_SUFFIX = "_report.parquet";
 
         private const int MAX_ERROR_MESSAGE_COUNT = 255;
 
@@ -215,211 +222,216 @@ namespace PeptideHitResultsProcessor.Processor
             PrecursorCharge = 16,
 
             /// <summary>
+            /// Precursor m/z value
+            /// </summary>
+            PrecursorMz = 17,
+
+            /// <summary>
             /// QValue
             /// </summary>
-            QValue = 17,
+            QValue = 18,
 
             /// <summary>
             /// PEP (posterior error probability)
             /// </summary>
-            PEP = 18,
+            PEP = 19,
 
             /// <summary>
             /// Global QValue
             /// </summary>
-            GlobalQValue = 19,
+            GlobalQValue = 20,
 
             /// <summary>
             /// Protein QValue
             /// </summary>
-            ProteinQValue = 20,
+            ProteinQValue = 21,
 
             /// <summary>
             /// Protein Group QValue
             /// </summary>
-            ProteinGroupQValue = 21,
+            ProteinGroupQValue = 22,
 
             /// <summary>
             /// Global Protein Group QValue
             /// </summary>
-            GlobalProteinGroupQValue = 22,
+            GlobalProteinGroupQValue = 23,
 
             /// <summary>
             /// Gene Group QValue
             /// </summary>
-            GeneGroupQValue = 23,
+            GeneGroupQValue = 24,
 
             /// <summary>
             /// Translated QValue
             /// </summary>
-            TranslatedQValue = 24,
+            TranslatedQValue = 25,
 
             /// <summary>
             /// 1 if the peptide is specific to a given protein or gene, otherwise 0
             /// </summary>
-            Proteotypic = 25,
+            Proteotypic = 26,
 
             /// <summary>
             /// Precursor Quantity
             /// </summary>
-            PrecursorQuantity = 26,
+            PrecursorQuantity = 27,
 
             /// <summary>
             /// Precursor Normalized
             /// </summary>
-            PrecursorNormalized = 27,
+            PrecursorNormalized = 28,
 
             /// <summary>
             /// Precursor Translated
             /// </summary>
-            PrecursorTranslated = 28,
+            PrecursorTranslated = 29,
 
             /// <summary>
             /// Translated Quality
             /// </summary>
-            TranslatedQuality = 29,
+            TranslatedQuality = 30,
 
             /// <summary>
             /// MS1 Translated
             /// </summary>
-            MS1Translated = 30,
+            MS1Translated = 31,
 
             /// <summary>
             /// Quantity Quality
             /// </summary>
-            QuantityQuality = 31,
+            QuantityQuality = 32,
 
             /// <summary>
             /// Elution Time (aka retention time)
             /// </summary>
-            RT = 32,
+            RT = 33,
 
             /// <summary>
             /// Elution Time Start
             /// </summary>
-            RTStart = 33,
+            RTStart = 34,
 
             /// <summary>
             /// Elution Time Stop
             /// </summary>
-            RTStop = 34,
+            RTStop = 35,
 
             /// <summary>
             /// Indexed retention time (iRT)
             /// </summary>
-            IndexedRT = 35,
+            IndexedRT = 36,
 
             /// <summary>
             /// Predicted retention time (unused by PHRP)
             /// </summary>
-            PredictedRT = 36,
+            PredictedRT = 37,
 
             /// <summary>
             /// Predicted indexed retention time (unused by PHRP)
             /// </summary>
-            PredictedIndexedRT = 37,
+            PredictedIndexedRT = 38,
 
             /// <summary>
             /// First protein description (unused by PHRP)
             /// </summary>
-            FirstProteinDescription = 38,
+            FirstProteinDescription = 39,
 
             /// <summary>
             /// Spectral Library QValue
             /// </summary>
-            LibQValue = 39,
+            LibQValue = 40,
 
             /// <summary>
             /// Spectral Library Protein Group QValue
             /// </summary>
-            LibProteinGroupQValue = 40,
+            LibProteinGroupQValue = 41,
 
             /// <summary>
             /// MS1 Profile Correlation
             /// </summary>
-            MS1ProfileCorr = 41,
+            MS1ProfileCorr = 42,
 
             /// <summary>
             /// MS1 Area
             /// </summary>
-            MS1Area = 42,
+            MS1Area = 43,
 
             /// <summary>
             /// Evidence (score)
             /// </summary>
             /// <remarks>Higher values are better</remarks>
-            Evidence = 43,
+            Evidence = 44,
 
             /// <summary>
             /// Spectrum Similarity
             /// </summary>
-            SpectrumSimilarity = 44,
+            SpectrumSimilarity = 45,
 
             /// <summary>
             /// Averagine
             /// </summary>
-            Averagine = 45,
+            Averagine = 46,
 
             /// <summary>
             /// Mass Evidence
             /// </summary>
             /// <remarks>Higher values are better</remarks>
-            MassEvidence = 46,
+            MassEvidence = 47,
 
             /// <summary>
             /// CScore
             /// </summary>
-            CScore = 47,
+            CScore = 48,
 
             /// <summary>
             /// Decoy Evidence
             /// </summary>
-            DecoyEvidence = 48,
+            DecoyEvidence = 49,
 
             /// <summary>
             /// Decoy CScore
             /// </summary>
-            DecoyCScore = 49,
+            DecoyCScore = 50,
 
             /// <summary>
             /// Fragmentation Ion Abundances
             /// </summary>
-            FragmentQuantRaw = 50,
+            FragmentQuantRaw = 51,
 
             /// <summary>
             /// Corrected Fragmentation Ion Abundances
             /// </summary>
-            FragmentQuantCorrected = 51,
+            FragmentQuantCorrected = 52,
 
             /// <summary>
             /// Fragmentation ion correlations
             /// </summary>
-            FragmentCorrelations = 52,
+            FragmentCorrelations = 53,
 
             /// <summary>
             /// MS/MS Scan Number
             /// </summary>
-            MS2Scan = 53,
+            MS2Scan = 54,
 
             /// <summary>
             /// Ion Mobility
             /// </summary>
-            IonMobility = 54,
+            IonMobility = 55,
 
             /// <summary>
             /// Indexed Ion Mobility
             /// </summary>
-            IndexedIonMobility = 55,
+            IndexedIonMobility = 56,
 
             /// <summary>
             /// Predicted Ion Mobility
             /// </summary>
-            PredictedIonMobility = 56,
+            PredictedIonMobility = 57,
 
             /// <summary>
             /// Predicted Indexed Ion Mobility
             /// </summary>
-            PredictedIndexedIonMobility = 57
+            PredictedIndexedIonMobility = 58
         }
 
         /// <summary>
@@ -768,7 +780,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// This routine creates a synopsis file using search results read from the DIA-NN report.tsv file
         /// The synopsis file includes every result with a probability above a set threshold
         /// </summary>
-        /// <param name="inputFilePath">DIA-NN results file</param>
+        /// <param name="inputFilePath">DIA-NN results file (either .tsv or .parquet)</param>
         /// <param name="outputDirectoryPath">Output directory path</param>
         /// <param name="baseName">Output: base synopsis file name</param>
         /// <param name="synOutputFilePath">Output: synopsis file path created by this method</param>
@@ -1401,12 +1413,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.ProteinGroup], out searchResult.ProteinGroup);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.ProteinIDs], out searchResult.ProteinIDs);
-
-                var proteinIdList = searchResult.ProteinIDs.Split(';').ToList();
-
-                if (proteinIdList.Count > 0)
-                    searchResult.Protein = proteinIdList[0];
-
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.ProteinNames], out searchResult.ProteinNames);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.GeneNames], out searchResult.GeneNames);
 
@@ -1428,8 +1434,6 @@ namespace PeptideHitResultsProcessor.Processor
                     ReportError("Stripped.Sequence column is missing or invalid on line " + lineNumber, true);
                 }
 
-                searchResult.Length = searchResult.Sequence.Length;
-
                 // Peptide sequences in DIA-NN report.tsv files do not include prefix or suffix residues (but this class will add them later)
                 // DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrevAA], out searchResult.PrefixResidue);
                 // DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.NextAA], out searchResult.SuffixResidue);
@@ -1437,13 +1441,7 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrecursorId], out searchResult.PrecursorId);
 
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PrecursorCharge], out searchResult.Charge);
-                searchResult.ChargeNum = (short)StringUtilities.CIntSafe(searchResult.Charge, 0);
-
-                if (DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.QValue], out searchResult.QValueDiaNN))
-                {
-                    double.TryParse(searchResult.QValueDiaNN, out searchResult.QValue);
-                }
-
+                DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.QValue], out searchResult.QValueDiaNN);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PEP], out searchResult.PEP);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.GlobalQValue], out searchResult.GlobalQValue);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.ProteinQValue], out searchResult.ProteinQValue);
@@ -1476,12 +1474,7 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.SpectrumSimilarity], out searchResult.SpectrumSimilarity);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.Averagine], out searchResult.Averagine);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.MassEvidence], out searchResult.MassEvidence);
-
-                if (DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.CScore], out searchResult.CScore))
-                {
-                    double.TryParse(searchResult.CScore, out searchResult.ConfidenceScore);
-                }
-
+                DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.CScore], out searchResult.CScore);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.DecoyEvidence], out searchResult.DecoyEvidence);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.DecoyCScore], out searchResult.DecoyCScore);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.FragmentQuantRaw], out searchResult.FragmentQuantRaw);
@@ -1502,6 +1495,68 @@ namespace PeptideHitResultsProcessor.Processor
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.IndexedIonMobility], out searchResult.IndexedIonMobility);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PredictedIonMobility], out searchResult.PredictedIonMobility);
                 DataUtilities.GetColumnValue(splitLine, columnMapping[DiaNNReportFileColumns.PredictedIndexedIonMobility], out searchResult.PredictedIndexedIonMobility);
+
+                searchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(searchResult.CalculatedMonoMassValue, 0, searchResult.ChargeNum), 6);
+
+                return ParseDiaNNSearchResult(searchResult, errorMessages, lineNumber, true);
+            }
+            catch (Exception ex)
+            {
+                // Error parsing this row from the DIA-NN results file
+                if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
+                {
+                    errorMessages.Add(string.Format(
+                        "Error parsing DIA-NN results in ParseDiaNNResultsFileEntry, line {0}: {1}", lineNumber, ex.Message));
+                }
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Parse a DIA-NN results line while reading the report.tsv file
+        /// </summary>
+        /// <param name="searchResult">Search result</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="lineOrRowNumber">Line number or row number in the input file (used for error reporting)</param>
+        /// <param name="readingTsvFile">True if reading a .tsv file, false if reading a .parquet file</param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool ParseDiaNNSearchResult(
+            DiaNNSearchResult searchResult,
+            ICollection<string> errorMessages,
+            int lineOrRowNumber,
+            bool readingTsvFile)
+        {
+            var lineOrRowDescription = readingTsvFile ? "line" : "row";
+
+            try
+            {
+                var proteinIdList = searchResult.ProteinIDs.Split(';').ToList();
+
+                if (proteinIdList.Count > 0)
+                    searchResult.Protein = proteinIdList[0];
+
+                if (string.IsNullOrWhiteSpace(searchResult.Sequence))
+                {
+                    // Example messages:
+                    // - Missing sequence on line 5
+                    // - Missing sequence on row 5
+                    ReportError(string.Format("Missing sequence on {0} {1}", lineOrRowDescription, lineOrRowNumber), true);
+                }
+
+                searchResult.Length = searchResult.Sequence.Length;
+
+                searchResult.ChargeNum = (short)StringUtilities.CIntSafe(searchResult.Charge, 0);
+
+                if (!string.IsNullOrWhiteSpace(searchResult.QValueDiaNN))
+                {
+                    double.TryParse(searchResult.QValueDiaNN, out searchResult.QValue);
+                }
+
+                if (!string.IsNullOrWhiteSpace(searchResult.CScore))
+                {
+                    double.TryParse(searchResult.CScore, out searchResult.ConfidenceScore);
+                }
 
                 searchResult.Reverse = IsReversedProtein(searchResult.Protein);
 
@@ -1533,11 +1588,11 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                // Error parsing this row from the DIA-NN results file
+                // Error parsing this line/row from the DIA-NN results file
                 if (errorMessages.Count < MAX_ERROR_MESSAGE_COUNT)
                 {
                     errorMessages.Add(string.Format(
-                        "Error parsing DIA-NN results in ParseDiaNNResultsFileEntry, line {0}: {1}", lineNumber, ex.Message));
+                        "Error parsing DIA-NN results in ParseDiaNNSearchResult, {0} {1}: {2}", lineOrRowDescription, lineOrRowNumber, ex.Message));
                 }
 
                 return false;
@@ -1548,7 +1603,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// Parse the DIA-NN report.tsv file header line, populating columnMapping
         /// </summary>
         /// <param name="lineIn">Data line</param>
-        /// <param name="columnMapping">Column mapping</param>
+        /// <param name="columnMapping">Column mapping, where keys are an enum in DiaNNReportFileColumns and values are the zero-based index</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseDiaNNResultsFileHeaderLine(
             string lineIn,
@@ -1556,7 +1611,7 @@ namespace PeptideHitResultsProcessor.Processor
         {
             // ReSharper disable StringLiteralTypo
 
-            // Columns in report.tsv files
+            // Columns in report.tsv and/or report.parquet files
             var columnNames = new SortedDictionary<string, DiaNNReportFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "File.Name", DiaNNReportFileColumns.DatasetFile },
@@ -1576,6 +1631,7 @@ namespace PeptideHitResultsProcessor.Processor
                 { "Stripped.Sequence", DiaNNReportFileColumns.StrippedSequence },
                 { "Precursor.Id", DiaNNReportFileColumns.PrecursorId },
                 { "Precursor.Charge", DiaNNReportFileColumns.PrecursorCharge },
+                { "Precursor.Mz", DiaNNReportFileColumns.PrecursorMz },         // Only in .parquet
                 { "Q.Value", DiaNNReportFileColumns.QValue },
                 { "PEP", DiaNNReportFileColumns.PEP },
                 { "Global.Q.Value", DiaNNReportFileColumns.GlobalQValue },
@@ -1788,6 +1844,8 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     searchResult.MultipleProteinCount = "0";
                 }
+
+                // ReSharper disable once GrammarMistakeInComment
 
                 // Note that DIA-NN peptides don't actually have mod symbols; that information is tracked via searchResult.Modifications
                 // Thus, .PeptideSequenceWithMods will not have any mod symbols
@@ -2034,8 +2092,8 @@ namespace PeptideHitResultsProcessor.Processor
                                 baseName, inputFile,
                                 synOutputFilePath, outputDirectoryPath,
                                 PeptideHitResultTypes.DiaNN
-                                // MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
-                                // MATCH_ERROR_PERCENT_WARNING_THRESHOLD
+                            // MAXIMUM_ALLOWABLE_MATCH_ERROR_PERCENT_THRESHOLD,
+                            // MATCH_ERROR_PERCENT_WARNING_THRESHOLD
                             );
                         }
                     }
@@ -2060,11 +2118,41 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
+        private void ReadColumnBatch(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out string[] dataValues)
+        {
+            dataValues = new string[length];
+
+            if (columnIndex < 0)
+                return;
+
+            rowGroupReader.Column(columnIndex).LogicalReader<string>().ReadBatch(dataValues, startRowIndex, length);
+        }
+
+        private void ReadColumnBatchFloat(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out float[] dataValues)
+        {
+            dataValues = new float[length];
+
+            if (columnIndex < 0)
+                return;
+
+            rowGroupReader.Column(columnIndex).LogicalReader<float>().ReadBatch(dataValues, startRowIndex, length);
+        }
+
+        private void ReadColumnBatchLong(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out long[] dataValues)
+        {
+            dataValues = new long[length];
+
+            if (columnIndex < 0)
+                return;
+
+            rowGroupReader.Column(columnIndex).LogicalReader<long>().ReadBatch(dataValues, startRowIndex, length);
+        }
+
         /// <summary>
         /// Load DIA-NN search results from a report.tsv file
         /// </summary>
         /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
-        /// <param name="inputFile">report.tsv file</param>
+        /// <param name="inputFile">report.tsv or report.parquet file</param>
         /// <param name="errorMessages">Error messages</param>
         /// <param name="filteredSearchResults">Output: DIA-NN results</param>
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
@@ -2077,7 +2165,6 @@ namespace PeptideHitResultsProcessor.Processor
         {
             filteredSearchResults = new List<DiaNNSearchResult>();
             datasetNameToBaseNameMap = new Dictionary<string, string>();
-            var baseNameToFullDatasetNameMap = new Dictionary<string, string>();
 
             try
             {
@@ -2090,6 +2177,333 @@ namespace PeptideHitResultsProcessor.Processor
 
                 OnStatusEvent("Reading DIA-NN results file, " + PathUtils.CompactPathString(inputFile.FullName, 80));
 
+                bool success;
+                List<DiaNNSearchResult> unfilteredSearchResults;
+
+                if (inputFile.Extension.Equals(".parquet", StringComparison.OrdinalIgnoreCase))
+                {
+                    success = ReadReportParquetFile(inputFile, errorMessages, datasetNameToBaseNameMap, out unfilteredSearchResults);
+                }
+                else
+                {
+                    success = ReadReportTsvFile(inputFile, errorMessages, datasetNameToBaseNameMap, out unfilteredSearchResults);
+                }
+
+                if (!success)
+                    return false;
+
+                if (unfilteredSearchResults.Count == 0)
+                {
+                    OnWarningEvent("No results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
+
+                    Console.WriteLine();
+                    return true;
+                }
+
+                // Sort the SearchResults by dataset name, scan, charge, and ascending QValue
+                unfilteredSearchResults.Sort(new DiaNNSearchResultsComparerDatasetScanChargeQValue());
+
+                // Now filter the data
+                var startIndex = 0;
+
+                while (startIndex < unfilteredSearchResults.Count)
+                {
+                    // Find all the matches for the current result's scan
+                    // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
+                    // DIA-NN will typically report just one match
+
+                    var endIndex = startIndex;
+
+                    while (endIndex + 1 < unfilteredSearchResults.Count &&
+                           unfilteredSearchResults[endIndex + 1].ScanNum == unfilteredSearchResults[startIndex].ScanNum)
+                    {
+                        endIndex++;
+                    }
+
+                    // Store the results for this scan
+                    StoreSynMatches(unfilteredSearchResults, startIndex, endIndex, filteredSearchResults);
+
+                    startIndex = endIndex + 1;
+                }
+
+                if (filteredSearchResults.Count == 0)
+                {
+                    OnWarningEvent("No filter passing results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
+                }
+
+                Console.WriteLine();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in DiaNNResultsProcessor.ReadDiaNNResults", ex);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
+                return false;
+            }
+        }
+
+        private bool ReadReportParquetFile
+        (
+            FileSystemInfo inputFile,
+            ICollection<string> errorMessages,
+            IDictionary<string, string> datasetNameToBaseNameMap,
+            out List<DiaNNSearchResult> unfilteredSearchResults)
+        {
+            // Initialize the list that will hold all the records in the DIA-NN result file
+            unfilteredSearchResults = new List<DiaNNSearchResult>();
+            var baseNameToFullDatasetNameMap = new Dictionary<string, string>();
+
+            try
+            {
+                var columnMapping = new Dictionary<DiaNNReportFileColumns, int>();
+
+                // Open the input file and parse it
+                using var reader = new ParquetFileReader(inputFile.FullName);
+
+                for (var rowGroup = 0; rowGroup < reader.FileMetaData.NumRowGroups; ++rowGroup)
+                {
+                    using var rowGroupReader = reader.RowGroup(rowGroup);
+
+                    var columnCount = rowGroupReader.MetaData.NumColumns;
+
+                    var columnNames = new List<string>();
+
+                    // Construct a tab-delimited list of the column names
+                    for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
+                    {
+                        columnNames.Add(rowGroupReader.Column(columnIndex).ColumnDescriptor.Name);
+                    }
+
+                    // Parse the header line
+                    var success = ParseDiaNNResultsFileHeaderLine(string.Join("\t", columnNames), columnMapping);
+
+                    if (!success)
+                    {
+                        if (string.IsNullOrEmpty(mErrorMessage))
+                        {
+                            SetErrorMessage("Error parsing the column names in .parquet file " + inputFile.Name);
+                        }
+
+                        return false;
+                    }
+
+                    var rowCount = checked((int)rowGroupReader.MetaData.NumRows);
+
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.DatasetName], 0, rowCount, out var datasetName);                                 // Run
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroup], 0, rowCount, out var proteinGroup);                               // Protein.Group
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinIDs], 0, rowCount, out var proteinIDs);                                   // Protein.Ids
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinNames], 0, rowCount, out var proteinNames);                               // Protein.Names
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.GeneNames], 0, rowCount, out var geneNames);                                     // Genes
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupQuantity], 0, rowCount, out var proteinGroupQuantity);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupNormalized], 0, rowCount, out var proteinGroupNormalized);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupMaxLFQ], 0, rowCount, out var proteinGroupMaxLFQ);              // PG.MaxLFQ
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesQuantity], 0, rowCount, out var genesQuantity);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesNormalized], 0, rowCount, out var genesNormalized);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesMaxLFQ], 0, rowCount, out var genesMaxLFQ);                            // Genes.MaxLFQ
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesMaxLFQUnique], 0, rowCount, out var genesMaxLFQUnique);                // Genes.MaxLFQ.Unique
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ModifiedSequence], 0, rowCount, out var modifiedSequence);                       // Modified.Sequence
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.StrippedSequence], 0, rowCount, out var strippedSequence);                       // Stripped.Sequence
+                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorId], 0, rowCount, out var precursorId);                                 // Precursor.Id
+                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorCharge], 0, rowCount, out var precursorCharge);                      // Precursor.Charge
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorMz], 0, rowCount, out var precursorMz);                            // Precursor.Mz
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.QValue], 0, rowCount, out var qValueDiaNN);                                 // Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PEP], 0, rowCount, out var pep);                                            // PEP
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GlobalQValue], 0, rowCount, out var globalQValue);                          // Global.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinQValue], 0, rowCount, out var proteinQValue);                        // Protein.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupQValue], 0, rowCount, out var proteinGroupQValue);              // PG.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GlobalProteinGroupQValue], 0, rowCount, out var globalProteinGroupQValue);  // Global.PG.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GeneGroupQValue], 0, rowCount, out var geneGroupQValue);                    // GG.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.TranslatedQValue], 0, rowCount, out var translatedQValue);                  // Translated.Q.Value
+                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.Proteotypic], 0, rowCount, out var proteotypic);                              // Proteotypic
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorQuantity], 0, rowCount, out var precursorQuantity);                // Precursor.Quantity
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorNormalized], 0, rowCount, out var precursorNormalized);            // Precursor.Normalised
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorTranslated], 0, rowCount, out var precursorTranslated);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.TranslatedQuality], 0, rowCount, out var translatedQuality);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1Translated], 0, rowCount, out var ms1Translated);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.QuantityQuality], 0, rowCount, out var quantityQuality);                    // Quantity.Quality
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RT], 0, rowCount, out var elutionTime);                                     // RT
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RTStart], 0, rowCount, out var rtStart);                                    // RT.Start
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RTStop], 0, rowCount, out var rtStop);                                      // RT.Stop
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IndexedRT], 0, rowCount, out var indexedRT);                                // iRT
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedRT], 0, rowCount, out var predictedRT);                            // Predicted.RT
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIndexedRT], 0, rowCount, out var predictedIndexedRT);              // Predicted.iRT
+                    // ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.FirstProteinDescription], 0, rowCount, out var firstProteinDescription);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.LibQValue], 0, rowCount, out var libQValue);                                // Lib.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.LibProteinGroupQValue], 0, rowCount, out var libProteinGroupQValue);        // Lib.PG.Q.Value
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1ProfileCorr], 0, rowCount, out var ms1ProfileCorrelation);               // Ms1.Profile.Corr
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1Area], 0, rowCount, out var ms1Area);                                    // Ms1.Area
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.Evidence], 0, rowCount, out var evidence);                                  // Evidence
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.SpectrumSimilarity], 0, rowCount, out var spectrumSimilarity);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.Averagine], 0, rowCount, out var averagine);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MassEvidence], 0, rowCount, out var massEvidence);                          // Mass.Evidence
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.CScore], 0, rowCount, out var cScore);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.DecoyEvidence], 0, rowCount, out var decoyEvidence);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.DecoyCScore], 0, rowCount, out var decoyCScore);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentQuantRaw], 0, rowCount, out var fragmentQuantRaw);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentQuantCorrected], 0, rowCount, out var fragmentQuantCorrected);
+                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentCorrelations], 0, rowCount, out var fragmentCorrelations);
+                    // ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS2Scan], 0, rowCount, out var scan);
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IonMobility], 0, rowCount, out var ionMobility);                                 // IM
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IndexedIonMobility], 0, rowCount, out var indexedIonMobility);                   // iIM
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIonMobility], 0, rowCount, out var predictedIonMobility);               // Predicted.IM
+                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIndexedIonMobility], 0, rowCount, out var predictedIndexedIonMobility); // Predicted.iIM
+
+                    for (var i = 0; i < rowCount; i++)
+                    {
+                        var searchResult = new DiaNNSearchResult
+                        {
+                            DatasetName = datasetName[i]
+                        };
+
+                        if (!string.IsNullOrWhiteSpace(searchResult.DatasetName))
+                        {
+                            searchResult.FullDatasetName = Path.GetFileNameWithoutExtension(searchResult.DatasetName);
+
+                            if (!datasetNameToBaseNameMap.ContainsKey(searchResult.FullDatasetName))
+                            {
+                                datasetNameToBaseNameMap.Add(searchResult.FullDatasetName, searchResult.DatasetName);
+                            }
+
+                            if (!baseNameToFullDatasetNameMap.ContainsKey(searchResult.DatasetName))
+                            {
+                                baseNameToFullDatasetNameMap.Add(searchResult.DatasetName, searchResult.FullDatasetName);
+                            }
+
+                            searchResult.DatasetFile = Path.HasExtension(searchResult.DatasetName)
+                                ? searchResult.DatasetName
+                                : string.Format("{0}.mzML", searchResult.DatasetName);
+                        }
+
+                        searchResult.ProteinGroup = proteinGroup[i];
+                        searchResult.ProteinIDs = proteinIDs[i];
+                        searchResult.ProteinNames = proteinNames[i];
+                        searchResult.GeneNames = geneNames[i];
+
+                        // searchResult.ProteinGroupQuantity = proteinGroupQuantity[i];
+                        // searchResult.ProteinGroupNormalized = proteinGroupNormalized[i];
+
+                        searchResult.ProteinGroupMaxLFQ = proteinGroupMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.GenesQuantity = genesQuantity[i];
+                        // searchResult.GenesNormalized = genesNormalized[i];
+                        searchResult.GenesMaxLFQ = genesMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GenesMaxLFQUnique = genesMaxLFQUnique[i].ToString(CultureInfo.InvariantCulture);
+
+                        searchResult.ModifiedSequence = modifiedSequence[i];
+
+                        searchResult.Sequence = strippedSequence[i];
+
+                        // Peptide sequences in DIA-NN report.tsv files do not include prefix or suffix residues (but this class will add them later)
+                        // searchResult.PrevAA = prevAA[i];
+                        // searchResult.NextAA = nextAA[i];
+
+                        searchResult.PrecursorId = precursorId[i];
+
+                        searchResult.Charge = precursorCharge[i].ToString();
+
+                        // Actual precursor m/z (only defined in .parquet files, not in .tsv files)
+                        searchResult.PrecursorMzDiaNN = precursorMz[i].ToString(CultureInfo.InvariantCulture);
+
+                        searchResult.QValueDiaNN = qValueDiaNN[i].ToString(CultureInfo.InvariantCulture);
+
+                        searchResult.PEP = pep[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GlobalQValue = globalQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.ProteinQValue = proteinQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.ProteinGroupQValue = proteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GlobalProteinGroupQValue = globalProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GeneGroupQValue = geneGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.TranslatedQValue = translatedQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.Proteotypic = proteotypic[i].ToString();
+                        searchResult.PrecursorQuantity = precursorQuantity[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PrecursorNormalized = precursorNormalized[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.PrecursorTranslated = precursorTranslated[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.TranslatedQuality = translatedQuality[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.MS1Translated = mS1Translated[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.QuantityQuality = quantityQuality[i].ToString(CultureInfo.InvariantCulture);
+
+                        // Retention time is in minutes
+                        searchResult.ElutionTime = elutionTime[i].ToString(CultureInfo.InvariantCulture);
+
+                        searchResult.RTStart = rtStart[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.RTStop = rtStop[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.IndexedRT = indexedRT[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedRT = predictedRT[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIndexedRT = predictedIndexedRT[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.FirstProteinDescription = firstProteinDescription[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.LibQValue = libQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.LibProteinGroupQValue = libProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MS1ProfileCorrelation = ms1ProfileCorrelation[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MS1Area = ms1Area[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.Evidence = evidence[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.SpectrumSimilarity = spectrumSimilarity[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.Averagine = averagine[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MassEvidence = massEvidence[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.CScore = cScore[i].ToString(CultureInfo.InvariantCulture);
+
+                        // searchResult.DecoyEvidence = decoyEvidence[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.DecoyCScore = decoyCScore[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.FragmentQuantRaw = fragmentQuantRaw[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.FragmentQuantCorrected = fragmentQuantCorrected[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.FragmentCorrelations = fragmentCorrelations[i].ToString(CultureInfo.InvariantCulture);
+
+                        // Store index number for the scan number since .parquet files do not have MS2.scan
+                        searchResult.ScanNum = i + 1;
+                        searchResult.Scan = searchResult.ScanNum.ToString();
+                        searchResult.IonMobility = ionMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.IndexedIonMobility = indexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIonMobility = predictedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIndexedIonMobility = predictedIndexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+
+                        var validSearchResult = ParseDiaNNSearchResult(
+                            searchResult,
+                            errorMessages,
+                            i,
+                            false);
+
+                        if (validSearchResult)
+                        {
+                            unfilteredSearchResults.Add(searchResult);
+                        }
+
+                        // Update the progress
+                        var percentComplete = i / (float)rowCount * 100;
+                        UpdateProgress(percentComplete);
+                    }
+                }
+
+                reader.Close();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in DiaNNResultsProcessor.ReadReportParquetFile", ex);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Load DIA-NN search results from a report.tsv file
+        /// </summary>
+        /// <remarks>If the file is found, but has no results, this method still returns true</remarks>
+        /// <param name="inputFile">report.tsv file</param>
+        /// <param name="errorMessages">Error messages</param>
+        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="unfilteredSearchResults">Output: DIA-NN results</param>
+        /// <returns>True if successful, false if an error</returns>
+        private bool ReadReportTsvFile(
+            FileSystemInfo inputFile,
+            ICollection<string> errorMessages,
+            IDictionary<string, string> datasetNameToBaseNameMap,
+            out List<DiaNNSearchResult> unfilteredSearchResults)
+        {
+            // Initialize the list that will hold all the records in the DIA-NN result file
+            unfilteredSearchResults = new List<DiaNNSearchResult>();
+            var baseNameToFullDatasetNameMap = new Dictionary<string, string>();
+
+            try
+            {
                 var columnMapping = new Dictionary<DiaNNReportFileColumns, int>();
 
                 // Open the input file and parse it
@@ -2097,9 +2511,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var headerParsed = false;
                 var lineNumber = 0;
-
-                // Initialize the list that will hold all the records in the DIA-NN result file
-                var searchResultsUnfiltered = new List<DiaNNSearchResult>();
 
                 var currentDatasetFile = string.Empty;
 
@@ -2145,59 +2556,18 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (validSearchResult)
                     {
-                        searchResultsUnfiltered.Add(searchResult);
+                        unfilteredSearchResults.Add(searchResult);
                     }
 
                     // Update the progress
                     UpdateSynopsisFileCreationProgress(reader);
                 }
 
-                if (searchResultsUnfiltered.Count == 0)
-                {
-                    OnWarningEvent("No results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
-
-                    Console.WriteLine();
-                    return true;
-                }
-
-                // Sort the SearchResults by dataset name, scan, charge, and ascending QValue
-                searchResultsUnfiltered.Sort(new DiaNNSearchResultsComparerDatasetScanChargeQValue());
-
-                // Now filter the data
-                var startIndex = 0;
-
-                while (startIndex < searchResultsUnfiltered.Count)
-                {
-                    // Find all the matches for the current result's scan
-                    // (we sorted by dataset, then scan, so adjacent results will be from the same dataset, except when a new dataset is encountered)
-                    // DIA-NN will typically report just one match
-
-                    var endIndex = startIndex;
-
-                    while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                           searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                    {
-                        endIndex++;
-                    }
-
-                    // Store the results for this scan
-                    StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                    startIndex = endIndex + 1;
-                }
-
-                if (filteredSearchResults.Count == 0)
-                {
-                    OnWarningEvent("No filter passing results were found in file {0}", PathUtils.CompactPathString(inputFile.FullName, 110));
-                }
-
-                Console.WriteLine();
-
                 return true;
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in DiaNNResultsProcessor.ReadDiaNNResults", ex);
+                SetErrorMessage("Error in DiaNNResultsProcessor.ReadReportTsvFile", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
                 return false;
             }

@@ -588,6 +588,7 @@ namespace PeptideHitResultsProcRunner
 
                 switch (peptideHitResultsFormat)
                 {
+                    case ResultsFileFormat.DiannParquetFile:
                     case ResultsFileFormat.DiannTSVFile:
                         mPeptideHitResultsProcessor = new DiaNNResultsProcessor(Options);
                         LogMessage("Detected DIA-NN results file");

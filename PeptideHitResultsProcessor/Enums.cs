@@ -176,8 +176,13 @@ namespace PeptideHitResultsProcessor
         MSFraggerTSVFile = 12,
 
         /// <summary>
-        /// DIA-NN
+        /// DIA-NN 1.x
         /// </summary>
-        DiannTSVFile = 13
+        DiannTSVFile = 13,
+
+        /// <summary>
+        /// DIA-NN 2.x
+        /// </summary>
+        DiannParquetFile = 14
     }
 }

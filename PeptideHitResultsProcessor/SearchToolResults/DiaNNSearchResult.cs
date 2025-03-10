@@ -106,6 +106,12 @@
         /// </summary>
         public string PrecursorMZ;
 
+        /// <summary>
+        /// Actual precursor m/z value
+        /// </summary>
+        /// <remarks>Only defined in .parquet files, not in .tsv files</remarks>
+        public string PrecursorMzDiaNN;
+
         // PrecursorCharge is tracked by Charge in the base class
 
         /// <summary>
