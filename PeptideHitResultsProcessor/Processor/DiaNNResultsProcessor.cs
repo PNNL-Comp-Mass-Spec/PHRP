@@ -709,6 +709,25 @@ namespace PeptideHitResultsProcessor.Processor
             return modList.Sum(modEntry => modEntry.ModMass);
         }
 
+        private void ComputeTrypticStateAndMissedCleavages(ToolResultsBaseClass searchResult, string peptideWithPrefixAndSuffix)
+        {
+            // Use the peptide cleavage state calculator to compute the missed cleavage count
+            var missedCleavageCount = mPeptideCleavageStateCalculator.ComputeNumberOfMissedCleavages(peptideWithPrefixAndSuffix);
+
+            searchResult.MissedCleavageCount = missedCleavageCount.ToString();
+
+            var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(peptideWithPrefixAndSuffix);
+
+            searchResult.NumberOfTrypticTermini = cleavageState switch
+            {
+                PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
+                PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
+                PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific => 0,
+                PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
+                _ => 0
+            };
+        }
+
         private string ConvertModListToMSFraggerNotation(List<MSFraggerResultsProcessor.MSFraggerModInfo> modList)
         {
             var modificationList = new StringBuilder();
@@ -1523,25 +1542,6 @@ namespace PeptideHitResultsProcessor.Processor
 
                 return false;
             }
-        }
-
-        private void ComputeTrypticStateAndMissedCleavages(ToolResultsBaseClass searchResult, string peptideWithPrefixAndSuffix)
-        {
-            // Use the peptide cleavage state calculator to compute the missed cleavage count
-            var missedCleavageCount = mPeptideCleavageStateCalculator.ComputeNumberOfMissedCleavages(peptideWithPrefixAndSuffix);
-
-            searchResult.MissedCleavageCount = missedCleavageCount.ToString();
-
-            var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(peptideWithPrefixAndSuffix);
-
-            searchResult.NumberOfTrypticTermini = cleavageState switch
-            {
-                PeptideCleavageStateCalculator.PeptideCleavageState.Full => 2,
-                PeptideCleavageStateCalculator.PeptideCleavageState.Partial => 1,
-                PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific => 0,
-                PeptideCleavageStateCalculator.PeptideCleavageState.Unknown => 0,
-                _ => 0
-            };
         }
 
         /// <summary>
