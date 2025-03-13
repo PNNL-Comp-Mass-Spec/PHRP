@@ -71,8 +71,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "March 9, 2025";
+            FileDate = "March 12, 2025";
 
+            mMissingScanInfoDatasets = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
             mModificationMassByName = new Dictionary<string, double>();
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
@@ -435,9 +436,35 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// These columns correspond to tab-delimited _ScanInfo.txt files
+        /// </summary>
+        private enum ScanInfoFileColumns
+        {
+            /// <summary>
+            /// Scan number
+            /// </summary>
+            Scan = 0,
+
+            /// <summary>
+            /// Scan
+            /// </summary>
+            ScanTime = 1,
+
+            /// <summary>
+            /// Charge
+            /// </summary>
+            ScanType = 2
+        }
+
+        /// <summary>
         /// Keys in this dictionary are modification names, values are modification masses
         /// </summary>
         private readonly Dictionary<string, double> mModificationMassByName;
+
+        /// <summary>
+        /// This holds the names of datasets for which a _ScanInfo.txt file was not loaded
+        /// </summary>
+        private readonly SortedSet<string> mMissingScanInfoDatasets;
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
@@ -1078,6 +1105,18 @@ namespace PeptideHitResultsProcessor.Processor
             return mods;
         }
 
+        private string GetDatasetNameFromFileName(string fileName, string fileNameSuffix)
+        {
+            if (fileName.EndsWith(fileNameSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                return fileName.Substring(0, fileName.Length - fileNameSuffix.Length);
+            }
+
+            OnWarningEvent("Filename does not end with {0}: {1}", fileNameSuffix, fileName);
+
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
         private double GetModificationMass(string modificationName)
         {
             if (mModificationMassByName.TryGetValue(modificationName, out var modMass))
@@ -1114,8 +1153,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>List of modifications</returns>
         internal List<MSFraggerResultsProcessor.MSFraggerModInfo> GetPeptideModifications(string cleanSequence, string modificationList)
         {
-            // modificationList should have both the static and dynamic mods, as a comma separated list
-            // of residue number, residue symbol, and mod mass; examples:
+            // modificationList should have both the static and dynamic mods,
+            // as a comma separated list of residue number, residue symbol, and mod mass; examples:
             //   15M(15.9949)
             //   1M(15.9949), 5C(57.0215)
             //   N-term(42.0106)
@@ -1185,6 +1224,40 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Determine scan number that corresponds to the given elution time, for the given dataset
+        /// </summary>
+        /// <param name="scanInfoByDataset">Dictionary where keys are dataset name and values are a class mapping elution times to scan numbers</param>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="elutionTime">Elution time</param>
+        /// <returns>Closest scan number</returns>
+        private int LookupScanNumber(
+            IReadOnlyDictionary<string, BinarySearchFindNearest> scanInfoByDataset,
+            string datasetName,
+            string elutionTime)
+        {
+            if (!scanInfoByDataset.TryGetValue(datasetName, out var elutionTimeToScanMap))
+            {
+                // ReSharper disable once InvertIf
+                if (!mMissingScanInfoDatasets.Contains(datasetName))
+                {
+                    OnWarningEvent("Dataset not found in scanInfoByDataset: {0}", datasetName);
+                    mMissingScanInfoDatasets.Add(datasetName);
+                }
+
+                return 0;
+            }
+
+            if (!double.TryParse(elutionTime, out var elutionTimeValue))
+            {
+                OnWarningEvent("Non-numeric elution time for dataset {0}: {1}", datasetName, elutionTime);
+            }
+
+            var scanNumber = elutionTimeToScanMap.GetYForX(elutionTimeValue);
+
+            return (int)Math.Round(scanNumber);
+        }
+
+        /// <summary>
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
@@ -1196,8 +1269,6 @@ namespace PeptideHitResultsProcessor.Processor
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            var columnMapping = new Dictionary<DiaNNSynFileColumns, int>();
-
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
@@ -1217,6 +1288,8 @@ namespace PeptideHitResultsProcessor.Processor
                 try
                 {
                     searchResult.UpdateSearchResultEnzymeAndTerminusInfo(Options);
+
+                    var columnMapping = new Dictionary<DiaNNSynFileColumns, int>();
 
                     // Open the input file and parse it
                     // Initialize the stream reader
@@ -1975,6 +2048,45 @@ namespace PeptideHitResultsProcessor.Processor
             return false;
         }
 
+        private bool ParseScanInfoFileHeaderLine(string lineIn, IDictionary<ScanInfoFileColumns, int> columnMapping)
+        {
+            var columnNames = new SortedDictionary<string, ScanInfoFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "ScanNumber", ScanInfoFileColumns.Scan },
+                { "ScanTime", ScanInfoFileColumns.ScanTime },
+                { "ScanType", ScanInfoFileColumns.ScanType }
+            };
+
+            columnMapping.Clear();
+
+            try
+            {
+                // Initialize each entry in columnMapping to -1
+                foreach (ScanInfoFileColumns resultColumn in Enum.GetValues(typeof(ScanInfoFileColumns)))
+                {
+                    columnMapping.Add(resultColumn, -1);
+                }
+
+                var splitLine = lineIn.Split('\t');
+
+                for (var index = 0; index < splitLine.Length; index++)
+                {
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
+                    {
+                        // Recognized column name; update columnMapping
+                        columnMapping[resultFileColumn] = index;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error parsing the header line in a _ScanInfo.txt file", ex);
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Main processing routine
         /// </summary>
@@ -2155,10 +2267,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inputFile">report.tsv or report.parquet file</param>
         /// <param name="errorMessages">Error messages</param>
         /// <param name="filteredSearchResults">Output: DIA-NN results</param>
-        /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="datasetNameToBaseNameMap">Output: Keys are full dataset names, values are abbreviated dataset names</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ReadDiaNNResults(
-            FileSystemInfo inputFile,
+            FileInfo inputFile,
             ICollection<string> errorMessages,
             out List<DiaNNSearchResult> filteredSearchResults,
             out Dictionary<string, string> datasetNameToBaseNameMap)
@@ -2256,7 +2368,19 @@ namespace PeptideHitResultsProcessor.Processor
 
             try
             {
+                // Cache the scan numbers and elution times in the _ScanInfo.txt files
+                var success = ReadScanInfoFiles(inputFile.Directory, out var scanInfoByDataset);
+
+                if (!success)
+                {
+                    return false;
+                }
+
+                var defaultDatasetName = GetDatasetNameFromFileName(inputFile.Name, PARQUET_REPORT_FILE_SUFFIX);
+
                 var columnMapping = new Dictionary<DiaNNReportFileColumns, int>();
+
+                var scanNumberRangeCount = 0;
 
                 // Open the input file and parse it
                 using var reader = new ParquetFileReader(inputFile.FullName);
@@ -2276,9 +2400,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
 
                     // Parse the header line
-                    var success = ParseDiaNNResultsFileHeaderLine(string.Join("\t", columnNames), columnMapping);
+                    var headerParsed = ParseDiaNNResultsFileHeaderLine(string.Join("\t", columnNames), columnMapping);
 
-                    if (!success)
+                    if (!headerParsed)
                     {
                         if (string.IsNullOrEmpty(mErrorMessage))
                         {
@@ -2305,7 +2429,7 @@ namespace PeptideHitResultsProcessor.Processor
                     ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ModifiedSequence], 0, rowCount, out var modifiedSequence);                       // Modified.Sequence
                     ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.StrippedSequence], 0, rowCount, out var strippedSequence);                       // Stripped.Sequence
                     ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorId], 0, rowCount, out var precursorId);                                 // Precursor.Id
-                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorCharge], 0, rowCount, out var precursorCharge);                      // Precursor.Charge
+                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorCharge], 0, rowCount, out var precursorCharge);                     // Precursor.Charge
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorMz], 0, rowCount, out var precursorMz);                            // Precursor.Mz
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.QValue], 0, rowCount, out var qValueDiaNN);                                 // Q.Value
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PEP], 0, rowCount, out var pep);                                            // PEP
@@ -2315,7 +2439,7 @@ namespace PeptideHitResultsProcessor.Processor
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GlobalProteinGroupQValue], 0, rowCount, out var globalProteinGroupQValue);  // Global.PG.Q.Value
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GeneGroupQValue], 0, rowCount, out var geneGroupQValue);                    // GG.Q.Value
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.TranslatedQValue], 0, rowCount, out var translatedQValue);                  // Translated.Q.Value
-                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.Proteotypic], 0, rowCount, out var proteotypic);                              // Proteotypic
+                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.Proteotypic], 0, rowCount, out var proteotypic);                             // Proteotypic
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorQuantity], 0, rowCount, out var precursorQuantity);                // Precursor.Quantity
                     ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorNormalized], 0, rowCount, out var precursorNormalized);            // Precursor.Normalised
                     // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorTranslated], 0, rowCount, out var precursorTranslated);
@@ -2353,7 +2477,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         var searchResult = new DiaNNSearchResult
                         {
-                            DatasetName = datasetName[i]
+                            DatasetName = string.IsNullOrWhiteSpace(datasetName[i]) ? defaultDatasetName : datasetName[i]
                         };
 
                         if (!string.IsNullOrWhiteSpace(searchResult.DatasetName))
@@ -2446,8 +2570,20 @@ namespace PeptideHitResultsProcessor.Processor
                         // searchResult.FragmentQuantCorrected = fragmentQuantCorrected[i].ToString(CultureInfo.InvariantCulture);
                         // searchResult.FragmentCorrelations = fragmentCorrelations[i].ToString(CultureInfo.InvariantCulture);
 
-                        // Store index number for the scan number since .parquet files do not have MS2.scan
-                        searchResult.ScanNum = i + 1;
+                        var startScan = LookupScanNumber(scanInfoByDataset, searchResult.DatasetName, searchResult.RTStart);
+                        var endScan = LookupScanNumber(scanInfoByDataset, searchResult.DatasetName, searchResult.RTStop);
+
+                        if (startScan != endScan)
+                        {
+                            scanNumberRangeCount++;
+
+                            if (scanNumberRangeCount <= 5)
+                            {
+                                OnDebugEvent("RT Start and RT End differ, resulting in scan numbers {0} and {1}; will use the start scan", startScan, endScan);
+                            }
+                        }
+
+                        searchResult.ScanNum = startScan;
                         searchResult.Scan = searchResult.ScanNum.ToString();
                         searchResult.IonMobility = ionMobility[i].ToString(CultureInfo.InvariantCulture);
                         searchResult.IndexedIonMobility = indexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
@@ -2469,6 +2605,11 @@ namespace PeptideHitResultsProcessor.Processor
                         var percentComplete = i / (float)rowCount * 100;
                         UpdateProgress(percentComplete);
                     }
+                }
+
+                if (scanNumberRangeCount > 5)
+                {
+                    OnDebugEvent("Note: {0} PSMs had differing RT Start and RT End values in the .parquet file", scanNumberRangeCount);
                 }
 
                 reader.Close();
@@ -2568,6 +2709,106 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in DiaNNResultsProcessor.ReadReportTsvFile", ex);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
+                return false;
+            }
+        }
+
+        private bool ReadScanInfoFiles(DirectoryInfo inputFileDirectory, out Dictionary<string, BinarySearchFindNearest> scanInfoByDataset)
+        {
+            scanInfoByDataset = new Dictionary<string, BinarySearchFindNearest>(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                foreach (var scanInfoFile in inputFileDirectory.GetFiles("*_ScanInfo.txt"))
+                {
+                    OnStatusEvent("Reading scan info file,      " + PathUtils.CompactPathString(scanInfoFile.FullName, 80));
+
+                    var datasetName = GetDatasetNameFromFileName(scanInfoFile.Name, "_ScanInfo.txt");
+                    var scanNumbersByElutionTime = new Dictionary<double, double>();
+                    var duplicateElutionTimes = new SortedSet<double>();
+
+                    var columnMapping = new Dictionary<ScanInfoFileColumns, int>();
+
+                    using var reader = new StreamReader(new FileStream(scanInfoFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                    var headerParsed = false;
+
+                    while (!reader.EndOfStream)
+                    {
+                        var lineIn = reader.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(lineIn))
+                        {
+                            continue;
+                        }
+
+                        if (!headerParsed)
+                        {
+                            // Parse the header line
+                            var success = ParseScanInfoFileHeaderLine(lineIn, columnMapping);
+
+                            if (!success)
+                            {
+                                if (string.IsNullOrEmpty(mErrorMessage))
+                                {
+                                    SetErrorMessage("Invalid header line in " + scanInfoFile.Name);
+                                }
+
+                                return false;
+                            }
+
+                            if (columnMapping[ScanInfoFileColumns.Scan] < 0)
+                            {
+                                SetErrorMessage(string.Format("Column 'ScanNumber' is missing from file {0}", scanInfoFile.FullName));
+                                return false;
+                            }
+
+                            if (columnMapping[ScanInfoFileColumns.ScanTime] < 0)
+                            {
+                                SetErrorMessage(string.Format("Column 'ScanTime' is missing from file {0}", scanInfoFile.FullName));
+                                return false;
+                            }
+
+                            headerParsed = true;
+                            continue;
+                        }
+
+                        var splitLine = lineIn.TrimEnd().Split('\t');
+
+                        DataUtilities.GetColumnValue(splitLine, columnMapping[ScanInfoFileColumns.Scan], out int scan);
+                        DataUtilities.GetColumnValue(splitLine, columnMapping[ScanInfoFileColumns.ScanTime], out double elutionTime);
+                        // DataUtilities.GetColumnValue(splitLine, columnMapping[ScanInfoFileColumns.ScanType], out int scanType);
+
+                        if (scanNumbersByElutionTime.ContainsKey(elutionTime))
+                        {
+                            if (duplicateElutionTimes.Add(elutionTime) && duplicateElutionTimes.Count <= 5)
+                            {
+                                OnDebugEvent("Elution time {0} is listed more than once in the scan info file; ignoring subsequent occurrences", elutionTime);
+                            }
+
+                            continue;
+                        }
+
+                        scanNumbersByElutionTime.Add(elutionTime, scan);
+                    }
+
+                    if (duplicateElutionTimes.Count > 10)
+                    {
+                        OnDebugEvent("Note: {0} elution times were listed more than once in the _ScanInfo.txt file", duplicateElutionTimes.Count);
+                    }
+
+                    var elutionTimeToScanMap = new BinarySearchFindNearest();
+                    elutionTimeToScanMap.AddData(scanNumbersByElutionTime);
+
+                    scanInfoByDataset.Add(datasetName, elutionTimeToScanMap);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                SetErrorMessage("Error in DiaNNResultsProcessor.ReadScanInfoFiles", ex);
                 SetErrorCode(PHRPErrorCode.UnspecifiedError);
                 return false;
             }
