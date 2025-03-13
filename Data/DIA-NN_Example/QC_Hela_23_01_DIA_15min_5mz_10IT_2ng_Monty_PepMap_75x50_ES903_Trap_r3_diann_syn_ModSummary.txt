@@ -1,0 +1,4 @@
+Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurrence_Count
+-	57.021465	C	S	IodoAcet	1522
+*	15.994915	M	D	Plus1Oxy	342
+#	42.010567	[<	D	Acetyl	59
