@@ -15,19 +15,20 @@ xcopy Debug\PHRPReader.* "..\..\DMS_Managers\Analysis_Manager\AM_Program\bin" /D
 
 rem PeptideHitResultsProcRunner is compiled as AnyCPU
 xcopy Debug\*.dll "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcessor.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PHRPReader.pdb "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
-xcopy Debug\PHRPReader.xml "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcessor.pdb         "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe        "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe.config "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.pdb        "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PHRPReader.pdb                         "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
+xcopy Debug\PHRPReader.xml                         "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
 
 xcopy Debug\*.dll "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PHRPReader.pdb "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcessor.pdb "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.pdb "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PHRPReader.pdb "C:\DMS_Programs\PHRP" /D /Y
-xcopy Debug\PHRPReader.xml "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcessor.pdb         "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe        "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe.config "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.pdb        "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PHRPReader.pdb                         "C:\DMS_Programs\PHRP" /D /Y
+xcopy Debug\PHRPReader.xml                         "C:\DMS_Programs\PHRP" /D /Y
 
 if not exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86" mkdir "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x86"
 if not exist "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64" mkdir "..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP\x64"
@@ -57,11 +58,11 @@ if not "%1"=="NoPause" pause
 @echo on
 
 xcopy Debug\*.dll \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PHRPReader.pdb \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcessor.pdb \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.pdb \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PHRPReader.pdb \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PHRPReader.xml \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcessor.pdb         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe.config \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.pdb        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PHRPReader.pdb                         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PHRPReader.xml                         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
 
 if not "%1"=="NoPause" pause
