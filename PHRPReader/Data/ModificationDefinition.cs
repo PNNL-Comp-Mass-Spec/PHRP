@@ -110,7 +110,7 @@ namespace PHRPReader.Data
             get => mAffectedAtom;
             set
             {
-                if (value == default(char))
+                if (value == '\0')
                 {
                     mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
                 }
@@ -170,7 +170,7 @@ namespace PHRPReader.Data
             get => mModificationSymbol;
             set
             {
-                if (value == default(char))
+                if (value == '\0')
                 {
                     mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
                 }
@@ -528,7 +528,7 @@ namespace PHRPReader.Data
         /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
         public static ResidueModificationType ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
-            if (modificationTypeSymbol == default(char))
+            if (modificationTypeSymbol == '\0')
             {
                 return ResidueModificationType.UnknownType;
             }
@@ -569,7 +569,7 @@ namespace PHRPReader.Data
         /// <returns>True if successful, false if an error</returns>
         public bool TargetResiduesContain(char chComparisonResidue)
         {
-            if (chComparisonResidue == default(char))
+            if (chComparisonResidue == '\0')
             {
                 return false;
             }

@@ -307,7 +307,7 @@ namespace PHRPReader
             {
                 // Note: do not use string.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
 
-                if (modifiedResidue.AffectedAtom is default(char) or NO_AFFECTED_ATOM_SYMBOL)
+                if (modifiedResidue.AffectedAtom is '\0' or NO_AFFECTED_ATOM_SYMBOL)
                 {
                     // Positional modification (static or dynamic mod)
                     // Simply add the modification mass to mass
@@ -547,7 +547,7 @@ namespace PHRPReader
         {
             // Returns the mass if success, 0 if an error
 
-            if (chAminoAcidSymbol != default(char))
+            if (chAminoAcidSymbol != '\0')
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
 
@@ -571,7 +571,7 @@ namespace PHRPReader
         {
             // Returns the atom counts if success, 0 if an error
 
-            if (chAminoAcidSymbol == default(char))
+            if (chAminoAcidSymbol == '\0')
             {
                 return new EmpiricalFormula();
             }
@@ -978,7 +978,7 @@ namespace PHRPReader
         /// <returns>True if successful, False if an invalid amino acid symbol</returns>
         public bool SetAminoAcidAtomCounts(char chAminoAcidSymbol, EmpiricalFormula empiricalFormula)
         {
-            if (chAminoAcidSymbol == default(char))
+            if (chAminoAcidSymbol == '\0')
             {
                 return false;
             }
@@ -1003,7 +1003,7 @@ namespace PHRPReader
         /// <returns>True if successful, False if an invalid amino acid symbol</returns>
         public bool SetAminoAcidMass(char chAminoAcidSymbol, double mass)
         {
-            if (chAminoAcidSymbol != default(char))
+            if (chAminoAcidSymbol != '\0')
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
 

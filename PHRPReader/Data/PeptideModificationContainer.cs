@@ -204,7 +204,7 @@ namespace PHRPReader.Data
         {
             string targetResidues;
 
-            if (chTargetResidue == default(char))
+            if (chTargetResidue == '\0')
             {
                 targetResidues = string.Empty;
             }
@@ -316,7 +316,7 @@ namespace PHRPReader.Data
                 return closestMatch.Value;
 
             // Assure that the target residues contain chTargetResidue
-            if (chTargetResidue != default(char) && !closestMatch.Value.TargetResiduesContain(chTargetResidue))
+            if (chTargetResidue != '\0' && !closestMatch.Value.TargetResiduesContain(chTargetResidue))
             {
                 closestMatch.Value.TargetResidues += chTargetResidue;
             }
@@ -626,7 +626,7 @@ namespace PHRPReader.Data
             out bool existingModFound)
         {
             existingModFound = false;
-            if (chTargetResidue != default(char) || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
+            if (chTargetResidue != '\0' || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
@@ -764,7 +764,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Looks for an existing modification with the given modification mass and target residues
         /// </summary>
-        /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        /// <remarks>If chTargetResidue is '\0' (which is default(char)) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         /// <param name="modificationMass">Modification mass</param>
         /// <param name="chTargetResidue">
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
@@ -789,7 +789,7 @@ namespace PHRPReader.Data
 
             var matchedMods = new List<KeyValuePair<double, ModificationDefinition>>();
 
-            if (chTargetResidue != default(char) || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
+            if (chTargetResidue != '\0' || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
@@ -904,7 +904,7 @@ namespace PHRPReader.Data
 
             // Still no match; look for the modification mass and residue in mStandardRefinementModifications
             // Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
-            if (chTargetResidue != default(char))
+            if (chTargetResidue != '\0')
             {
                 for (var index = 0; index <= mStandardRefinementModifications.Count - 1; index++)
                 {
@@ -1043,7 +1043,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Looks for an existing modification with the given modification mass, modification type, and target residues
         /// </summary>
-        /// <remarks>If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        /// <remarks>If chTargetResidue is '\0' (which is default(char)) or AminoAcidModInfo.ResidueTerminusState.None, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         /// <param name="modificationMass">Modification mass</param>
         /// <param name="modType">Modification type</param>
         /// <param name="chTargetResidue">
@@ -1069,7 +1069,7 @@ namespace PHRPReader.Data
             // If no match is found, looks for the first modification with the given mass and no defined .TargetResidues
             // If no match is found, looks for the first dynamic modification with the given mass, regardless of .TargetResidues
             // If no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
-            // If chTargetResidue is default(char) or AminoAcidModInfo.ResidueTerminusState.None, follows similar logic, but skips defined modifications with defined .TargetResidues
+            // If chTargetResidue is '\0' or AminoAcidModInfo.ResidueTerminusState.None, follows similar logic, but skips defined modifications with defined .TargetResidues
 
             char modSymbol;
             bool useNextAvailableModificationSymbol;
@@ -1090,7 +1090,7 @@ namespace PHRPReader.Data
             }
 
             existingModFound = false;
-            if (chTargetResidue != default(char) || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
+            if (chTargetResidue != '\0' || residueTerminusState != AminoAcidModInfo.ResidueTerminusState.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
@@ -1105,7 +1105,7 @@ namespace PHRPReader.Data
 
                         // Matching mass found
                         // Now see if .TargetResidues contains chTargetResidue
-                        if (chTargetResidue != default(char) && Modifications[index].TargetResiduesContain(chTargetResidue))
+                        if (chTargetResidue != '\0' && Modifications[index].TargetResiduesContain(chTargetResidue))
                         {
                             existingModFound = true;
                         }
@@ -1160,7 +1160,7 @@ namespace PHRPReader.Data
 
             // Still no match; look for the modification mass and residue in mStandardRefinementModifications
             // Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing or chTargetResidue = '<' or chTargetResidue = '>'
-            if (chTargetResidue != default(char))
+            if (chTargetResidue != '\0')
             {
                 for (var index = 0; index <= mStandardRefinementModifications.Count - 1; index++)
                 {
@@ -1207,7 +1207,7 @@ namespace PHRPReader.Data
 
                 // Matching mass found
                 // Assure that the target residues contain chTargetResidue
-                if (chTargetResidue != default(char) && !Modifications[index].TargetResiduesContain(chTargetResidue))
+                if (chTargetResidue != '\0' && !Modifications[index].TargetResiduesContain(chTargetResidue))
                 {
                     Modifications[index].TargetResidues += chTargetResidue;
                 }

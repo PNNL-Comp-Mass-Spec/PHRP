@@ -426,7 +426,7 @@ namespace PeptideHitResultsProcessor.Processor
             /// </summary>
             public readonly override string ToString()
             {
-                return ResidueSymbol is default(char)
+                return ResidueSymbol is '\0'
                     ? string.Format("{0}: {1:F4}", ResidueLocInPeptide, ModMass)
                     : string.Format("{0}{1}: {2:F4}", ResidueLocInPeptide, ResidueSymbol, ModMass);
             }
