@@ -839,7 +839,12 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                var resultsLoaded = ReadDiaNNResults(inputFile, errorMessages, out var filteredSearchResults, out var datasetNameToBaseNameMap);
+                var resultsLoaded = ReadDiaNNResults(
+                    inputFile,
+                    errorMessages,
+                    out var filteredSearchResults,
+                    out var datasetNameToBaseNameMap,
+                    out var usingParquetFile);
 
                 if (!resultsLoaded)
                 {
@@ -902,10 +907,10 @@ namespace PeptideHitResultsProcessor.Processor
                 using var writer = new StreamWriter(new FileStream(synOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
                 // Write the header line to the output file
-                WriteSynFHTFileHeader(writer, errorMessages);
+                WriteSynFHTFileHeader(writer, usingParquetFile, errorMessages);
 
                 // Write the search results to disk
-                WriteFilteredSearchResults(datasetNameToBaseNameMap, writer, filteredSearchResults, errorMessages);
+                WriteFilteredSearchResults(datasetNameToBaseNameMap, writer, filteredSearchResults, usingParquetFile, errorMessages);
 
                 filterPassingResultCount = filteredSearchResults.Count;
 
@@ -1788,7 +1793,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseDiaNNSynFileHeaderLine(string lineIn, IDictionary<DiaNNSynFileColumns, int> columnMapping)
         {
-            var columnNames = DiaNNSynFileReader.GetColumnHeaderNamesAndIDs();
+            var columnNames = DiaNNSynFileReader.GetColumnHeaderNamesAndIDs(false);
 
             columnMapping.Clear();
 
@@ -2268,15 +2273,19 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="errorMessages">Error messages</param>
         /// <param name="filteredSearchResults">Output: DIA-NN results</param>
         /// <param name="datasetNameToBaseNameMap">Output: Keys are full dataset names, values are abbreviated dataset names</param>
+        /// <param name="usingParquetFile">Output: true if the input file is a .parquet file</param>
         /// <returns>True if successful, false if an error</returns>
         private bool ReadDiaNNResults(
             FileInfo inputFile,
             ICollection<string> errorMessages,
             out List<DiaNNSearchResult> filteredSearchResults,
-            out Dictionary<string, string> datasetNameToBaseNameMap)
+            out Dictionary<string, string> datasetNameToBaseNameMap,
+            out bool usingParquetFile)
         {
             filteredSearchResults = new List<DiaNNSearchResult>();
             datasetNameToBaseNameMap = new Dictionary<string, string>();
+
+            usingParquetFile = inputFile.Extension.Equals(".parquet", StringComparison.OrdinalIgnoreCase);
 
             try
             {
@@ -2292,7 +2301,8 @@ namespace PeptideHitResultsProcessor.Processor
                 bool success;
                 List<DiaNNSearchResult> unfilteredSearchResults;
 
-                if (inputFile.Extension.Equals(".parquet", StringComparison.OrdinalIgnoreCase))
+                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+                if (usingParquetFile)
                 {
                     success = ReadReportParquetFile(inputFile, errorMessages, datasetNameToBaseNameMap, out unfilteredSearchResults);
                 }
@@ -2357,7 +2367,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ReadReportParquetFile
         (
-            FileSystemInfo inputFile,
+            FileInfo inputFile,
             ICollection<string> errorMessages,
             IDictionary<string, string> datasetNameToBaseNameMap,
             out List<DiaNNSearchResult> unfilteredSearchResults)
@@ -2857,16 +2867,18 @@ namespace PeptideHitResultsProcessor.Processor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer">Writer</param>
+        /// <param name="usingParquetFile">When true, the input file is a .parquet file and thus several columns should not be written to the output file</param>
         /// <param name="errorMessages">Error messages</param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
+            bool usingParquetFile,
             ICollection<string> errorMessages)
         {
             try
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = DiaNNSynFileReader.GetColumnHeaderNamesAndIDs();
+                var headerColumns = DiaNNSynFileReader.GetColumnHeaderNamesAndIDs(usingParquetFile);
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
@@ -2887,11 +2899,13 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="datasetNameToBaseNameMap">Keys are full dataset names, values are abbreviated dataset names</param>
         /// <param name="writer">Writer</param>
         /// <param name="filteredSearchResults">Filtered search results</param>
+        /// <param name="usingParquetFile">When true, the input file is a .parquet file and thus several columns should not be written to the output file</param>
         /// <param name="errorMessages">Error messages</param>
         private void WriteFilteredSearchResults(
             Dictionary<string, string> datasetNameToBaseNameMap,
             TextWriter writer,
             List<DiaNNSearchResult> filteredSearchResults,
+            bool usingParquetFile,
             ICollection<string> errorMessages)
         {
             // Lookup the Dataset ID for each dataset (only if on the pnl.gov domain)
@@ -2909,11 +2923,11 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrEmpty(baseDatasetName))
                 {
                     OnWarningEvent("Method GetBaseNameAndDatasetID returned an empty string for baseDatasetName for result {0}; this is unexpected", result);
-                    WriteSearchResultToFile(index, result.DatasetName, datasetID, writer, result, errorMessages);
+                    WriteSearchResultToFile(index, result.DatasetName, datasetID, writer, result, usingParquetFile, errorMessages);
                 }
                 else
                 {
-                    WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, errorMessages);
+                    WriteSearchResultToFile(index, baseDatasetName, datasetID, writer, result, usingParquetFile, errorMessages);
                 }
 
                 index++;
@@ -2928,6 +2942,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="datasetID">Dataset ID</param>
         /// <param name="writer">Writer</param>
         /// <param name="searchResult">Search result</param>
+        /// <param name="usingParquetFile">When true, the input file is a .parquet file and thus several columns should not be written to the output file</param>
         /// <param name="errorMessages">Error messages</param>
         private void WriteSearchResultToFile(
             int resultID,
@@ -2935,6 +2950,7 @@ namespace PeptideHitResultsProcessor.Processor
             int datasetID,
             TextWriter writer,
             DiaNNSearchResult searchResult,
+            bool usingParquetFile,
             ICollection<string> errorMessages)
         {
             try
@@ -2956,46 +2972,70 @@ namespace PeptideHitResultsProcessor.Processor
                     searchResult.ProteinIDs,
                     searchResult.ProteinNames,
                     searchResult.GeneNames,
-                    searchResult.NumberOfTrypticTermini.ToString(),     // NTT
-                    searchResult.ProteinGroupQuantity,
-                    searchResult.ProteinGroupNormalized,
-                    searchResult.ProteinGroupMaxLFQ,
-                    searchResult.GenesQuantity,
-                    searchResult.GenesNormalized,
-                    searchResult.GenesMaxLFQ,
-                    searchResult.GenesMaxLFQUnique,
-                    searchResult.QValueDiaNN,
-                    searchResult.PEP,
-                    searchResult.GlobalQValue,
-                    searchResult.ProteinQValue,
-                    searchResult.ProteinGroupQValue,
-                    searchResult.GlobalProteinGroupQValue,
-                    searchResult.GeneGroupQValue,
-                    searchResult.TranslatedQValue,
-                    searchResult.Proteotypic,
-                    searchResult.PrecursorQuantity,
-                    searchResult.PrecursorNormalized,
-                    searchResult.PrecursorTranslated,
-                    searchResult.TranslatedQuality,
-                    searchResult.MS1Translated,
-                    searchResult.QuantityQuality,
-                    searchResult.ElutionTime,
-                    searchResult.RTStart,
-                    searchResult.RTStop,
-                    searchResult.IndexedRT,
-                    searchResult.IndexedIonMobility,
-                    searchResult.PredictedRT,
-                    searchResult.PredictedIndexedRT,
-                    searchResult.MS1ProfileCorrelation,
-                    searchResult.MS1Area,
-                    searchResult.Evidence,
-                    searchResult.SpectrumSimilarity,
-                    searchResult.Averagine,
-                    searchResult.MassEvidence,
-                    searchResult.CScore,
-                    searchResult.DecoyEvidence,
-                    searchResult.DecoyCScore
+                    searchResult.NumberOfTrypticTermini.ToString(), // NTT
                 };
+
+                if (!usingParquetFile)
+                {
+                    data.Add(searchResult.ProteinGroupQuantity);
+                    data.Add(searchResult.ProteinGroupNormalized);
+                }
+
+                data.Add(searchResult.ProteinGroupMaxLFQ);
+
+                if (!usingParquetFile)
+                {
+                    data.Add(searchResult.GenesQuantity);
+                    data.Add(searchResult.GenesNormalized);
+                }
+
+                data.Add(searchResult.GenesMaxLFQ);
+                data.Add(searchResult.GenesMaxLFQUnique);
+                data.Add(searchResult.QValueDiaNN);
+                data.Add(searchResult.PEP);
+                data.Add(searchResult.GlobalQValue);
+                data.Add(searchResult.ProteinQValue);
+                data.Add(searchResult.ProteinGroupQValue);
+                data.Add(searchResult.GlobalProteinGroupQValue);
+                data.Add(searchResult.GeneGroupQValue);
+                data.Add(searchResult.TranslatedQValue);
+                data.Add(searchResult.Proteotypic);
+                data.Add(searchResult.PrecursorQuantity);
+                data.Add(searchResult.PrecursorNormalized);
+
+                if (!usingParquetFile)
+                {
+                    data.Add(searchResult.PrecursorTranslated);
+                    data.Add(searchResult.TranslatedQuality);
+                    data.Add(searchResult.MS1Translated);
+                }
+
+                data.Add(searchResult.QuantityQuality);
+                data.Add(searchResult.ElutionTime);
+                data.Add(searchResult.RTStart);
+                data.Add(searchResult.RTStop);
+                data.Add(searchResult.IndexedRT);
+                data.Add(searchResult.IndexedIonMobility);
+                data.Add(searchResult.PredictedRT);
+                data.Add(searchResult.PredictedIndexedRT);
+                data.Add(searchResult.MS1ProfileCorrelation);
+                data.Add(searchResult.MS1Area);
+                data.Add(searchResult.Evidence);
+
+                if (!usingParquetFile)
+                {
+                    data.Add(searchResult.SpectrumSimilarity);
+                    data.Add(searchResult.Averagine);
+                }
+
+                data.Add(searchResult.MassEvidence);
+
+                if (!usingParquetFile)
+                {
+                    data.Add(searchResult.CScore);
+                    data.Add(searchResult.DecoyEvidence);
+                    data.Add(searchResult.DecoyCScore);
+                }
 
                 writer.WriteLine(StringUtilities.CollapseList(data));
             }

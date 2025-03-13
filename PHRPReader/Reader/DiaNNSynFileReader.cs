@@ -130,17 +130,18 @@ namespace PHRPReader.Reader
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
-            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs(false).Keys);
             return headerNames;
         }
 
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
+        /// <param name="excludeColumnsNotInParquetFile">When true, do not include column names that are not in .parquet files (used by DIA-NN 2.x)</param>
         /// <returns>Dictionary of header names and enum values</returns>
-        public static SortedDictionary<string, DiaNNSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, DiaNNSynFileColumns> GetColumnHeaderNamesAndIDs(bool excludeColumnsNotInParquetFile)
         {
-            return new SortedDictionary<string, DiaNNSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, DiaNNSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 { "ResultID", DiaNNSynFileColumns.ResultID },
                 { "Dataset", DiaNNSynFileColumns.Dataset },
@@ -157,46 +158,73 @@ namespace PHRPReader.Reader
                 { "ProteinIDs", DiaNNSynFileColumns.ProteinIDs },
                 { "ProteinNames", DiaNNSynFileColumns.ProteinNames },
                 { "GeneNames", DiaNNSynFileColumns.GeneNames },
-                { "NTT", DiaNNSynFileColumns.NTT },
-                { "ProteinGroupQuantity", DiaNNSynFileColumns.ProteinGroupQuantity },
-                { "ProteinGroupNormalized", DiaNNSynFileColumns.ProteinGroupNormalized },
-                { "ProteinGroupMaxLFQ", DiaNNSynFileColumns.ProteinGroupMaxLFQ },
-                { "GenesQuantity", DiaNNSynFileColumns.GenesQuantity },
-                { "GenesNormalized", DiaNNSynFileColumns.GenesNormalized },
-                { "GenesMaxLFQ", DiaNNSynFileColumns.GenesMaxLFQ },
-                { "GenesMaxLFQUnique", DiaNNSynFileColumns.GenesMaxLFQUnique },
-                { "QValue", DiaNNSynFileColumns.QValue },
-                { "PEP", DiaNNSynFileColumns.PEP },
-                { "GlobalQValue", DiaNNSynFileColumns.GlobalQValue },
-                { "ProteinQValue", DiaNNSynFileColumns.ProteinQValue },
-                { "ProteinGroupQValue", DiaNNSynFileColumns.ProteinGroupQValue },
-                { "GlobalProteinGroupQValue", DiaNNSynFileColumns.GlobalProteinGroupQValue },
-                { "GeneGroupQValue", DiaNNSynFileColumns.GeneGroupQValue },
-                { "TranslatedQValue", DiaNNSynFileColumns.TranslatedQValue },
-                { "Proteotypic", DiaNNSynFileColumns.Proteotypic },
-                { "PrecursorQuantity", DiaNNSynFileColumns.PrecursorQuantity },
-                { "PrecursorNormalized", DiaNNSynFileColumns.PrecursorNormalized },
-                { "PrecursorTranslated", DiaNNSynFileColumns.PrecursorTranslated },
-                { "TranslatedQuality", DiaNNSynFileColumns.TranslatedQuality },
-                { "MS1Translated", DiaNNSynFileColumns.MS1Translated },
-                { "QuantityQuality", DiaNNSynFileColumns.QuantityQuality },
-                { "ElutionTime", DiaNNSynFileColumns.ElutionTime },
-                { "ElutionTimeStart", DiaNNSynFileColumns.ElutionTimeStart },
-                { "ElutionTimeStop", DiaNNSynFileColumns.ElutionTimeStop },
-                { "IndexedRT", DiaNNSynFileColumns.IndexedRT },
-                { "IndexedIonMobility", DiaNNSynFileColumns.IndexedIonMobility },
-                { "PredictedRT", DiaNNSynFileColumns.PredictedRT },
-                { "PredictedIndexedRT", DiaNNSynFileColumns.PredictedIndexedRT },
-                { "MS1ProfileCorrelation", DiaNNSynFileColumns.MS1ProfileCorrelation },
-                { "MS1Area", DiaNNSynFileColumns.MS1Area },
-                { "Evidence", DiaNNSynFileColumns.Evidence },
-                { "SpectrumSimilarity", DiaNNSynFileColumns.SpectrumSimilarity },
-                { "Averagine", DiaNNSynFileColumns.Averagine },
-                { "MassEvidence", DiaNNSynFileColumns.MassEvidence },
-                { "CScore", DiaNNSynFileColumns.CScore },
-                { "DecoyEvidence", DiaNNSynFileColumns.DecoyEvidence },
-                { "DecoyCScore", DiaNNSynFileColumns.DecoyCScore }
+                { "NTT", DiaNNSynFileColumns.NTT }
             };
+
+            if (!excludeColumnsNotInParquetFile)
+            {
+                headerColumns.Add("ProteinGroupQuantity", DiaNNSynFileColumns.ProteinGroupQuantity);
+                headerColumns.Add("ProteinGroupNormalized", DiaNNSynFileColumns.ProteinGroupNormalized);
+            }
+
+            headerColumns.Add("ProteinGroupMaxLFQ", DiaNNSynFileColumns.ProteinGroupMaxLFQ);
+
+            if (!excludeColumnsNotInParquetFile)
+            {
+                headerColumns.Add("GenesQuantity", DiaNNSynFileColumns.GenesQuantity);
+                headerColumns.Add("GenesNormalized", DiaNNSynFileColumns.GenesNormalized);
+            }
+
+            headerColumns.Add("GenesMaxLFQ", DiaNNSynFileColumns.GenesMaxLFQ);
+            headerColumns.Add("GenesMaxLFQUnique", DiaNNSynFileColumns.GenesMaxLFQUnique);
+            headerColumns.Add("QValue", DiaNNSynFileColumns.QValue);
+            headerColumns.Add("PEP", DiaNNSynFileColumns.PEP);
+            headerColumns.Add("GlobalQValue", DiaNNSynFileColumns.GlobalQValue);
+            headerColumns.Add("ProteinQValue", DiaNNSynFileColumns.ProteinQValue);
+            headerColumns.Add("ProteinGroupQValue", DiaNNSynFileColumns.ProteinGroupQValue);
+            headerColumns.Add("GlobalProteinGroupQValue", DiaNNSynFileColumns.GlobalProteinGroupQValue);
+            headerColumns.Add("GeneGroupQValue", DiaNNSynFileColumns.GeneGroupQValue);
+            headerColumns.Add("TranslatedQValue", DiaNNSynFileColumns.TranslatedQValue);
+            headerColumns.Add("Proteotypic", DiaNNSynFileColumns.Proteotypic);
+            headerColumns.Add("PrecursorQuantity", DiaNNSynFileColumns.PrecursorQuantity);
+            headerColumns.Add("PrecursorNormalized", DiaNNSynFileColumns.PrecursorNormalized);
+
+            if (!excludeColumnsNotInParquetFile)
+            {
+                headerColumns.Add("PrecursorTranslated", DiaNNSynFileColumns.PrecursorTranslated);
+                headerColumns.Add("TranslatedQuality", DiaNNSynFileColumns.TranslatedQuality);
+                headerColumns.Add("MS1Translated", DiaNNSynFileColumns.MS1Translated);
+            }
+
+            headerColumns.Add("QuantityQuality", DiaNNSynFileColumns.QuantityQuality);
+            headerColumns.Add("ElutionTime", DiaNNSynFileColumns.ElutionTime);
+            headerColumns.Add("ElutionTimeStart", DiaNNSynFileColumns.ElutionTimeStart);
+            headerColumns.Add("ElutionTimeStop", DiaNNSynFileColumns.ElutionTimeStop);
+            headerColumns.Add("IndexedRT", DiaNNSynFileColumns.IndexedRT);
+            headerColumns.Add("IndexedIonMobility", DiaNNSynFileColumns.IndexedIonMobility);
+            headerColumns.Add("PredictedRT", DiaNNSynFileColumns.PredictedRT);
+            headerColumns.Add("PredictedIndexedRT", DiaNNSynFileColumns.PredictedIndexedRT);
+            headerColumns.Add("MS1ProfileCorrelation", DiaNNSynFileColumns.MS1ProfileCorrelation);
+            headerColumns.Add("MS1Area", DiaNNSynFileColumns.MS1Area);
+            headerColumns.Add("Evidence", DiaNNSynFileColumns.Evidence);
+
+            if (!excludeColumnsNotInParquetFile)
+            {
+                headerColumns.Add("SpectrumSimilarity", DiaNNSynFileColumns.SpectrumSimilarity);
+                headerColumns.Add("Averagine", DiaNNSynFileColumns.Averagine);
+            }
+
+            headerColumns.Add("MassEvidence", DiaNNSynFileColumns.MassEvidence);
+
+            // ReSharper disable once InvertIf
+            if (!excludeColumnsNotInParquetFile)
+            {
+                headerColumns.Add("CScore", DiaNNSynFileColumns.CScore);
+                headerColumns.Add("DecoyEvidence", DiaNNSynFileColumns.DecoyEvidence);
+                headerColumns.Add("DecoyCScore", DiaNNSynFileColumns.DecoyCScore);
+            }
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -208,7 +236,7 @@ namespace PHRPReader.Reader
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<DiaNNSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
-            var headerColumns = GetColumnHeaderNamesAndIDs();
+            var headerColumns = GetColumnHeaderNamesAndIDs(false);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
@@ -224,7 +252,7 @@ namespace PHRPReader.Reader
                 return mSynopsisFileColumn[column];
             }
 
-            foreach (var item in GetColumnHeaderNamesAndIDs())
+            foreach (var item in GetColumnHeaderNamesAndIDs(false))
             {
                 mSynopsisFileColumn.Add(item.Value, item.Key);
             }
