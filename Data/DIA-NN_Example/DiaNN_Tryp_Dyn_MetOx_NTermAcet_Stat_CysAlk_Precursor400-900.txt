@@ -1,0 +1,167 @@
+## Parameters that control in-silico spectral library generation
+
+# Use deep learning-based prediction of spectra, retention times and ion mobility values
+DeepLearningPredictor=True
+
+# Minimum fragment ion m/z value
+FragmentIonMzMin=200
+
+# Maximum fragment ion m/z value
+FragmentIonMzMax=1800
+
+# Enable protein N-terminus methionine excision as variable modification for the in-silico digestion
+TrimNTerminalMethionine=True
+
+# Enzyme cleavage specificity
+#   Strict trypsin:                K*,R*,!*P
+#   Trypsin (ignore proline rule): K*,R*
+#   Lys/C:                         K*
+#   Chymotrypsin:                  F*,W*,Y*,L*
+#   Asp-N:                         D*
+#   Glu-C:                         E*,D*
+CleavageSpecificity=K*,R*
+
+# Maximum number of allowed missed cleavages
+MissedCleavages=2
+
+# Minimum peptide length
+PeptideLengthMin=7
+
+# Maximum peptide length
+PeptideLengthMax=30
+
+# Minimum precursor ion m/z value
+PrecursorMzMin=400
+
+# Maximum precursor ion m/z value
+PrecursorMzMax=900
+
+# Minimum precursor charge
+PrecursorChargeMin=2
+
+# Maximum precursor charge
+PrecursorChargeMax=4
+
+# Modifications
+
+# Static Cys carbamidomethyl (+57.021), aka iodoacetamide alkylation
+StaticCysCarbamidomethyl=True
+
+# Additional static mods
+StaticMod=None
+
+# Dynamic mods
+DynamicMod=UniMod:35,   15.994915,  M         # Oxidized methionine
+DynamicMod=UniMod:1,    42.010565,  *n        # Acetylation protein N-term
+
+# DynamicMod=UniMod:21,   79.966331,  STY       # Phosphorylated STY
+# DynamicMod=UniMod:121,  114.042927, K         # Lysine ubiquitinylation (K-GG)
+
+# Maximum number of dynamic mods (per peptide)
+MaxDynamicModsPerPeptide=3
+
+
+## Parameters that control identifying peptides in DIA spectra
+
+# Existing spectral library to use (overrides the in-silico digestion based spectral library) 
+ExistingSpectralLibrary=
+
+# MS1 mass accuracy, in ppm
+# If 0, let DIA-NN auto determine the mass accuracy to use
+MS1MassAccuracy=0
+
+# MS2 mass accuracy, in ppm
+# If 0, let DIA-NN auto determine the mass accuracy to use
+MS2MassAccuracy=0
+
+# Scan window radius (window half width, in scans)
+# If 0, let DIA-NN auto-determine the value
+# Ideally, it should be approximately equal to the average number of data points per peak
+ScanWindow=0
+
+# Match-between-runs (MBR); only applicable if searching multiple datasets as a group
+MatchBetweenRuns=True
+
+# Precursor false discovery rate (Q-value)
+# 0.01 means 1% FDR
+PrecursorQvalue=0.01
+
+# When true, disable scoring and localization of the dynamic mods (deprecated in DIA-NN 2.0)
+# DisableScoring=False
+
+# When true, disable peptidoform scoring (not recommended)
+NoPeptidoforms=False
+
+# Generate a spectral library using DIA search results
+CreateSpectralLibrary=True
+
+# Create expression level matrices
+CreateQuantitiesMatrices=True
+
+# Use a heuristic protein inference algorithm (similar to the one used by FragPipe)
+# The Readme says that this mode is only recommended for benchmarking protein ID numbers, and should thus generally not be used
+HeuristicProteinInference=True
+
+# When creating a spectral library from DIA data, use an intelligent algorithm which determines how to extract spectra
+# Highly recommended and should almost always be enabled
+# When false, the library generation mode is "IDs, RT, and IM profiling" 
+SmartProfilingLibraryGeneration=True
+
+# Create extracted ion chromatograms for heavy isotopologues; set to False to disable
+# The chromatograms are saved as xic.parquet files (one per dataset)
+CreateExtractedChromatograms=True
+
+# Scoring Mode
+#  0: Generic
+#  1: Peptidoforms (aim to achieve amino acid sequence correctness at the peptide level); DIA-NN auto-enables this mode if dynamic mods are defined
+#  2: Proteoforms  (aim to achieve amino acid sequence correctness at the protein level)
+ScoringMode=1
+
+# Protein Inference Mode (aka protein grouping or proteotypicity)
+#  0: Isoform IDs
+#  1: Protein names (from FASTA)
+#  2: Genes (default)					For species-specific genes, use SpeciesGenes=True
+#  3: off
+ProteinInferenceMode=2
+
+# Add the organism identifier to the gene names (only supports UniProt proteomes)
+# This is useful when the FASTA file has a mix of organisms
+# However, when enabled, this affects proteotypicity definition
+SpeciesGenes=False
+
+# Neutral Network Classifier (only settable in the GUI
+# 0: Off
+# 1: Single-pass mode (default)
+# 2: Double-pass mode
+# NeuralNetworkClassifier=1
+
+# Quantification Strategy
+# 0: Legacy
+# 1: Quant UMS, high accuracy
+# 2: Quant UMS, high precision (default)
+QuantificationStrategy=2
+
+# Cross-run normalization
+# 0: Global
+# 1: RT-dependent (default)
+# 2: Off
+CrossRunNormalization=1
+
+# Example protein and gene names when SpeciesGenes is False:
+#   EFTU_HUMAN  TUFM
+#   PPOX_HUMAN  PPOX
+#
+# Example protein and gene names when SpeciesGenes is True:
+#   EFTU_HUMAN  TUFM_HUMAN
+#   PPOX_HUMAN  PPOX_HUMAN
+
+# Create a PDF report
+GeneratePDFReport=True
+
+# Number of CPU threads to use
+# 0 or all means to use all available cores
+# Number of CPU threads to use
+ThreadCount=All
+
+# Verbosity level, default to 1; can be 0, 1, 2, 3, or 4
+LogLevel=2

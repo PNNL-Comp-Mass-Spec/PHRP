@@ -1,0 +1,4 @@
+Modification_Symbol	Monoisotopic_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	UniMod_Mod_Name
+-	57.021465	C	S	IodoAcet	Carbamidomethyl
+*	15.994915	M	D	Plus1Oxy	Oxidation
+#	42.010567	[	D	Acetyl	Acetyl
