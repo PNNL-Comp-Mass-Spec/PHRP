@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DiaNNParquetDataReader.cs" />
     <Compile Include="Data\DiaNNResults.cs" />
     <Compile Include="Data\MaxQuantModifiedSequenceModInfo.cs" />
     <Compile Include="Data\MaxQuantModInfo.cs" />

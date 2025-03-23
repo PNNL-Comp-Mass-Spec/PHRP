@@ -71,7 +71,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public DiaNNResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "March 12, 2025";
+            FileDate = "March 22, 2025";
 
             mMissingScanInfoDatasets = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
             mModificationMassByName = new Dictionary<string, double>();
@@ -116,8 +116,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// These columns correspond to the DIA-NN report.tsv file
         /// </summary>
-        private enum DiaNNReportFileColumns
+        internal enum DiaNNReportFileColumns
         {
+            // ReSharper disable InconsistentNaming
+
             /// <summary>
             /// Undefined
             /// </summary>
@@ -432,7 +434,177 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Predicted Indexed Ion Mobility
             /// </summary>
-            PredictedIndexedIonMobility = 58
+            PredictedIndexedIonMobility = 58,
+
+            /// <summary>
+            /// Run Index
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            RunIndex = 59,
+
+            /// <summary>
+            /// Channel
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            Channel = 60,
+
+            /// <summary>
+            /// Precursor Library Index
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            PrecursorLibIndex = 61,
+
+            /// <summary>
+            /// Decoy (0 if not a decoy, 1 if a decoy)
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            Decoy = 62,
+
+            /// <summary>
+            /// Protein Group MaxLFQ Quality
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ProteinGroupMaxLFQQuality = 63,
+
+            /// <summary>
+            /// Genes MaxLFQ Quality
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            GenesMaxLFQQuality = 64,
+
+            /// <summary>
+            /// Genes MaxLFQ Unique Quality
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            GenesMaxLFQUniqueQuality = 65,
+
+            /// <summary>
+            /// Peptidoform QValue
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            PeptidoformQValue = 66,
+
+            /// <summary>
+            /// Global Peptidoform QValue
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            GlobalPeptidoformQValue = 67,
+
+            /// <summary>
+            /// Lib Peptidoform QValue
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            LibPeptidoformQValue = 68,
+
+            /// <summary>
+            /// Ptm Site Confidence
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            PtmSiteConfidence = 69,
+
+            /// <summary>
+            /// Site Occupancy Probabilities
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            SiteOccupancyProbabilities = 70,
+
+            /// <summary>
+            /// Protein Sites
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ProteinSites = 71,
+
+            /// <summary>
+            /// Lib Ptm Site Confidence
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            LibPtmSiteConfidence = 72,
+
+            /// <summary>
+            /// Channel QValue
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ChannelQValue = 73,
+
+            /// <summary>
+            /// Protein Group PEP
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ProteinGroupPEP = 74,
+
+            /// <summary>
+            /// MS1 Normalised
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            MS1Normalised = 75,
+
+            /// <summary>
+            /// MS1 Apex Area
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            MS1ApexArea = 76,
+
+            /// <summary>
+            /// MS1 Apex Mz Delta
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            MS1ApexMzDelta = 77,
+
+            /// <summary>
+            /// Normalisation Factor
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            NormalisationFactor = 78,
+
+            /// <summary>
+            /// Empirical Quality
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            EmpiricalQuality = 79,
+
+            /// <summary>
+            /// Normalisation Noise
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            NormalisationNoise = 80,
+
+            /// <summary>
+            /// FWHM
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            FWHM = 81,
+
+            /// <summary>
+            /// Protein Group Top N
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ProteinGroupTopN = 82,
+
+            /// <summary>
+            /// Genes Top N
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            GenesTopN = 83,
+
+            /// <summary>
+            /// Channel Evidence
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            ChannelEvidence = 84,
+
+            /// <summary>
+            /// MS1 Total Signal Before
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            MS1TotalSignalBefore = 85,
+
+            /// <summary>
+            /// MS1 Total Signal After
+            /// </summary>
+            /// <remarks>Only in .parquet files</remarks>
+            MS1TotalSignalAfter = 86
+
+            // ReSharper restore InconsistentNaming
         }
 
         /// <summary>
@@ -1131,6 +1303,86 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         /// <summary>
+        /// Populate list outputData with the header names for the .tsv file created from the .parquet file
+        /// </summary>
+        /// <param name="columnNamesByEnum">Dictionary where keys are enum DiaNNReportFileColumns and values are the corresponding column name</param>
+        private List<string> GetParquetTsvHeaderNames(IReadOnlyDictionary<DiaNNReportFileColumns, string> columnNamesByEnum)
+        {
+            return new List<string>
+            {
+                columnNamesByEnum[DiaNNReportFileColumns.RunIndex],
+                columnNamesByEnum[DiaNNReportFileColumns.DatasetName],
+                columnNamesByEnum[DiaNNReportFileColumns.Channel],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorId],
+                columnNamesByEnum[DiaNNReportFileColumns.ModifiedSequence],
+                columnNamesByEnum[DiaNNReportFileColumns.StrippedSequence],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorCharge],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorLibIndex],
+                columnNamesByEnum[DiaNNReportFileColumns.Decoy],
+                columnNamesByEnum[DiaNNReportFileColumns.Proteotypic],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorMz],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinIDs],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroup],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinNames],
+                columnNamesByEnum[DiaNNReportFileColumns.GeneNames],
+                columnNamesByEnum[DiaNNReportFileColumns.RT],
+                columnNamesByEnum[DiaNNReportFileColumns.IndexedRT],
+                columnNamesByEnum[DiaNNReportFileColumns.PredictedRT],
+                columnNamesByEnum[DiaNNReportFileColumns.PredictedIndexedRT],
+                columnNamesByEnum[DiaNNReportFileColumns.IonMobility],
+                columnNamesByEnum[DiaNNReportFileColumns.IndexedIonMobility],
+                columnNamesByEnum[DiaNNReportFileColumns.PredictedIonMobility],
+                columnNamesByEnum[DiaNNReportFileColumns.PredictedIndexedIonMobility],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorQuantity],
+                columnNamesByEnum[DiaNNReportFileColumns.PrecursorNormalized],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1Area],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1Normalised],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1ApexArea],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1ApexMzDelta],
+                columnNamesByEnum[DiaNNReportFileColumns.NormalisationFactor],
+                columnNamesByEnum[DiaNNReportFileColumns.QuantityQuality],
+                columnNamesByEnum[DiaNNReportFileColumns.EmpiricalQuality],
+                columnNamesByEnum[DiaNNReportFileColumns.NormalisationNoise],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1ProfileCorr],
+                columnNamesByEnum[DiaNNReportFileColumns.Evidence],
+                columnNamesByEnum[DiaNNReportFileColumns.MassEvidence],
+                columnNamesByEnum[DiaNNReportFileColumns.ChannelEvidence],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1TotalSignalBefore],
+                columnNamesByEnum[DiaNNReportFileColumns.MS1TotalSignalAfter],
+                columnNamesByEnum[DiaNNReportFileColumns.RTStart],
+                columnNamesByEnum[DiaNNReportFileColumns.RTStop],
+                columnNamesByEnum[DiaNNReportFileColumns.FWHM],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroupTopN],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroupMaxLFQ],
+                columnNamesByEnum[DiaNNReportFileColumns.GenesTopN],
+                columnNamesByEnum[DiaNNReportFileColumns.GenesMaxLFQ],
+                columnNamesByEnum[DiaNNReportFileColumns.GenesMaxLFQUnique],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroupMaxLFQQuality],
+                columnNamesByEnum[DiaNNReportFileColumns.GenesMaxLFQQuality],
+                columnNamesByEnum[DiaNNReportFileColumns.GenesMaxLFQUniqueQuality],
+                columnNamesByEnum[DiaNNReportFileColumns.QValue],
+                columnNamesByEnum[DiaNNReportFileColumns.PEP],
+                columnNamesByEnum[DiaNNReportFileColumns.GlobalQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.LibQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.PeptidoformQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.GlobalPeptidoformQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.LibPeptidoformQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.PtmSiteConfidence],
+                columnNamesByEnum[DiaNNReportFileColumns.SiteOccupancyProbabilities],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinSites],
+                columnNamesByEnum[DiaNNReportFileColumns.LibPtmSiteConfidence],
+                columnNamesByEnum[DiaNNReportFileColumns.TranslatedQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.ChannelQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroupQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinGroupPEP],
+                columnNamesByEnum[DiaNNReportFileColumns.GeneGroupQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.ProteinQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.GlobalProteinGroupQValue],
+                columnNamesByEnum[DiaNNReportFileColumns.LibProteinGroupQValue]
+            };
+        }
+
+        /// <summary>
         /// Get the list of static and dynamic modifications for a peptide read from a DIA-NN synopsis file
         /// </summary>
         /// <param name="searchResult">Search result</param>
@@ -1680,20 +1932,26 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Parse the DIA-NN report.tsv file header line, populating columnMapping
         /// </summary>
-        /// <param name="lineIn">Data line</param>
+        /// <param name="headerLine">Tab-delimited list of header names</param>
         /// <param name="columnMapping">Column mapping, where keys are an enum in DiaNNReportFileColumns and values are the zero-based index</param>
+        /// <param name="columnNamesByEnum">Output: Dictionary where keys are enum DiaNNReportFileColumns and values are the corresponding column name</param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         private bool ParseDiaNNResultsFileHeaderLine(
-            string lineIn,
-            IDictionary<DiaNNReportFileColumns, int> columnMapping)
+            string headerLine,
+            IDictionary<DiaNNReportFileColumns, int> columnMapping,
+            out Dictionary<DiaNNReportFileColumns, string> columnNamesByEnum)
         {
+            columnNamesByEnum = new Dictionary<DiaNNReportFileColumns, string>();
+
             // ReSharper disable StringLiteralTypo
 
             // Columns in report.tsv and/or report.parquet files
             var columnNames = new SortedDictionary<string, DiaNNReportFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
+                { "Run.Index", DiaNNReportFileColumns.RunIndex },                                       // Only in .parquet
                 { "File.Name", DiaNNReportFileColumns.DatasetFile },
                 { "Run", DiaNNReportFileColumns.DatasetName },
+                { "Channel", DiaNNReportFileColumns.Channel },                                          // Only in .parquet
                 { "Protein.Group", DiaNNReportFileColumns.ProteinGroup },
                 { "Protein.Ids", DiaNNReportFileColumns.ProteinIDs },
                 { "Protein.Names", DiaNNReportFileColumns.ProteinNames },
@@ -1709,12 +1967,26 @@ namespace PeptideHitResultsProcessor.Processor
                 { "Stripped.Sequence", DiaNNReportFileColumns.StrippedSequence },
                 { "Precursor.Id", DiaNNReportFileColumns.PrecursorId },
                 { "Precursor.Charge", DiaNNReportFileColumns.PrecursorCharge },
-                { "Precursor.Mz", DiaNNReportFileColumns.PrecursorMz },         // Only in .parquet
+                { "Precursor.Lib.Index", DiaNNReportFileColumns.PrecursorLibIndex },                    // Only in .parquet
+                { "Decoy", DiaNNReportFileColumns.Decoy },                                              // Only in .parquet
+                { "Precursor.Mz", DiaNNReportFileColumns.PrecursorMz },                                 // Only in .parquet
+                { "PG.MaxLFQ.Quality", DiaNNReportFileColumns.ProteinGroupMaxLFQQuality },              // Only in .parquet
+                { "Genes.MaxLFQ.Quality", DiaNNReportFileColumns.GenesMaxLFQQuality },                  // Only in .parquet
+                { "Genes.MaxLFQ.Unique.Quality", DiaNNReportFileColumns.GenesMaxLFQUniqueQuality },          // Only in .parquet
                 { "Q.Value", DiaNNReportFileColumns.QValue },
                 { "PEP", DiaNNReportFileColumns.PEP },
                 { "Global.Q.Value", DiaNNReportFileColumns.GlobalQValue },
-                { "Protein.Q.Value", DiaNNReportFileColumns.ProteinQValue },
+                { "Peptidoform.Q.Value", DiaNNReportFileColumns.PeptidoformQValue },                   // Only in .parquet
+                { "Global.Peptidoform.Q.Value", DiaNNReportFileColumns.GlobalPeptidoformQValue },      // Only in .parquet
+                { "Lib.Peptidoform.Q.Value", DiaNNReportFileColumns.LibPeptidoformQValue },            // Only in .parquet
+                { "PTM.Site.Confidence", DiaNNReportFileColumns.PtmSiteConfidence },                   // Only in .parquet
+                { "Site.Occupancy.Probabilities", DiaNNReportFileColumns.SiteOccupancyProbabilities }, // Only in .parquet
+                { "Protein.Sites", DiaNNReportFileColumns.ProteinSites },                              // Only in .parquet
+                { "Protein.Q.Value", DiaNNReportFileColumns.ProteinQValue  },
+                { "Lib.PTM.Site.Confidence", DiaNNReportFileColumns.LibPtmSiteConfidence },             // Only in .parquet
+                { "Channel.Q.Value", DiaNNReportFileColumns.ChannelQValue },                            // Only in .parquet
                 { "PG.Q.Value", DiaNNReportFileColumns.ProteinGroupQValue },
+                { "PG.PEP", DiaNNReportFileColumns.ProteinGroupPEP },                                   // Only in .parquet
                 { "Global.PG.Q.Value", DiaNNReportFileColumns.GlobalProteinGroupQValue },
                 { "GG.Q.Value", DiaNNReportFileColumns.GeneGroupQValue },
                 { "Translated.Q.Value", DiaNNReportFileColumns.TranslatedQValue },
@@ -1723,11 +1995,21 @@ namespace PeptideHitResultsProcessor.Processor
                 { "Precursor.Normalised", DiaNNReportFileColumns.PrecursorNormalized },
                 { "Precursor.Translated", DiaNNReportFileColumns.PrecursorTranslated },
                 { "Translated.Quality", DiaNNReportFileColumns.TranslatedQuality },
+                { "Ms1.Area", DiaNNReportFileColumns.MS1Area },
+                { "Ms1.Normalised", DiaNNReportFileColumns.MS1Normalised },             // Only in .parquet
+                { "Ms1.Apex.Area", DiaNNReportFileColumns.MS1ApexArea },                // Only in .parquet
+                { "Ms1.Apex.Mz.Delta", DiaNNReportFileColumns.MS1ApexMzDelta },         // Only in .parquet
+                { "Normalisation.Factor", DiaNNReportFileColumns.NormalisationFactor }, // Only in .parquet
                 { "Ms1.Translated", DiaNNReportFileColumns.MS1Translated },
                 { "Quantity.Quality", DiaNNReportFileColumns.QuantityQuality },
+                { "Empirical.Quality", DiaNNReportFileColumns.EmpiricalQuality },       // Only in .parquet
+                { "Normalisation.Noise", DiaNNReportFileColumns.NormalisationNoise },   // Only in .parquet
                 { "RT", DiaNNReportFileColumns.RT },
                 { "RT.Start", DiaNNReportFileColumns.RTStart },
                 { "RT.Stop", DiaNNReportFileColumns.RTStop },
+                { "FWHM", DiaNNReportFileColumns.FWHM },                                // Only in .parquet
+                { "PG.TopN", DiaNNReportFileColumns.ProteinGroupTopN },                 // Only in .parquet
+                { "Genes.TopN", DiaNNReportFileColumns.GenesTopN },                     // Only in .parquet
                 { "iRT", DiaNNReportFileColumns.IndexedRT },
                 { "Predicted.RT", DiaNNReportFileColumns.PredictedRT },
                 { "Predicted.iRT", DiaNNReportFileColumns.PredictedIndexedRT },
@@ -1735,11 +2017,13 @@ namespace PeptideHitResultsProcessor.Processor
                 { "Lib.Q.Value", DiaNNReportFileColumns.LibQValue },
                 { "Lib.PG.Q.Value", DiaNNReportFileColumns.LibProteinGroupQValue },
                 { "Ms1.Profile.Corr", DiaNNReportFileColumns.MS1ProfileCorr },
-                { "Ms1.Area", DiaNNReportFileColumns.MS1Area },
                 { "Evidence", DiaNNReportFileColumns.Evidence },
                 { "Spectrum.Similarity", DiaNNReportFileColumns.SpectrumSimilarity },
                 { "Averagine", DiaNNReportFileColumns.Averagine },
                 { "Mass.Evidence", DiaNNReportFileColumns.MassEvidence },
+                { "Channel.Evidence", DiaNNReportFileColumns.ChannelEvidence },                 // Only in .parquet
+                { "Ms1.Total.Signal.Before", DiaNNReportFileColumns.MS1TotalSignalBefore },     // Only in .parquet
+                { "Ms1.Total.Signal.After", DiaNNReportFileColumns.MS1TotalSignalAfter },       // Only in .parquet
                 { "CScore", DiaNNReportFileColumns.CScore },
                 { "Decoy.Evidence", DiaNNReportFileColumns.DecoyEvidence },
                 { "Decoy.CScore", DiaNNReportFileColumns.DecoyCScore },
@@ -1765,7 +2049,7 @@ namespace PeptideHitResultsProcessor.Processor
                     columnMapping.Add(resultColumn, -1);
                 }
 
-                var splitLine = lineIn.Split('\t');
+                var splitLine = headerLine.Split('\t');
 
                 for (var index = 0; index < splitLine.Length; index++)
                 {
@@ -1774,6 +2058,12 @@ namespace PeptideHitResultsProcessor.Processor
                         // Recognized column name; update columnMapping
                         columnMapping[resultFileColumn] = index;
                     }
+                }
+
+                // Populate columnNamesByEnum
+                foreach (var item in columnNames)
+                {
+                    columnNamesByEnum.Add(item.Value, item.Key);
                 }
 
                 return true;
@@ -2235,36 +2525,6 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
-        private void ReadColumnBatch(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out string[] dataValues)
-        {
-            dataValues = new string[length];
-
-            if (columnIndex < 0)
-                return;
-
-            rowGroupReader.Column(columnIndex).LogicalReader<string>().ReadBatch(dataValues, startRowIndex, length);
-        }
-
-        private void ReadColumnBatchFloat(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out float[] dataValues)
-        {
-            dataValues = new float[length];
-
-            if (columnIndex < 0)
-                return;
-
-            rowGroupReader.Column(columnIndex).LogicalReader<float>().ReadBatch(dataValues, startRowIndex, length);
-        }
-
-        private void ReadColumnBatchLong(RowGroupReader rowGroupReader, int columnIndex, int startRowIndex, int length, out long[] dataValues)
-        {
-            dataValues = new long[length];
-
-            if (columnIndex < 0)
-                return;
-
-            rowGroupReader.Column(columnIndex).LogicalReader<long>().ReadBatch(dataValues, startRowIndex, length);
-        }
-
         /// <summary>
         /// Load DIA-NN search results from a report.tsv file
         /// </summary>
@@ -2390,9 +2650,14 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var columnMapping = new Dictionary<DiaNNReportFileColumns, int>();
 
-                var scanNumberRangeCount = 0;
+                var scanNumberOutOfRangeCount = 0;
 
-                // Open the input file and parse it
+                // Define the path to the _report.tsv file that will be created from the _report.parquet file
+                var tsvFile = new FileInfo(Path.ChangeExtension(inputFile.FullName, ".tsv"));
+
+                using var writer = new StreamWriter(new FileStream(tsvFile.FullName, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                // Open the .parquet file and parse it
                 using var reader = new ParquetFileReader(inputFile.FullName);
 
                 for (var rowGroup = 0; rowGroup < reader.FileMetaData.NumRowGroups; ++rowGroup)
@@ -2409,8 +2674,10 @@ namespace PeptideHitResultsProcessor.Processor
                         columnNames.Add(rowGroupReader.Column(columnIndex).ColumnDescriptor.Name);
                     }
 
+                    var columnNameList = string.Join("\t", columnNames);
+
                     // Parse the header line
-                    var headerParsed = ParseDiaNNResultsFileHeaderLine(string.Join("\t", columnNames), columnMapping);
+                    var headerParsed = ParseDiaNNResultsFileHeaderLine(columnNameList, columnMapping, out var columnNamesByEnum);
 
                     if (!headerParsed)
                     {
@@ -2424,70 +2691,24 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var rowCount = checked((int)rowGroupReader.MetaData.NumRows);
 
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.DatasetName], 0, rowCount, out var datasetName);                                 // Run
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroup], 0, rowCount, out var proteinGroup);                               // Protein.Group
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinIDs], 0, rowCount, out var proteinIDs);                                   // Protein.Ids
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinNames], 0, rowCount, out var proteinNames);                               // Protein.Names
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.GeneNames], 0, rowCount, out var geneNames);                                     // Genes
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupQuantity], 0, rowCount, out var proteinGroupQuantity);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupNormalized], 0, rowCount, out var proteinGroupNormalized);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupMaxLFQ], 0, rowCount, out var proteinGroupMaxLFQ);              // PG.MaxLFQ
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesQuantity], 0, rowCount, out var genesQuantity);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesNormalized], 0, rowCount, out var genesNormalized);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesMaxLFQ], 0, rowCount, out var genesMaxLFQ);                            // Genes.MaxLFQ
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GenesMaxLFQUnique], 0, rowCount, out var genesMaxLFQUnique);                // Genes.MaxLFQ.Unique
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.ModifiedSequence], 0, rowCount, out var modifiedSequence);                       // Modified.Sequence
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.StrippedSequence], 0, rowCount, out var strippedSequence);                       // Stripped.Sequence
-                    ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorId], 0, rowCount, out var precursorId);                                 // Precursor.Id
-                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorCharge], 0, rowCount, out var precursorCharge);                     // Precursor.Charge
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorMz], 0, rowCount, out var precursorMz);                            // Precursor.Mz
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.QValue], 0, rowCount, out var qValueDiaNN);                                 // Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PEP], 0, rowCount, out var pep);                                            // PEP
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GlobalQValue], 0, rowCount, out var globalQValue);                          // Global.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinQValue], 0, rowCount, out var proteinQValue);                        // Protein.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.ProteinGroupQValue], 0, rowCount, out var proteinGroupQValue);              // PG.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GlobalProteinGroupQValue], 0, rowCount, out var globalProteinGroupQValue);  // Global.PG.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.GeneGroupQValue], 0, rowCount, out var geneGroupQValue);                    // GG.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.TranslatedQValue], 0, rowCount, out var translatedQValue);                  // Translated.Q.Value
-                    ReadColumnBatchLong(rowGroupReader, columnMapping[DiaNNReportFileColumns.Proteotypic], 0, rowCount, out var proteotypic);                             // Proteotypic
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorQuantity], 0, rowCount, out var precursorQuantity);                // Precursor.Quantity
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorNormalized], 0, rowCount, out var precursorNormalized);            // Precursor.Normalised
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PrecursorTranslated], 0, rowCount, out var precursorTranslated);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.TranslatedQuality], 0, rowCount, out var translatedQuality);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1Translated], 0, rowCount, out var ms1Translated);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.QuantityQuality], 0, rowCount, out var quantityQuality);                    // Quantity.Quality
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RT], 0, rowCount, out var elutionTime);                                     // RT
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RTStart], 0, rowCount, out var rtStart);                                    // RT.Start
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.RTStop], 0, rowCount, out var rtStop);                                      // RT.Stop
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IndexedRT], 0, rowCount, out var indexedRT);                                // iRT
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedRT], 0, rowCount, out var predictedRT);                            // Predicted.RT
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIndexedRT], 0, rowCount, out var predictedIndexedRT);              // Predicted.iRT
-                    // ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.FirstProteinDescription], 0, rowCount, out var firstProteinDescription);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.LibQValue], 0, rowCount, out var libQValue);                                // Lib.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.LibProteinGroupQValue], 0, rowCount, out var libProteinGroupQValue);        // Lib.PG.Q.Value
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1ProfileCorr], 0, rowCount, out var ms1ProfileCorrelation);               // Ms1.Profile.Corr
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS1Area], 0, rowCount, out var ms1Area);                                    // Ms1.Area
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.Evidence], 0, rowCount, out var evidence);                                  // Evidence
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.SpectrumSimilarity], 0, rowCount, out var spectrumSimilarity);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.Averagine], 0, rowCount, out var averagine);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.MassEvidence], 0, rowCount, out var massEvidence);                          // Mass.Evidence
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.CScore], 0, rowCount, out var cScore);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.DecoyEvidence], 0, rowCount, out var decoyEvidence);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.DecoyCScore], 0, rowCount, out var decoyCScore);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentQuantRaw], 0, rowCount, out var fragmentQuantRaw);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentQuantCorrected], 0, rowCount, out var fragmentQuantCorrected);
-                    // ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.FragmentCorrelations], 0, rowCount, out var fragmentCorrelations);
-                    // ReadColumnBatch(rowGroupReader, columnMapping[DiaNNReportFileColumns.MS2Scan], 0, rowCount, out var scan);
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IonMobility], 0, rowCount, out var ionMobility);                                 // IM
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.IndexedIonMobility], 0, rowCount, out var indexedIonMobility);                   // iIM
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIonMobility], 0, rowCount, out var predictedIonMobility);               // Predicted.IM
-                    ReadColumnBatchFloat(rowGroupReader, columnMapping[DiaNNReportFileColumns.PredictedIndexedIonMobility], 0, rowCount, out var predictedIndexedIonMobility); // Predicted.iIM
+                    if (rowGroup > 0 && rowCount <= 0)
+                        continue;
+
+                    // Write the header names to the _report.tsv file
+                    var headerNames = GetParquetTsvHeaderNames(columnNamesByEnum);
+                    writer.WriteLine(string.Join("\t", headerNames));
+
+                    var parquetData = new DiaNNParquetDataReader(columnMapping);
+
+                    parquetData.ReadParquetData(rowGroupReader, rowCount);
+
+                    var currentDataset = string.Empty;
 
                     for (var i = 0; i < rowCount; i++)
                     {
                         var searchResult = new DiaNNSearchResult
                         {
-                            DatasetName = string.IsNullOrWhiteSpace(datasetName[i]) ? defaultDatasetName : datasetName[i]
+                            DatasetName = string.IsNullOrWhiteSpace(parquetData.DatasetName[i]) ? defaultDatasetName : parquetData.DatasetName[i]
                         };
 
                         if (!string.IsNullOrWhiteSpace(searchResult.DatasetName))
@@ -2509,70 +2730,86 @@ namespace PeptideHitResultsProcessor.Processor
                                 : string.Format("{0}.mzML", searchResult.DatasetName);
                         }
 
-                        searchResult.ProteinGroup = proteinGroup[i];
-                        searchResult.ProteinIDs = proteinIDs[i];
-                        searchResult.ProteinNames = proteinNames[i];
-                        searchResult.GeneNames = geneNames[i];
+                        string datasetNameToUse;
 
-                        // searchResult.ProteinGroupQuantity = proteinGroupQuantity[i];
-                        // searchResult.ProteinGroupNormalized = proteinGroupNormalized[i];
+                        if (string.IsNullOrWhiteSpace(currentDataset) || !currentDataset.Equals(searchResult.DatasetName))
+                        {
+                            currentDataset = searchResult.DatasetName;
+                            datasetNameToUse = searchResult.DatasetName;
+                        }
+                        else
+                        {
+                            datasetNameToUse = string.Empty;
+                        }
 
-                        searchResult.ProteinGroupMaxLFQ = proteinGroupMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.GenesQuantity = genesQuantity[i];
-                        // searchResult.GenesNormalized = genesNormalized[i];
-                        searchResult.GenesMaxLFQ = genesMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.GenesMaxLFQUnique = genesMaxLFQUnique[i].ToString(CultureInfo.InvariantCulture);
+                        var outputData = parquetData.GetRowData(i, datasetNameToUse);
 
-                        searchResult.ModifiedSequence = modifiedSequence[i];
+                        writer.WriteLine(string.Join("\t", outputData));
 
-                        searchResult.Sequence = strippedSequence[i];
+                        searchResult.ProteinGroup = parquetData.ProteinGroup[i];
+                        searchResult.ProteinIDs = parquetData.ProteinIDs[i];
+                        searchResult.ProteinNames = parquetData.ProteinNames[i];
+                        searchResult.GeneNames = parquetData.GeneNames[i];
+
+                        // searchResult.ProteinGroupQuantity = parquetData.ProteinGroupQuantity[i];
+                        // searchResult.ProteinGroupNormalized = parquetData.ProteinGroupNormalized[i];
+
+                        searchResult.ProteinGroupMaxLFQ = parquetData.ProteinGroupMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.GenesQuantity = parquetData.GenesQuantity[i];
+                        // searchResult.GenesNormalized = parquetData.GenesNormalized[i];
+                        searchResult.GenesMaxLFQ = parquetData.GenesMaxLFQ[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GenesMaxLFQUnique = parquetData.GenesMaxLFQUnique[i].ToString(CultureInfo.InvariantCulture);
+
+                        searchResult.ModifiedSequence = parquetData.ModifiedSequence[i];
+
+                        searchResult.Sequence = parquetData.StrippedSequence[i];
 
                         // Peptide sequences in DIA-NN report.tsv files do not include prefix or suffix residues (but this class will add them later)
-                        // searchResult.PrevAA = prevAA[i];
-                        // searchResult.NextAA = nextAA[i];
+                        // searchResult.PrevAA = parquetData.PrevAA[i];
+                        // searchResult.NextAA = parquetData.NextAA[i];
 
-                        searchResult.PrecursorId = precursorId[i];
+                        searchResult.PrecursorId = parquetData.PrecursorId[i];
 
-                        searchResult.Charge = precursorCharge[i].ToString();
+                        searchResult.Charge = parquetData.PrecursorCharge[i].ToString();
 
                         // Actual precursor m/z (only defined in .parquet files, not in .tsv files)
-                        searchResult.PrecursorMzDiaNN = precursorMz[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PrecursorMzDiaNN = parquetData.PrecursorMz[i].ToString(CultureInfo.InvariantCulture);
 
-                        searchResult.QValueDiaNN = qValueDiaNN[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.QValueDiaNN = parquetData.QValueDiaNN[i].ToString(CultureInfo.InvariantCulture);
 
-                        searchResult.PEP = pep[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.GlobalQValue = globalQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.ProteinQValue = proteinQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.ProteinGroupQValue = proteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.GlobalProteinGroupQValue = globalProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.GeneGroupQValue = geneGroupQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.TranslatedQValue = translatedQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.Proteotypic = proteotypic[i].ToString();
-                        searchResult.PrecursorQuantity = precursorQuantity[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.PrecursorNormalized = precursorNormalized[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.PrecursorTranslated = precursorTranslated[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.TranslatedQuality = translatedQuality[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.MS1Translated = mS1Translated[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.QuantityQuality = quantityQuality[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PEP = parquetData.Pep[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GlobalQValue = parquetData.GlobalQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.ProteinQValue = parquetData.ProteinQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.ProteinGroupQValue = parquetData.ProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GlobalProteinGroupQValue = parquetData.GlobalProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.GeneGroupQValue = parquetData.GeneGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.TranslatedQValue = parquetData.TranslatedQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.Proteotypic = parquetData.Proteotypic[i].ToString();
+                        searchResult.PrecursorQuantity = parquetData.PrecursorQuantity[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PrecursorNormalized = parquetData.PrecursorNormalized[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.PrecursorTranslated = parquetData.PrecursorTranslated[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.TranslatedQuality = parquetData.TranslatedQuality[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.MS1Translated = parquetData.MS1Translated[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.QuantityQuality = parquetData.QuantityQuality[i].ToString(CultureInfo.InvariantCulture);
 
                         // Retention time is in minutes
-                        searchResult.ElutionTime = elutionTime[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.ElutionTime = parquetData.ElutionTime[i].ToString(CultureInfo.InvariantCulture);
 
-                        searchResult.RTStart = rtStart[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.RTStop = rtStop[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.IndexedRT = indexedRT[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.PredictedRT = predictedRT[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.PredictedIndexedRT = predictedIndexedRT[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.FirstProteinDescription = firstProteinDescription[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.LibQValue = libQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.LibProteinGroupQValue = libProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.MS1ProfileCorrelation = ms1ProfileCorrelation[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.MS1Area = ms1Area[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.Evidence = evidence[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.SpectrumSimilarity = spectrumSimilarity[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.Averagine = averagine[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.MassEvidence = massEvidence[i].ToString(CultureInfo.InvariantCulture);
-                        // searchResult.CScore = cScore[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.RTStart = parquetData.RtStart[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.RTStop = parquetData.RtStop[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.IndexedRT = parquetData.IndexedRT[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedRT = parquetData.PredictedRT[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIndexedRT = parquetData.PredictedIndexedRT[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.FirstProteinDescription = parquetData.FirstProteinDescription[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.LibQValue = parquetData.LibQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.LibProteinGroupQValue = parquetData.LibProteinGroupQValue[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MS1ProfileCorrelation = parquetData.Ms1ProfileCorrelation[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MS1Area = parquetData.Ms1Area[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.Evidence = parquetData.Evidence[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.SpectrumSimilarity = parquetData.SpectrumSimilarity[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.Averagine = parquetData.Averagine[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.MassEvidence = parquetData.MassEvidence[i].ToString(CultureInfo.InvariantCulture);
+                        // searchResult.CScore = parquetData.CScore[i].ToString(CultureInfo.InvariantCulture);
 
                         // searchResult.DecoyEvidence = decoyEvidence[i].ToString(CultureInfo.InvariantCulture);
                         // searchResult.DecoyCScore = decoyCScore[i].ToString(CultureInfo.InvariantCulture);
@@ -2580,25 +2817,27 @@ namespace PeptideHitResultsProcessor.Processor
                         // searchResult.FragmentQuantCorrected = fragmentQuantCorrected[i].ToString(CultureInfo.InvariantCulture);
                         // searchResult.FragmentCorrelations = fragmentCorrelations[i].ToString(CultureInfo.InvariantCulture);
 
+                        var scanNumber = LookupScanNumber(scanInfoByDataset, searchResult.DatasetName, searchResult.ElutionTime);
                         var startScan = LookupScanNumber(scanInfoByDataset, searchResult.DatasetName, searchResult.RTStart);
                         var endScan = LookupScanNumber(scanInfoByDataset, searchResult.DatasetName, searchResult.RTStop);
 
-                        if (startScan != endScan)
+                        if (scanNumber < startScan || scanNumber > endScan)
                         {
-                            scanNumberRangeCount++;
+                            scanNumberOutOfRangeCount++;
 
-                            if (scanNumberRangeCount <= 5)
+                            if (scanNumberOutOfRangeCount <= 5)
                             {
-                                OnDebugEvent("RT Start and RT End differ, resulting in scan numbers {0} and {1}; will use the start scan", startScan, endScan);
+                                OnDebugEvent("Elution time (RT) is not between RT Start and RT End: {0} vs. time range {1} to {2}",
+                                    searchResult.ElutionTime, searchResult.RTStart, searchResult.RTStop);
                             }
                         }
 
-                        searchResult.ScanNum = startScan;
+                        searchResult.ScanNum = scanNumber;
                         searchResult.Scan = searchResult.ScanNum.ToString();
-                        searchResult.IonMobility = ionMobility[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.IndexedIonMobility = indexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.PredictedIonMobility = predictedIonMobility[i].ToString(CultureInfo.InvariantCulture);
-                        searchResult.PredictedIndexedIonMobility = predictedIndexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.IonMobility = parquetData.IonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.IndexedIonMobility = parquetData.IndexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIonMobility = parquetData.PredictedIonMobility[i].ToString(CultureInfo.InvariantCulture);
+                        searchResult.PredictedIndexedIonMobility = parquetData.PredictedIndexedIonMobility[i].ToString(CultureInfo.InvariantCulture);
 
                         var validSearchResult = ParseDiaNNSearchResult(
                             searchResult,
@@ -2617,9 +2856,9 @@ namespace PeptideHitResultsProcessor.Processor
                     }
                 }
 
-                if (scanNumberRangeCount > 5)
+                if (scanNumberOutOfRangeCount > 5)
                 {
-                    OnDebugEvent("Note: {0} PSMs had differing RT Start and RT End values in the .parquet file", scanNumberRangeCount);
+                    OnDebugEvent("Note: {0} PSMs in the .parquet file had an elution time not between RT Start and RT End", scanNumberOutOfRangeCount);
                 }
 
                 reader.Close();
@@ -2679,7 +2918,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!headerParsed)
                     {
                         // Parse the header line
-                        var success = ParseDiaNNResultsFileHeaderLine(lineIn, columnMapping);
+                        var success = ParseDiaNNResultsFileHeaderLine(lineIn, columnMapping, out _);
 
                         if (!success)
                         {
