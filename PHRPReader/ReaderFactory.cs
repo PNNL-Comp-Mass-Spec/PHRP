@@ -2993,7 +2993,7 @@ namespace PHRPReader
                 {
                     if (item.Value > 1)
                     {
-                        ShowMessage(string.Format(" Duplicate count for symbol '{0}': {1}", item.Key, item.Value));
+                        ShowMessage(string.Format("Duplicate count for symbol '{0}': {1}", item.Key, item.Value));
                     }
                 }
             }
