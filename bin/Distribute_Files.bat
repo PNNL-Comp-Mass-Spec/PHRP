@@ -57,12 +57,12 @@ echo.
 if not "%1"=="NoPause" pause
 @echo on
 
-xcopy Debug\*.dll \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcessor.pdb         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.exe.config \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PeptideHitResultsProcRunner.pdb        \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PHRPReader.pdb                         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
-xcopy Debug\PHRPReader.xml                         \\pnl\projects\OmicsSW\DMS_Programs\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\*.dll \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcessor.pdb         \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe        \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.exe.config \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PeptideHitResultsProcRunner.pdb        \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PHRPReader.pdb                         \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
+xcopy Debug\PHRPReader.xml                         \\Proto-3\DMS_Programs_Dist\AnalysisToolManagerDistribution\PHRP\ /D /Y
 
 if not "%1"=="NoPause" pause
