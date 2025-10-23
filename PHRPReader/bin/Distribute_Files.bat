@@ -41,8 +41,8 @@ call Distribute_Files_Work.bat "..\..\..\Protein_Coverage_Summarizer\PeptideToPr
 call Distribute_Files_Work.bat "..\..\..\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\Release"
 
 call Distribute_Files_Work.bat "..\..\..\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
-call Distribute_Files_Work.bat "..\..\..\SMAQC\SMAQC\dll"
-call Distribute_Files_Work.bat "..\..\..\SMAQC\SMAQC\SMAQC\bin\Debug"
+call Distribute_Files_Work.bat "..\..\..\SMAQC\SMAQC_ExeAndDLL\dll"
+call Distribute_Files_Work.bat "..\..\..\SMAQC\SMAQC_ExeAndDLL\SMAQC\bin\Debug"
 
 @echo off
 echo.
