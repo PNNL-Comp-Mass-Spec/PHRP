@@ -52,7 +52,7 @@ popd
 @echo off
 echo.
 echo.
-echo About to copy to \\pnl\projects\OmicsSW\DMS_Programs
+echo About to copy to \\Proto-3\DMS_Programs_Dist\
 echo.
 if not "%1"=="NoPause" pause
 @echo on
