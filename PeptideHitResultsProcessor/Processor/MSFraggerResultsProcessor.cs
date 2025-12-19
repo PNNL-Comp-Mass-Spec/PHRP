@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         public MSFraggerResultsProcessor(PHRPOptions options) : base(options)
         {
-            FileDate = "February 15, 2025";
+            FileDate = "December 18, 2025";
 
             mPeptideCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
@@ -743,7 +743,6 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="additionalResult">Search result</param>
         /// <returns>String in the form Scan-Charge-CleanSequence-Rank</returns>
-        /// <exception cref="NotImplementedException"></exception>
         private string ConstructKeyForPSM(ToolResultsBaseClass additionalResult)
         {
             var cleanSequence = GetCleanSequence(additionalResult.Sequence);
@@ -1353,7 +1352,7 @@ namespace PeptideHitResultsProcessor.Processor
                         ComputeQValues(additionalSearchResults);
                     }
 
-                    // Populate a dictionary mapping scan, charge, and peptide to each row in additionalSearchResults
+                    // Populate a dictionary mapping scan, charge, peptide, and rank score to each row in additionalSearchResults
                     var searchResultsLookup = new Dictionary<string, MSFraggerSearchResult>();
 
                     var datasetNameFilter = additionalFile.Value;
@@ -1366,7 +1365,17 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
 
                         if (searchResultsLookup.ContainsKey(key))
-                            throw new DuplicateNameException(string.Format("searchResultsLookup already has key {0}", key));
+                        {
+                            // The results file has a scan with multiple instances of the same peptide for a given charge
+                            // This is possible if the peptides have different modified residues
+
+                            // ReSharper disable once CommentTypo
+                            // See, for example, file Salk_inst_exp2_DIA_01_Patty_15Dec25_BEHCoA-25-10-10.tsv in job 2543717, scan 56768; peptide MMCAELNNHFILISGESGAGK is listed twice
+
+                            // Since we're only concerned about elution times, we can ignore the duplicate peptides
+                            // OnDebugEvent("searchResultsLookup already has key {0}; most likely the same peptide is listed twice, but with different modified residues", key);
+                            continue;
+                        }
 
                         searchResultsLookup.Add(key, additionalResult);
 
