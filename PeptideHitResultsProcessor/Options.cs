@@ -9,7 +9,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class PHRPOptions
     {
-        // Ignore Spelling: conf, Dia, DMS, Fasta, Fragger, Hyperscore, MaxQuant, MODa, prepended, Quant, txt
+        // Ignore Spelling: conf, Dia, DMS, Fasta, Fragger, Hyperscore, MaxQuant, MODa, prepended, Quant, recurse, txt
 
         /// <summary>
         /// Default database connection string
@@ -58,7 +58,7 @@ namespace PeptideHitResultsProcessor
         public string AlternateBasePath { get; set; }
 
         /// <summary>
-        /// Typically a Key=Value parameter file path, but can also be a legacy XML-based parameter file
+        /// Typically, a Key=Value parameter file path, but can also be a legacy XML-based parameter file
         /// </summary>
         /// <remarks>
         /// This property is intended for use when using PeptideToProteinMapEngine.dll along with a parameter file
@@ -348,6 +348,16 @@ namespace PeptideHitResultsProcessor
             HelpText = "When processing a MODPlus or MODa results, the p-value threshold used to determine which peptides are written to the synopsis file.\n" +
                        "Smaller p-values are higher confidence results, thus the default of 0.95 is a very loose filter.")]
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
+
+        /// <summary>
+        /// Optional name of the program calling the Peptide Hit Results Processor
+        /// </summary>
+        /// <remarks>
+        /// Passed to the Protein Coverage Summarizer to customize the name of the SQLite database
+        /// </remarks>
+        [Option("ApplicationName", "AppName", "App",
+            HelpText = "Name of the program calling the Peptide Hit Results Processor (used to customize the name of the SQLite database used to cache proteins)", SecondaryArg = true)]
+        public string ApplicationName { get; set; }
 
         /// <summary>
         /// DMS database connection string (only used if the computer is on the pnl.gov domain)

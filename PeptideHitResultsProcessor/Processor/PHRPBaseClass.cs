@@ -50,7 +50,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Program date
         /// </summary>
-        public const string PROGRAM_DATE = "December 18, 2025";
+        public const string PROGRAM_DATE = "March 19, 2026";
 
         /// <summary>
         /// Constructor
@@ -1380,6 +1380,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 var options = new ProteinCoverageSummarizerOptions()
                 {
+                    ApplicationName = Options.ApplicationName,
                     IgnoreILDifferences = false,
                     MatchPeptidePrefixAndSuffixToProtein = false,
                     OutputProteinSequence = false,
