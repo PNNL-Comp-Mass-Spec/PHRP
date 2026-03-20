@@ -53,6 +53,7 @@ PeptideHitResultsProcRunner.exe
  [/MaxQScore:50] [/MaxQPEP:0.01]
  [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]
  [/SynProb:0.05] [/SynPValue:0.95]
+ [/AppName:ApplicationName]
  [/DB:DatabaseConnectionString]
 ```
 
@@ -150,6 +151,9 @@ When processing a MODPlus or MODa results file, use `/SynPValue` to customize th
 * The default is `/SynPValue:0.95`
 * Lower p-values are higher confidence results
   * 0.95 is a very loose filter
+
+Use `/AppName` to define the name of the program calling the Peptide Hit Results Processor
+* If defined, it is used to customize the name of the SQLite database used to cache proteins
 
 When processing MaxQuant results using a computer on the pnl.gov domain, the DMS database is contacted to lookup dataset IDs by dataset name, where dataset name comes from the 'Raw file' column in the msms.txt file
 * Optionally use `/DB` to override the default connection info
