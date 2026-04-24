@@ -111,7 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ParquetSharp">
-      <Version>18.1.0</Version>
+      <Version>23.0.0.1</Version>
     </PackageReference>
     <PackageReference Include="PRISM-DatabaseUtils">
       <Version>1.5.10</Version>
