@@ -7,8 +7,6 @@ if not "%1"=="NoPause" pause
 :StartCopy
 
 @echo on
-call Distribute_Files_Work.bat "..\..\..\CodeTestCS\lib"
-call Distribute_Files_Work.bat "..\..\..\CodeTestCS\bin"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\AM_Common"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
 call Distribute_Files_Work.bat "..\..\..\DMS_Managers\Analysis_Manager\AM_Shared\bin\Debug"
